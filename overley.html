@@ -26,11 +26,11 @@
             transition: transform 0.2s ease, top 0.3s ease, left 0.3s ease;
             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6));
             position: absolute;
-            top: 25px; /* трішки збільшено відступ для плашки */
+            top: 25px;
             left: 20px;
         }
 
-        /* ===== ПАНЕЛЬ ЛОГОТИПУ (зліва, висувається справа→ліво) ===== */
+        /* ===== ПАНЕЛЬ ЛОГОТИПУ ===== */
         .logo-panel {
             transform: translateX(100%);
             opacity: 0;
@@ -45,8 +45,7 @@
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                        opacity 0.4s ease;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
             box-sizing: border-box;
             order: 1;
         }
@@ -163,12 +162,12 @@
             align-items: center;
         }
 
-        /* ===== ПЛАШКА PRO-SET ЧІТКО ПО ЦЕНТРУ ВЕРХУ ТАБЛА ===== */
+        /* ===== ПЛАШКА PRO-SET ПО ЦЕНТРУ ВЕРХУ ===== */
         .ribbon-proset {
             position: absolute;
             bottom: 100%;
             left: 50%;
-            transform: translateX(-50%); /* Центрування по горизонталі */
+            transform: translateX(-50%);
             height: 0;
             opacity: 0;
             overflow: hidden;
@@ -189,7 +188,7 @@
             z-index: 1;
             white-space: nowrap;
             width: auto;
-            padding: 0 12px; /* Динамічний розмір під текст */
+            padding: 0 12px;
         }
 
         .ribbon-proset.visible {
@@ -197,7 +196,7 @@
             opacity: 1;
         }
 
-        /* ===== АНІМОВАНІ ПЛАШКИ ЗНИЗУ ТАБЛА ===== */
+        /* ===== ПЛАШКИ ЗНИЗУ (ПРОЗОРИЙ ФОН 50/50, ПЛAШКА ПО РОЗМІРУ ТЕКСТУ) ===== */
         .info-ribbons-container {
             position: absolute;
             top: 100%;
@@ -205,6 +204,7 @@
             width: 100%;
             display: flex;
             flex-direction: column;
+            align-items: flex-start; /* Вирівнювання по лівому краю, щоб ширина була по тексту */
             gap: 2px;
             pointer-events: none;
             z-index: 1;
@@ -223,10 +223,12 @@
             letter-spacing: 2px;
             font-size: 13px;
             border-radius: 0 0 4px 4px;
-            transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease;
+            transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease, padding 0.3s ease;
             box-sizing: border-box;
             border: 2px solid transparent;
             border-top: none;
+            width: auto; /* По розміру тексту */
+            white-space: nowrap;
         }
 
         .ribbon.visible {
@@ -235,42 +237,42 @@
             padding: 0 15px;
         }
 
+        /* Прозорі фони 50/50 (rgba з альфа-каналом 0.5) */
         .ribbon-matchpoint {
-            background: linear-gradient(to right, #b91c1c, #dc2626);
+            background: rgba(185, 28, 28, 0.5);
             color: #ffffff;
-            border-color: #b91c1c;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            border-color: rgba(185, 28, 28, 0.6);
         }
 
         .ribbon-setpoint {
-            background: linear-gradient(to right, #1d4ed8, #2563eb);
+            background: rgba(29, 78, 216, 0.5);
             color: #ffffff;
-            border-color: #1d4ed8;
+            border-color: rgba(29, 78, 216, 0.6);
         }
 
         .ribbon-breakpoint {
-            background: linear-gradient(to right, #c69f66, #b28a55);
+            background: rgba(198, 159, 102, 0.5);
             color: #ffffff;
-            border-color: #9c7a4b;
+            border-color: rgba(156, 122, 75, 0.6);
         }
 
         .ribbon-gamepoint {
-            background: rgba(42, 42, 42, 0.95);
+            background: rgba(42, 42, 42, 0.5);
             color: #ffffff;
-            border-color: #444;
+            border-color: rgba(68, 68, 68, 0.6);
         }
 
         .ribbon-goldenpoint {
-            background: linear-gradient(to right, #f59e0b, #d97706);
-            color: #000000;
+            background: rgba(245, 158, 11, 0.5);
+            color: #ffffff;
             font-weight: 900;
-            border-color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.6);
         }
 
         .ribbon-tiebreak {
-            background: #4b5563;
+            background: rgba(75, 85, 99, 0.5);
             color: #ffffff;
-            border-color: #374151;
+            border-color: rgba(55, 65, 81, 0.6);
         }
 
         /* Мерехтіння для Дабл фолу */
@@ -287,7 +289,7 @@
 
     <div class="scoreboard-wrapper" id="main-scoreboard">
 
-        <!-- ПАНЕЛЬ ЛОГОТИПУ — висувається зліва -->
+        <!-- ПАНЕЛЬ ЛОГОТИПУ -->
         <div class="logo-panel" id="logo-panel">
             <div class="logo-panel-text" id="logo-text-node">QATAR<br><span>AIRWAYS</span></div>
             <img id="logo-img-node" src="" style="display:none;">
@@ -295,7 +297,6 @@
 
         <!-- ОСНОВНЕ ТАБЛО -->
         <div class="scoreboard-container">
-            <!-- Плашка Pro-set тепер центрується за допомогою CSS по центру верху табла -->
             <div class="ribbon-proset" id="ribbon-proset">PRO-SET 8</div>
 
             <div class="main-board">
