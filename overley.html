@@ -32,10 +32,8 @@
 
         /* ===== ПАНЕЛЬ ЛОГОТИПУ (зліва, висувається справа→ліво) ===== */
         .logo-panel {
-            /* Початково схована — зміщена вправо за табло */
             transform: translateX(100%);
             opacity: 0;
-            /* Висота рівна двом рядкам табло (48px * 2 + 2px border) */
             height: 98px;
             width: 120px;
             background: rgba(0, 0, 0, 0.55);
@@ -165,7 +163,38 @@
             align-items: center;
         }
 
-        /* ===== АНІМОВАНІ ПЛАШКИ ЗНИЗУ ===== */
+        /* ===== ПЛАШКА PRO-SET ЗВЕРХУ ТАБЛА НАД ОЧКАМИ ===== */
+        .ribbon-proset {
+            position: absolute;
+            bottom: 100%; /* точно над таблом */
+            right: 0; /* вирівнювання над очками розіграшу */
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+            background: rgba(30, 30, 30, 0.95);
+            color: #c69f66;
+            border: 2px solid #5a4528;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease;
+            box-sizing: border-box;
+            z-index: 1;
+            width: 69px; /* Ідеально під ширину блоку очок розіграшу + border */
+        }
+
+        .ribbon-proset.visible {
+            height: 22px;
+            opacity: 1;
+        }
+
+        /* ===== АНІМОВАНІ ПЛАШКИ ЗНИЗУ ТАБЛА ===== */
         .info-ribbons-container {
             position: absolute;
             top: 100%;
@@ -176,7 +205,7 @@
             gap: 2px;
             pointer-events: none;
             z-index: 1;
-            margin-top: -2px; /* щоб заходило під рамку */
+            margin-top: -2px;
         }
 
         .ribbon {
@@ -201,13 +230,6 @@
             height: 28px;
             opacity: 1;
             padding: 0 15px;
-        }
-
-        /* Стилі різних типів плашок */
-        .ribbon-proset {
-            background: rgba(30, 30, 30, 0.9);
-            color: #c69f66;
-            border-color: #5a4528;
         }
 
         .ribbon-matchpoint {
@@ -270,6 +292,9 @@
 
         <!-- ОСНОВНЕ ТАБЛО -->
         <div class="scoreboard-container">
+            <!-- Плашка Pro-set переміщена наверх, чітко над блоком точок розіграшу -->
+            <div class="ribbon-proset" id="ribbon-proset">P-S 8</div>
+
             <div class="main-board">
                 <div class="team-row" id="row-team-1">
                     <div class="team-names" id="block-anim-1">
@@ -300,7 +325,6 @@
 
             <!-- Контейнер для нижніх висувних плашок -->
             <div class="info-ribbons-container">
-                <div class="ribbon ribbon-proset" id="ribbon-proset">PRO-SET 8</div>
                 <div class="ribbon" id="ribbon-match">MATCH POINT</div>
             </div>
         </div>
@@ -332,13 +356,13 @@
                 document.getElementById('name-display-t1').innerText = state.p1name || "Команда 1";
                 document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
 
-                // Масштабування і позиція
+                // Масштабування і позиція[cite: 1]
                 const currentScale = state.scale || 1;
                 document.getElementById('main-scoreboard').style.transform = `scale(${currentScale})`;
                 document.getElementById('main-scoreboard').style.left = (state.posX || 0) + 'px';
                 document.getElementById('main-scoreboard').style.top = (state.posY || 0) + 'px';
 
-                // Панель логотипу
+                // Панель логотипу[cite: 1]
                 const logoPanel = document.getElementById('logo-panel');
                 logoPanel.classList.toggle('visible', !!state.showLogo);
 
@@ -357,7 +381,7 @@
                     document.getElementById('logo-img-node').style.display = 'none';
                 }
 
-                // Очки розіграшу
+                // Очки розіграшу[cite: 1]
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('t1-pts').innerText = state.p1Index;
                     document.getElementById('t2-pts').innerText = state.p2Index;
@@ -369,7 +393,7 @@
                 document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
 
-                // СЕТИ (Враховуючи Pro-Set)
+                // Сети[cite: 1]
                 const activeSet = state.currentSet || 1;
                 const totalSetsToShow = state.isProSet ? 1 : 5;
 
@@ -391,7 +415,6 @@
                         box2.style.display = 'flex'; box2.className = 'score-box set-past';
                         box1.innerText = g1; box2.innerText = g2;
                     } else if (s === activeSet) {
-                        // Для Pro-Set або якщо є гейми, показуємо завжди активний сет
                         if (state.isProSet || g1 > 0 || g2 > 0) {
                             box1.style.display = 'flex'; box1.className = 'score-box set-current';
                             box2.style.display = 'flex'; box2.className = 'score-box set-current';
@@ -406,21 +429,20 @@
                     }
                 }
 
-                // ПЛАШКА 3: Режим Pro-Set
+                // Верхня плашка Pro-Set (зменшена до розмірів тексту)
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isProSet) {
-                    ribbonProset.innerText = `PRO-SET ${state.proSetLimit || 8}`;
+                    ribbonProset.innerText = `P-S ${state.proSetLimit || 8}`;
                     ribbonProset.classList.add('visible');
                 } else {
                     ribbonProset.classList.remove('visible');
                 }
 
-                // ПЛАШКА 4: Важливі розіграші (Match, Set, Break, Game, Golden, Tiebreak Point)
+                // Висувні плашки знизу табла (Match, Set, Break, Game, Golden, Tiebreak Point)
                 const ribbonMatch = document.getElementById('ribbon-match');
                 if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && !state.isAmericano) {
                     ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
                     
-                    // Стилізуємо залежно від типу
                     ribbonMatch.className = "ribbon visible"; 
                     if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
                     else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
@@ -432,7 +454,7 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                // АНІМАЦІЇ (Виграш гейму/сету або ДАБЛ ФОЛ)
+                // Анімації виграшу або Дабл Фол[cite: 1]
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
@@ -441,15 +463,13 @@
                     const targetBlock = document.getElementById(`block-anim-${winTeam}`);
                     if (targetBlock) {
                         if (animType === 'double_fault') {
-                            // Ефект мерехтіння для дабл фолу
                             targetBlock.classList.remove('double-fault-blink');
-                            void targetBlock.offsetWidth; // хак для рестарту css анімації
+                            void targetBlock.offsetWidth; 
                             targetBlock.classList.add('double-fault-blink');
                             setTimeout(() => {
                                 targetBlock.classList.remove('double-fault-blink');
                             }, 800);
                         } else {
-                            // Стандартна логіка виграшу гейму/сету
                             targetBlock.style.transition = 'none';
                             targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
                             if (animType === 'set') targetBlock.style.color = '#1a1a1a';
