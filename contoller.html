@@ -19,8 +19,8 @@
         .btn-blue { background: #1d4ed8; }
         .btn-red { background: #b91c1c; }
         
-        /* КНОПКИ В КОНТРОЛЕРІ З ЕФЕКТОМ ГЛИБОКОГО МЕХАНІЧНОГО НАТИСКАННЯ */
-        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* СТИЛЬ АНІМАЦІЇ ДЛЯ ВЕЛИКИХ КНОПОК РОЗІГРАШУ */
+        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { 
             height: 140px; 
             border: none; 
@@ -34,13 +34,13 @@
             align-items: center; 
             gap: 8px; 
             cursor: pointer; 
-            box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); 
-            transition: transform 0.06s cubic-bezier(0.175, 0.885, 0.32, 1.2), filter 0.06s ease, box-shadow 0.06s ease;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+            transition: transform 0.05s linear, filter 0.05s ease;
         }
+        /* Візуальний ефект натискання */
         .score-btn:active { 
-            transform: scale(0.92); /* Ефект продавлювання кнопки */
-            filter: brightness(0.8); /* затемнення при натисканні */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6), inset 0 4px 8px rgba(0,0,0,0.5);
+            transform: scale(0.91); 
+            filter: brightness(0.75); 
         }
         .score-btn span { font-size: 42px; font-weight: 900; }
         
@@ -53,7 +53,7 @@
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #4b5563; }
 
-        /* ===== СТИЛІ ДЛЯ ЖИВОГО ДУБЛІКАТА ТАБЛА НА ПУЛЬТІ ===== */
+        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ (УСІ ЗИГРАНІ СЕТИ Й ОЧКИ РОЗІГРАШУ) ===== */
         .preview-scoreboard {
             border: 2px solid #b28a55;
             border-radius: 4px;
@@ -84,7 +84,7 @@
         .preview-srv.active { visibility: visible; }
         .preview-box {
             width: 28px;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
@@ -98,9 +98,9 @@
 </head>
 <body>
 
-    <h2>Пульт Padel Pro (Дублікат екрану + Жива логіка)</h2>
+    <h2>Пульт Padel Pro (Master)</h2>
 
-    <!-- ЖИВИЙ ДУБЛІКАТ ТАБЛА (Точно копіює табло на екрані) -->
+    <!-- ЖИВИЙ ДУБЛІКАТ ЕКРАНУ НА ПУЛЬТІ -->
     <div class="preview-scoreboard">
         <div class="preview-row">
             <div class="preview-name-block">
@@ -128,6 +128,22 @@
         </div>
     </div>
 
+    <!-- ОСНОВНІ КНОПКИ КЕРУВАННЯ ПЕРЕНЕСЕНІ ПІД ДУБЛІКАТ ЕКРАНУ -->
+    <div class="score-grid">
+        <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)">
+            <small id="lbl-p1">Команда 1</small>
+            <span id="view-p1-pts">0</span>
+        </button>
+        <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)">
+            <small id="lbl-p2">Команда 2</small>
+            <span id="view-p2-pts">0</span>
+        </button>
+    </div>
+
+    <button class="btn btn-orange" style="width:100%; padding:12px;" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
+    <button class="btn btn-gray" style="width:100%; padding:12px;" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
+    <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d;" onclick="toggleStatsManual()">📊 Переключити статистику вручну</button>
+
     <div class="card">
         <div class="row" style="gap:10px;">
             <input type="text" id="p1-name-input" placeholder="Команда 1">
@@ -139,7 +155,7 @@
     <!-- Режими системи -->
     <div class="card">
         <div class="switch-row">
-            <span style="font-size:13px; font-weight:700;">Режим Американо (В сумі 21 і т.д.):</span>
+            <span style="font-size:13px; font-weight:700;">Режим Американо (В сумі 21):</span>
             <input type="checkbox" id="mode-americano-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleAmericanoMode(this.checked)">
         </div>
         <div class="row" id="americano-limit-row" style="margin-top:10px; display:none;">
@@ -161,36 +177,21 @@
         <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
 
         <div style="font-size:12px; font-weight:700; color:#c69f66; margin-bottom:8px; text-transform:uppercase;">Тип розіграшу при 40:40 :</div>
-        
         <div class="switch-row">
             <span style="font-size:12px; color:#ddd;">1. Класичний тенісний (без голден):</span>
-            <input type="radio" name="deuce-style" id="deuce-classic" style="width:18px; height:18px; accent-color:#b28a55;" onchange="changeDeuceStyle('classic')">
+            <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">2. Один Golden Point (за замовчуванням):</span>
-            <input type="radio" name="deuce-style" id="deuce-one-golden" style="width:18px; height:18px; accent-color:#b28a55;" checked onchange="changeDeuceStyle('one-golden')">
+            <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
+            <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">3. Два Більше-Менше → на 3-й Golden Point:</span>
-            <input type="radio" name="deuce-style" id="deuce-double" style="width:18px; height:18px; accent-color:#b28a55;" onchange="changeDeuceStyle('double')">
+            <span style="font-size:12px; color:#ddd;">3. Два Більше-Менше → на 3-й GP:</span>
+            <input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')">
         </div>
     </div>
 
-    <div class="status-badge" id="mode-status">Режим: Сет 1 (Матч з 5 сетів)</div>
-
-    <div class="score-grid">
-        <button class="score-btn btn-green" onclick="scorePoint(1)">
-            <small id="lbl-p1">Команда 1</small>
-            <span id="view-p1-pts">0</span>
-        </button>
-        <button class="score-btn btn-blue" onclick="scorePoint(2)">
-            <small id="lbl-p2">Команда 2</small>
-            <span id="view-p2-pts">0</span>
-        </button>
-    </div>
-
-    <button class="btn btn-orange" style="width:100%; margin-top:5px; padding:12px;" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
-    <button class="btn btn-gray" style="width:100%; margin-top:5px; padding:12px;" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
+    <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
     <div class="card">
         <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Масштаб табла (OBS):</div>
@@ -198,12 +199,10 @@
             <input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" value="1" style="flex:1; accent-color:#b28a55;" oninput="updateScale(this.value)">
             <span id="scale-factor-display" style="font-size:14px; font-weight:700; min-width:45px; text-align:right; color:#c69f66;">1.00x</span>
         </div>
-        <div style="font-size:11px; font-weight:700; margin:10px 0 6px; color:#aaa; text-transform: uppercase;">&#x2190;&#x2192; Позиція по горизонталі:</div>
         <div class="row">
             <input type="range" id="pos-x-slider" min="0" max="1800" step="5" value="0" style="flex:1; accent-color:#b28a55;" oninput="updatePosition()">
             <span id="pos-x-display" style="font-size:14px; font-weight:700; min-width:45px; text-align:right; color:#c69f66;">0px</span>
         </div>
-        <div style="font-size:11px; font-weight:700; margin:6px 0; color:#aaa; text-transform: uppercase;">&#x2191;&#x2193; Позиція по вертикалі:</div>
         <div class="row">
             <input type="range" id="pos-y-slider" min="0" max="980" step="5" value="0" style="flex:1; accent-color:#b28a55;" oninput="updatePosition()">
             <span id="pos-y-display" style="font-size:14px; font-weight:700; min-width:45px; text-align:right; color:#c69f66;">0px</span>
@@ -211,27 +210,14 @@
     </div>
 
     <div class="card">
-        <div style="font-size:11px; font-weight:700; margin-bottom:4px; color:#aaa; text-transform: uppercase;">Подача:</div>
         <div class="serve-box">
             <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
             <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
         </div>
     </div>
 
-    <div class="card">
-        <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Керування Логотипом спонсора:</div>
-        <div class="row">
-            <button class="btn" id="logo-visibility-btn" style="flex:1; background:#b28a55;" onclick="toggleLogoVisibility()">Сховати логотип</button>
-            <button class="btn btn-red" onclick="clearLogo()">Скинути лого</button>
-        </div>
-        <label class="btn btn-gold" style="display: block; text-align: center; margin-top: 8px;">
-            📁 Вибрати файл Логотипу
-            <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(event)">
-        </label>
-    </div>
-
     <div class="row">
-        <button class="btn btn-red" style="flex:1" onclick="resetMatch()">Скинути матч</button>
+        <button class="btn btn-red" style="flex:1" onclick="resetMatch()">Скинути матч вручную</button>
     </div>
 
     <script type="module">
@@ -255,24 +241,19 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {
             p1name: "Команда A", p2name: "Команда B",
-            p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: 1,
-            posX: 0, posY: 0,
-            isTiebreak: false, isAmericano: false, americanoLimit: 21,
-            isProSet: false, proSetLimit: 8, activeMatchRibbon: "NONE",
-            deuceStyle: "one-golden", deuceCounter: 0,
-            showLogo: false, logoSrc: "",
+            p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: 1, posX: 0, posY: 0,
+            isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8,
+            activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
+            p1DoubleFaults: 0, p2DoubleFaults: 0, showStatsOverlay: false, showLogo: false, logoSrc: "",
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
             animation: { team: 0, type: "", ts: 0 }
         };
 
         let stateHistory = [];
-        const MAX_HISTORY = 30;
-
-        function saveToHistory(stateToSave) {
-            const clone = JSON.parse(JSON.stringify(stateToSave));
-            stateHistory.push(clone);
-            if (stateHistory.length > MAX_HISTORY) stateHistory.shift();
+        function saveToHistory(s) {
+            stateHistory.push(JSON.parse(JSON.stringify(s)));
+            if (stateHistory.length > 30) stateHistory.shift();
         }
 
         function triggerVibration() {
@@ -283,54 +264,34 @@
             const data = snapshot.val();
             if (data) {
                 state = data;
-                
-                // СИНХРОНІЗАЦІЯ ПАНЕЛІ КЕРУВАННЯ
                 document.getElementById('lbl-p1').innerText = state.p1name;
                 document.getElementById('lbl-p2').innerText = state.p2name;
                 document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
-                document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
                 document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
-                document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
                 
-                const currentStyle = state.deuceStyle || "one-golden";
-                if(document.getElementById(`deuce-${currentStyle}`)) document.getElementById(`deuce-${currentStyle}`).checked = true;
+                if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
+                    document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
+                }
 
-                // Вивід поточних текстових значень на великі кнопки[cite: 2]
+                // Вивід на великі кнопки
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('view-p1-pts').innerText = state.p1Index;
                     document.getElementById('view-p2-pts').innerText = state.p2Index;
                 } else {
                     document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                    document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
                     document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
 
-                // СТАТУС БЕДЖ ПУЛЬТА
-                if (state.isAmericano) document.getElementById('mode-status').innerText = `🔥 РЕЖИМ АМЕРИКАНО (В СУМІ: ${state.americanoLimit || 21})`;
-                else if (state.isTiebreak) document.getElementById('mode-status').innerText = "🔥 РЕЖИМ ТАЙБРЕЙКУ (ДО 7)";
-                else if (state.isProSet) document.getElementById('mode-status').innerText = `🏆 РЕЖИМ PRO-SET (ДО ${state.proSetLimit || 8} ГЕЙМІВ)`;
-                else document.getElementById('mode-status').innerText = `Режим: Сет ${state.currentSet || 1} (Матч з 5 сетів)`;
-                
-                document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
-                document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
-                document.getElementById('logo-visibility-btn').innerText = state.showLogo ? "Сховати логотип" : "Показати логотип";
-                document.getElementById('scale-slider').value = state.scale || 1;
-                document.getElementById('scale-factor-display').innerText = (state.scale || 1).toFixed(2) + "x";
-                document.getElementById('pos-x-slider').value = state.posX || 0;
-                document.getElementById('pos-y-slider').value = state.posY || 0;
-                document.getElementById('pos-x-display').innerText = (state.posX || 0) + "px";
-                document.getElementById('pos-y-display').innerText = (state.posY || 0) + "px";
-                document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
-                document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
+                document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Hide Stats (Активна)" : "Show Stats (Прихована)";
 
                 // ========================================================
-                // ТОЧНЕ ЖИВЕ КОПІЮВАННЯ ТАБЛА В КОНТРОЛЬНІЙ ПАНЕЛІ (ПЕРЕДПРЕВ'Ю)[cite: 1]
+                // ПОВНИЙ ДУБЛІКАТ ВСІХ СЕТІВ ТA ОЧОК В КOНТРОЛЕРІ[cite: 1]
                 // ========================================================
                 document.getElementById('pr-name1').innerText = state.p1name || "Команда 1";
                 document.getElementById('pr-name2').innerText = state.p2name || "Команда 2";
                 document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
-
+                
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('pr-t1-pts').innerText = state.p1Index;
                     document.getElementById('pr-t2-pts').innerText = state.p2Index;
@@ -339,136 +300,40 @@
                     document.getElementById('pr-t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
 
-                const activeSet = state.currentSet || 1;
-                const totalSetsToShow = state.isProSet ? 1 : 5;
-
+                // Заповнення дубліката по всім 5 сетам незалежно від режиму[cite: 1]
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`pr-t1-s${s}`);
                     const box2 = document.getElementById(`pr-t2-s${s}`);
-
-                    if (state.isAmericano || s > totalSetsToShow) {
-                        box1.style.display = 'none'; box2.style.display = 'none';
-                        continue;
-                    }
-
-                    const g1 = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
-                    const g2 = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
-
-                    if (s < activeSet) {
-                        box1.style.display = 'flex'; box1.className = 'preview-box p-past';
-                        box2.style.display = 'flex'; box2.className = 'preview-box p-past';
-                        box1.innerText = g1; box2.innerText = g2;
-                    } else if (s === activeSet) {
-                        if (state.isProSet || g1 > 0 || g2 > 0) {
-                            box1.style.display = 'flex'; box1.className = 'preview-box p-curr';
-                            box2.style.display = 'flex'; box2.className = 'preview-box p-curr';
-                            box1.innerText = g1; box2.innerText = g2;
-                        } else {
-                            box1.style.display = 'none'; box2.style.display = 'none';
-                        }
+                    box1.innerText = state[`t1_s${s}`] || 0;
+                    box2.innerText = state[`t2_s${s}`] || 0;
+                    
+                    if (s < state.currentSet) {
+                        box1.className = 'preview-box p-past'; box2.className = 'preview-box p-past';
+                    } else if (s === state.currentSet) {
+                        box1.className = 'preview-box p-curr'; box2.className = 'preview-box p-curr';
                     } else {
-                        box1.style.display = 'none'; box2.style.display = 'none';
+                        box1.className = 'preview-box'; box2.className = 'preview-box';
                     }
                 }
+
+                document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
+                document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
             }
         });
 
-        window.undoAction = function() {
-            triggerVibration();
-            if (stateHistory.length > 0) {
-                const previousState = stateHistory.pop();
-                previousState.scale = state.scale; previousState.posX = state.posX; previousState.posY = state.posY;
-                state = previousState;
-                set(matchRef, state);
-            } else {
-                alert("Історія порожня!");
-            }
-        }
-
-        window.triggerServerDoubleFault = function() {
-            triggerVibration();
-            saveToHistory(state);
-            const serverTeam = state.currentServer || 1;
-            const receiverTeam = serverTeam === 1 ? 2 : 1;
-            state.animation = { team: serverTeam, type: 'double_fault', ts: Date.now() };
-            window.scorePointWithoutHistorySave(receiverTeam);
-        }
-
-        function recalculateRibbons(s) {
-            if (s.isAmericano) {
-                s.activeMatchRibbon = "NONE"; return;
-            }
-            let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
-            let cSet = s.currentSet || 1; let g1 = s[`t1_s${cSet}`] || 0; let g2 = s[`t2_s${cSet}`] || 0;
-            let style = s.deuceStyle || "one-golden";
-            
-            let isGolden = false;
-            if (!s.isTiebreak && p1 === 3 && p2 === 3) {
-                if (style === "one-golden") isGolden = true;
-                if (style === "double" && (s.deuceCounter || 0) >= 2) isGolden = true; 
-            }
-
-            let p1GamePoint = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || (isGolden));
-            let p2GamePoint = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (p2 === 3 && p1 < 3) || p2 === 4 || (isGolden));
-
-            if (!p1GamePoint && !p2GamePoint) {
-                s.activeMatchRibbon = "NONE"; return;
-            }
-
-            let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
-            let p1SetPoint = false; let p2SetPoint = false;
-            
-            if (s.isTiebreak) {
-                p1SetPoint = true; p2SetPoint = true;
-            } else {
-                if (s.isProSet) {
-                    if ((g1 === limit - 1 && g2 <= limit - 2) || g1 === limit) p1SetPoint = true;
-                    if ((g2 === limit - 1 && g1 <= limit - 2) || g2 === merge) p2SetPoint = true;
-                } else {
-                    if ((g1 === 5 && g2 <= 4) || g1 === 6) p1SetPoint = true;
-                    if ((g2 === 5 && g1 <= 4) || g2 === 6) p2SetPoint = true;
-                }
-            }
-
-            let isMatchOverPoint = (s.isProSet || cSet >= 3);
-
-            if (p1GamePoint && p1SetPoint && isMatchOverPoint) { s.activeMatchRibbon = "MATCH_POINT"; return; }
-            if (p2GamePoint && p2SetPoint && isMatchOverPoint) { s.activeMatchRibbon = "MATCH_POINT"; return; }
-            if (p1GamePoint && p1SetPoint) { s.activeMatchRibbon = "SET_POINT"; return; }
-            if (p2GamePoint && p2SetPoint) { s.activeMatchRibbon = "SET_POINT"; return; }
-            if (s.isTiebreak) { s.activeMatchRibbon = "TIEBREAK_POINT"; return; }
-            if (isGolden) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
-            if (p1GamePoint && server === 2) { s.activeMatchRibbon = "BREAK_POINT"; return; }
-            if (p2GamePoint && server === 1) { s.activeMatchRibbon = "BREAK_POINT"; return; }
-
-            s.activeMatchRibbon = "GAME_POINT";
-        }
-
-        window.scorePoint = function(teamIndex) {
-            triggerVibration();
-            saveToHistory(state);
-            window.scorePointWithoutHistorySave(teamIndex);
+        window.scorePoint = function(team) {
+            triggerVibration(); saveToHistory(state);
+            window.scorePointWithoutHistorySave(team);
         }
 
         window.scorePointWithoutHistorySave = function(teamIndex) {
             let style = state.deuceStyle || "one-golden";
-
             if (state.isAmericano) {
-                // ЛОГІКА РЕЖИМУ АМЕРИКАНО (В СУМІ ОЧОК ДО ЛІМІТУ)
-                if (teamIndex === 1) state.p1Index++;
-                else state.p2Index++;
-                
+                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 let total = state.p1Index + state.p2Index;
-                
-                // Перемикання подачі: перша одна, далі кожні дві подачі
-                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) {
-                    state.currentServer = state.currentServer === 1 ? 2 : 1;
-                }
-                // Матчі автоматично НЕ завершуються. Гра продовжується без обмежень.
+                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
             } else if (state.isTiebreak) {
-                if (teamIndex === 1) state.p1Index++;
-                else state.p2Index++;
-                
+                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
                 else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) winGame(2);
             } else {
@@ -476,8 +341,7 @@
                     if (state.p1Index === 3 && state.p2Index === 3) {
                         if (style === "one-golden") winGame(1);
                         else if (style === "double") {
-                            if ((state.deuceCounter || 0) >= 2) winGame(1);
-                            else state.p1Index = 4;
+                            if ((state.deuceCounter || 0) >= 2) winGame(1); else state.p1Index = 4;
                         } else state.p1Index = 4;
                     } 
                     else if (state.p1Index === 3 && state.p2Index === 4) {
@@ -490,8 +354,7 @@
                     if (state.p2Index === 3 && state.p1Index === 3) {
                         if (style === "one-golden") winGame(2);
                         else if (style === "double") {
-                            if ((state.deuceCounter || 0) >= 2) winGame(2);
-                            else state.p2Index = 4;
+                            if ((state.deuceCounter || 0) >= 2) winGame(2); else state.p2Index = 4;
                         } else state.p2Index = 4;
                     } 
                     else if (state.p2Index === 3 && state.p1Index === 4) {
@@ -502,8 +365,7 @@
                     else state.p2Index++;
                 }
             }
-            recalculateRibbons(state);
-            set(matchRef, state);
+            recalculateRibbons(state); set(matchRef, state);
         }
 
         function winGame(winningTeam) {
@@ -514,6 +376,15 @@
             else state[`t2_s${cSet}`] = (state[`t2_s${cSet}`] || 0) + 1;
             
             let g1 = state[`t1_s${cSet}`]; let g2 = state[`t2_s${cSet}`];
+            let totalGamesInSet = g1 + g2;
+
+            // АВТОМАТИЧНИЙ РОЗРАХУНОК ОВЕРЛЕЮ СТАТИСТИКИ (Після 1 гейму і кожні два гейми)
+            if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
+                state.showStatsOverlay = true;
+            } else {
+                state.showStatsOverlay = false;
+            }
+
             let isSetOver = false;
             let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
 
@@ -529,93 +400,88 @@
             
             state.animation = { team: winningTeam, type: isSetOver ? 'set' : 'game', ts: Date.now() };
 
-            if (isSetOver && !state.isProSet && state.currentSet < 5) {
-                state.currentSet++;
-                state[`t1_s${state.currentSet}`] = 0; state[`t2_s${state.currentSet}`] = 0;
+            // АВТОМАТИЧНИЙ ПЕРЕХІД НА НАСТУПНИЙ СЕТ У ВСІХ РЕЖИМАХ[cite: 2]
+            if (isSetOver) {
+                state.showStatsOverlay = true; // Завжди показуємо в кінці сету
+                if (!state.isProSet && state.currentSet < 5) {
+                    state.currentSet++;
+                    state[`t1_s${state.currentSet}`] = 0;
+                    state[`t2_s${state.currentSet}`] = 0;
+                }
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
         }
 
-        window.toggleAmericanoMode = function(isChecked) {
-            saveToHistory(state);
-            state.isAmericano = isChecked;
-            if (isChecked) { state.isProSet = false; }
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            recalculateRibbons(state); set(matchRef, state);
-        };
-
-        window.toggleProSetMode = function(isChecked) {
-            saveToHistory(state);
-            state.isProSet = isChecked;
-            if (isChecked) state.isAmericano = false;
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.currentSet = 1; state.deuceCounter = 0;
-            recalculateRibbons(state); set(matchRef, state);
-        };
-
-        window.changeDeuceStyle = function(styleName) {
-            saveToHistory(state);
-            state.deuceStyle = styleName;
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            recalculateRibbons(state); set(matchRef, state);
+        window.triggerServerDoubleFault = function() {
+            triggerVibration(); saveToHistory(state);
+            const server = state.currentServer || 1;
+            if (server === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1;
+            else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1;
+            state.animation = { team: server, type: 'double_fault', ts: Date.now() };
+            window.scorePointWithoutHistorySave(server === 1 ? 2 : 1);
         }
 
-        window.updateAmericanoLimit = function(val) {
-            let parsed = parseInt(val) || 21;
-            if (parsed < 1) parsed = 1; if (parsed > 30) parsed = 30;
-            state.americanoLimit = parsed; set(matchRef, state);
-        };
+        window.toggleStatsManual = function() {
+            state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state);
+        }
 
-        window.updateProSetLimit = function(val) {
-            let parsed = parseInt(val) || 8;
-            if (parsed < 1) parsed = 1; if (parsed > 10) parsed = 10;
-            state.proSetLimit = parsed;
-            recalculateRibbons(state); set(matchRef, state);
-        };
+        window.undoAction = function() {
+            triggerVibration();
+            if (stateHistory.length > 0) {
+                state = stateHistory.pop(); set(matchRef, state);
+            }
+        }
 
-        window.updateScale = function(val) {
-            state.scale = parseFloat(val); set(matchRef, state);
-        };
+        function recalculateRibbons(s) {
+            if (s.isAmericano) { s.activeMatchRibbon = "NONE"; return; }
+            let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
+            let cSet = s.currentSet || 1; let g1 = s[`t1_s${cSet}`] || 0; let g2 = s[`t2_s${cSet}`] || 0;
+            let isGolden = (!s.isTiebreak && p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
+            let p1GP = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || isGolden);
+            let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
+            if (!p1GP && !p2GP) { s.activeMatchRibbon = "NONE"; return; }
+            let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
+            let p1SP = s.isTiebreak || (s.isProSet ? (g1 === limit-1 && g2 <= limit-2) || g1 === limit : (g1 === 5 && g2 <= 4) || g1 === 6);
+            let p2SP = s.isTiebreak || (s.isProSet ? (g2 === limit-1 && g1 <= limit-2) || g2 === limit : (g2 === 5 && g1 <= 4) || g2 === 6);
+            if ((p1GP && p1SP) || (p2GP && p2SP)) { s.activeMatchRibbon = (s.isProSet || cSet >= 3) ? "MATCH_POINT" : "SET_POINT"; return; }
+            if (s.isTiebreak) { s.activeMatchRibbon = "TIEBREAK_POINT"; return; }
+            if (isGolden) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
+            if ((p1GP && server === 2) || (p2GP && server === 1)) { s.activeMatchRibbon = "BREAK_POINT"; return; }
+            s.activeMatchRibbon = "GAME_POINT";
+        }
 
+        window.toggleAmericanoMode = function(c) {
+            saveToHistory(state); state.isAmericano = c; if(c) state.isProSet = false;
+            state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
+        };
+        window.toggleProSetMode = function(c) {
+            saveToHistory(state); state.isProSet = c; if(c) state.isAmericano = false;
+            state.p1Index = 0; state.p2Index = 0; state.currentSet = 1; state.deuceCounter = 0; set(matchRef, state);
+        };
+        window.changeDeuceStyle = function(s) {
+            saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
+        }
+        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v) || 21; set(matchRef, state); };
+        window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v) || 8; set(matchRef, state); };
+        window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
         window.updatePosition = function() {
             state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
-            state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0;
-            set(matchRef, state);
+            state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0; set(matchRef, state);
         };
-
-        window.setServer = function(srv) { 
-            triggerVibration(); saveToHistory(state);
-            state.currentServer = srv; recalculateRibbons(state); set(matchRef, state); 
-        }
-        
+        window.setServer = function(s) { triggerVibration(); saveToHistory(state); state.currentServer = s; set(matchRef, state); };
         window.updateNames = function() {
-            const p1n = document.getElementById('p1-name-input').value;
-            const p2n = document.getElementById('p2-name-input').value;
-            if(p1n) state.p1name = p1n; if(p2n) state.p2name = p2n;
-            set(matchRef, state);
+            const p1 = document.getElementById('p1-name-input').value; const p2 = document.getElementById('p2-name-input').value;
+            if(p1) state.p1name = p1; if(p2) state.p2name = p2; set(matchRef, state);
         }
-        window.toggleLogoVisibility = function() { state.showLogo = !state.showLogo; set(matchRef, state); }
-        window.uploadLogo = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) { state.logoSrc = evt.target.result; set(matchRef, state); };
-            reader.readAsDataURL(file);
-        }
-        window.clearLogo = function() { state.logoSrc = ""; set(matchRef, state); }
         
         window.resetMatch = function() {
-            if(confirm("Скинути матч вручну?")) {
-                stateHistory = [];
+            if(confirm("Скинути матч?")) {
                 set(matchRef, {
                     p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
-                    p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1,
-                    posX: state.posX || 0, posY: state.posY || 0,
-                    isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21,
-                    isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
-                    deuceStyle: state.deuceStyle || "one-golden", deuceCounter: 0,
-                    showLogo: false, logoSrc: state.logoSrc || "",
-                    t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
-                    t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
-                    animation: { team: 0, type: "", ts: 0 }
+                    p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
+                    isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8, activeMatchRibbon: "NONE",
+                    deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, showStatsOverlay: false, showLogo: false, logoSrc: "",
+                    t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
             }
         }
