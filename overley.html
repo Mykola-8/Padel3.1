@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
         html, body {
             background: transparent !important;
@@ -15,7 +15,7 @@
             font-family: 'Montserrat', sans-serif;
             color: white;
         }
- 
+
         /* Зовнішній контейнер — масштабується цілком */
         .scoreboard-wrapper {
             display: flex;
@@ -29,7 +29,7 @@
             top: 20px;
             left: 20px;
         }
- 
+
         /* ===== ПАНЕЛЬ ЛОГОТИПУ (зліва, висувається справа→ліво) ===== */
         .logo-panel {
             /* Початково схована — зміщена вправо за табло */
@@ -52,19 +52,19 @@
             box-sizing: border-box;
             order: 1;
         }
- 
+
         .logo-panel.visible {
             transform: translateX(0);
             opacity: 1;
         }
- 
+
         .logo-panel img {
             max-width: 90%;
             max-height: 85%;
             object-fit: contain;
             display: block;
         }
- 
+
         .logo-panel-text {
             font-size: 13px;
             font-weight: 700;
@@ -74,38 +74,41 @@
             line-height: 1.3;
             color: #ffffff;
         }
- 
+
         .logo-panel-text span {
             font-size: 9px;
             display: block;
             letter-spacing: 2px;
             color: #b28a55;
         }
- 
+
         /* ===== ОСНОВНЕ ТАБЛО ===== */
         .scoreboard-container {
             display: flex;
             flex-direction: column;
             width: max-content;
             order: 2;
+            position: relative;
         }
- 
+
         .main-board {
             display: inline-flex;
             flex-direction: column;
             background-color: transparent;
             border: 2px solid #b28a55;
             border-radius: 4px;
+            z-index: 2;
+            position: relative;
         }
- 
+
         .team-row {
             display: flex;
             height: 48px;
             border-bottom: 1px solid rgba(255,255,255,0.15);
         }
- 
+
         .team-row:last-child { border-bottom: none; }
- 
+
         .team-names {
             width: 320px;
             display: flex;
@@ -121,7 +124,7 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
- 
+
         .server-indicator {
             color: #b28a55;
             font-size: 20px;
@@ -130,7 +133,7 @@
             margin-left: 10px;
         }
         .server-indicator.active { visibility: visible; }
- 
+
         .score-box {
             width: 40px;
             display: none;
@@ -140,17 +143,17 @@
             font-weight: 800;
             border-left: 2px solid rgba(255,255,255,0.15);
         }
- 
+
         .set-past {
             background-color: rgba(255,255,255,0.9);
             color: #1a1a1a;
         }
- 
+
         .set-current {
             background-color: rgba(122,122,122,0.75);
             color: #ffffff;
         }
- 
+
         .points {
             background: linear-gradient(to bottom, #c69f66, #9c7a4b);
             color: #ffffff;
@@ -161,18 +164,110 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* ===== АНІМОВАНІ ПЛАШКИ ЗНИЗУ ===== */
+        .info-ribbons-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            pointer-events: none;
+            z-index: 1;
+            margin-top: -2px; /* щоб заходило під рамку */
+        }
+
+        .ribbon {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 13px;
+            border-radius: 0 0 4px 4px;
+            transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease;
+            box-sizing: border-box;
+            border: 2px solid transparent;
+            border-top: none;
+        }
+
+        .ribbon.visible {
+            height: 28px;
+            opacity: 1;
+            padding: 0 15px;
+        }
+
+        /* Стилі різних типів плашок */
+        .ribbon-proset {
+            background: rgba(30, 30, 30, 0.9);
+            color: #c69f66;
+            border-color: #5a4528;
+        }
+
+        .ribbon-matchpoint {
+            background: linear-gradient(to right, #b91c1c, #dc2626);
+            color: #ffffff;
+            border-color: #b91c1c;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .ribbon-setpoint {
+            background: linear-gradient(to right, #1d4ed8, #2563eb);
+            color: #ffffff;
+            border-color: #1d4ed8;
+        }
+
+        .ribbon-breakpoint {
+            background: linear-gradient(to right, #c69f66, #b28a55);
+            color: #ffffff;
+            border-color: #9c7a4b;
+        }
+
+        .ribbon-gamepoint {
+            background: rgba(42, 42, 42, 0.95);
+            color: #ffffff;
+            border-color: #444;
+        }
+
+        .ribbon-goldenpoint {
+            background: linear-gradient(to right, #f59e0b, #d97706);
+            color: #000000;
+            font-weight: 900;
+            border-color: #f59e0b;
+        }
+
+        .ribbon-tiebreak {
+            background: #4b5563;
+            color: #ffffff;
+            border-color: #374151;
+        }
+
+        /* Мерехтіння для Дабл фолу */
+        @keyframes gray-blink {
+            0%, 100% { background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); color: white; }
+            50% { background: #555555; color: #bbbbbb; }
+        }
+        .double-fault-blink {
+            animation: gray-blink 0.25s ease-in-out 3;
+        }
     </style>
 </head>
 <body>
- 
+
     <div class="scoreboard-wrapper" id="main-scoreboard">
- 
+
         <!-- ПАНЕЛЬ ЛОГОТИПУ — висувається зліва -->
         <div class="logo-panel" id="logo-panel">
             <div class="logo-panel-text" id="logo-text-node">QATAR<br><span>AIRWAYS</span></div>
             <img id="logo-img-node" src="" style="display:none;">
         </div>
- 
+
         <!-- ОСНОВНЕ ТАБЛО -->
         <div class="scoreboard-container">
             <div class="main-board">
@@ -188,7 +283,7 @@
                     <div class="score-box" id="t1-s5">0</div>
                     <div class="score-box points" id="t1-pts">0</div>
                 </div>
- 
+
                 <div class="team-row" id="row-team-2">
                     <div class="team-names" id="block-anim-2">
                         <span id="name-display-t2">GALAN / CHINGOTTO</span>
@@ -202,14 +297,20 @@
                     <div class="score-box points" id="t2-pts">0</div>
                 </div>
             </div>
+
+            <!-- Контейнер для нижніх висувних плашок -->
+            <div class="info-ribbons-container">
+                <div class="ribbon ribbon-proset" id="ribbon-proset">PRO-SET 8</div>
+                <div class="ribbon" id="ribbon-match">MATCH POINT</div>
+            </div>
         </div>
- 
+
     </div>
- 
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
- 
+
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
             authDomain: "padel-2-gurskyj.firebaseapp.com",
@@ -219,28 +320,28 @@
             messagingSenderId: "671715970020",
             appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
         };
- 
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0;
- 
+
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
             const state = snapshot.val();
             if (state) {
                 document.getElementById('name-display-t1').innerText = state.p1name || "Команда 1";
                 document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
- 
-                // Масштабування і позиція — весь wrapper разом з панеллю логотипу
+
+                // Масштабування і позиція
                 const currentScale = state.scale || 1;
                 document.getElementById('main-scoreboard').style.transform = `scale(${currentScale})`;
                 document.getElementById('main-scoreboard').style.left = (state.posX || 0) + 'px';
                 document.getElementById('main-scoreboard').style.top = (state.posY || 0) + 'px';
- 
-                // Панель логотипу (замість sponsor-box)
+
+                // Панель логотипу
                 const logoPanel = document.getElementById('logo-panel');
                 logoPanel.classList.toggle('visible', !!state.showLogo);
- 
+
                 if (state.isAmericano) {
                     document.getElementById('logo-text-node').innerHTML = "AMERICANO<br><span>MODE</span>";
                     document.getElementById('logo-text-node').style.display = 'block';
@@ -255,7 +356,7 @@
                     document.getElementById('logo-text-node').style.display = 'block';
                     document.getElementById('logo-img-node').style.display = 'none';
                 }
- 
+
                 // Очки розіграшу
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('t1-pts').innerText = state.p1Index;
@@ -264,31 +365,34 @@
                     document.getElementById('t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
                     document.getElementById('t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
- 
+
                 document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
- 
-                // Сети
+
+                // СЕТИ (Враховуючи Pro-Set)
                 const activeSet = state.currentSet || 1;
+                const totalSetsToShow = state.isProSet ? 1 : 5;
+
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`t1-s${s}`);
                     const box2 = document.getElementById(`t2-s${s}`);
- 
-                    if (state.isAmericano) {
+
+                    if (state.isAmericano || s > totalSetsToShow) {
                         box1.style.display = 'none';
                         box2.style.display = 'none';
                         continue;
                     }
- 
+
                     const g1 = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
                     const g2 = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
- 
+
                     if (s < activeSet) {
                         box1.style.display = 'flex'; box1.className = 'score-box set-past';
                         box2.style.display = 'flex'; box2.className = 'score-box set-past';
                         box1.innerText = g1; box2.innerText = g2;
                     } else if (s === activeSet) {
-                        if (g1 > 0 || g2 > 0) {
+                        // Для Pro-Set або якщо є гейми, показуємо завжди активний сет
+                        if (state.isProSet || g1 > 0 || g2 > 0) {
                             box1.style.display = 'flex'; box1.className = 'score-box set-current';
                             box2.style.display = 'flex'; box2.className = 'score-box set-current';
                             box1.innerText = g1; box2.innerText = g2;
@@ -301,24 +405,61 @@
                         box2.style.display = 'none';
                     }
                 }
- 
-                // Анімація спалаху при виграші
+
+                // ПЛАШКА 3: Режим Pro-Set
+                const ribbonProset = document.getElementById('ribbon-proset');
+                if (state.isProSet) {
+                    ribbonProset.innerText = `PRO-SET ${state.proSetLimit || 8}`;
+                    ribbonProset.classList.add('visible');
+                } else {
+                    ribbonProset.classList.remove('visible');
+                }
+
+                // ПЛАШКА 4: Важливі розіграші (Match, Set, Break, Game, Golden, Tiebreak Point)
+                const ribbonMatch = document.getElementById('ribbon-match');
+                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && !state.isAmericano) {
+                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
+                    
+                    // Стилізуємо залежно від типу
+                    ribbonMatch.className = "ribbon visible"; 
+                    if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
+                    else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
+                    else if (state.activeMatchRibbon === "BREAK_POINT") ribbonMatch.classList.add('ribbon-breakpoint');
+                    else if (state.activeMatchRibbon === "GOLDEN_POINT") ribbonMatch.classList.add('ribbon-goldenpoint');
+                    else if (state.activeMatchRibbon === "TIEBREAK_POINT") ribbonMatch.classList.add('ribbon-tiebreak');
+                    else if (state.activeMatchRibbon === "GAME_POINT") ribbonMatch.classList.add('ribbon-gamepoint');
+                } else {
+                    ribbonMatch.classList.remove('visible');
+                }
+
+                // АНІМАЦІЇ (Виграш гейму/сету або ДАБЛ ФОЛ)
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
                     const animType = state.animation.type;
- 
+
                     const targetBlock = document.getElementById(`block-anim-${winTeam}`);
                     if (targetBlock) {
-                        targetBlock.style.transition = 'none';
-                        targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
-                        if (animType === 'set') targetBlock.style.color = '#1a1a1a';
- 
-                        setTimeout(() => {
-                            targetBlock.style.transition = 'background 0.8s ease, color 0.8s ease';
-                            targetBlock.style.background = 'linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75))';
-                            targetBlock.style.color = 'white';
-                        }, 600);
+                        if (animType === 'double_fault') {
+                            // Ефект мерехтіння для дабл фолу
+                            targetBlock.classList.remove('double-fault-blink');
+                            void targetBlock.offsetWidth; // хак для рестарту css анімації
+                            targetBlock.classList.add('double-fault-blink');
+                            setTimeout(() => {
+                                targetBlock.classList.remove('double-fault-blink');
+                            }, 800);
+                        } else {
+                            // Стандартна логіка виграшу гейму/сету
+                            targetBlock.style.transition = 'none';
+                            targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
+                            if (animType === 'set') targetBlock.style.color = '#1a1a1a';
+
+                            setTimeout(() => {
+                                targetBlock.style.transition = 'background 0.8s ease, color 0.8s ease';
+                                targetBlock.style.background = 'linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75))';
+                                targetBlock.style.color = 'white';
+                            }, 600);
+                        }
                     }
                 }
             }
