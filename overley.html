@@ -10,12 +10,12 @@
             background: transparent !important;
             background-color: transparent !important;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             overflow: hidden;
             font-family: 'Montserrat', sans-serif;
             color: white;
         }
- 
+
         /* Зовнішній контейнер — масштабується цілком */
         .scoreboard-wrapper {
             display: flex;
@@ -23,10 +23,13 @@
             align-items: flex-start;
             width: max-content;
             transform-origin: top left;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, top 0.3s ease, left 0.3s ease;
             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6));
+            position: absolute;
+            top: 20px;
+            left: 20px;
         }
- 
+
         /* ===== ПАНЕЛЬ ЛОГОТИПУ (зліва, висувається справа→ліво) ===== */
         .logo-panel {
             /* Початково схована — зміщена вправо за табло */
@@ -49,19 +52,19 @@
             box-sizing: border-box;
             order: 1;
         }
- 
+
         .logo-panel.visible {
             transform: translateX(0);
             opacity: 1;
         }
- 
+
         .logo-panel img {
             max-width: 90%;
             max-height: 85%;
             object-fit: contain;
             display: block;
         }
- 
+
         .logo-panel-text {
             font-size: 13px;
             font-weight: 700;
@@ -71,14 +74,14 @@
             line-height: 1.3;
             color: #ffffff;
         }
- 
+
         .logo-panel-text span {
             font-size: 9px;
             display: block;
             letter-spacing: 2px;
             color: #b28a55;
         }
- 
+
         /* ===== ОСНОВНЕ ТАБЛО ===== */
         .scoreboard-container {
             display: flex;
@@ -86,7 +89,7 @@
             width: max-content;
             order: 2;
         }
- 
+
         .main-board {
             display: inline-flex;
             flex-direction: column;
@@ -94,15 +97,15 @@
             border: 2px solid #b28a55;
             border-radius: 4px;
         }
- 
+
         .team-row {
             display: flex;
             height: 48px;
             border-bottom: 1px solid rgba(255,255,255,0.15);
         }
- 
+
         .team-row:last-child { border-bottom: none; }
- 
+
         .team-names {
             width: 320px;
             display: flex;
@@ -118,7 +121,7 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
- 
+
         .server-indicator {
             color: #b28a55;
             font-size: 20px;
@@ -127,7 +130,7 @@
             margin-left: 10px;
         }
         .server-indicator.active { visibility: visible; }
- 
+
         .score-box {
             width: 40px;
             display: none;
@@ -137,17 +140,17 @@
             font-weight: 800;
             border-left: 2px solid rgba(255,255,255,0.15);
         }
- 
+
         .set-past {
             background-color: rgba(255,255,255,0.9);
             color: #1a1a1a;
         }
- 
+
         .set-current {
             background-color: rgba(122,122,122,0.75);
             color: #ffffff;
         }
- 
+
         .points {
             background: linear-gradient(to bottom, #c69f66, #9c7a4b);
             color: #ffffff;
@@ -161,15 +164,15 @@
     </style>
 </head>
 <body>
- 
+
     <div class="scoreboard-wrapper" id="main-scoreboard">
- 
+
         <!-- ПАНЕЛЬ ЛОГОТИПУ — висувається зліва -->
         <div class="logo-panel" id="logo-panel">
             <div class="logo-panel-text" id="logo-text-node">QATAR<br><span>AIRWAYS</span></div>
             <img id="logo-img-node" src="" style="display:none;">
         </div>
- 
+
         <!-- ОСНОВНЕ ТАБЛО -->
         <div class="scoreboard-container">
             <div class="main-board">
@@ -185,7 +188,7 @@
                     <div class="score-box" id="t1-s5">0</div>
                     <div class="score-box points" id="t1-pts">0</div>
                 </div>
- 
+
                 <div class="team-row" id="row-team-2">
                     <div class="team-names" id="block-anim-2">
                         <span id="name-display-t2">GALAN / CHINGOTTO</span>
@@ -200,13 +203,13 @@
                 </div>
             </div>
         </div>
- 
+
     </div>
- 
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
- 
+
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
             authDomain: "padel-2-gurskyj.firebaseapp.com",
@@ -216,26 +219,28 @@
             messagingSenderId: "671715970020",
             appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
         };
- 
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0;
- 
+
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
             const state = snapshot.val();
             if (state) {
                 document.getElementById('name-display-t1').innerText = state.p1name || "Команда 1";
                 document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
- 
-                // Масштабування — весь wrapper разом з панеллю логотипу
+
+                // Масштабування і позиція — весь wrapper разом з панеллю логотипу
                 const currentScale = state.scale || 1;
                 document.getElementById('main-scoreboard').style.transform = `scale(${currentScale})`;
- 
+                document.getElementById('main-scoreboard').style.left = (state.posX || 0) + 'px';
+                document.getElementById('main-scoreboard').style.top = (state.posY || 0) + 'px';
+
                 // Панель логотипу (замість sponsor-box)
                 const logoPanel = document.getElementById('logo-panel');
                 logoPanel.classList.toggle('visible', !!state.showLogo);
- 
+
                 if (state.isAmericano) {
                     document.getElementById('logo-text-node').innerHTML = "AMERICANO<br><span>MODE</span>";
                     document.getElementById('logo-text-node').style.display = 'block';
@@ -250,7 +255,7 @@
                     document.getElementById('logo-text-node').style.display = 'block';
                     document.getElementById('logo-img-node').style.display = 'none';
                 }
- 
+
                 // Очки розіграшу
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('t1-pts').innerText = state.p1Index;
@@ -259,25 +264,25 @@
                     document.getElementById('t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
                     document.getElementById('t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
- 
+
                 document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
- 
+
                 // Сети
                 const activeSet = state.currentSet || 1;
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`t1-s${s}`);
                     const box2 = document.getElementById(`t2-s${s}`);
- 
+
                     if (state.isAmericano) {
                         box1.style.display = 'none';
                         box2.style.display = 'none';
                         continue;
                     }
- 
+
                     const g1 = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
                     const g2 = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
- 
+
                     if (s < activeSet) {
                         box1.style.display = 'flex'; box1.className = 'score-box set-past';
                         box2.style.display = 'flex'; box2.className = 'score-box set-past';
@@ -296,19 +301,19 @@
                         box2.style.display = 'none';
                     }
                 }
- 
+
                 // Анімація спалаху при виграші
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
                     const animType = state.animation.type;
- 
+
                     const targetBlock = document.getElementById(`block-anim-${winTeam}`);
                     if (targetBlock) {
                         targetBlock.style.transition = 'none';
                         targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
                         if (animType === 'set') targetBlock.style.color = '#1a1a1a';
- 
+
                         setTimeout(() => {
                             targetBlock.style.transition = 'background 0.8s ease, color 0.8s ease';
                             targetBlock.style.background = 'linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75))';
