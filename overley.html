@@ -26,7 +26,7 @@
             transition: transform 0.2s ease, top 0.3s ease, left 0.3s ease;
             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6));
             position: absolute;
-            top: 20px;
+            top: 25px; /* трішки збільшено відступ для плашки */
             left: 20px;
         }
 
@@ -163,11 +163,12 @@
             align-items: center;
         }
 
-        /* ===== ПЛАШКА PRO-SET ЗВЕРХУ ТАБЛА НАД ОЧКАМИ ===== */
+        /* ===== ПЛАШКА PRO-SET ЧІТКО ПО ЦЕНТРУ ВЕРХУ ТАБЛА ===== */
         .ribbon-proset {
             position: absolute;
-            bottom: 100%; /* точно над таблом */
-            right: 0; /* вирівнювання над очками розіграшу */
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%); /* Центрування по горизонталі */
             height: 0;
             opacity: 0;
             overflow: hidden;
@@ -176,7 +177,7 @@
             justify-content: center;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             font-size: 11px;
             background: rgba(30, 30, 30, 0.95);
             color: #c69f66;
@@ -186,7 +187,9 @@
             transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease;
             box-sizing: border-box;
             z-index: 1;
-            width: 69px; /* Ідеально під ширину блоку очок розіграшу + border */
+            white-space: nowrap;
+            width: auto;
+            padding: 0 12px; /* Динамічний розмір під текст */
         }
 
         .ribbon-proset.visible {
@@ -292,8 +295,8 @@
 
         <!-- ОСНОВНЕ ТАБЛО -->
         <div class="scoreboard-container">
-            <!-- Плашка Pro-set переміщена наверх, чітко над блоком точок розіграшу -->
-            <div class="ribbon-proset" id="ribbon-proset">P-S 8</div>
+            <!-- Плашка Pro-set тепер центрується за допомогою CSS по центру верху табла -->
+            <div class="ribbon-proset" id="ribbon-proset">PRO-SET 8</div>
 
             <div class="main-board">
                 <div class="team-row" id="row-team-1">
@@ -429,16 +432,16 @@
                     }
                 }
 
-                // Верхня плашка Pro-Set (зменшена до розмірів тексту)
+                // Вивід плашки PRO-SET по центру верху
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isProSet) {
-                    ribbonProset.innerText = `P-S ${state.proSetLimit || 8}`;
+                    ribbonProset.innerText = `PRO-SET ${state.proSetLimit || 8}`;
                     ribbonProset.classList.add('visible');
                 } else {
                     ribbonProset.classList.remove('visible');
                 }
 
-                // Висувні плашки знизу табла (Match, Set, Break, Game, Golden, Tiebreak Point)
+                // Нижній висувний індикатор розіграшів
                 const ribbonMatch = document.getElementById('ribbon-match');
                 if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && !state.isAmericano) {
                     ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
@@ -454,7 +457,7 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                // Анімації виграшу або Дабл Фол[cite: 1]
+                // Анімації[cite: 1]
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
