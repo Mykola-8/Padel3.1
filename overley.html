@@ -242,9 +242,6 @@
                 const dl = state.prosetDeuce === 'sudden' ? 'SUDDEN' : 'ADV';
                 modeHeader.textContent = `PRO-SET  ${state.prosetLimit || 8}  ·  ${dl}`;
                 modeHeader.classList.add('visible');
-            } else if (m === 'americano') {
-                modeHeader.textContent = `AMERICANO  ·  ${state.americanoLimit || 21}`;
-                modeHeader.classList.add('visible');
             } else {
                 modeHeader.textContent = '';
                 modeHeader.classList.remove('visible');
@@ -264,7 +261,7 @@
             }
  
             // Очки
-            if (m === 'americano' || state.isTiebreak) {
+            if (state.isTiebreak) {
                 document.getElementById('t1-pts').innerText = state.p1Index;
                 document.getElementById('t2-pts').innerText = state.p2Index;
             } else {
@@ -280,7 +277,6 @@
             for (let s = 1; s <= 5; s++) {
                 const b1 = document.getElementById(`t1-s${s}`);
                 const b2 = document.getElementById(`t2-s${s}`);
-                if (m === 'americano') { b1.style.display = 'none'; b2.style.display = 'none'; continue; }
                 const g1 = parseInt(state[`t1_s${s}`]) || 0;
                 const g2 = parseInt(state[`t2_s${s}`]) || 0;
                 if (s < activeSet) {
