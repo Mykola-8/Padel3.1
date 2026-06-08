@@ -170,8 +170,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -40%) scale(0.8);
-            width: 540px;
-            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.92), rgba(15, 15, 15, 0.92));
+            width: 550px;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.94), rgba(15, 15, 15, 0.94));
             border-radius: 8px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             font-family: 'Montserrat', sans-serif;
@@ -180,11 +180,11 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-            padding: 22px;
+            padding: 24px;
             box-sizing: border-box;
         }
         .statistics-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .stats-header { text-align: center; font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+        .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
         .stats-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
         .stats-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
         .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -193,7 +193,15 @@
         .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
         .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
 
-        /* ===== БЛОК QR КОДУ ===== */
+        /* ДИНАМІЧНИЙ СПИСОК СЕТІВ ДЛЯ ФІНАЛУ МАТЧУ */
+        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; margin-top: 5px; }
+        .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .h-set-title { font-weight: 700; color: #aaa; text-transform: uppercase; font-size: 11px; }
+        .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; }
+        .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; }
+
+        /* ===== БЛОК QR КОДУ З ОПИСОМ ===== */
         .qr-code-wrapper {
             position: fixed;
             bottom: 30px;
@@ -202,8 +210,8 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            background: rgba(20, 20, 20, 0.85);
-            padding: 10px;
+            background: rgba(20, 20, 20, 0.88);
+            padding: 12px;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
@@ -211,10 +219,11 @@
             visibility: hidden;
             transform: translateY(20px);
             z-index: 10000;
+            max-width: 150px;
         }
         .qr-code-wrapper.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .qr-code-wrapper img { width: 110px; height: 110px; display: block; border-radius: 4px; background: white; padding: 4px; box-sizing: border-box; }
-        .qr-code-text { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #c69f66; letter-spacing: 1px; text-align: center; }
+        .qr-code-wrapper img { width: 115px; height: 115px; display: block; border-radius: 4px; background: white; padding: 4px; box-sizing: border-box; }
+        .qr-code-text { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #c69f66; letter-spacing: 0.8px; text-align: center; line-height: 1.2; word-break: break-word; margin-top: 2px; }
 
         @keyframes gray-blink {
             0%, 100% { background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); color: white; }
@@ -266,14 +275,14 @@
     </div>
 
     <div class="statistics-overlay" id="statistics-panel">
-        <div class="stats-header">Матч-Статистика</div>
+        <div class="stats-header" id="stats-main-header">Матч-Статистика</div>
         <div class="stats-table">
             <div class="stats-row">
                 <div class="stats-team-left" id="st-name1">Команда A</div>
                 <div class="stats-label">Команди</div>
                 <div class="stats-team-right" id="st-name2">Команда B</div>
             </div>
-            <div class="stats-row">
+            <div class="stats-row" id="row-stats-current-set-games">
                 <div class="stats-val" id="st-g1">0</div>
                 <div class="stats-label">Гейми (сет)</div>
                 <div class="stats-val" id="st-g2">0</div>
@@ -288,21 +297,26 @@
                 <div class="stats-label">Дабл фоли</div>
                 <div class="stats-val" id="st-df2">0</div>
             </div>
-            <div class="stats-row">
+            <div class="stats-row" id="row-stats-timers">
                 <div class="stats-val gold" id="st-time-set" style="font-size:18px; font-weight:800;">00:00</div>
                 <div class="stats-label">Загальний час сету</div>
                 <div class="stats-val gold" id="st-time-match" style="font-size:13px; font-weight:600; color:#aaa;">00:00</div>
             </div>
-            <div class="stats-row">
+            <div class="stats-row" id="row-stats-history">
                 <div class="stats-val gold" id="st-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 5px; font-size: 16px;">0`</div>
                 <div class="stats-label" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
+            </div>
+
+            <div id="final-sets-summary-block" style="display:none; flex-direction:column; gap:4px;">
+                <div class="stats-label" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
+                <div class="history-sets-container" id="final-sets-list-target"></div>
             </div>
         </div>
     </div>
 
     <div class="qr-code-wrapper" id="qr-code-panel">
         <img id="qr-code-image" src="" alt="QR Code">
-        <div class="qr-code-text">SCAN ME</div>
+        <div class="qr-code-text" id="qr-code-description-node">SCAN ME</div>
     </div>
 
     <script type="module">
@@ -328,35 +342,45 @@
         let totalSeconds = 0;
         let setSeconds = 0;
         let lastSetTracked = 1;
+        let isMatchFinishedCurrently = false;
+
+        // Масив для збереження фінального часу тривалості кожного сету
+        let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"];
+
+        const formatTime = (sec) => {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        };
 
         setInterval(() => {
+            if (isMatchFinishedCurrently) return; // якщо кінець матчу, час зупиняється
             totalSeconds++;
             setSeconds++;
             
-            const formatTime = (sec) => {
-                const m = Math.floor(sec / 60).toString().padStart(2, '0');
-                const s = (sec % 60).toString().padStart(2, '0');
-                return `${m}:${s}`;
-            };
-
             const tMatch = document.getElementById('st-time-match');
             const tSet = document.getElementById('st-time-set');
             if(tMatch) tMatch.innerText = "Матч: " + formatTime(totalSeconds);
             if(tSet) tSet.innerText = formatTime(setSeconds);
+
+            // Оновлюємо тривалість поточного активного сету в масиві пам'яті
+            setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
         }, 1000);
 
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
             const state = snapshot.val();
             if (state) {
+                isMatchFinishedCurrently = !!state.isMatchFinished;
                 const boardWrapper = document.getElementById('main-scoreboard');
 
-                // ПРИХОВУВАННЯ ТАБЛА РАХУНКУ, ЯКЩО ВІДКРИТА СТАТИСТИКА (Або якщо примусово сховано пультом)
-                if (state.showMainBoard === false || state.showStatsOverlay === true) {
+                // Приховуємо табло рахунку, якщо активний будь-який показ статистики (авто або фінальний)
+                if (state.showMainBoard === false || state.showStatsOverlay === true || state.isMatchFinished === true) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
                 }
 
+                // Логіка QR коду та кастомного підпису під ним
                 const qrWrapper = document.getElementById('qr-code-panel');
                 if (state.showQrCode) {
                     const targetUrl = state.qrCodeUrl || "https://google.com";
@@ -364,6 +388,7 @@
                         currentQrUrl = targetUrl;
                         document.getElementById('qr-code-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(targetUrl)}`;
                     }
+                    document.getElementById('qr-code-description-node').innerText = state.qrCodeDescription || "SCAN ME";
                     qrWrapper.classList.add('visible');
                 } else {
                     qrWrapper.classList.remove('visible');
@@ -461,8 +486,9 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
+                // ЛОГІКА СТАТИСТИКИ (АВТОМАТИЧНА АБО ФІНАЛЬНА ПРИ КІНЦІ МАТЧУ)
                 const stPanel = document.getElementById('statistics-panel');
-                if (state.showStatsOverlay) {
+                if (state.showStatsOverlay || state.isMatchFinished) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('st-name2').innerText = state.p2name || "Команда B";
                     document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
@@ -474,6 +500,53 @@
                     
                     const historyArray = state.gamesTimeHistory || [];
                     document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
+
+                    if (state.isMatchFinished) {
+                        // Адаптуємо вікно під фінальний екран результатів матчу
+                        document.getElementById('stats-main-header').innerText = "МАТЧ ЗАВЕРШЕНО • ПІДСУМКИ";
+                        document.getElementById('row-stats-current-set-games').style.display = 'none';
+                        document.getElementById('row-stats-history').style.display = 'none';
+                        document.getElementById('row-stats-timers').style.display = 'none';
+                        
+                        // Генеруємо детальний звіт по всім зіграним сетам
+                        const targetList = document.getElementById('final-sets-list-target');
+                        targetList.innerHTML = "";
+                        
+                        let totalSetsToRender = state.isAmericano ? 0 : 5;
+                        let validSetsRendered = 0;
+
+                        for(let i = 1; i <= totalSetsToRender; i++) {
+                            let g1_set = state[`t1_s${i}`] || 0;
+                            let g2_set = state[`t2_s${i}`] || 0;
+                            
+                            // Показуємо тільки сети в які реально грали (або поточний)
+                            if (i <= activeSet || g1_set > 0 || g2_set > 0) {
+                                validSetsRendered++;
+                                const setRow = document.createElement('div');
+                                setRow.className = 'history-set-row';
+                                setRow.innerHTML = `
+                                    <span class="h-set-title">Сет ${i}</span>
+                                    <span class="h-set-score">${g1_set} : ${g2_set}</span>
+                                    <span class="h-set-time">⏱️ Час: ${setsTimeDurationsHistory[i-1] || "00:00"}</span>
+                                `;
+                                targetList.appendChild(setRow);
+                            }
+                        }
+                        
+                        if(validSetsRendered > 0 && !state.isAmericano) {
+                            document.getElementById('final-sets-summary-block').style.display = 'flex';
+                        } else {
+                            document.getElementById('final-sets-summary-block').style.display = 'none';
+                        }
+                    } else {
+                        // Повертаємо вигляд для звичайного оверлею статистики під час геймів
+                        document.getElementById('stats-main-header').innerText = "Матч-Статистика";
+                        document.getElementById('row-stats-current-set-games').style.display = 'grid';
+                        document.getElementById('row-stats-history').style.display = 'grid';
+                        document.getElementById('row-stats-timers').style.display = 'grid';
+                        document.getElementById('final-sets-summary-block').style.display = 'none';
+                    }
+
                     stPanel.classList.add('visible');
                 } else {
                     stPanel.classList.remove('visible');
