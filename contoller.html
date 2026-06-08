@@ -11,9 +11,14 @@
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
-        input[type="text"], input[type="number"] { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
-        .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.15s; }
-        .btn:active { transform: scale(0.97); }
+        
+        input[type="text"], input[type="number"] { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; transition: border 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus { border-color: #c69f66; outline: none; }
+
+        /* ЕФЕКТ НАТИСКАННЯ ДЛЯ ВСІХ ОСНОВНИХ КЛАВІШ */
+        .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.08s ease, filter 0.08s ease; }
+        .btn:active { transform: scale(0.95); filter: brightness(0.85); }
+        
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
         .btn-green { background: #15803d; }
         .btn-blue { background: #1d4ed8; }
@@ -34,15 +39,18 @@
             gap: 8px; 
             cursor: pointer; 
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-            transition: transform 0.05s linear, filter 0.05s ease;
+            transition: transform 0.06s cubic-bezier(0, 0, 0, 1), filter 0.06s ease;
         }
         .score-btn:active { transform: scale(0.91); filter: brightness(0.75); }
         .score-btn span { font-size: 42px; font-weight: 900; }
         
         .serve-box { display: flex; gap: 10px; width: 100%; }
-        .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+        .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; transition: transform 0.08s; }
+        .serve-btn:active { transform: scale(0.95); }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         
+        .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s; }
         .status-badge.golden-alert { background: #ea580c !important; color: white !important; animation: pulse-border 1s infinite alternate; }
         
@@ -52,8 +60,8 @@
         }
 
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
-        .btn-orange { background: #ea580c; }
-        .btn-gray { background: #4b5563; }
+        input[type="checkbox"], input[type="radio"] { transition: transform 0.1s; }
+        input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(1.2); }
 
         .preview-scoreboard {
             border: 2px solid #b28a55;
@@ -83,15 +91,7 @@
         }
         .preview-srv { color: #b28a55; font-size: 12px; visibility: hidden; }
         .preview-srv.active { visibility: visible; }
-        .preview-box {
-            width: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            border-left: 1px solid rgba(255,255,255,0.1);
-        }
+        .preview-box { width: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border-left: 1px solid rgba(255,255,255,0.1); }
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
@@ -139,8 +139,8 @@
         </button>
     </div>
 
-    <button class="btn btn-orange" style="width:100%; padding:12px;" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
-    <button class="btn btn-gray" style="width:100%; padding:12px;" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
+    <button class="btn btn-orange btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
+    <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
     <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d;" onclick="toggleStatsManual()">📊 Переключити статистику вручну</button>
     
     <button class="btn btn-red" style="width:100%; padding:14px; font-size:13px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ВИВЕСТИ ФІНАЛЬНУ СТАТИСТИКУ)</button>
@@ -281,7 +281,7 @@
             isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8,
             activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
             p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-            isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
+            isStatsAutomated: true, showStatsOverlay: false, showSetOverlayTrigger: false, lastFinishedSetNum: 0, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
             showMainBoard: true, showQrCode: false, qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
@@ -301,17 +301,40 @@
             if (navigator.vibrate) navigator.vibrate(40);
         }
 
+        // Авто-показ статистики на 6 секунд КРІМ кінця сету
         function trigger6SecStats() {
             if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
+            
             state.showStatsOverlay = true;
+            state.showSetOverlayTrigger = false;
             set(matchRef, state);
 
             statsTimeout = setTimeout(() => {
                 onValue(matchRef, (snap) => {
                     let current = snap.val();
-                    if (current && current.showStatsOverlay) {
+                    if (current && current.showStatsOverlay && !current.isMatchFinished) {
                         current.showStatsOverlay = false;
+                        set(matchRef, current);
+                    }
+                }, { onlyOnce: true });
+            }, 6000);
+        }
+
+        // Авто-показ результату зіграного сету на 6 секунд
+        function trigger6SecSetOverlay(finishedSetNum) {
+            if (statsTimeout) clearTimeout(statsTimeout);
+            
+            state.showStatsOverlay = false;
+            state.showSetOverlayTrigger = true;
+            state.lastFinishedSetNum = finishedSetNum;
+            set(matchRef, state);
+
+            statsTimeout = setTimeout(() => {
+                onValue(matchRef, (snap) => {
+                    let current = snap.val();
+                    if (current && current.showSetOverlayTrigger) {
+                        current.showSetOverlayTrigger = false;
                         set(matchRef, current);
                     }
                 }, { onlyOnce: true });
@@ -425,13 +448,13 @@
             state.qrCodeDescription = val; set(matchRef, state);
         }
 
-        // Логіка кінця матчу
         window.finishMatchPro = function() {
             triggerVibration();
-            if(confirm("Ви впевнені, що хочете завершити матч та зафіксувати фінальні результати?")) {
+            if(confirm("Ви впевнені, що хочете завершити матч?")) {
                 saveToHistory(state);
                 state.isMatchFinished = true;
-                state.showStatsOverlay = true; // Фінальний екран виводиться безстроково
+                state.showStatsOverlay = true; 
+                state.showSetOverlayTrigger = false;
                 set(matchRef, state);
             }
         }
@@ -456,10 +479,11 @@
                 if (total >= limit) {
                     state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
                     if (state.currentSet < 5) {
+                        const justFinishedSet = state.currentSet;
                         state.currentSet++;
                         state.p1Index = 0; state.p2Index = 0;
                         state.gamesTimeHistory = [];
-                        trigger6SecStats();
+                        trigger6SecSetOverlay(justFinishedSet);
                     }
                 }
             } else if (state.isTiebreak) {
@@ -520,10 +544,6 @@
             let g2 = state['t2_s' + cSet];
             let totalGamesInSet = g1 + g2;
 
-            if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
-                trigger6SecStats();
-            }
-
             let isSetOver = false;
             let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
 
@@ -542,12 +562,18 @@
             state.animation = { team: winningTeam, type: isSetOver ? 'set' : 'game', ts: Date.now() };
 
             if (isSetOver) {
-                trigger6SecStats();
+                const finishedSetNum = state.currentSet;
                 if (state.currentSet < 5) {
                     state.currentSet++;
                     state.p1BreakPoints = 0; state.p2BreakPoints = 0;
                     state.gamesTimeHistory = [];
                     state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
+                }
+                trigger6SecSetOverlay(finishedSetNum); // Показ прозорого фону Сету
+            } else {
+                // Звичайна авто-статистика геймів через один розіграш (якщо сума геймів непарна)
+                if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
+                    trigger6SecStats();
                 }
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -660,7 +686,7 @@
                     p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                     isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
                     deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
+                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
                     showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
