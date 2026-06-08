@@ -193,7 +193,6 @@
         .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
         .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
 
-        /* ДИНАМІЧНИЙ СПИСОК СЕТІВ ДЛЯ ФІНАЛУ МАТЧУ */
         .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
@@ -201,7 +200,38 @@
         .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; }
         .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; }
 
-        /* ===== БЛОК QR КОДУ З ОПИСОМ ===== */
+        /* ===== ЦЕНТРАЛЬНИЙ ЕКРАН РЕЗУЛЬТАТУ СЕТУ ===== */
+        .set-result-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 820px;
+            background: rgba(15, 15, 15, 0.88);
+            border-radius: 6px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 35px;
+            box-sizing: border-box;
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .set-result-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; }
+        .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 25px; }
+        .sr-team { flex: 1; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sr-team.left { text-align: right; }
+        .sr-team.right { text-align: left; }
+        .sr-vs-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
+        .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
+        .sr-vs { font-size: 14px; font-weight: 800; color: #777; letter-spacing: 1px; margin-top: 5px; }
+
+        /* ===== ЧИСТИЙ БЛОК QR КОДУ ===== */
         .qr-code-wrapper {
             position: fixed;
             bottom: 30px;
@@ -209,21 +239,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            background: rgba(20, 20, 20, 0.88);
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            gap: 8px;
+            background: rgba(20, 20, 20, 0.75);
+            padding: 0;
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
             opacity: 0;
             visibility: hidden;
             transform: translateY(20px);
             z-index: 10000;
-            max-width: 150px;
         }
         .qr-code-wrapper.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .qr-code-wrapper img { width: 115px; height: 115px; display: block; border-radius: 4px; background: white; padding: 4px; box-sizing: border-box; }
-        .qr-code-text { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #c69f66; letter-spacing: 0.8px; text-align: center; line-height: 1.2; word-break: break-word; margin-top: 2px; }
+        .qr-code-wrapper img { width: 115px; height: 115px; display: block; background: transparent; padding: 0; box-sizing: border-box; }
+        .qr-code-text { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #c69f66; letter-spacing: 1px; text-align: center; max-width: 120px; line-height: 1.3; margin-top: 4px; }
 
         @keyframes gray-blink {
             0%, 100% { background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); color: white; }
@@ -251,7 +278,7 @@
                     <div class="score-box" id="t1-s1">0</div>
                     <div class="score-box" id="t1-s2">0</div>
                     <div class="score-box" id="t1-s3">0</div>
-                    <div class="score-box" id="t1-s4">0</div>
+                    <div class="score-box" id="m-t1-s4">0</div>
                     <div class="score-box" id="t1-s5">0</div>
                     <div class="score-box points" id="t1-pts">0</div>
                 </div>
@@ -314,6 +341,18 @@
         </div>
     </div>
 
+    <div class="set-result-overlay" id="set-result-panel">
+        <div class="sr-set-label" id="sr-set-number-label">ЗАВЕРШЕНО СЕТ 1</div>
+        <div class="sr-main-row">
+            <div class="sr-team left" id="sr-team1-name">Команда 1</div>
+            <div class="sr-vs-score-block">
+                <div class="sr-score" id="sr-sets-score-value">6 : 4</div>
+                <div class="sr-vs">VS</div>
+            </div>
+            <div class="sr-team right" id="sr-team2-name">Команда 2</div>
+        </div>
+    </div>
+
     <div class="qr-code-wrapper" id="qr-code-panel">
         <img id="qr-code-image" src="" alt="QR Code">
         <div class="qr-code-text" id="qr-code-description-node">SCAN ME</div>
@@ -344,7 +383,6 @@
         let lastSetTracked = 1;
         let isMatchFinishedCurrently = false;
 
-        // Масив для збереження фінального часу тривалості кожного сету
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"];
 
         const formatTime = (sec) => {
@@ -354,17 +392,15 @@
         };
 
         setInterval(() => {
-            if (isMatchFinishedCurrently) return; // якщо кінець матчу, час зупиняється
+            if (isMatchFinishedCurrently) return;
             totalSeconds++;
             setSeconds++;
+            setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
             
             const tMatch = document.getElementById('st-time-match');
             const tSet = document.getElementById('st-time-set');
             if(tMatch) tMatch.innerText = "Матч: " + formatTime(totalSeconds);
             if(tSet) tSet.innerText = formatTime(setSeconds);
-
-            // Оновлюємо тривалість поточного активного сету в масиві пам'яті
-            setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
         }, 1000);
 
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
@@ -372,15 +408,33 @@
             if (state) {
                 isMatchFinishedCurrently = !!state.isMatchFinished;
                 const boardWrapper = document.getElementById('main-scoreboard');
+                const setResultPanel = document.getElementById('set-result-panel');
+                const stPanel = document.getElementById('statistics-panel');
 
-                // Приховуємо табло рахунку, якщо активний будь-який показ статистики (авто або фінальний)
-                if (state.showMainBoard === false || state.showStatsOverlay === true || state.isMatchFinished === true) {
+                // ПРИХОВУЄМО КУТОВЕ ТАБЛО, якщо відкритий екран Сету або Статистика або Фінал
+                if (state.showMainBoard === false || state.showStatsOverlay === true || state.isMatchFinished === true || !!state.showSetOverlayTrigger) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
                 }
 
-                // Логіка QR коду та кастомного підпису під ним
+                // Логіка умовного відображення екрану Сету замість статистики
+                if (state.showSetOverlayTrigger && !state.isMatchFinished) {
+                    const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
+                    document.getElementById('sr-set-number-label').innerText = `ЗАВЕРШЕНО СЕТ ${targetSetForOverlay}`;
+                    document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
+                    document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
+                    
+                    const g1_res = state[`t1_s${targetSetForOverlay}`] || 0;
+                    const g2_res = state[`t2_s${targetSetForOverlay}`] || 0;
+                    document.getElementById('sr-sets-score-value').innerText = `${g1_res} : ${g2_res}`;
+                    
+                    setResultPanel.classList.add('visible');
+                } else {
+                    setResultPanel.classList.remove('visible');
+                }
+
+                // Показ та динамічна генерація чистого QR-коду
                 const qrWrapper = document.getElementById('qr-code-panel');
                 if (state.showQrCode) {
                     const targetUrl = state.qrCodeUrl || "https://google.com";
@@ -486,40 +540,29 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                // ЛОГІКА СТАТИСТИКИ (АВТОМАТИЧНА АБО ФІНАЛЬНА ПРИ КІНЦІ МАТЧУ)
-                const stPanel = document.getElementById('statistics-panel');
+                // ТАБЛО СТАТИСТИКИ (ПРИ ГЕЙМАХ АБО ФІНАЛІ)
                 if (state.showStatsOverlay || state.isMatchFinished) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('st-name2').innerText = state.p2name || "Команда B";
-                    document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
-                    document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                     document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0;
                     document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
                     document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0;
                     document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
-                    
-                    const historyArray = state.gamesTimeHistory || [];
-                    document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
 
                     if (state.isMatchFinished) {
-                        // Адаптуємо вікно під фінальний екран результатів матчу
                         document.getElementById('stats-main-header').innerText = "МАТЧ ЗАВЕРШЕНО • ПІДСУМКИ";
                         document.getElementById('row-stats-current-set-games').style.display = 'none';
                         document.getElementById('row-stats-history').style.display = 'none';
                         document.getElementById('row-stats-timers').style.display = 'none';
                         
-                        // Генеруємо детальний звіт по всім зіграним сетам
                         const targetList = document.getElementById('final-sets-list-target');
                         targetList.innerHTML = "";
-                        
                         let totalSetsToRender = state.isAmericano ? 0 : 5;
                         let validSetsRendered = 0;
 
                         for(let i = 1; i <= totalSetsToRender; i++) {
                             let g1_set = state[`t1_s${i}`] || 0;
                             let g2_set = state[`t2_s${i}`] || 0;
-                            
-                            // Показуємо тільки сети в які реально грали (або поточний)
                             if (i <= activeSet || g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
                                 const setRow = document.createElement('div');
@@ -532,21 +575,19 @@
                                 targetList.appendChild(setRow);
                             }
                         }
-                        
-                        if(validSetsRendered > 0 && !state.isAmericano) {
-                            document.getElementById('final-sets-summary-block').style.display = 'flex';
-                        } else {
-                            document.getElementById('final-sets-summary-block').style.display = 'none';
-                        }
+                        document.getElementById('final-sets-summary-block').style.display = (validSetsRendered > 0 && !state.isAmericano) ? 'flex' : 'none';
                     } else {
-                        // Повертаємо вигляд для звичайного оверлею статистики під час геймів
                         document.getElementById('stats-main-header').innerText = "Матч-Статистика";
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
                         document.getElementById('final-sets-summary-block').style.display = 'none';
+                        
+                        document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
+                        document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
+                        const historyArray = state.gamesTimeHistory || [];
+                        document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
                     }
-
                     stPanel.classList.add('visible');
                 } else {
                     stPanel.classList.remove('visible');
@@ -556,7 +597,6 @@
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
                     const animType = state.animation.type;
-
                     const targetBlock = document.getElementById(`block-anim-${winTeam}`);
                     if (targetBlock) {
                         if (animType === 'double_fault') {
@@ -568,7 +608,6 @@
                             targetBlock.style.transition = 'none';
                             targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
                             if (animType === 'set') targetBlock.style.color = '#1a1a1a';
-
                             setTimeout(() => {
                                 targetBlock.style.transition = 'background 0.8s ease, color 0.8s ease';
                                 targetBlock.style.background = 'linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75))';
