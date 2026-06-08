@@ -145,6 +145,22 @@
 
     <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
+    <div class="card" style="border: 1px dashed #b28a55;">
+        <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#c69f66; text-transform: uppercase;">Видимість елементів трансляції:</div>
+        <div class="switch-row">
+            <span style="font-size:13px; font-weight:700;">Показувати основне табло:</span>
+            <input type="checkbox" id="mode-show-board-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" checked onchange="toggleMainBoardVisibility(this.checked)">
+        </div>
+        <hr style="border:0; border-top:1px solid #333; margin:6px 0;">
+        <div class="switch-row">
+            <span style="font-size:13px; font-weight:700;">Показувати QR-код (Куток):</span>
+            <input type="checkbox" id="mode-show-qr-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleQrCodeVisibility(this.checked)">
+        </div>
+        <div class="row" id="qr-url-row" style="margin-top:8px; display:none;">
+            <input type="text" id="qr-code-url-input" placeholder="Посилання для QR-коду" oninput="updateQrCodeUrl(this.value)">
+        </div>
+    </div>
+
     <div class="card">
         <div class="row" style="gap:10px;">
             <input type="text" id="p1-name-input" placeholder="Команда 1">
@@ -199,7 +215,7 @@
     <div class="card">
         <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Панель Спонсора (Логотип / Текст):</div>
         <div class="row">
-            <input type="text" id="custom-logo-text-input" placeholder="Введіть текст спонсора (напр. QATAR AIRWAYS)" oninput="updateLogoText(this.value)">
+            <input type="text" id="custom-logo-text-input" placeholder="Введіть текст спонсора" oninput="updateLogoText(this.value)">
         </div>
         <div class="row">
             <button class="btn" id="logo-visibility-btn" style="flex:1; background:#b28a55;" onclick="toggleLogoVisibility()">Показати / Сховати</button>
@@ -263,6 +279,7 @@
             activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
             p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
             isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
+            showMainBoard: true, showQrCode: false, qrCodeUrl: "https://google.com",
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
             animation: { team: 0, type: "", ts: 0 }
@@ -309,11 +326,15 @@
                 document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
                 document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
                 
+                document.getElementById('mode-show-board-checkbox').checked = state.showMainBoard !== false;
+                document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
+                document.getElementById('qr-code-url-input').value = state.qrCodeUrl || "";
+                document.getElementById('qr-url-row').style.display = state.showQrCode ? 'flex' : 'none';
+
                 if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
                     document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
                 }
 
-                // Попередження про Golden Point на пульті
                 const badge = document.getElementById('mode-status');
                 let isGoldenAlert = false;
                 if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
@@ -379,6 +400,16 @@
                 document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             }
         });
+
+        window.toggleMainBoardVisibility = function(isChecked) {
+            saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
+        }
+        window.toggleQrCodeVisibility = function(isChecked) {
+            saveToHistory(state); state.showQrCode = isChecked; set(matchRef, state);
+        }
+        window.updateQrCodeUrl = function(val) {
+            state.qrCodeUrl = val; set(matchRef, state);
+        }
 
         window.scorePoint = function(team) {
             triggerVibration(); saveToHistory(state);
@@ -459,7 +490,8 @@
             state.gamesTimeHistory.push(elapsedMinutes + '`');
             gameStartTimestamp = Date.now();
 
-            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + cSet];
+            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + rtdbSet || cSet];
+            g2 = state['t2_s' + cSet];
             let totalGamesInSet = g1 + g2;
 
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
@@ -485,7 +517,8 @@
 
             if (isSetOver) {
                 trigger6SecStats();
-                if (!state.isProSet && state.currentSet < 5) {
+                // Наскрізний автоперехід працює до 5 сетів для ВСІХ режимів (включаючи Pro-set та динамічні зміни)
+                if (state.currentSet < 5) {
                     state.currentSet++;
                     state.p1BreakPoints = 0; state.p2BreakPoints = 0;
                     state.gamesTimeHistory = [];
@@ -507,11 +540,9 @@
         window.toggleStatsAutomation = function(isChecked) {
             saveToHistory(state); state.isStatsAutomated = isChecked; set(matchRef, state);
         }
-
         window.toggleStatsManual = function() {
             state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state);
         }
-
         window.updateLogoText = function(val) {
             state.customLogoText = val; set(matchRef, state);
         }
@@ -527,7 +558,6 @@
         window.clearLogoData = function() {
             state.logoSrc = ""; state.customLogoText = ""; state.showLogo = false; set(matchRef, state);
         }
-
         window.undoAction = function() {
             triggerVibration();
             if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); }
@@ -568,7 +598,7 @@
         };
         window.toggleProSetMode = function(c) {
             saveToHistory(state); state.isProSet = c; if(c) state.isAmericano = false;
-            state.p1Index = 0; state.p2Index = 0; state.currentSet = 1; state.deuceCounter = 0; set(matchRef, state);
+            state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
         };
         window.changeDeuceStyle = function(s) {
             saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
@@ -596,15 +626,16 @@
         }
         
         window.resetMatch = function() {
-            if(confirm("Скинути матч вручную?")) {
+            if(confirm("Скинути матч вручну?")) {
                 if (statsTimeout) clearTimeout(statsTimeout);
                 gameStartTimestamp = Date.now();
                 set(matchRef, {
                     p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
                     p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
-                    isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
+                    isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
                     deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
                     isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
+                    showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com",
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
             }
