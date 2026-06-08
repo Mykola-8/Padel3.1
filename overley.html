@@ -16,7 +16,6 @@
             color: white;
         }
 
-        /* Зовнішній контейнер */
         .scoreboard-wrapper {
             display: flex;
             flex-direction: row;
@@ -48,17 +47,8 @@
             order: 1;
         }
 
-        .logo-panel.visible {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .logo-panel img {
-            max-width: 90%;
-            max-height: 85%;
-            object-fit: contain;
-            display: block;
-        }
+        .logo-panel.visible { transform: translateX(0); opacity: 1; }
+        .logo-panel img { max-width: 90%; max-height: 85%; object-fit: contain; display: block; }
 
         .logo-panel-text {
             font-size: 13px;
@@ -69,13 +59,7 @@
             line-height: 1.3;
             color: #ffffff;
         }
-
-        .logo-panel-text span {
-            font-size: 9px;
-            display: block;
-            letter-spacing: 2px;
-            color: #b28a55;
-        }
+        .logo-panel-text span { font-size: 9px; display: block; letter-spacing: 2px; color: #b28a55; }
 
         /* ===== ОСНОВНЕ ТАБЛО (БЕЗ РАМОК) ===== */
         .scoreboard-container {
@@ -96,10 +80,7 @@
             overflow: hidden;
         }
 
-        .team-row {
-            display: flex;
-            height: 48px;
-        }
+        .team-row { display: flex; height: 48px; }
 
         .team-names {
             width: 320px;
@@ -117,33 +98,12 @@
             flex-shrink: 0;
         }
 
-        .server-indicator {
-            color: #b28a55;
-            font-size: 20px;
-            visibility: hidden;
-            flex-shrink: 0;
-            margin-left: 10px;
-        }
+        .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
         .server-indicator.active { visibility: visible; }
 
-        .score-box {
-            width: 40px;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 26px;
-            font-weight: 800;
-        }
-
-        .set-past {
-            background-color: rgba(255,255,255,0.9);
-            color: #1a1a1a;
-        }
-
-        .set-current {
-            background-color: rgba(122,122,122,0.75);
-            color: #ffffff;
-        }
+        .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
+        .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
+        .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
 
         .points {
             background: linear-gradient(to bottom, #c69f66, #9c7a4b);
@@ -155,7 +115,7 @@
             align-items: center;
         }
 
-        /* ===== ПЛАШКА PRO-SET ПО ЦЕНТРУ ВЕРХУ ===== */
+        /* ===== ПЛАШКА PRO-SET ===== */
         .ribbon-proset {
             position: absolute;
             bottom: 100%;
@@ -182,13 +142,9 @@
             white-space: nowrap;
             padding: 0 12px;
         }
+        .ribbon-proset.visible { height: 22px; opacity: 1; }
 
-        .ribbon-proset.visible {
-            height: 22px;
-            opacity: 1;
-        }
-
-        /* ===== ПЛАШКИ ЗНИЗУ ПО РОЗМІРУ ТЕКСТУ ===== */
+        /* ===== ПЛАШКИ ЗНИЗУ ===== */
         .info-ribbons-container {
             position: absolute;
             top: 100%;
@@ -219,7 +175,6 @@
             box-sizing: border-box;
             white-space: nowrap;
         }
-
         .ribbon.visible { height: 28px; opacity: 1; padding: 0 15px; }
         .ribbon-matchpoint { background: rgba(185, 28, 28, 0.5); color: #fff; }
         .ribbon-setpoint { background: rgba(29, 78, 216, 0.5); color: #fff; }
@@ -228,14 +183,14 @@
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.5); color: #fff; font-weight: 900; }
         .ribbon-tiebreak { background: rgba(75, 85, 99, 0.5); color: #fff; }
 
-        /* ===== ТАБЛО СТАТИСТИКИ З АНІМАЦІЄЮ ВХОДУ/ВИХОДУ ===== */
+        /* ===== ТАБЛО СТАТИСТИКИ ПО ЦЕНТРУ ===== */
         .statistics-overlay {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -40%) scale(0.8);
-            width: 520px;
-            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.9), rgba(15, 15, 15, 0.9));
+            width: 540px;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.92), rgba(15, 15, 15, 0.92));
             border-radius: 8px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             font-family: 'Montserrat', sans-serif;
@@ -244,30 +199,18 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-            padding: 20px;
+            padding: 22px;
             box-sizing: border-box;
         }
-        .statistics-overlay.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-        .stats-header {
-            text-align: center;
-            font-size: 14px;
-            font-weight: 800;
-            color: #c69f66;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
+        .statistics-overlay.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        .stats-header { text-align: center; font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
         .stats-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
-        .stats-row { display: grid; grid-template-columns: 1fr 80px 1fr; align-items: center; text-align: center; }
+        .stats-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
         .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .stats-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .stats-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
-        .stats-val.gold { color: #c69f66; }
+        .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
 
         @keyframes gray-blink {
             0%, 100% { background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); color: white; }
@@ -332,14 +275,18 @@
                 <div class="stats-val" id="st-g2">0</div>
             </div>
             <div class="stats-row">
+                <div class="stats-val" id="st-bp1">0</div>
+                <div class="stats-label">Брейк-поінти</div>
+                <div class="stats-val" id="st-bp2">0</div>
+            </div>
+            <div class="stats-row">
                 <div class="stats-val" id="st-df1">0</div>
                 <div class="stats-label">Дабл фоли</div>
                 <div class="stats-val" id="st-df2">0</div>
             </div>
             <div class="stats-row">
-                <div class="stats-val gold" id="st-time-set">00:00</div>
-                <div class="stats-label">Час сету</div>
-                <div class="stats-val gold" id="st-time-match">00:00</div>
+                <div class="stats-val gold" id="st-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 5px; font-size: 16px;">0`</div>
+                <div class="stats-label" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
             </div>
         </div>
     </div>
@@ -362,27 +309,6 @@
         const db = getDatabase(app);
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0;
-
-        // Таймери
-        let totalSeconds = 0;
-        let setSeconds = 0;
-        let lastSetTracked = 1;
-
-        setInterval(() => {
-            totalSeconds++;
-            setSeconds++;
-            
-            const formatTime = (sec) => {
-                const m = Math.floor(sec / 60).toString().padStart(2, '0');
-                const s = (sec % 60).toString().padStart(2, '0');
-                return `${m}:${s}`;
-            };
-
-            const tMatch = document.getElementById('st-time-match');
-            const tSet = document.getElementById('st-time-set');
-            if(tMatch) tMatch.innerText = formatTime(totalSeconds);
-            if(tSet) tSet.innerText = formatTime(setSeconds);
-        }, 1000);
 
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
             const state = snapshot.val();
@@ -424,11 +350,6 @@
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
 
                 const activeSet = state.currentSet || 1;
-                if (activeSet !== lastSetTracked) {
-                    setSeconds = 0;
-                    lastSetTracked = activeSet;
-                }
-
                 const totalSetsToShow = state.isProSet ? 1 : 5;
 
                 for (let s = 1; s <= 5; s++) {
@@ -482,15 +403,21 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                // Виведення / Приховування статистики
+                // Відображення оновленої статистики
                 const stPanel = document.getElementById('statistics-panel');
                 if (state.showStatsOverlay) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('st-name2').innerText = state.p2name || "Команда B";
                     document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
                     document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
+                    document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0;
+                    document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
                     document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0;
                     document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+                    
+                    // Хронологія у вигляді 3` 7` 21`
+                    const historyArray = state.gamesTimeHistory || [];
+                    document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
                     stPanel.classList.add('visible');
                 } else {
                     stPanel.classList.remove('visible');
