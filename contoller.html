@@ -36,21 +36,27 @@
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
             transition: transform 0.05s linear, filter 0.05s ease;
         }
-        .score-btn:active { 
-            transform: scale(0.91); 
-            filter: brightness(0.75); 
-        }
+        .score-btn:active { transform: scale(0.91); filter: brightness(0.75); }
         .score-btn span { font-size: 42px; font-weight: 900; }
         
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
-        .status-badge { background: #2a2a2a; color: #c69f66; padding: 6px 10px; font-size: 12px; border-radius: 4px; font-weight: 700; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
         
+        /* ПЛАШКА СТАТУСУ З ПОПЕРЕДЖЕННЯМ ПРО GOLDEN POINT */
+        .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s; }
+        .status-badge.golden-alert { background: #ea580c !important; color: white !important; animation: pulse-border 1s infinite alternate; }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 4px #ea580c; }
+            100% { box-shadow: 0 0 15px #ff781f; }
+        }
+
+        .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #4b5563; }
 
+        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ ===== */
         .preview-scoreboard {
             border: 2px solid #b28a55;
             border-radius: 4px;
@@ -139,6 +145,8 @@
     <button class="btn btn-gray" style="width:100%; padding:12px;" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
     <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d;" onclick="toggleStatsManual()">📊 Переключити статистику вручну</button>
 
+    <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+
     <div class="card">
         <div class="row" style="gap:10px;">
             <input type="text" id="p1-name-input" placeholder="Команда 1">
@@ -169,7 +177,7 @@
             <input type="checkbox" id="mode-proset-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleProSetMode(this.checked)">
         </div>
         <div class="row" id="proset-limit-row" style="margin-top:10px; display:none;">
-            <span style="font-size:12px; color:#aaa;">Ліміт сету геймів (1-10):</span>
+            <span style="font-size:12px; color:#aaa;">Ліміт геймів сету (1-10):</span>
             <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateProSetLimit(this.value)">
         </div>
 
@@ -181,7 +189,7 @@
             <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
+            <span style="font-size:12px; color:#ddd;">2. Jeden Golden Point:</span>
             <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
@@ -190,10 +198,22 @@
         </div>
     </div>
 
-    <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+    <div class="card">
+        <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Панель Спонсора (Логотип / Текст):</div>
+        <div class="row">
+            <input type="text" id="custom-logo-text-input" placeholder="Введіть текст спонсора (напр. QATAR AIRWAYS)" oninput="updateLogoText(this.value)">
+        </div>
+        <div class="row">
+            <button class="btn" id="logo-visibility-btn" style="flex:1; background:#b28a55;" onclick="toggleLogoVisibility()">Показати / Сховати</button>
+            <button class="btn btn-red" onclick="clearLogoData()">Скинути все</button>
+        </div>
+        <label class="btn btn-gold" style="display: block; text-align: center; margin-top: 5px;">
+            📁 Завантажити графічне Лого (.PNG / .JPG)
+            <input type="file" accept="image/*" style="display:none" onchange="uploadLogoFile(event)">
+        </label>
+    </div>
 
     <div class="card">
-        <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Масштаб табла (OBS):</div>
         <div class="row">
             <input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" value="1" style="flex:1; accent-color:#b28a55;" oninput="updateScale(this.value)">
             <span id="scale-factor-display" style="font-size:14px; font-weight:700; min-width:45px; text-align:right; color:#c69f66;">1.00x</span>
@@ -244,7 +264,7 @@
             isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8,
             activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
             p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-            isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "",
+            isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
             animation: { team: 0, type: "", ts: 0 }
@@ -252,7 +272,7 @@
 
         let stateHistory = [];
         let statsTimeout = null;
-        let gameStartTimestamp = Date.now(); // Для фіксації тривалості кожного гейму
+        let gameStartTimestamp = Date.now();
 
         function saveToHistory(s) {
             stateHistory.push(JSON.parse(JSON.stringify(s)));
@@ -264,9 +284,7 @@
         }
 
         function trigger6SecStats() {
-            // Перевіряємо чи дозволена галочкою автоматизація виводу
             if (!state.isStatsAutomated) return;
-
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = true;
             set(matchRef, state);
@@ -291,9 +309,29 @@
                 document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
                 document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
                 document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+                document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
                 
                 if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
                     document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
+                }
+
+                // Логіка підсвічування GOLDEN POINT на пульті
+                const badge = document.getElementById('mode-status');
+                let isGoldenAlert = false;
+                if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
+                    if (state.deuceStyle === "one-golden") isGoldenAlert = true;
+                    if (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2) isGoldenAlert = true;
+                }
+
+                if (isGoldenAlert) {
+                    badge.innerText = "🔥 УВАГА: РОЗІГРАШ GOLDEN POINT! 🔥";
+                    badge.classList.add('golden-alert');
+                } else {
+                    badge.classList.remove('golden-alert');
+                    if (state.isAmericano) badge.innerText = `🔥 РЕЖИМ АМЕРИКАНО (В СУМІ: ${state.americanoLimit || 21})`;
+                    else if (state.isTiebreak) badge.innerText = "🔥 РЕЖИМ ТАЙБРЕЙКУ (ДО 7)";
+                    else if (state.isProSet) badge.innerText = `🏆 РЕЖИМ PRO-SET (ДО ${state.proSetLimit || 8} ГЕЙМІВ)`;
+                    else badge.innerText = `Режим: Сет ${state.currentSet || 1}`;
                 }
 
                 if (state.isAmericano || state.isTiebreak) {
@@ -305,6 +343,7 @@
                 }
 
                 document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Hide Stats (Активна)" : "Show Stats (Прихована)";
+                document.getElementById('logo-visibility-btn').innerText = state.showLogo ? "Сховати Спонсора" : "Показати Спонсора";
 
                 document.getElementById('pr-name1').innerText = state.p1name || "Команда 1";
                 document.getElementById('pr-name2').innerText = state.p2name || "Команда 2";
@@ -362,7 +401,7 @@
                     if (state.currentSet < 5) {
                         state.currentSet++;
                         state.p1Index = 0; state.p2Index = 0;
-                        state.gamesTimeHistory = []; // очищуємо історію геймів для нового сету
+                        state.gamesTimeHistory = [];
                         trigger6SecStats();
                     }
                 }
@@ -406,7 +445,6 @@
             state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
             let cSet = state.currentSet || 1;
             
-            // Фіксація брейк-поінту (якщо виграла приймаюча команда)
             const server = state.currentServer || 1;
             if (winningTeam !== server) {
                 if (winningTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1;
@@ -416,18 +454,14 @@
             if (winningTeam === 1) state[`t1_s${cSet}`] = (state[`t1_s${cSet}`] || 0) + 1;
             else state[`t2_s${cSet}`] = (state[`t2_s${cSet}`] || 0) + 1;
             
-            // Розрахунок часу тривалості гейму у форматі суми хвилин гейму
             const elapsedMinutes = Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000));
             if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
-            
-            // Додаємо новий гейм у вигляді "3`"
             state.gamesTimeHistory.push(`${elapsedMinutes}\``);
-            gameStartTimestamp = Date.now(); // Скидання відліку під наступний гейм
+            gameStartTimestamp = Date.now();
 
             let g1 = state[`t1_s${cSet}`]; let g2 = state[`t2_s${cSet}`];
             let totalGamesInSet = g1 + g2;
 
-            // СТАТИСТИКА: ПЕРШИЙ ГЕЙМ, А ПОТІМ ЧЕРЕЗ ОДИН (1, 3, 5, 7 і т.д.)
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
                 trigger6SecStats();
             }
@@ -453,8 +487,8 @@
                 trigger6SecStats();
                 if (!state.isProSet && state.currentSet < 5) {
                     state.currentSet++;
-                    state.p1BreakPoints = 0; state.p2BreakPoints = 0; // скидання брейків під новий сет
-                    state.gamesTimeHistory = []; // Хронологія нового сету з нуля
+                    state.p1BreakPoints = 0; state.p2BreakPoints = 0;
+                    state.gamesTimeHistory = [];
                     state[`t1_s${state.currentSet}`] = 0; state[`t2_s${state.currentSet}`] = 0;
                 }
             }
@@ -471,20 +505,33 @@
         }
 
         window.toggleStatsAutomation = function(isChecked) {
-            saveToHistory(state);
-            state.isStatsAutomated = isChecked;
-            set(matchRef, state);
+            saveToHistory(state); state.isStatsAutomated = isChecked; set(matchRef, state);
         }
 
         window.toggleStatsManual = function() {
             state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state);
         }
 
+        // Логіка Спонсора (Текст / Лого)
+        window.updateLogoText = function(val) {
+            state.customLogoText = val; set(matchRef, state);
+        }
+        window.toggleLogoVisibility = function() {
+            state.showLogo = !state.showLogo; set(matchRef, state);
+        }
+        window.uploadLogoFile = function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) { state.logoSrc = evt.target.result; set(matchRef, state); };
+            reader.readAsDataURL(file);
+        }
+        window.clearLogoData = function() {
+            state.logoSrc = ""; state.customLogoText = ""; state.showLogo = false; set(matchRef, state);
+        }
+
         window.undoAction = function() {
             triggerVibration();
-            if (stateHistory.length > 0) {
-                state = stateHistory.pop(); set(matchRef, state);
-            }
+            if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); }
         }
 
         function recalculateRibbons(s) {
@@ -549,7 +596,7 @@
                     p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                     isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
                     deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "",
+                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
             }
