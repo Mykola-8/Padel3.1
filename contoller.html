@@ -43,7 +43,6 @@
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         
-        /* ПЛАШКА СТАТУСУ З ПОПЕРЕДЖЕННЯМ ПРО GOLDEN POINT */
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s; }
         .status-badge.golden-alert { background: #ea580c !important; color: white !important; animation: pulse-border 1s infinite alternate; }
         
@@ -56,7 +55,6 @@
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #4b5563; }
 
-        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ ===== */
         .preview-scoreboard {
             border: 2px solid #b28a55;
             border-radius: 4px;
@@ -189,7 +187,7 @@
             <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">2. Jeden Golden Point:</span>
+            <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
             <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
@@ -315,7 +313,7 @@
                     document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
                 }
 
-                // Логіка підсвічування GOLDEN POINT на пульті
+                // Попередження про Golden Point на пульті
                 const badge = document.getElementById('mode-status');
                 let isGoldenAlert = false;
                 if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
@@ -359,10 +357,10 @@
                 }
 
                 for (let s = 1; s <= 5; s++) {
-                    const box1 = document.getElementById(`pr-t1-s${s}`);
-                    const box2 = document.getElementById(`pr-t2-s${s}`);
-                    box1.innerText = state[`t1_s${s}`] || 0;
-                    box2.innerText = state[`t2_s${s}`] || 0;
+                    const box1 = document.getElementById('pr-t1-s' + s);
+                    const box2 = document.getElementById('pr-t2-s' + s);
+                    box1.innerText = state['t1_s' + s] || 0;
+                    box2.innerText = state['t2_s' + s] || 0;
                     
                     if (s < state.currentSet) {
                         box1.className = 'preview-box p-past'; box2.className = 'preview-box p-past';
@@ -377,6 +375,8 @@
                 document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
                 document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
                 document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
+                document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
+                document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             }
         });
 
@@ -451,15 +451,15 @@
                 else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1;
             }
 
-            if (winningTeam === 1) state[`t1_s${cSet}`] = (state[`t1_s${cSet}`] || 0) + 1;
-            else state[`t2_s${cSet}`] = (state[`t2_s${cSet}`] || 0) + 1;
+            if (winningTeam === 1) state['t1_s' + cSet] = (state['t1_s' + cSet] || 0) + 1;
+            else state['t2_s' + cSet] = (state['t2_s' + cSet] || 0) + 1;
             
             const elapsedMinutes = Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000));
             if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
-            state.gamesTimeHistory.push(`${elapsedMinutes}\``);
+            state.gamesTimeHistory.push(elapsedMinutes + '`');
             gameStartTimestamp = Date.now();
 
-            let g1 = state[`t1_s${cSet}`]; let g2 = state[`t2_s${cSet}`];
+            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + cSet];
             let totalGamesInSet = g1 + g2;
 
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
@@ -489,7 +489,7 @@
                     state.currentSet++;
                     state.p1BreakPoints = 0; state.p2BreakPoints = 0;
                     state.gamesTimeHistory = [];
-                    state[`t1_s${state.currentSet}`] = 0; state[`t2_s${state.currentSet}`] = 0;
+                    state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
                 }
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -512,7 +512,6 @@
             state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state);
         }
 
-        // Логіка Спонсора (Текст / Лого)
         window.updateLogoText = function(val) {
             state.customLogoText = val; set(matchRef, state);
         }
@@ -537,7 +536,7 @@
         function recalculateRibbons(s) {
             if (s.isAmericano) { s.activeMatchRibbon = "NONE"; return; }
             let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
-            let cSet = s.currentSet || 1; let g1 = s[`t1_s${cSet}`] || 0; let g2 = s[`t2_s${cSet}`] || 0;
+            let cSet = s.currentSet || 1; let g1 = s['t1_s' + cSet] || 0; let g2 = s['t2_s' + cSet] || 0;
             let isGolden = (!s.isTiebreak && p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
             let p1GP = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || isGolden);
             let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
@@ -574,8 +573,17 @@
         window.changeDeuceStyle = function(s) {
             saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
         }
-        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v) || 21; set(matchRef, state); };
-        window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v) || 8; set(matchRef, state); };
+        window.updateAmericanoLimit = function(v) { 
+            let parsed = parseInt(v) || 21;
+            if (parsed < 1) parsed = 1; if (parsed > 30) parsed = 30;
+            state.americanoLimit = parsed; set(matchRef, state); 
+        };
+        window.updateProSetLimit = function(v) { 
+            let parsed = parseInt(v) || 8;
+            if (parsed < 1) parsed = 1; if (parsed > 10) parsed = 10;
+            state.proSetLimit = parsed;
+            recalculateRibbons(state); set(matchRef, state); 
+        };
         window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
         window.updatePosition = function() {
             state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
@@ -588,7 +596,7 @@
         }
         
         window.resetMatch = function() {
-            if(confirm("Скинути матч вручну?")) {
+            if(confirm("Скинути матч вручную?")) {
                 if (statsTimeout) clearTimeout(statsTimeout);
                 gameStartTimestamp = Date.now();
                 set(matchRef, {
