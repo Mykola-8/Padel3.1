@@ -115,7 +115,7 @@
             align-items: center;
         }
 
-        /* ===== ПЛАШКА PRO-SET ===== */
+        /* ===== ПЛАШКА PRO-SET ПО ЦЕНТРУ ===== */
         .ribbon-proset {
             position: absolute;
             bottom: 100%;
@@ -348,7 +348,6 @@
 
                 document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
 
-                // Відображення логотипу або кастомного тексту спонсора
                 if (state.logoSrc) {
                     document.getElementById('logo-text-node').style.display = 'none';
                     const imgNode = document.getElementById('logo-img-node');
@@ -373,7 +372,6 @@
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
 
                 const activeSet = state.currentSet || 1;
-                // Обнулення часу при переході на новий сет
                 if (activeSet !== lastSetTracked) {
                     setSeconds = 0;
                     lastSetTracked = activeSet;
