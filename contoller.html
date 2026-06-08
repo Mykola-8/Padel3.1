@@ -142,6 +142,8 @@
     <button class="btn btn-orange" style="width:100%; padding:12px;" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
     <button class="btn btn-gray" style="width:100%; padding:12px;" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
     <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d;" onclick="toggleStatsManual()">📊 Переключити статистику вручну</button>
+    
+    <button class="btn btn-red" style="width:100%; padding:14px; font-size:13px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ВИВЕСТИ ФІНАЛЬНУ СТАТИСТИКУ)</button>
 
     <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
@@ -156,8 +158,9 @@
             <span style="font-size:13px; font-weight:700;">Показувати QR-код (Куток):</span>
             <input type="checkbox" id="mode-show-qr-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleQrCodeVisibility(this.checked)">
         </div>
-        <div class="row" id="qr-url-row" style="margin-top:8px; display:none;">
-            <input type="text" id="qr-code-url-input" placeholder="Посилання для QR-коду" oninput="updateQrCodeUrl(this.value)">
+        <div id="qr-url-row" style="margin-top:8px; display:none; flex-direction:column; gap:8px;">
+            <input type="text" id="qr-code-url-input" placeholder="Посилання для QR-коду">
+            <input type="text" id="qr-code-desc-input" placeholder="Опис під QR-кодом (напр. Наш Instagram)" oninput="updateQrDescription(this.value)">
         </div>
     </div>
 
@@ -279,7 +282,7 @@
             activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
             p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
             isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
-            showMainBoard: true, showQrCode: false, qrCodeUrl: "https://google.com",
+            showMainBoard: true, showQrCode: false, qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
             animation: { team: 0, type: "", ts: 0 }
@@ -299,7 +302,7 @@
         }
 
         function trigger6SecStats() {
-            if (!state.isStatsAutomated) return;
+            if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = true;
             set(matchRef, state);
@@ -329,6 +332,7 @@
                 document.getElementById('mode-show-board-checkbox').checked = state.showMainBoard !== false;
                 document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
                 document.getElementById('qr-code-url-input').value = state.qrCodeUrl || "";
+                document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
                 document.getElementById('qr-url-row').style.display = state.showQrCode ? 'flex' : 'none';
 
                 if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
@@ -342,11 +346,18 @@
                     if (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2) isGoldenAlert = true;
                 }
 
-                if (isGoldenAlert) {
+                if (state.isMatchFinished) {
+                    badge.innerText = "🏁 МАТЧ ОФІЦІЙНО ЗАВЕРШЕНО";
+                    badge.className = "status-badge";
+                    badge.style.background = "#b91c1c";
+                    badge.style.color = "white";
+                } else if (isGoldenAlert) {
                     badge.innerText = "🔥 УВАГА: РОЗІГРАШ GOLDEN POINT! 🔥";
                     badge.classList.add('golden-alert');
                 } else {
                     badge.classList.remove('golden-alert');
+                    badge.style.background = "#2a2a2a";
+                    badge.style.color = "#c69f66";
                     if (state.isAmericano) badge.innerText = `🔥 РЕЖИМ АМЕРИКАНО (В СУМІ: ${state.americanoLimit || 21})`;
                     else if (state.isTiebreak) badge.innerText = "🔥 РЕЖИМ ТАЙБРЕЙКУ (ДО 7)";
                     else if (state.isProSet) badge.innerText = `🏆 РЕЖИМ PRO-SET (ДО ${state.proSetLimit || 8} ГЕЙМІВ)`;
@@ -410,8 +421,23 @@
         window.updateQrCodeUrl = function(val) {
             state.qrCodeUrl = val; set(matchRef, state);
         }
+        window.updateQrDescription = function(val) {
+            state.qrCodeDescription = val; set(matchRef, state);
+        }
+
+        // Логіка кінця матчу
+        window.finishMatchPro = function() {
+            triggerVibration();
+            if(confirm("Ви впевнені, що хочете завершити матч та зафіксувати фінальні результати?")) {
+                saveToHistory(state);
+                state.isMatchFinished = true;
+                state.showStatsOverlay = true; // Фінальний екран виводиться безстроково
+                set(matchRef, state);
+            }
+        }
 
         window.scorePoint = function(team) {
+            if (state.isMatchFinished) return;
             triggerVibration(); saveToHistory(state);
             window.scorePointWithoutHistorySave(team);
         }
@@ -528,6 +554,7 @@
         }
 
         window.triggerServerDoubleFault = function() {
+            if (state.isMatchFinished) return;
             triggerVibration(); saveToHistory(state);
             const server = state.currentServer || 1;
             if (server === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1;
@@ -568,7 +595,7 @@
             let cSet = s.currentSet || 1; let g1 = s['t1_s' + cSet] || 0; let g2 = s['t2_s' + cSet] || 0;
             let isGolden = (!s.isTiebreak && p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
             let p1GP = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || isGolden);
-            let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
+            let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (s.p2Index === 3 && s.p1Index < 3) || s.p2Index === 4 || isGolden);
             if (!p1GP && !p2GP) { s.activeMatchRibbon = "NONE"; return; }
             
             let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
@@ -634,7 +661,7 @@
                     isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
                     deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
                     isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
-                    showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com",
+                    showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
             }
