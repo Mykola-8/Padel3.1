@@ -19,7 +19,6 @@
         .btn-blue { background: #1d4ed8; }
         .btn-red { background: #b91c1c; }
         
-        /* СТИЛЬ АНІМАЦІЇ ДЛЯ ВЕЛИКИХ КНОПОК РОЗІГРАШУ */
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { 
             height: 140px; 
@@ -37,7 +36,6 @@
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
             transition: transform 0.05s linear, filter 0.05s ease;
         }
-        /* Візуальний ефект натискання */
         .score-btn:active { 
             transform: scale(0.91); 
             filter: brightness(0.75); 
@@ -53,7 +51,7 @@
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #4b5563; }
 
-        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ (УСІ ЗИГРАНІ СЕТИ Й ОЧКИ РОЗІГРАШУ) ===== */
+        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ ===== */
         .preview-scoreboard {
             border: 2px solid #b28a55;
             border-radius: 4px;
@@ -100,7 +98,6 @@
 
     <h2>Пульт Padel Pro (Master)</h2>
 
-    <!-- ЖИВИЙ ДУБЛІКАТ ЕКРАНУ НА ПУЛЬТІ -->
     <div class="preview-scoreboard">
         <div class="preview-row">
             <div class="preview-name-block">
@@ -128,7 +125,6 @@
         </div>
     </div>
 
-    <!-- ОСНОВНІ КНОПКИ КЕРУВАННЯ ПЕРЕНЕСЕНІ ПІД ДУБЛІКАТ ЕКРАНУ -->
     <div class="score-grid">
         <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)">
             <small id="lbl-p1">Команда 1</small>
@@ -152,10 +148,9 @@
         <button class="btn btn-gold" style="width:100%" onclick="updateNames()">Оновити назви</button>
     </div>
 
-    <!-- Режими системи -->
     <div class="card">
         <div class="switch-row">
-            <span style="font-size:13px; font-weight:700;">Режим Американо (В сумі 21):</span>
+            <span style="font-size:13px; font-weight:700;">Режим Американо (В сумі):</span>
             <input type="checkbox" id="mode-americano-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleAmericanoMode(this.checked)">
         </div>
         <div class="row" id="americano-limit-row" style="margin-top:10px; display:none;">
@@ -251,6 +246,8 @@
         };
 
         let stateHistory = [];
+        let statsTimeout = null;
+
         function saveToHistory(s) {
             stateHistory.push(JSON.parse(JSON.stringify(s)));
             if (stateHistory.length > 30) stateHistory.shift();
@@ -258,6 +255,23 @@
 
         function triggerVibration() {
             if (navigator.vibrate) navigator.vibrate(40);
+        }
+
+        function trigger6SecStats() {
+            if (statsTimeout) clearTimeout(statsTimeout);
+            state.showStatsOverlay = true;
+            set(matchRef, state);
+
+            // Автоматичне приховування закриттям через 6 секунд
+            statsTimeout = setTimeout(() => {
+                onValue(matchRef, (snap) => {
+                    let current = snap.val();
+                    if (current && current.showStatsOverlay) {
+                        current.showStatsOverlay = false;
+                        set(matchRef, current);
+                    }
+                }, { onlyOnce: true });
+            }, 6000);
         }
 
         onValue(matchRef, (snapshot) => {
@@ -273,7 +287,6 @@
                     document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
                 }
 
-                // Вивід на великі кнопки
                 if (state.isAmericano || state.isTiebreak) {
                     document.getElementById('view-p1-pts').innerText = state.p1Index;
                     document.getElementById('view-p2-pts').innerText = state.p2Index;
@@ -284,9 +297,6 @@
 
                 document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Hide Stats (Активна)" : "Show Stats (Прихована)";
 
-                // ========================================================
-                // ПОВНИЙ ДУБЛІКАТ ВСІХ СЕТІВ ТA ОЧОК В КOНТРОЛЕРІ[cite: 1]
-                // ========================================================
                 document.getElementById('pr-name1').innerText = state.p1name || "Команда 1";
                 document.getElementById('pr-name2').innerText = state.p2name || "Команда 2";
                 document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
@@ -300,7 +310,6 @@
                     document.getElementById('pr-t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
 
-                // Заповнення дубліката по всім 5 сетам незалежно від режиму[cite: 1]
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`pr-t1-s${s}`);
                     const box2 = document.getElementById(`pr-t2-s${s}`);
@@ -318,6 +327,8 @@
 
                 document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
+                document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
+                document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             }
         });
 
@@ -331,7 +342,22 @@
             if (state.isAmericano) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 let total = state.p1Index + state.p2Index;
-                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                
+                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) {
+                    state.currentServer = state.currentServer === 1 ? 2 : 1;
+                }
+
+                // ЛОГІКА АМЕРИКАНО З ЛІМІТОМ ОЧОК В СУМІ
+                let limit = parseInt(state.americanoLimit) || 21;
+                if (total >= limit) {
+                    state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
+                    // Замість завершення переходимо на новий сет
+                    if (state.currentSet < 5) {
+                        state.currentSet++;
+                        state.p1Index = 0; state.p2Index = 0;
+                        trigger6SecStats();
+                    }
+                }
             } else if (state.isTiebreak) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
@@ -378,11 +404,9 @@
             let g1 = state[`t1_s${cSet}`]; let g2 = state[`t2_s${cSet}`];
             let totalGamesInSet = g1 + g2;
 
-            // АВТОМАТИЧНИЙ РОЗРАХУНОК ОВЕРЛЕЮ СТАТИСТИКИ (Після 1 гейму і кожні два гейми)
+            // СТАТИСТИКА: ПЕРШИЙ ГЕЙМ, А ПОТІМ ЧЕРЕЗ ОДИН (1, 3, 5, 7, 9 і т.д.)
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
-                state.showStatsOverlay = true;
-            } else {
-                state.showStatsOverlay = false;
+                trigger6SecStats();
             }
 
             let isSetOver = false;
@@ -400,13 +424,11 @@
             
             state.animation = { team: winningTeam, type: isSetOver ? 'set' : 'game', ts: Date.now() };
 
-            // АВТОМАТИЧНИЙ ПЕРЕХІД НА НАСТУПНИЙ СЕТ У ВСІХ РЕЖИМАХ[cite: 2]
             if (isSetOver) {
-                state.showStatsOverlay = true; // Завжди показуємо в кінці сету
+                trigger6SecStats(); // Завжди показуємо під час завершення сету
                 if (!state.isProSet && state.currentSet < 5) {
                     state.currentSet++;
-                    state[`t1_s${state.currentSet}`] = 0;
-                    state[`t2_s${state.currentSet}`] = 0;
+                    state[`t1_s${state.currentSet}`] = 0; state[`t2_s${state.currentSet}`] = 0;
                 }
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -475,11 +497,12 @@
         }
         
         window.resetMatch = function() {
-            if(confirm("Скинути матч?")) {
+            if(confirm("Скинути матч вручну?")) {
+                if (statsTimeout) clearTimeout(statsTimeout);
                 set(matchRef, {
                     p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
                     p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
-                    isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8, activeMatchRibbon: "NONE",
+                    isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
                     deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, showStatsOverlay: false, showLogo: false, logoSrc: "",
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
