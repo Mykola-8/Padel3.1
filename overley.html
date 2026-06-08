@@ -1,351 +1,47 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Padel Overlay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            background: transparent !important;
-            background-color: transparent !important;
-            margin: 0; padding: 0; overflow: hidden;
-            font-family: 'Montserrat', sans-serif; color: white;
+        body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .scoreboard-container { 
+            background: rgba(26, 26, 26, 0.85); 
+            border: 2px solid #b28a55; 
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            position: relative;
         }
- 
-        /* ===== WRAPPER — масштабується і переміщується ===== */
-        .scoreboard-wrapper {
-            display: flex; flex-direction: row; align-items: flex-start;
-            width: max-content; transform-origin: top left;
-            transition: transform 0.2s ease;
-            filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.6));
-            position: absolute; top: 20px; left: 20px;
+        .pro-set-label { font-size: 10px; color: #c69f66; text-transform: uppercase; margin-bottom: 5px; }
+        #status-ticker {
+            height: 0; overflow: hidden; transition: height 0.3s;
+            background: #b28a55; text-align: center; font-weight: bold;
         }
- 
-        /* ===== ЛОГОТИП (висувається зліва) ===== */
-        .logo-panel {
-            transform: translateX(100%); opacity: 0;
-            height: 98px; width: 120px;
-            background: rgba(0,0,0,0.55); border: 2px solid #b28a55; border-right: none;
-            border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; flex-shrink: 0; box-sizing: border-box; order: 1;
-            transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.4s ease;
-        }
-        .logo-panel.visible { transform: translateX(0); opacity: 1; }
-        .logo-panel img { max-width: 90%; max-height: 85%; object-fit: contain; display: block; }
-        .logo-panel-text { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.3; color: #fff; }
-        .logo-panel-text span { font-size: 9px; display: block; letter-spacing: 2px; color: #b28a55; }
- 
-        /* ===== ОСНОВНЕ ТАБЛО ===== */
-        .scoreboard-container { display: flex; flex-direction: column; width: max-content; order: 2; }
- 
-        /* Шапка режиму зверху (Pro-Set) */
-        .mode-header {
-            display: none; height: 22px;
-            background: rgba(178,138,85,0.9); border: 2px solid #b28a55; border-bottom: none;
-            border-radius: 4px 4px 0 0; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
-            color: #fff; padding: 0 12px; white-space: nowrap;
-        }
-        .mode-header.visible { display: flex; }
- 
-        .main-board {
-            display: inline-flex; flex-direction: column;
-            background-color: rgba(10,10,10,0.35);
-            border: 2px solid #b28a55; border-radius: 4px;
-        }
-        .mode-header.visible + .main-board { border-radius: 0 0 4px 4px; border-top: none; }
- 
-        .team-row { display: flex; height: 48px; border-bottom: 1px solid rgba(255,255,255,0.15); }
-        .team-row:last-child { border-bottom: none; }
- 
-        .team-names {
-            width: 320px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; font-size: 22px; font-weight: 800; letter-spacing: 0.5px;
-            background: linear-gradient(to bottom, rgba(30,30,30,0.40), rgba(15,15,15,0.40));
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0;
-        }
-        .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
-        .server-indicator.active { visibility: visible; }
- 
-        .score-box {
-            width: 40px; display: none; justify-content: center; align-items: center;
-            font-size: 26px; font-weight: 800; border-left: 2px solid rgba(255,255,255,0.15);
-        }
-        .set-past  { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
-        .set-current { background-color: rgba(122,122,122,0.75); color: #fff; }
-        .points {
-            background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff;
-            width: 65px; border-left: 2px solid #5a4528; font-size: 24px;
-            display: flex; justify-content: center; align-items: center;
-        }
- 
-        /* ===== ПАНЕЛЬ СТАТИСТИКИ — по центру екрану ===== */
-        .stats-panel {
-            position: fixed; z-index: 200;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.75);
-            background: rgba(10,10,10,0.88);
-            border: 2px solid #b28a55; border-radius: 10px;
-            padding: 20px 28px; min-width: 280px;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.34,1.56,0.64,1),
-                        transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-            font-size: 13px; line-height: 1.8;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(178,138,85,0.2);
-        }
-        .stats-panel.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-        .stats-panel.hiding {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.85) translateY(12px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
-        }
-        .stats-title { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #b28a55; margin-bottom: 10px; }
-        .stats-section-label { font-size: 10px; color: #b28a55; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 8px 0 4px; border-top: 1px solid #333; padding-top: 8px; }
-        .stats-row { display: flex; justify-content: space-between; gap: 24px; }
-        .stats-label { color: #999; font-size: 12px; }
-        .stats-value { font-weight: 700; color: #fff; font-size: 13px; font-variant-numeric: tabular-nums; }
-        .stats-total { color: #c69f66; font-weight: 800; }
     </style>
 </head>
 <body>
- 
-    <div class="scoreboard-wrapper" id="main-scoreboard">
- 
-        <div class="logo-panel" id="logo-panel">
-            <div class="logo-panel-text" id="logo-text-node">QATAR<br><span>AIRWAYS</span></div>
-            <img id="logo-img-node" src="" style="display:none;">
-        </div>
- 
-        <div class="scoreboard-container">
-            <div class="mode-header" id="mode-header"></div>
-            <div class="main-board">
-                <div class="team-row" id="row-team-1">
-                    <div class="team-names" id="block-anim-1">
-                        <span id="name-display-t1">КОМАНДА A</span>
-                        <span class="server-indicator" id="srv1">🎾</span>
-                    </div>
-                    <div class="score-box" id="t1-s1">0</div>
-                    <div class="score-box" id="t1-s2">0</div>
-                    <div class="score-box" id="t1-s3">0</div>
-                    <div class="score-box" id="t1-s4">0</div>
-                    <div class="score-box" id="t1-s5">0</div>
-                    <div class="score-box points" id="t1-pts">0</div>
-                </div>
-                <div class="team-row" id="row-team-2">
-                    <div class="team-names" id="block-anim-2">
-                        <span id="name-display-t2">КОМАНДА B</span>
-                        <span class="server-indicator" id="srv2">🎾</span>
-                    </div>
-                    <div class="score-box" id="t2-s1">0</div>
-                    <div class="score-box" id="t2-s2">0</div>
-                    <div class="score-box" id="t2-s3">0</div>
-                    <div class="score-box" id="t2-s4">0</div>
-                    <div class="score-box" id="t2-s5">0</div>
-                    <div class="score-box points" id="t2-pts">0</div>
-                </div>
-            </div>
-        </div>
- 
+    <div class="scoreboard-container">
+        <div class="pro-set-label">PRO-SET</div>
+        <div id="main-board"> ... Табло ... </div>
+        <div id="status-ticker"></div>
     </div>
- 
-    <!-- ПАНЕЛЬ СТАТИСТИКИ — поза wrapper щоб не масштабувалась -->
-    <div class="stats-panel" id="stats-panel">
-        <div class="stats-title">⏱ ЧАС ГЕЙМІВ</div>
-        <div id="stats-body"></div>
-    </div>
- 
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
- 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
-            authDomain: "padel-2-gurskyj.firebaseapp.com",
-            databaseURL: "https://padel-2-gurskyj-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "padel-2-gurskyj",
-            storageBucket: "padel-2-gurskyj.firebasestorage.app",
-            messagingSenderId: "671715970020",
-            appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
-        };
- 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const pointSequence = ['0', '15', '30', '40', 'AD'];
-        let lastAnimationTs = 0;
-        let lastStatsTs = 0;
-        let statsHideTimer = null;
- 
-        // Формат часу: "7'9" або "4'" (хвилини + секунди компактно)
-        function fmtTime(ms) {
-            if (!ms || ms <= 0) return "0'";
-            const totalSec = Math.floor(ms / 1000);
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
-            if (s === 0) return `${m}'`;
-            return `${m}'${s}`;
-        }
- 
-        // Показ панелі статистики
-        function showStatsPanel(state) {
-            const panel  = document.getElementById('stats-panel');
-            const body   = document.getElementById('stats-body');
- 
-            // gameTimes — масив ms геймів ПОТОЧНОГО сету
-            const gameTimes = Array.isArray(state.gameTimes) ? state.gameTimes : [];
-            // setTimes — масив { games:[...ms], total:ms } ЗАВЕРШЕНИХ сетів
-            const setTimes  = Array.isArray(state.setTimes)  ? state.setTimes  : [];
- 
-            let html = '';
- 
-            // --- Поточний сет: гейми + сума ---
-            if (gameTimes.length > 0) {
-                const currentSetNum = (state.currentSet || 1);
-                html += `<div class="stats-section-label">Сет ${currentSetNum} — поточний</div>`;
-                gameTimes.forEach((ms, i) => {
-                    html += `<div class="stats-row">
-                        <span class="stats-label">Гейм ${i + 1}</span>
-                        <span class="stats-value">${fmtTime(ms)}</span>
-                    </div>`;
-                });
-                const runningTotal = gameTimes.reduce((a, b) => a + b, 0);
-                html += `<div class="stats-row" style="margin-top:4px;">
-                    <span class="stats-label stats-total">Разом</span>
-                    <span class="stats-value stats-total">${fmtTime(runningTotal)}</span>
-                </div>`;
-            }
- 
-            // --- Завершені сети ---
-            if (setTimes.length > 0) {
-                setTimes.forEach((st, idx) => {
-                    const games = Array.isArray(st.games) ? st.games : [];
-                    const total = st.total || 0;
-                    html += `<div class="stats-section-label">Сет ${idx + 1} — завершено</div>`;
-                    games.forEach((ms, i) => {
-                        html += `<div class="stats-row">
-                            <span class="stats-label">Гейм ${i + 1}</span>
-                            <span class="stats-value">${fmtTime(ms)}</span>
-                        </div>`;
-                    });
-                    html += `<div class="stats-row" style="margin-top:4px;">
-                        <span class="stats-label stats-total">Разом</span>
-                        <span class="stats-value stats-total">${fmtTime(total)}</span>
-                    </div>`;
-                });
-            }
- 
-            if (!html) html = `<span style="color:#555;font-size:12px;">Ще немає даних</span>`;
-            body.innerHTML = html;
- 
-            // Анімований вхід
-            panel.classList.remove('hiding');
-            panel.classList.add('visible');
- 
-            if (statsHideTimer) clearTimeout(statsHideTimer);
-            statsHideTimer = setTimeout(() => {
-                panel.classList.add('hiding');
-                setTimeout(() => {
-                    panel.classList.remove('visible');
-                    panel.classList.remove('hiding');
-                }, 380);
-            }, 7000);
-        }
- 
+        // Логіка оновлення з Firebase
         onValue(ref(db, "padel/standalone_board"), (snapshot) => {
             const state = snapshot.val();
-            if (!state) return;
- 
-            document.getElementById('name-display-t1').innerText = state.p1name || "Команда A";
-            document.getElementById('name-display-t2').innerText = state.p2name || "Команда B";
- 
-            // Позиція і масштаб
-            const sc = state.scale || 1;
-            document.getElementById('main-scoreboard').style.transform = `scale(${sc})`;
-            document.getElementById('main-scoreboard').style.left = (state.posX || 0) + 'px';
-            document.getElementById('main-scoreboard').style.top  = (state.posY || 0) + 'px';
- 
-            // Шапка режиму
-            const m = state.gameMode || 'classic';
-            const modeHeader = document.getElementById('mode-header');
-            if (m === 'proset') {
-                const dl = state.prosetDeuce === 'sudden' ? 'SUDDEN' : 'ADV';
-                modeHeader.textContent = `PRO-SET  ${state.prosetLimit || 8}  ·  ${dl}`;
-                modeHeader.classList.add('visible');
+            const ticker = document.getElementById('status-ticker');
+            
+            // Логіка появи написів
+            if (state.p1Index === 3 && state.p2Index === 3) {
+                ticker.innerText = "DEUCE / GOLDEN POINT";
+                ticker.style.height = "30px";
+            } else if (state.isTiebreak) {
+                ticker.innerText = "TIE-BREAK";
+                ticker.style.height = "30px";
             } else {
-                modeHeader.textContent = '';
-                modeHeader.classList.remove('visible');
-            }
- 
-            // Логотип
-            const logoPanel = document.getElementById('logo-panel');
-            logoPanel.classList.toggle('visible', !!state.showLogo);
-            if (state.logoSrc) {
-                document.getElementById('logo-text-node').style.display = 'none';
-                document.getElementById('logo-img-node').src = state.logoSrc;
-                document.getElementById('logo-img-node').style.display = 'block';
-            } else {
-                document.getElementById('logo-text-node').innerHTML = "QATAR<br><span>AIRWAYS</span>";
-                document.getElementById('logo-text-node').style.display = 'block';
-                document.getElementById('logo-img-node').style.display = 'none';
-            }
- 
-            // Очки
-            if (state.isTiebreak) {
-                document.getElementById('t1-pts').innerText = state.p1Index;
-                document.getElementById('t2-pts').innerText = state.p2Index;
-            } else {
-                document.getElementById('t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                document.getElementById('t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
-            }
- 
-            document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
-            document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
- 
-            // Сети
-            const activeSet = state.currentSet || 1;
-            for (let s = 1; s <= 5; s++) {
-                const b1 = document.getElementById(`t1-s${s}`);
-                const b2 = document.getElementById(`t2-s${s}`);
-                const g1 = parseInt(state[`t1_s${s}`]) || 0;
-                const g2 = parseInt(state[`t2_s${s}`]) || 0;
-                if (s < activeSet) {
-                    b1.style.display = 'flex'; b1.className = 'score-box set-past';  b1.innerText = g1;
-                    b2.style.display = 'flex'; b2.className = 'score-box set-past';  b2.innerText = g2;
-                } else if (s === activeSet) {
-                    if (g1 > 0 || g2 > 0) {
-                        b1.style.display = 'flex'; b1.className = 'score-box set-current'; b1.innerText = g1;
-                        b2.style.display = 'flex'; b2.className = 'score-box set-current'; b2.innerText = g2;
-                    } else { b1.style.display = 'none'; b2.style.display = 'none'; }
-                } else { b1.style.display = 'none'; b2.style.display = 'none'; }
-            }
- 
-            // Анімація спалаху
-            if (state.animation && state.animation.ts !== lastAnimationTs) {
-                lastAnimationTs = state.animation.ts;
-                const tgt = document.getElementById(`block-anim-${state.animation.team}`);
-                if (tgt) {
-                    tgt.style.transition = 'none';
-                    tgt.style.background = state.animation.type === 'set' ? '#ffffff' : '#c69f66';
-                    if (state.animation.type === 'set') tgt.style.color = '#1a1a1a';
-                    setTimeout(() => {
-                        tgt.style.transition = 'background 0.8s ease, color 0.8s ease';
-                        tgt.style.background = 'linear-gradient(to bottom, rgba(30,30,30,0.60), rgba(15,15,15,0.60))';
-                        tgt.style.color = 'white';
-                    }, 600);
-                }
-            }
- 
-            // Статистика — тригер
-            if (state.statsTs && state.statsTs !== lastStatsTs) {
-                lastStatsTs = state.statsTs;
-                showStatsPanel(state);
+                ticker.style.height = "0";
             }
         });
     </script>
 </body>
 </html>
- 
