@@ -51,7 +51,6 @@
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #4b5563; }
 
-        /* ===== ПОВНИЙ ДУБЛІКАТ ЕКРАНУ ===== */
         .preview-scoreboard {
             border: 2px solid #b28a55;
             border-radius: 4px;
@@ -149,6 +148,11 @@
     </div>
 
     <div class="card">
+        <div class="switch-row" style="background: #2563eb; padding: 8px; border-radius: 6px; margin-bottom: 10px;">
+            <span style="font-size:13px; font-weight:800; color: white;">Включити авто-статистику геймів:</span>
+            <input type="checkbox" id="mode-enable-stats-checkbox" style="width:22px; height:22px; accent-color:#15803d;" checked onchange="toggleStatsAutomation(this.checked)">
+        </div>
+
         <div class="switch-row">
             <span style="font-size:13px; font-weight:700;">Режим Американо (В сумі):</span>
             <input type="checkbox" id="mode-americano-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleAmericanoMode(this.checked)">
@@ -165,7 +169,7 @@
             <input type="checkbox" id="mode-proset-checkbox" style="width:20px; height:20px; accent-color:#b28a55;" onchange="toggleProSetMode(this.checked)">
         </div>
         <div class="row" id="proset-limit-row" style="margin-top:10px; display:none;">
-            <span style="font-size:12px; color:#aaa;">Ліміт геймів (1-10):</span>
+            <span style="font-size:12px; color:#aaa;">Ліміт сету геймів (1-10):</span>
             <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateProSetLimit(this.value)">
         </div>
 
@@ -239,7 +243,8 @@
             p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: 1, posX: 0, posY: 0,
             isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8,
             activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
-            p1DoubleFaults: 0, p2DoubleFaults: 0, showStatsOverlay: false, showLogo: false, logoSrc: "",
+            p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
+            isStatsAutomated: true, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "",
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
             animation: { team: 0, type: "", ts: 0 }
@@ -247,6 +252,7 @@
 
         let stateHistory = [];
         let statsTimeout = null;
+        let gameStartTimestamp = Date.now(); // Для фіксації тривалості кожного гейму
 
         function saveToHistory(s) {
             stateHistory.push(JSON.parse(JSON.stringify(s)));
@@ -258,11 +264,13 @@
         }
 
         function trigger6SecStats() {
+            // Перевіряємо чи дозволена галочкою автоматизація виводу
+            if (!state.isStatsAutomated) return;
+
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = true;
             set(matchRef, state);
 
-            // Автоматичне приховування закриттям через 6 секунд
             statsTimeout = setTimeout(() => {
                 onValue(matchRef, (snap) => {
                     let current = snap.val();
@@ -282,6 +290,7 @@
                 document.getElementById('lbl-p2').innerText = state.p2name;
                 document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
                 document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
+                document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
                 
                 if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
                     document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
@@ -347,14 +356,13 @@
                     state.currentServer = state.currentServer === 1 ? 2 : 1;
                 }
 
-                // ЛОГІКА АМЕРИКАНО З ЛІМІТОМ ОЧОК В СУМІ
                 let limit = parseInt(state.americanoLimit) || 21;
                 if (total >= limit) {
                     state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
-                    // Замість завершення переходимо на новий сет
                     if (state.currentSet < 5) {
                         state.currentSet++;
                         state.p1Index = 0; state.p2Index = 0;
+                        state.gamesTimeHistory = []; // очищуємо історію геймів для нового сету
                         trigger6SecStats();
                     }
                 }
@@ -398,13 +406,28 @@
             state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
             let cSet = state.currentSet || 1;
             
+            // Фіксація брейк-поінту (якщо виграла приймаюча команда)
+            const server = state.currentServer || 1;
+            if (winningTeam !== server) {
+                if (winningTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1;
+                else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1;
+            }
+
             if (winningTeam === 1) state[`t1_s${cSet}`] = (state[`t1_s${cSet}`] || 0) + 1;
             else state[`t2_s${cSet}`] = (state[`t2_s${cSet}`] || 0) + 1;
             
+            // Розрахунок часу тривалості гейму у форматі суми хвилин гейму
+            const elapsedMinutes = Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000));
+            if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
+            
+            // Додаємо новий гейм у вигляді "3`"
+            state.gamesTimeHistory.push(`${elapsedMinutes}\``);
+            gameStartTimestamp = Date.now(); // Скидання відліку під наступний гейм
+
             let g1 = state[`t1_s${cSet}`]; let g2 = state[`t2_s${cSet}`];
             let totalGamesInSet = g1 + g2;
 
-            // СТАТИСТИКА: ПЕРШИЙ ГЕЙМ, А ПОТІМ ЧЕРЕЗ ОДИН (1, 3, 5, 7, 9 і т.д.)
+            // СТАТИСТИКА: ПЕРШИЙ ГЕЙМ, А ПОТІМ ЧЕРЕЗ ОДИН (1, 3, 5, 7 і т.д.)
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
                 trigger6SecStats();
             }
@@ -413,9 +436,11 @@
             let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
 
             if (state.isProSet) {
-                if ((g1 >= limit && g1 - g2 >= 2) || g1 === (limit + 1)) isSetOver = true;
-                else if ((g2 >= limit && g2 - g1 >= 2) || g2 === (limit + 1)) isSetOver = true;
-                else if (g1 === limit && g2 === limit) state.isTiebreak = true;
+                if (g1 >= limit && (g1 - g2 >= 2)) isSetOver = true;
+                else if (g2 >= limit && (g2 - g1 >= 2)) isSetOver = true;
+                else if (g1 === (limit + 1) && g2 === (limit - 1)) isSetOver = true;
+                else if (g2 === (limit + 1) && g1 === (limit - 1)) isSetOver = true;
+                else if (g1 === limit && g2 === limit) { state.isTiebreak = true; }
             } else {
                 if ((g1 >= 6 && g1 - g2 >= 2) || g1 === 7) isSetOver = true;
                 else if ((g2 >= 6 && g2 - g1 >= 2) || g2 === 7) isSetOver = true;
@@ -425,9 +450,11 @@
             state.animation = { team: winningTeam, type: isSetOver ? 'set' : 'game', ts: Date.now() };
 
             if (isSetOver) {
-                trigger6SecStats(); // Завжди показуємо під час завершення сету
+                trigger6SecStats();
                 if (!state.isProSet && state.currentSet < 5) {
                     state.currentSet++;
+                    state.p1BreakPoints = 0; state.p2BreakPoints = 0; // скидання брейків під новий сет
+                    state.gamesTimeHistory = []; // Хронологія нового сету з нуля
                     state[`t1_s${state.currentSet}`] = 0; state[`t2_s${state.currentSet}`] = 0;
                 }
             }
@@ -441,6 +468,12 @@
             else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1;
             state.animation = { team: server, type: 'double_fault', ts: Date.now() };
             window.scorePointWithoutHistorySave(server === 1 ? 2 : 1);
+        }
+
+        window.toggleStatsAutomation = function(isChecked) {
+            saveToHistory(state);
+            state.isStatsAutomated = isChecked;
+            set(matchRef, state);
         }
 
         window.toggleStatsManual = function() {
@@ -462,9 +495,20 @@
             let p1GP = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || isGolden);
             let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
             if (!p1GP && !p2GP) { s.activeMatchRibbon = "NONE"; return; }
+            
             let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
-            let p1SP = s.isTiebreak || (s.isProSet ? (g1 === limit-1 && g2 <= limit-2) || g1 === limit : (g1 === 5 && g2 <= 4) || g1 === 6);
-            let p2SP = s.isTiebreak || (s.isProSet ? (g2 === limit-1 && g1 <= limit-2) || g2 === limit : (g2 === 5 && g1 <= 4) || g2 === 6);
+            let p1SP = false; let p2SP = false;
+            
+            if (s.isTiebreak) {
+                p1SP = true; p2SP = true;
+            } else if (s.isProSet) {
+                if ((g1 === limit - 1 && g2 <= limit - 2) || g1 === limit) p1SP = true;
+                if ((g2 === limit - 1 && g1 <= limit - 2) || g2 === limit) p2SP = true;
+            } else {
+                if ((g1 === 5 && g2 <= 4) || g1 === 6) p1SP = true;
+                if ((g2 === 5 && g1 <= 4) || g2 === 6) p2SP = true;
+            }
+
             if ((p1GP && p1SP) || (p2GP && p2SP)) { s.activeMatchRibbon = (s.isProSet || cSet >= 3) ? "MATCH_POINT" : "SET_POINT"; return; }
             if (s.isTiebreak) { s.activeMatchRibbon = "TIEBREAK_POINT"; return; }
             if (isGolden) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
@@ -499,11 +543,13 @@
         window.resetMatch = function() {
             if(confirm("Скинути матч вручну?")) {
                 if (statsTimeout) clearTimeout(statsTimeout);
+                gameStartTimestamp = Date.now();
                 set(matchRef, {
                     p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
                     p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                     isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
-                    deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, showStatsOverlay: false, showLogo: false, logoSrc: "",
+                    deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
+                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, gamesTimeHistory: [], showLogo: false, logoSrc: "",
                     t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
                 });
             }
