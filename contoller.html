@@ -490,8 +490,8 @@
             state.gamesTimeHistory.push(elapsedMinutes + '`');
             gameStartTimestamp = Date.now();
 
-            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + rtdbSet || cSet];
-            g2 = state['t2_s' + cSet];
+            let g1 = state['t1_s' + cSet]; 
+            let g2 = state['t2_s' + cSet];
             let totalGamesInSet = g1 + g2;
 
             if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
@@ -517,7 +517,6 @@
 
             if (isSetOver) {
                 trigger6SecStats();
-                // Наскрізний автоперехід працює до 5 сетів для ВСІХ режимів (включаючи Pro-set та динамічні зміни)
                 if (state.currentSet < 5) {
                     state.currentSet++;
                     state.p1BreakPoints = 0; state.p2BreakPoints = 0;
