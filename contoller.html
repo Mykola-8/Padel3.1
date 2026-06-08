@@ -56,13 +56,13 @@
         <div class="mode-tab-row">
             <button class="mode-tab active" id="tab-classic" onclick="setMode('classic')">5 Сетів</button>
             <button class="mode-tab" id="tab-proset" onclick="setMode('proset')">Pro-Set</button>
-            <button class="mode-tab" id="tab-americano" onclick="setMode('americano')">Американо</button>
+ 
         </div>
  
         <div id="proset-options" style="display:none;">
             <div class="row" style="margin-top:4px;">
                 <span id="t-proset-limit" style="font-size:12px; color:#aaa;">Ліміт геймів (1-10):</span>
-                <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:60px; padding:6px; text-align:center;" onchange="updateProsetLimit(this.value)">
+                <input type="number" id="s-proset-limit" min="2" max="10" value="8" style="width:60px; padding:6px; text-align:center;" onchange="updateProsetLimit(this.value)">
             </div>
             <div class="switch-row" style="margin-top:4px;">
                 <span id="t-proset-deuce" style="font-size:12px; color:#aaa;">Тип 40-40:</span>
@@ -73,12 +73,6 @@
             </div>
         </div>
  
-        <div id="americano-options" style="display:none;">
-            <div class="row" style="margin-top:4px;">
-                <span id="t-americano-total" style="font-size:12px; color:#aaa;">Сума очок (1-30):</span>
-                <input type="number" id="s-americano-limit" min="1" max="30" value="21" style="width:60px; padding:6px; text-align:center;" onchange="updateAmericanoLimit(this.value)">
-            </div>
-        </div>
     </div>
  
     <div class="status-badge" id="mode-status">Сет 1 з 5</div>
@@ -164,7 +158,6 @@
             gameMode: "classic",
             isTiebreak: false, isAmericano: false, isProset: false,
             prosetLimit: 8, prosetDeuce: "advantage",
-            americanoLimit: 21,
             showLogo: false, logoSrc: "",
             t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
             t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
@@ -181,10 +174,10 @@
                 title: "Пульт Padel Pro",
                 updateNames: "Оновити назви",
                 modeLabel: "Режим гри:",
-                tabClassic: "5 Сетів", tabProset: "Pro-Set", tabAmericano: "Американо",
-                prosetLimit: "Ліміт геймів (1-10):",
+                tabClassic: "5 Сетів", tabProset: "Pro-Set",
+                prosetLimit: "Ліміт геймів (2-10):",
                 prosetDeuce: "Тип 40-40:", deuceAdv: "Advantage", deuceSudden: "Sudden Death",
-                americanoTotal: "Сума очок (1-30):",
+ 
                 scaleLabel: "Масштаб табла (OBS):",
                 posXLabel: "&#x2190;&#x2192; Позиція по горизонталі:",
                 posYLabel: "&#x2191;&#x2193; Позиція по вертикалі:",
@@ -194,20 +187,20 @@
                 showLogo: "Показати логотип", hideLogo: "Сховати логотип",
                 clearLogo: "Скинути лого", uploadLogo: "&#128193; Вибрати файл Логотипу",
                 reset: "Скинути матч", resetConfirm: "Скинути матч?",
-                statusAmericano: (lim) => `АМЕРИКАНО — СУМА: ${lim}`,
+ 
                 statusTiebreak: "🔥 ТАЙБРЕЙК (ДО 7)",
                 statusSet: (s) => `Сет ${s} з 5`,
                 statusProset: (lim, d) => `PRO-SET — ЛІМІТ: ${lim} | ${d === 'sudden' ? 'SUDDEN' : 'ADV'}`,
-                matchEnd: "Матч завершено!", americanoEnd: "Американо завершено!", prosetEnd: "Pro-Set завершено!",
+                matchEnd: "Матч завершено!", prosetEnd: "Pro-Set завершено!",
             },
             en: {
                 title: "Padel Pro Controller",
                 updateNames: "Update names",
                 modeLabel: "Game mode:",
-                tabClassic: "5 Sets", tabProset: "Pro-Set", tabAmericano: "Americano",
-                prosetLimit: "Game limit (1-10):",
+                tabClassic: "5 Sets", tabProset: "Pro-Set",
+                prosetLimit: "Game limit (2-10):",
                 prosetDeuce: "40-40 type:", deuceAdv: "Advantage", deuceSudden: "Sudden Death",
-                americanoTotal: "Point sum (1-30):",
+ 
                 scaleLabel: "Scoreboard scale (OBS):",
                 posXLabel: "&#x2190;&#x2192; Horizontal position:",
                 posYLabel: "&#x2191;&#x2193; Vertical position:",
@@ -217,11 +210,11 @@
                 showLogo: "Show logo", hideLogo: "Hide logo",
                 clearLogo: "Clear logo", uploadLogo: "&#128193; Choose logo file",
                 reset: "Reset match", resetConfirm: "Reset match?",
-                statusAmericano: (lim) => `AMERICANO — SUM: ${lim}`,
+ 
                 statusTiebreak: "🔥 TIEBREAK (TO 7)",
                 statusSet: (s) => `Set ${s} of 5`,
                 statusProset: (lim, d) => `PRO-SET — LIMIT: ${lim} | ${d === 'sudden' ? 'SUDDEN' : 'ADV'}`,
-                matchEnd: "Match finished!", americanoEnd: "Americano finished!", prosetEnd: "Pro-Set finished!",
+                matchEnd: "Match finished!", prosetEnd: "Pro-Set finished!",
             }
         };
  
@@ -241,12 +234,10 @@
             document.getElementById('t-mode-label').innerText = t.modeLabel;
             document.getElementById('tab-classic').innerText = t.tabClassic;
             document.getElementById('tab-proset').innerText = t.tabProset;
-            document.getElementById('tab-americano').innerText = t.tabAmericano;
             document.getElementById('t-proset-limit').innerText = t.prosetLimit;
             document.getElementById('t-proset-deuce').innerText = t.prosetDeuce;
             document.getElementById('t-deuce-adv').innerText = t.deuceAdv;
             document.getElementById('t-deuce-sudden').innerText = t.deuceSudden;
-            document.getElementById('t-americano-total').innerText = t.americanoTotal;
             document.getElementById('t-scale-label').innerText = t.scaleLabel;
             document.getElementById('t-pos-x-label').innerHTML = t.posXLabel;
             document.getElementById('t-pos-y-label').innerHTML = t.posYLabel;
@@ -265,8 +256,7 @@
             const t = T[lang];
             const m = state.gameMode || 'classic';
             let txt = '';
-            if (m === 'americano') txt = t.statusAmericano(state.americanoLimit || 21);
-            else if (m === 'proset') txt = t.statusProset(state.prosetLimit || 8, state.prosetDeuce || 'advantage');
+            if (m === 'proset') txt = t.statusProset(state.prosetLimit || 8, state.prosetDeuce || 'advantage');
             else if (state.isTiebreak) txt = t.statusTiebreak;
             else txt = t.statusSet(state.currentSet || 1);
             document.getElementById('mode-status').innerHTML = txt;
@@ -276,9 +266,7 @@
             const m = state.gameMode || 'classic';
             document.getElementById('tab-classic').classList.toggle('active', m === 'classic');
             document.getElementById('tab-proset').classList.toggle('active', m === 'proset');
-            document.getElementById('tab-americano').classList.toggle('active', m === 'americano');
             document.getElementById('proset-options').style.display = m === 'proset' ? 'block' : 'none';
-            document.getElementById('americano-options').style.display = m === 'americano' ? 'block' : 'none';
         }
  
         document.getElementById('lang-uk').classList.toggle('active', lang === 'uk');
@@ -293,10 +281,7 @@
             syncModeTabs();
  
             const m = state.gameMode || 'classic';
-            if (m === 'americano') {
-                document.getElementById('view-p1-pts').innerText = state.p1Index;
-                document.getElementById('view-p2-pts').innerText = state.p2Index;
-            } else if (state.isTiebreak) {
+            if (state.isTiebreak) {
                 document.getElementById('view-p1-pts').innerText = state.p1Index;
                 document.getElementById('view-p2-pts').innerText = state.p2Index;
             } else {
@@ -314,7 +299,6 @@
             document.getElementById('pos-y-slider').value = state.posY || 0;
             document.getElementById('pos-x-display').innerText = (state.posX || 0) + "px";
             document.getElementById('pos-y-display').innerText = (state.posY || 0) + "px";
-            document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
             document.getElementById('s-proset-limit').value = state.prosetLimit || 8;
             document.getElementById('s-proset-deuce').value = state.prosetDeuce || 'advantage';
  
@@ -365,35 +349,17 @@
         };
  
         window.updateProsetLimit = function(val) {
-            let v = Math.min(10, Math.max(1, parseInt(val) || 8));
+            let v = Math.min(10, Math.max(2, parseInt(val) || 8));
             state.prosetLimit = v; set(matchRef, state);
         };
         window.updateProsetDeuce = function(val) { state.prosetDeuce = val; set(matchRef, state); };
-        window.updateAmericanoLimit = function(val) {
-            let v = Math.min(30, Math.max(1, parseInt(val) || 21));
-            state.americanoLimit = v; set(matchRef, state);
-        };
  
         // ===== РАХУНОК =====
         window.scorePoint = function(teamIndex) {
             const t = T[lang];
             const m = state.gameMode || 'classic';
  
-            if (m === 'americano') {
-                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
-                const total = state.p1Index + state.p2Index;
-                const limit = parseInt(state.americanoLimit) || 21;
-                if (total >= limit) {
-                    state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
-                    recordGameTime(false, true);
-                    set(matchRef, state);
-                    alert(t.americanoEnd);
-                } else {
-                    if (total === 1 || (total > 1 && (total - 1) % 2 === 0))
-                        state.currentServer = state.currentServer === 1 ? 2 : 1;
-                    set(matchRef, state);
-                }
-            } else if (m === 'proset') {
+            if (m === 'proset') {
                 scoreClassicPoint(teamIndex, true);
                 set(matchRef, state);
             } else if (state.isTiebreak) {
@@ -507,7 +473,7 @@
                 p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
                 scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                 gameMode: "classic", isTiebreak: false, isAmericano: false, isProset: false,
-                prosetLimit: 8, prosetDeuce: "advantage", americanoLimit: 21,
+                prosetLimit: 8, prosetDeuce: "advantage",
                 showLogo: false, logoSrc: state.logoSrc || "",
                 t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
                 t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
