@@ -16,6 +16,7 @@
             color: white;
         }
 
+        /* Зовнішній контейнер табла з плавним зникненням */
         .scoreboard-wrapper {
             display: flex;
             flex-direction: row;
@@ -348,7 +349,9 @@
             const state = snapshot.val();
             if (state) {
                 const boardWrapper = document.getElementById('main-scoreboard');
-                if (state.showMainBoard === false) {
+
+                // ПРИХОВУВАННЯ ТАБЛА РАХУНКУ, ЯКЩО ВІДКРИТА СТАТИСТИКА (Або якщо примусово сховано пультом)
+                if (state.showMainBoard === false || state.showStatsOverlay === true) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
@@ -405,7 +408,6 @@
                     lastSetTracked = activeSet;
                 }
 
-                // Показуємо кубики для всіх 5 сетів незалежно від режиму (включаючи наскрізний Pro-Set)
                 const totalSetsToShow = state.isAmericano ? 0 : 5;
 
                 for (let s = 1; s <= 5; s++) {
