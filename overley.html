@@ -164,16 +164,17 @@
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
         .ribbon-tiebreak { background: rgba(75, 85, 99, 0.65); color: #fff; }
 
-        /* ===== ТАБЛО СТАТИСТИКИ / КІНЕЦЬ МАТЧУ ===== */
+        /* ===== ТАБЛО СТАТИСТИКИ ТА КІНЦЯ МАТЧУ (БІЛЬШ НАПІВПРОЗОРЕ З КОНТУРОМ) ===== */
         .statistics-overlay {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 550px;
-            background: linear-gradient(to bottom, rgba(20, 20, 20, 0.75), rgba(12, 12, 12, 0.75));
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.45), rgba(8, 8, 8, 0.45)); /* Значно прозоріше */
+            border: 1px solid rgba(198, 159, 102, 0.25); /* Контури табла */
             border-radius: 8px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             font-family: 'Montserrat', sans-serif;
             color: white;
             z-index: 9999;
@@ -183,6 +184,7 @@
             transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
             padding: 24px;
             box-sizing: border-box;
+            backdrop-filter: blur(4px); /* Легке розмиття заднього плану корта */
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
@@ -190,27 +192,28 @@
         .stats-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
         .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .stats-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .stats-label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-label { font-size: 10px; font-weight: 700; color: #bbbbbb; text-transform: uppercase; letter-spacing: 1px; }
         .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
         .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
 
         .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .h-set-title { font-weight: 700; color: #aaa; text-transform: uppercase; font-size: 11px; }
+        .h-set-title { font-weight: 700; color: #ddd; text-transform: uppercase; font-size: 11px; }
         .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; }
         .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; }
 
-        /* ===== ЦЕНТРАЛЬНИЙ ЕКРАН РЕЗУЛЬТАТУ СЕТУ ===== */
+        /* ===== ТАБЛИЦЯ ПІСЛЯ ЗАКІНЧЕННЯ СЕТУ (НАПІВПРОЗОРА З КОНТУРАМИ) ===== */
         .set-result-overlay {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 820px;
-            background: rgba(15, 15, 15, 0.72);
+            background: rgba(12, 12, 12, 0.45); /* Значно прозоріше для трансляції */
+            border: 1px solid rgba(198, 159, 102, 0.3); /* Контури табла результату */
             border-radius: 6px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
             z-index: 9998;
             opacity: 0;
             visibility: hidden;
@@ -222,6 +225,7 @@
             padding: 35px;
             box-sizing: border-box;
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
+            backdrop-filter: blur(4px);
         }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; }
@@ -231,7 +235,7 @@
         .sr-team.right { text-align: left; }
         .sr-vs-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
-        .sr-vs { font-size: 14px; font-weight: 800; color: #777; letter-spacing: 1px; margin-top: 5px; }
+        .sr-vs { font-size: 14px; font-weight: 800; color: #aaa; letter-spacing: 1px; margin-top: 5px; }
 
         /* ===== ПОВНІСТЮ ПРОЗОРИЙ БЛОК QR КОДУ ===== */
         .qr-code-wrapper {
@@ -336,6 +340,18 @@
                 <div class="stats-label" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
                 <div class="history-sets-container" id="final-sets-list-target"></div>
             </div>
+        </div>
+    </div>
+
+    <div class="set-result-overlay" id="set-result-panel">
+        <div class="sr-set-label" id="sr-set-number-label">ЗАВЕРШЕНО СЕТ 1</div>
+        <div class="sr-main-row">
+            <div class="sr-team left" id="sr-team1-name">Команда 1</div>
+            <div class="sr-vs-score-block">
+                <div class="sr-score" id="sr-sets-score-value">6 : 4</div>
+                <div class="sr-vs">VS</div>
+            </div>
+            <div class="sr-team right" id="sr-team2-name">Команда 2</div>
         </div>
     </div>
 
@@ -547,7 +563,7 @@
 
                         for(let i = 1; i <= totalSetsToRender; i++) {
                             let g1_set = state[`t1_s${i}`] || 0;
-                            let g2_set = state[`t2_set`] || 0;
+                            let g2_set = state[`t2_s${i}`] || 0;
                             if (i <= activeSet || g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
                                 const setRow = document.createElement('div');
