@@ -254,6 +254,26 @@
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
         .sr-vs { font-size: 14px; font-weight: 800; color: #aaa; letter-spacing: 1px; margin-top: 5px; }
 
+        /* ===== QR КОД (ПРАВИЙ НИЖНІЙ КУТ) ===== */
+        .qr-code-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 6px;
+            padding: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+        .qr-code-wrapper.visible { opacity: 1; visibility: visible; }
+        .qr-code-wrapper img { width: 130px; height: 130px; display: block; }
+        .qr-code-text { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #c69f66; text-align: center; }
+ 
         /* Стиль підсвічування червоним при дабл фолі */
         .double-fault-red-flash {
             background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important;
