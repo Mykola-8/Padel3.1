@@ -545,11 +545,15 @@
             let isSetOver = false; let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
 
             if (state.isProSet) {
-                if (g1 >= limit && (g1 - g2 >= 2)) isSetOver = true;
-                else if (g2 >= limit && (g2 - g1 >= 2)) isSetOver = true;
-                else if (g1 === (limit + 1) && g2 === (limit - 1)) isSetOver = true;
-                else if (g2 === (limit + 1) && g1 === (limit - 1)) isSetOver = true;
+                const halfLimit = limit - 1;
+                // При рахунку (limit-1):(limit-1) — грати до (limit+1), перший хто досяг — переміг
+                if (g1 === (limit + 1) && g2 === halfLimit) isSetOver = true;
+                else if (g2 === (limit + 1) && g1 === halfLimit) isSetOver = true;
+                // При (limit):(limit) — тайбрейк
                 else if (g1 === limit && g2 === limit) { state.isTiebreak = true; }
+                // Стандартна перемога: досяг ліміту з різницею 2
+                else if (g1 >= limit && (g1 - g2 >= 2)) isSetOver = true;
+                else if (g2 >= limit && (g2 - g1 >= 2)) isSetOver = true;
             } else {
                 if ((g1 >= 6 && g1 - g2 >= 2) || g1 === 7) isSetOver = true;
                 else if ((g2 >= 6 && g2 - g1 >= 2) || g2 === 7) isSetOver = true;
