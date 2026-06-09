@@ -33,7 +33,7 @@
         }
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
 
-        /* ===== ПАНЕЛЬ ЛОГОТИПУ (БЕЗ ВНУТРІШНІХ ВІДСТУПІВ, ДО КРАЇВ) ===== */
+        /* ===== ПАНЕЛЬ ЛОГОТИПУ ===== */
         .logo-panel {
             transform: translateX(100%);
             opacity: 0;
@@ -49,7 +49,7 @@
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
             box-sizing: border-box;
             order: 1;
-            padding: 0 !important; /* Рамка 0,0,0,0 */
+            padding: 0 !important;
             margin: 0 !important;
         }
         .logo-panel.visible { transform: translateX(0); opacity: 1; }
@@ -96,15 +96,14 @@
         .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
         .points { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #ffffff; width: 65px; font-size: 24px; display: flex; justify-content: center; align-items: center; }
 
-        /* ===== СТРІЧКИ ВГОРУ (PRO-SET ТА TIEBREAK ЗВЕРХУ) ===== */
+        /* ===== СТРІЧКИ ВГОРУ (ПОЗИЦІОНУВАННЯ PRO-SET ТА TIEBREAK) ===== */
         .ribbons-top-container {
             position: absolute;
             bottom: 100%;
             left: 0;
             width: 100%;
             display: flex;
-            flex-direction: column-reverse; /* Щоб з'являлися гарно стопкою вгору */
-            align-items: center;
+            flex-direction: column-reverse;
             gap: 2px;
             margin-bottom: 2px;
             z-index: 1;
@@ -128,8 +127,10 @@
             white-space: nowrap;
         }
         .ribbon-top-item.visible { height: 22px; opacity: 1; padding: 0 14px; }
-        .r-proset-style { color: #c69f66; border: 2px solid #5a4528; border-bottom: none; }
-        .r-tiebreak-style { background: rgba(75, 85, 99, 0.85); color: #fff; font-size: 11px; letter-spacing: 2px; }
+        .r-proset-style { color: #c69f66; border: 2px solid #5a4528; border-bottom: none; align-self: center; }
+        
+        /* ТАЙБРЕЙК ПЕРЕНЕСЕНО ПРАВІШЕ (НАД РАХУНКОМ ОЧОК/ГЕЙМІВ) */
+        .r-tiebreak-style { background: rgba(75, 85, 99, 0.85); color: #fff; font-size: 11px; letter-spacing: 2px; align-self: flex-end; border-radius: 4px 4px 4px 4px; margin-right: 2px; }
 
         /* ===== ПЛАШКИ ЗНИЗУ ===== */
         .info-ribbons-container {
@@ -207,7 +208,7 @@
         .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; }
         .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; }
 
-        /* ===== ТАБЛИЦЯ РЕЗУЛЬТАТУ СЕТУ ===== */
+        /* ===== ТАБЛИЦЯ РЕЗУЛЬТАТУ СЕТУ (ЗМЕНШЕНО ТА ЗТИСНЕНО ТЕКСТ КОМАНД) ===== */
         .set-result-overlay {
             position: fixed;
             top: 50%;
@@ -233,36 +234,31 @@
         }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; }
-        .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 25px; }
-        .sr-team { flex: 1; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 20px; }
+        
+        /* Зменшення, стиснення та ліміт ширини, щоб 100% вмістити у табло */
+        .sr-team { 
+            flex: 1; 
+            font-size: 20px; /* Зменшено з 28px */
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: -0.2px; /* Стиснення міжлітерного простору */
+            max-width: 280px; /* Обмеження по ширині */
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
         .sr-team.left { text-align: right; }
         .sr-team.right { text-align: left; }
         .sr-vs-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
         .sr-vs { font-size: 14px; font-weight: 800; color: #aaa; letter-spacing: 1px; margin-top: 5px; }
 
-        /* ===== ПОВНІСТЮ ПРОЗОРИЙ БЛОК QR КОДУ ===== */
-        .qr-code-wrapper {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            background: transparent !important;
-            padding: 0 !important;
-            border-radius: 0;
-            box-shadow: none;
-            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            z-index: 10000;
+        /* Стиль підсвічування червоним при дабл фолі */
+        .double-fault-red-flash {
+            background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important;
+            color: #ffffff !important;
         }
-        .qr-code-wrapper.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .qr-code-wrapper img { width: 115px; height: 115px; display: block; background: transparent; padding: 0; box-sizing: border-box; }
-        .qr-code-text { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #c69f66; letter-spacing: 1px; text-align: center; max-width: 130px; line-height: 1.3; margin-top: 4px; background: transparent !important; }
     </style>
 </head>
 <body>
@@ -430,7 +426,6 @@
                     boardWrapper.classList.remove('hidden');
                 }
 
-                // Логіка верхньої стрічки TIEBREAK
                 const topTiebreakRibbon = document.getElementById('ribbon-top-tiebreak');
                 if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger) {
                     topTiebreakRibbon.classList.add('visible');
@@ -486,8 +481,6 @@
                 } else {
                     imgNode.style.display = 'none';
                     txtNode.innerText = state.customLogoText || "QATAR AIRWAYS";
-                    
-                    // Застосування кастомних шрифтів, розмірів та кольору тексту
                     txtNode.style.fontFamily = state.logoFontFamily || 'Montserrat';
                     txtNode.style.fontSize = (state.logoFontSize || 13) + 'px';
                     txtNode.style.color = state.logoFontColor || '#ffffff';
@@ -551,7 +544,8 @@
                 }
 
                 const ribbonMatch = document.getElementById('ribbon-match');
-                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano) {
+                // Модифіковане правило: в Pro-Set не виводиться Match Point
+                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
                     ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
                     ribbonMatch.className = "ribbon visible"; 
                     if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
@@ -615,6 +609,7 @@
                     stPanel.classList.remove('visible');
                 }
 
+                // Логіка анімацій та підсвічування
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts;
                     const winTeam = state.animation.team;
@@ -622,10 +617,9 @@
                     const targetBlock = document.getElementById(`block-anim-${winTeam}`);
                     if (targetBlock) {
                         if (animType === 'double_fault') {
-                            targetBlock.classList.remove('double-fault-blink');
-                            void targetBlock.offsetWidth; 
-                            targetBlock.classList.add('double-fault-blink');
-                            setTimeout(() => targetBlock.classList.remove('double-fault-blink'), 800);
+                            // ОНОВЛЕНО: Команда, яка зробила помилку, підсвічується червоним
+                            targetBlock.classList.add('double-fault-red-flash');
+                            setTimeout(() => targetBlock.classList.remove('double-fault-red-flash'), 900);
                         } else {
                             targetBlock.style.transition = 'none';
                             targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
