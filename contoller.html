@@ -12,10 +12,9 @@
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
         
-        input[type="text"], input[type="number"] { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; transition: border 0.2s; }
-        input[type="text"]:focus, input[type="number"]:focus { border-color: #c69f66; outline: none; }
+        input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; transition: border 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
 
-        /* ЕФЕКТ НАТИСКАННЯ ДЛЯ ВСІХ ОСНОВНИХ КЛАВІШ */
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.08s ease, filter 0.08s ease; }
         .btn:active { transform: scale(0.95); filter: brightness(0.85); }
         
@@ -49,9 +48,7 @@
         .serve-btn:active { transform: scale(0.95); }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         
-        /* ЗБІЛЬШЕНІ СТРАТЕГІЧНІ КНОПКИ */
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s; }
         .status-badge.golden-alert { background: #ea580c !important; color: white !important; animation: pulse-border 1s infinite alternate; }
         
@@ -61,35 +58,10 @@
         }
 
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
-        input[type="checkbox"], input[type="radio"] { transition: transform 0.1s; }
-        input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(1.2); }
-
-        .preview-scoreboard {
-            border: 2px solid #b28a55;
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            background: #1a1a1a;
-            font-family: 'Montserrat', sans-serif;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            margin-bottom: 5px;
-        }
+        .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; font-family: 'Montserrat', sans-serif; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
         .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .preview-row:last-child { border-bottom: none; }
-        .preview-name-block {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-            font-size: 13px;
-            font-weight: 700;
-            background: #222;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .preview-name-block { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 13px; font-weight: 700; background: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .preview-srv { color: #b28a55; font-size: 12px; visibility: hidden; }
         .preview-srv.active { visibility: visible; }
         .preview-box { width: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border-left: 1px solid rgba(255,255,255,0.1); }
@@ -99,6 +71,22 @@
     </style>
 </head>
 <body>
+
+    <div class="card" style="border: 2px solid #c69f66;">
+        <div style="font-size:11px; font-weight:800; color:#c69f66; margin-bottom:6px; text-transform:uppercase; text-align:center;">Поточний корт управління:</div>
+        <select id="court-selector" onchange="switchCourt(this.value)" style="font-weight:800; color:#fff; background:#15803d; text-align:center;">
+            <option value="1">Корт №1</option>
+            <option value="2">Корт №2</option>
+            <option value="3">Корт №3</option>
+            <option value="4">Корт №4</option>
+            <option value="5">Корт №5</option>
+            <option value="6">Корт №6</option>
+            <option value="7">Корт №7</option>
+            <option value="8">Корт №8</option>
+            <option value="9">Корт №9</option>
+            <option value="10">Корт №10</option>
+        </select>
+    </div>
 
     <h2>Пульт Padel Pro (Master)</h2>
 
@@ -207,7 +195,7 @@
             <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
+            <span style="font-size:12px; color:#ddd;">2. Jeden Golden Point:</span>
             <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
@@ -273,168 +261,162 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const matchRef = ref(db, "padel/standalone_board");
+        
+        let courtId = "1";
+        let databasePath = `padel/courts/court_${courtId}`;
+        let matchRef = ref(db, databasePath);
+        let unsubscribeCurrentOnValue = null;
 
         const pointSequence = ['0', '15', '30', '40', 'AD'];
-        let state = {
-            p1name: "Команда A", p2name: "Команда B",
-            p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: 1, posX: 0, posY: 0,
-            isTiebreak: false, isAmericano: false, americanoLimit: 21, isProSet: false, proSetLimit: 8,
-            activeMatchRibbon: "NONE", deuceStyle: "one-golden", deuceCounter: 0,
-            p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-            isStatsAutomated: true, showStatsOverlay: false, showSetOverlayTrigger: false, lastFinishedSetNum: 0, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: "QATAR AIRWAYS",
-            showMainBoard: true, showQrCode: false, qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
-            t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0,
-            t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0,
-            animation: { team: 0, type: "", ts: 0 }
-        };
-
+        let state = {};
         let stateHistory = [];
         let statsTimeout = null;
         let gameStartTimestamp = Date.now();
+
+        // Функція ініціалізації та зміни кортів
+        function initCourtConnection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            courtId = urlParams.get('court') || "1";
+            document.getElementById('court-selector').value = courtId;
+            
+            databasePath = `padel/courts/court_${courtId}`;
+            matchRef = ref(db, databasePath);
+            stateHistory = [];
+
+            if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
+
+            unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    state = data;
+                    renderUI();
+                } else {
+                    // Якщо корт повністю пустий, створюємо дефолтну структуру
+                    resetMatchWithoutConfirm();
+                }
+            });
+        }
+
+        window.switchCourt = function(newCourtValue) {
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?court=' + newCourtValue;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            initCourtConnection();
+        }
+
+        function renderUI() {
+            document.getElementById('lbl-p1').innerText = state.p1name || "Команда A";
+            document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
+            document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
+            document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
+            
+            document.getElementById('mode-show-board-checkbox').checked = state.showMainBoard !== false;
+            document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
+            document.getElementById('qr-code-url-input').value = state.qrCodeUrl || "";
+            document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
+            document.getElementById('qr-url-row').style.display = state.showQrCode ? 'flex' : 'none';
+
+            if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
+                document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
+            }
+
+            const badge = document.getElementById('mode-status');
+            let isGoldenAlert = false;
+            if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
+                if (state.deuceStyle === "one-golden") isGoldenAlert = true;
+                if (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2) isGoldenAlert = true;
+            }
+
+            if (state.isMatchFinished) {
+                badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
+                badge.style.background = "#b91c1c";
+                badge.style.color = "white";
+            } else if (isGoldenAlert) {
+                badge.innerText = "🔥 GOLDEN POINT! 🔥";
+                badge.classList.add('golden-alert');
+            } else {
+                badge.classList.remove('golden-alert');
+                badge.style.background = "#2a2a2a";
+                badge.style.color = "#c69f66";
+                if (state.isAmericano) badge.innerText = `АМЕРИКАНО (ДО: ${state.americanoLimit || 21})`;
+                else if (state.isTiebreak) badge.innerText = "ТАЙБРЕЙКУ (ДО 7)";
+                else if (state.isProSet) badge.innerText = `PRO-SET (ДО ${state.proSetLimit || 8})`;
+                else badge.innerText = `Сет ${state.currentSet || 1}`;
+            }
+
+            if (state.isAmericano || state.isTiebreak) {
+                document.getElementById('view-p1-pts').innerText = state.p1Index;
+                document.getElementById('view-p2-pts').innerText = state.p2Index;
+            } else {
+                document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
+                document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
+            }
+
+            document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Hide Stats (Активна)" : "Show Stats (Прихована)";
+            document.getElementById('logo-visibility-btn').innerText = state.showLogo ? "Сховати Спонсора" : "Показати Спонсора";
+
+            document.getElementById('pr-name1').innerText = state.p1name || "Команда A";
+            document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
+            document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
+            document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
+            
+            if (state.isAmericano || state.isTiebreak) {
+                document.getElementById('pr-t1-pts').innerText = state.p1Index;
+                document.getElementById('pr-t2-pts').innerText = state.p2Index;
+            } else {
+                document.getElementById('pr-t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
+                document.getElementById('pr-t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
+            }
+
+            for (let s = 1; s <= 5; s++) {
+                const box1 = document.getElementById('pr-t1-s' + s);
+                const box2 = document.getElementById('pr-t2-s' + s);
+                box1.innerText = state['t1_s' + s] || 0;
+                box2.innerText = state['t2_s' + s] || 0;
+                if (s < state.currentSet) {
+                    box1.className = 'preview-box p-past'; box2.className = 'preview-box p-past';
+                } else if (s === state.currentSet) {
+                    box1.className = 'preview-box p-curr'; box2.className = 'preview-box p-curr';
+                } else {
+                    box1.className = 'preview-box'; box2.className = 'preview-box';
+                }
+            }
+
+            document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
+            document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
+            document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
+            document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
+            document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
+            document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
+        }
 
         function saveToHistory(s) {
             stateHistory.push(JSON.parse(JSON.stringify(s)));
             if (stateHistory.length > 30) stateHistory.shift();
         }
 
-        function triggerVibration() {
-            if (navigator.vibrate) navigator.vibrate(40);
-        }
-
-        // Авто-показ статистики на 6 секунд КРІМ кінця сету
         function trigger6SecStats() {
             if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
-            
             state.showStatsOverlay = true;
             state.showSetOverlayTrigger = false;
             set(matchRef, state);
-
             statsTimeout = setTimeout(() => {
-                onValue(matchRef, (snap) => {
-                    let current = snap.val();
-                    if (current && current.showStatsOverlay && !current.isMatchFinished) {
-                        current.showStatsOverlay = false;
-                        set(matchRef, current);
-                    }
-                }, { onlyOnce: true });
+                state.showStatsOverlay = false; set(matchRef, state);
             }, 6000);
         }
 
-        // Авто-показ результату зіграного сету на 6 секунд
         function trigger6SecSetOverlay(finishedSetNum) {
             if (statsTimeout) clearTimeout(statsTimeout);
-            
             state.showStatsOverlay = false;
             state.showSetOverlayTrigger = true;
             state.lastFinishedSetNum = finishedSetNum;
             set(matchRef, state);
-
             statsTimeout = setTimeout(() => {
-                onValue(matchRef, (snap) => {
-                    let current = snap.val();
-                    if (current && current.showSetOverlayTrigger) {
-                        current.showSetOverlayTrigger = false;
-                        set(matchRef, current);
-                    }
-                }, { onlyOnce: true });
+                state.showSetOverlayTrigger = false; set(matchRef, state);
             }, 6000);
         }
-
-        onValue(matchRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                state = data;
-                document.getElementById('lbl-p1').innerText = state.p1name;
-                document.getElementById('lbl-p2').innerText = state.p2name;
-                document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
-                document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
-                document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
-                document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
-                
-                document.getElementById('mode-show-board-checkbox').checked = state.showMainBoard !== false;
-                document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
-                document.getElementById('qr-code-url-input').value = state.qrCodeUrl || "";
-                document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
-                document.getElementById('qr-url-row').style.display = state.showQrCode ? 'flex' : 'none';
-
-                if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
-                    document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
-                }
-
-                const badge = document.getElementById('mode-status');
-                let isGoldenAlert = false;
-                if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
-                    if (state.deuceStyle === "one-golden") isGoldenAlert = true;
-                    if (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2) isGoldenAlert = true;
-                }
-
-                if (state.isMatchFinished) {
-                    badge.innerText = "🏁 МАТЧ ОФІЦІЙНО ЗАВЕРШЕНО";
-                    badge.className = "status-badge";
-                    badge.style.background = "#b91c1c";
-                    badge.style.color = "white";
-                } else if (isGoldenAlert) {
-                    badge.innerText = "🔥 УВАГА: РОЗІГРАШ GOLDEN POINT! 🔥";
-                    badge.classList.add('golden-alert');
-                } else {
-                    badge.classList.remove('golden-alert');
-                    badge.style.background = "#2a2a2a";
-                    badge.style.color = "#c69f66";
-                    if (state.isAmericano) badge.innerText = `🔥 РЕЖИМ АМЕРИКАНО (В СУМІ: ${state.americanoLimit || 21})`;
-                    else if (state.isTiebreak) badge.innerText = "🔥 РЕЖИМ ТАЙБРЕЙКУ (ДО 7)";
-                    else if (state.isProSet) badge.innerText = `🏆 РЕЖИМ PRO-SET (ДО ${state.proSetLimit || 8} ГЕЙМІВ)`;
-                    else badge.innerText = `Режим: Сет ${state.currentSet || 1}`;
-                }
-
-                if (state.isAmericano || state.isTiebreak) {
-                    document.getElementById('view-p1-pts').innerText = state.p1Index;
-                    document.getElementById('view-p2-pts').innerText = state.p2Index;
-                } else {
-                    document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                    document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
-                }
-
-                document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Hide Stats (Активна)" : "Show Stats (Прихована)";
-                document.getElementById('logo-visibility-btn').innerText = state.showLogo ? "Сховати Спонсора" : "Показати Спонсора";
-
-                document.getElementById('pr-name1').innerText = state.p1name || "Команда 1";
-                document.getElementById('pr-name2').innerText = state.p2name || "Команда 2";
-                document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
-                document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
-                
-                if (state.isAmericano || state.isTiebreak) {
-                    document.getElementById('pr-t1-pts').innerText = state.p1Index;
-                    document.getElementById('pr-t2-pts').innerText = state.p2Index;
-                } else {
-                    document.getElementById('pr-t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                    document.getElementById('pr-t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
-                }
-
-                for (let s = 1; s <= 5; s++) {
-                    const box1 = document.getElementById('pr-t1-s' + s);
-                    const box2 = document.getElementById('pr-t2-s' + s);
-                    box1.innerText = state['t1_s' + s] || 0;
-                    box2.innerText = state['t2_s' + s] || 0;
-                    
-                    if (s < state.currentSet) {
-                        box1.className = 'preview-box p-past'; box2.className = 'preview-box p-past';
-                    } else if (s === state.currentSet) {
-                        box1.className = 'preview-box p-curr'; box2.className = 'preview-box p-curr';
-                    } else {
-                        box1.className = 'preview-box'; box2.className = 'preview-box';
-                    }
-                }
-
-                document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
-                document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
-                document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
-                document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
-                document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
-                document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
-            }
-        });
 
         window.toggleMainBoardVisibility = function(isChecked) {
             saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
@@ -442,27 +424,19 @@
         window.toggleQrCodeVisibility = function(isChecked) {
             saveToHistory(state); state.showQrCode = isChecked; set(matchRef, state);
         }
-        window.updateQrCodeUrl = function(val) {
-            state.qrCodeUrl = val; set(matchRef, state);
-        }
         window.updateQrDescription = function(val) {
             state.qrCodeDescription = val; set(matchRef, state);
         }
 
         window.finishMatchPro = function() {
-            triggerVibration();
-            if(confirm("Ви впевнені, що хочете завершити матч?")) {
-                saveToHistory(state);
-                state.isMatchFinished = true;
-                state.showStatsOverlay = true; 
-                state.showSetOverlayTrigger = false;
-                set(matchRef, state);
+            if(confirm("Завершити матч на поточному корті?")) {
+                saveToHistory(state); state.isMatchFinished = true; state.showStatsOverlay = true; state.showSetOverlayTrigger = false; set(matchRef, state);
             }
         }
 
         window.scorePoint = function(team) {
             if (state.isMatchFinished) return;
-            triggerVibration(); saveToHistory(state);
+            saveToHistory(state);
             window.scorePointWithoutHistorySave(team);
         }
 
@@ -471,19 +445,13 @@
             if (state.isAmericano) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 let total = state.p1Index + state.p2Index;
-                
-                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) {
-                    state.currentServer = state.currentServer === 1 ? 2 : 1;
-                }
-
+                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 let limit = parseInt(state.americanoLimit) || 21;
                 if (total >= limit) {
                     state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
                     if (state.currentSet < 5) {
-                        const justFinishedSet = state.currentSet;
-                        state.currentSet++;
-                        state.p1Index = 0; state.p2Index = 0;
-                        state.gamesTimeHistory = [];
+                        const justFinishedSet = state.currentSet; state.currentSet++;
+                        state.p1Index = 0; state.p2Index = 0; state.gamesTimeHistory = [];
                         trigger6SecSetOverlay(justFinishedSet);
                     }
                 }
@@ -495,28 +463,20 @@
                 if (teamIndex === 1) {
                     if (state.p1Index === 3 && state.p2Index === 3) {
                         if (style === "one-golden") winGame(1);
-                        else if (style === "double") {
-                            if ((state.deuceCounter || 0) >= 2) winGame(1); else state.p1Index = 4;
-                        } else state.p1Index = 4;
-                    } 
-                    else if (state.p1Index === 3 && state.p2Index === 4) {
-                        state.p2Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1;
-                    } 
-                    else if (state.p1Index === 4) winGame(1); 
-                    else if (state.p1Index === 3 && state.p2Index < 3) winGame(1); 
+                        else if (style === "double") { if ((state.deuceCounter || 0) >= 2) winGame(1); else state.p1Index = 4; }
+                        else state.p1Index = 4;
+                    } else if (state.p1Index === 3 && state.p2Index === 4) { state.p2Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
+                    else if (state.p1Index === 4) winGame(1);
+                    else if (state.p1Index === 3 && state.p2Index < 3) winGame(1);
                     else state.p1Index++;
                 } else {
                     if (state.p2Index === 3 && state.p1Index === 3) {
                         if (style === "one-golden") winGame(2);
-                        else if (style === "double") {
-                            if ((state.deuceCounter || 0) >= 2) winGame(2); else state.p2Index = 4;
-                        } else state.p2Index = 4;
-                    } 
-                    else if (state.p2Index === 3 && state.p1Index === 4) {
-                        state.p1Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1;
-                    } 
-                    else if (state.p2Index === 4) winGame(2); 
-                    else if (state.p2Index === 3 && state.p1Index < 3) winGame(2); 
+                        else if (style === "double") { if ((state.deuceCounter || 0) >= 2) winGame(2); else state.p2Index = 4; }
+                        else state.p2Index = 4;
+                    } else if (state.p2Index === 3 && state.p1Index === 4) { state.p1Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
+                    else if (state.p2Index === 4) winGame(2);
+                    else if (state.p2Index === 3 && state.p1Index < 3) winGame(2);
                     else state.p2Index++;
                 }
             }
@@ -526,13 +486,11 @@
         function winGame(winningTeam) {
             state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
             let cSet = state.currentSet || 1;
-            
             const server = state.currentServer || 1;
             if (winningTeam !== server) {
                 if (winningTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1;
                 else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1;
             }
-
             if (winningTeam === 1) state['t1_s' + cSet] = (state['t1_s' + cSet] || 0) + 1;
             else state['t2_s' + cSet] = (state['t2_s' + cSet] || 0) + 1;
             
@@ -541,12 +499,8 @@
             state.gamesTimeHistory.push(elapsedMinutes + '`');
             gameStartTimestamp = Date.now();
 
-            let g1 = state['t1_s' + cSet]; 
-            let g2 = state['t2_s' + cSet];
-            let totalGamesInSet = g1 + g2;
-
-            let isSetOver = false;
-            let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
+            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + cSet]; let totalGamesInSet = g1 + g2;
+            let isSetOver = false; let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
 
             if (state.isProSet) {
                 if (g1 >= limit && (g1 - g2 >= 2)) isSetOver = true;
@@ -565,134 +519,102 @@
             if (isSetOver) {
                 const finishedSetNum = state.currentSet;
                 if (state.currentSet < 5) {
-                    state.currentSet++;
-                    state.p1BreakPoints = 0; state.p2BreakPoints = 0;
-                    state.gamesTimeHistory = [];
+                    state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = [];
                     state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
                 }
                 trigger6SecSetOverlay(finishedSetNum); 
             } else {
-                // Авто-статистика геймів через один розіграш (якщо сума геймів непарна)
-                if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
-                    trigger6SecStats();
-                }
+                if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) trigger6SecStats();
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
         }
 
         window.triggerServerDoubleFault = function() {
             if (state.isMatchFinished) return;
-            triggerVibration(); saveToHistory(state);
-            const server = state.currentServer || 1;
+            saveToHistory(state); const server = state.currentServer || 1;
             if (server === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1;
             else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1;
             state.animation = { team: server, type: 'double_fault', ts: Date.now() };
             window.scorePointWithoutHistorySave(server === 1 ? 2 : 1);
         }
 
-        window.toggleStatsAutomation = function(isChecked) {
-            saveToHistory(state); state.isStatsAutomated = isChecked; set(matchRef, state);
-        }
-        window.toggleStatsManual = function() {
-            state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state);
-        }
-        window.updateLogoText = function(val) {
-            state.customLogoText = val; set(matchRef, state);
-        }
-        window.toggleLogoVisibility = function() {
-            state.showLogo = !state.showLogo; set(matchRef, state);
-        }
+        window.toggleStatsAutomation = function(isChecked) { saveToHistory(state); state.isStatsAutomated = isChecked; set(matchRef, state); }
+        window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
+        window.updateLogoText = function(val) { state.customLogoText = val; set(matchRef, state); }
+        window.toggleLogoVisibility = function() { state.showLogo = !state.showLogo; set(matchRef, state); }
         window.uploadLogoFile = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) { state.logoSrc = evt.target.result; set(matchRef, state); };
             reader.readAsDataURL(file);
         }
-        window.clearLogoData = function() {
-            state.logoSrc = ""; state.customLogoText = ""; state.showLogo = false; set(matchRef, state);
-        }
-        window.undoAction = function() {
-            triggerVibration();
-            if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); }
-        }
+        window.clearLogoData = function() { state.logoSrc = ""; state.customLogoText = ""; state.showLogo = false; set(matchRef, state); }
+        window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
 
         function recalculateRibbons(s) {
             if (s.isAmericano) { s.activeMatchRibbon = "NONE"; return; }
             let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
             let cSet = s.currentSet || 1; let g1 = s['t1_s' + cSet] || 0; let g2 = s['t2_s' + cSet] || 0;
-            let isGolden = (!s.isTiebreak && p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
-            let p1GP = (s.isTiebreak ? p1 >= 6 && p1 > p2 : (p1 === 3 && p2 < 3) || p1 === 4 || isGolden);
-            let p2GP = (s.isTiebreak ? p2 >= 6 && p2 > p1 : (s.p2Index === 3 && s.p1Index < 3) || s.p2Index === 4 || isGolden);
+            
+            if (!!s.isTiebreak) {
+                if (p1 >= 6 && p1 > p2) { s.activeMatchRibbon = (cSet >= 3 || s.isProSet) ? "MATCH_POINT" : "SET_POINT"; return; }
+                if (p2 >= 6 && p2 > p1) { s.activeMatchRibbon = (cSet >= 3 || s.isProSet) ? "MATCH_POINT" : "SET_POINT"; return; }
+                s.activeMatchRibbon = "TIEBREAK_POINT"; return;
+            }
+
+            let isGolden = (p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
+            let p1GP = ((p1 === 3 && p2 < 3) || p1 === 4 || isGolden); let p2GP = ((p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
             if (!p1GP && !p2GP) { s.activeMatchRibbon = "NONE"; return; }
             
             let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
             let p1SP = false; let p2SP = false;
-            
-            if (s.isTiebreak) {
-                p1SP = true; p2SP = true;
-            } else if (s.isProSet) {
+            if (s.isProSet) {
                 if ((g1 === limit - 1 && g2 <= limit - 2) || g1 === limit) p1SP = true;
                 if ((g2 === limit - 1 && g1 <= limit - 2) || g2 === limit) p2SP = true;
             } else {
                 if ((g1 === 5 && g2 <= 4) || g1 === 6) p1SP = true;
                 if ((g2 === 5 && g1 <= 4) || g2 === 6) p2SP = true;
             }
-
             if ((p1GP && p1SP) || (p2GP && p2SP)) { s.activeMatchRibbon = (s.isProSet || cSet >= 3) ? "MATCH_POINT" : "SET_POINT"; return; }
-            if (s.isTiebreak) { s.activeMatchRibbon = "TIEBREAK_POINT"; return; }
             if (isGolden) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
             if ((p1GP && server === 2) || (p2GP && server === 1)) { s.activeMatchRibbon = "BREAK_POINT"; return; }
             s.activeMatchRibbon = "GAME_POINT";
         }
 
-        window.toggleAmericanoMode = function(c) {
-            saveToHistory(state); state.isAmericano = c; if(c) state.isProSet = false;
-            state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
-        };
-        window.toggleProSetMode = function(c) {
-            saveToHistory(state); state.isProSet = c; if(c) state.isAmericano = false;
-            state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
-        };
-        window.changeDeuceStyle = function(s) {
-            saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; state.deuceCounter = 0; set(matchRef, state);
-        }
-        window.updateAmericanoLimit = function(v) { 
-            let parsed = parseInt(v) || 21;
-            if (parsed < 1) parsed = 1; if (parsed > 30) parsed = 30;
-            state.americanoLimit = parsed; set(matchRef, state); 
-        };
-        window.updateProSetLimit = function(v) { 
-            let parsed = parseInt(v) || 8;
-            if (parsed < 1) parsed = 1; if (parsed > 10) parsed = 10;
-            state.proSetLimit = parsed;
-            recalculateRibbons(state); set(matchRef, state); 
-        };
+        window.toggleAmericanoMode = function(c) { saveToHistory(state); state.isAmericano = c; if(c) state.isProSet = false; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
+        window.toggleProSetMode = function(c) { saveToHistory(state); state.isProSet = c; if(c) state.isAmericano = false; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
+        window.changeDeuceStyle = function(s) { saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); }
+        window.updateAmericanoLimit = function(v) { let parsed = parseInt(v) || 21; state.americanoLimit = parsed; set(matchRef, state); };
+        window.updateProSetLimit = function(v) { let parsed = parseInt(v) || 8; state.proSetLimit = parsed; set(matchRef, state); };
         window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
         window.updatePosition = function() {
             state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
             state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0; set(matchRef, state);
         };
-        window.setServer = function(s) { triggerVibration(); saveToHistory(state); state.currentServer = s; set(matchRef, state); };
+        window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); };
         window.updateNames = function() {
             const p1 = document.getElementById('p1-name-input').value; const p2 = document.getElementById('p2-name-input').value;
             if(p1) state.p1name = p1; if(p2) state.p2name = p2; set(matchRef, state);
         }
         
-        window.resetMatch = function() {
-            if(confirm("Скинути матч вручну?")) {
-                if (statsTimeout) clearTimeout(statsTimeout);
-                gameStartTimestamp = Date.now();
-                set(matchRef, {
-                    p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
-                    p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
-                    isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
-                    deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-                    isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
-                    showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
-                    t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
-                });
-            }
+        window.resetMatch = function() { if(confirm("Скинути поточний корт?")) { resetMatchWithoutConfirm(); } }
+
+        function resetMatchWithoutConfirm() {
+            if (statsTimeout) clearTimeout(statsTimeout);
+            gameStartTimestamp = Date.now();
+            set(matchRef, {
+                p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B",
+                p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
+                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
+                deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
+                isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
+                showMainBoard: true, showQrCode: false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
+                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
+            });
         }
+
+        // Старт підключення
+        initCourtConnection();
     </script>
 </body>
 </html>
