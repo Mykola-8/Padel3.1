@@ -405,6 +405,7 @@
             }, 6000);
         }
 
+        // ПОКАЗ ТАБЛИЦІ РЕЗУЛЬТАТУ СЕТУ ПРОТЯГОМ 8 СЕКУНД (8000 мс)
         function trigger6SecSetOverlay(finishedSetNum) {
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = false;
@@ -413,7 +414,7 @@
             set(matchRef, state);
             statsTimeout = setTimeout(() => {
                 state.showSetOverlayTrigger = false; set(matchRef, state);
-            }, 6000);
+            }, 8000); // Оновлено до 8 секунд
         }
 
         window.toggleMainBoardVisibility = function(isChecked) {
