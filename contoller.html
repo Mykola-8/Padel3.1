@@ -15,8 +15,9 @@
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; transition: border 0.2s; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
 
-        .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.08s ease, filter 0.08s ease; }
-        .btn:active { transform: scale(0.95); filter: brightness(0.85); }
+        /* ОНОВЛЕНІ КЛАВІШІ З КІНЕМАТОГРАФІЧНОЮ АНІМАЦІЄЮ НАТИСКАННЯ */
+        .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
+        .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
         
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
         .btn-green { background: #15803d; }
@@ -38,9 +39,9 @@
             gap: 8px; 
             cursor: pointer; 
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-            transition: transform 0.06s cubic-bezier(0, 0, 0, 1), filter 0.06s ease;
+            transition: transform 0.05s ease, filter 0.05s ease;
         }
-        .score-btn:active { transform: scale(0.91); filter: brightness(0.75); }
+        .score-btn:active { transform: scale(0.93) !important; filter: brightness(0.75) !important; }
         .score-btn span { font-size: 42px; font-weight: 900; }
         
         .serve-box { display: flex; gap: 10px; width: 100%; }
@@ -405,7 +406,6 @@
             }, 6000);
         }
 
-        // ПОКАЗ ТАБЛИЦІ РЕЗУЛЬТАТУ СЕТУ ПРОТЯГОМ 8 СЕКУНД (8000 мс)
         function trigger6SecSetOverlay(finishedSetNum) {
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = false;
@@ -414,7 +414,7 @@
             set(matchRef, state);
             statsTimeout = setTimeout(() => {
                 state.showSetOverlayTrigger = false; set(matchRef, state);
-            }, 8000); // Оновлено до 8 секунд
+            }, 8000);
         }
 
         window.toggleMainBoardVisibility = function(isChecked) {
