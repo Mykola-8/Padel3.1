@@ -233,30 +233,6 @@
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
         .sr-vs { font-size: 14px; font-weight: 800; color: #777; letter-spacing: 1px; margin-top: 5px; }
 
-        /* ===== НАПИС ТАЙБРЕЙК ПО ЦЕНТРУ ЕКРАНА ===== */
-        .tiebreak-center-alert {
-            position: fixed;
-            top: 220px;
-            left: 50%;
-            transform: translateX(-50%) scale(0.8);
-            font-size: 20px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            color: #c69f66;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px 24px;
-            border-radius: 4px;
-            border: 1px solid rgba(198, 159, 102, 0.3);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 9990;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
-        }
-        .tiebreak-center-alert.visible { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
-
         /* ===== ПОВНІСТЮ ПРОЗОРИЙ БЛОК QR КОДУ ===== */
         .qr-code-wrapper {
             position: fixed;
@@ -363,20 +339,6 @@
         </div>
     </div>
 
-    <div class="set-result-overlay" id="set-result-panel">
-        <div class="sr-set-label" id="sr-set-number-label">ЗАВЕРШЕНО СЕТ 1</div>
-        <div class="sr-main-row">
-            <div class="sr-team left" id="sr-team1-name">Команда 1</div>
-            <div class="sr-vs-score-block">
-                <div class="sr-score" id="sr-sets-score-value">6 : 4</div>
-                <div class="sr-vs">VS</div>
-            </div>
-            <div class="sr-team right" id="sr-team2-name">Команда 2</div>
-        </div>
-    </div>
-
-    <div class="tiebreak-center-alert" id="tiebreak-center-panel">Тайбрейк</div>
-
     <div class="qr-code-wrapper" id="qr-code-panel">
         <img id="qr-code-image" src="" alt="QR Code">
         <div class="qr-code-text" id="qr-code-description-node">SCAN ME</div>
@@ -408,7 +370,6 @@
         let isMatchFinishedCurrently = false;
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"];
 
-        // ДИНАМІЧНЕ ВИЗНАЧЕННЯ КОРТУ З URL (?court=1)
         const urlParams = new URLSearchParams(window.location.search);
         const courtId = urlParams.get('court') || "1"; 
         const databasePath = `padel/courts/court_${courtId}`;
@@ -445,13 +406,6 @@
                     boardWrapper.classList.remove('hidden');
                 }
 
-                const tbCenterPanel = document.getElementById('tiebreak-center-panel');
-                if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger) {
-                    tbCenterPanel.classList.add('visible');
-                } else {
-                    tbCenterPanel.classList.remove('visible');
-                }
-
                 if (state.showSetOverlayTrigger && !state.isMatchFinished) {
                     const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
                     document.getElementById('sr-set-number-label').innerText = `ЗАВЕРШЕНО СЕТ ${targetSetForOverlay} • КОРТ ${courtId}`;
@@ -464,7 +418,7 @@
                     
                     setResultPanel.classList.add('visible');
                 } else {
-                    setResultPanel.classList.remove('visible');
+                    if (setResultPanel) setResultPanel.classList.remove('visible');
                 }
 
                 const qrWrapper = document.getElementById('qr-code-panel');
@@ -593,7 +547,7 @@
 
                         for(let i = 1; i <= totalSetsToRender; i++) {
                             let g1_set = state[`t1_s${i}`] || 0;
-                            let g2_set = state[`t2_s${i}`] || 0;
+                            let g2_set = state[`t2_set`] || 0;
                             if (i <= activeSet || g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
                                 const setRow = document.createElement('div');
