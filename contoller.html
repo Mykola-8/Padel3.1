@@ -195,7 +195,7 @@
             <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
-            <span style="font-size:12px; color:#ddd;">2. Jeden Golden Point:</span>
+            <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
             <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
         </div>
         <div class="switch-row" style="margin-top:4px;">
@@ -273,7 +273,6 @@
         let statsTimeout = null;
         let gameStartTimestamp = Date.now();
 
-        // Функція ініціалізації та зміни кортів
         function initCourtConnection() {
             const urlParams = new URLSearchParams(window.location.search);
             courtId = urlParams.get('court') || "1";
@@ -291,7 +290,6 @@
                     state = data;
                     renderUI();
                 } else {
-                    // Якщо корт повністю пустий, створюємо дефолтну структуру
                     resetMatchWithoutConfirm();
                 }
             });
@@ -613,7 +611,6 @@
             });
         }
 
-        // Старт підключення
         initCourtConnection();
     </script>
 </body>
