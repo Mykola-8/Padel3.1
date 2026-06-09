@@ -157,23 +157,23 @@
             white-space: nowrap;
         }
         .ribbon.visible { height: 28px; opacity: 1; padding: 0 15px; }
-        .ribbon-matchpoint { background: rgba(185, 28, 28, 0.5); color: #fff; }
-        .ribbon-setpoint { background: rgba(29, 78, 216, 0.5); color: #fff; }
-        .ribbon-breakpoint { background: rgba(198, 159, 102, 0.5); color: #fff; }
-        .ribbon-gamepoint { background: rgba(42, 42, 42, 0.5); color: #fff; }
-        .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.5); color: #fff; font-weight: 900; }
-        .ribbon-tiebreak { background: rgba(75, 85, 99, 0.5); color: #fff; }
+        .ribbon-matchpoint { background: rgba(185, 28, 28, 0.65); color: #fff; }
+        .ribbon-setpoint { background: rgba(29, 78, 216, 0.65); color: #fff; }
+        .ribbon-breakpoint { background: rgba(198, 159, 102, 0.65); color: #fff; }
+        .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
+        .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
+        .ribbon-tiebreak { background: rgba(75, 85, 99, 0.65); color: #fff; }
 
-        /* ===== ТАБЛО СТАТИСТИКИ ПО ЦЕНТРУ ===== */
+        /* ===== ТАБЛО СТАТИСТИКИ / КІНЕЦЬ МАТЧУ ===== */
         .statistics-overlay {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 550px;
-            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.94), rgba(15, 15, 15, 0.94));
+            background: linear-gradient(to bottom, rgba(20, 20, 20, 0.75), rgba(12, 12, 12, 0.75));
             border-radius: 8px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             font-family: 'Montserrat', sans-serif;
             color: white;
             z-index: 9999;
@@ -194,7 +194,7 @@
         .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
         .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
 
-        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; margin-top: 5px; }
+        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
         .h-set-title { font-weight: 700; color: #aaa; text-transform: uppercase; font-size: 11px; }
@@ -208,9 +208,9 @@
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 820px;
-            background: rgba(15, 15, 15, 0.88);
+            background: rgba(15, 15, 15, 0.72);
             border-radius: 6px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             z-index: 9998;
             opacity: 0;
             visibility: hidden;
@@ -233,7 +233,31 @@
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
         .sr-vs { font-size: 14px; font-weight: 800; color: #777; letter-spacing: 1px; margin-top: 5px; }
 
-        /* ===== ПОВНІСТЮ ПРОЗОРИЙ БЛОК QR КОДУ (БЕЗ ФОНІВ Й РАМОК) ===== */
+        /* ===== НАПИС ТАЙБРЕЙК ПО ЦЕНТРУ ЕКРАНА ===== */
+        .tiebreak-center-alert {
+            position: fixed;
+            top: 220px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: #c69f66;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 24px;
+            border-radius: 4px;
+            border: 1px solid rgba(198, 159, 102, 0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 9990;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
+        }
+        .tiebreak-center-alert.visible { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
+
+        /* ===== ПОВНІСТЮ ПРОЗОРИЙ БЛОК QR КОДУ ===== */
         .qr-code-wrapper {
             position: fixed;
             bottom: 30px;
@@ -242,7 +266,7 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            background: transparent !important; /* Прозорий фон */
+            background: transparent !important;
             padding: 0 !important;
             border-radius: 0;
             box-shadow: none;
@@ -255,12 +279,6 @@
         .qr-code-wrapper.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         .qr-code-wrapper img { width: 115px; height: 115px; display: block; background: transparent; padding: 0; box-sizing: border-box; }
         .qr-code-text { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #c69f66; letter-spacing: 1px; text-align: center; max-width: 130px; line-height: 1.3; margin-top: 4px; background: transparent !important; }
-
-        @keyframes gray-blink {
-            0%, 100% { background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); color: white; }
-            50% { background: #555555; color: #bbbbbb; }
-        }
-        .double-fault-blink { animation: gray-blink 0.25s ease-in-out 3; }
     </style>
 </head>
 <body>
@@ -357,6 +375,8 @@
         </div>
     </div>
 
+    <div class="tiebreak-center-alert" id="tiebreak-center-panel">Тайбрейк</div>
+
     <div class="qr-code-wrapper" id="qr-code-panel">
         <img id="qr-code-image" src="" alt="QR Code">
         <div class="qr-code-text" id="qr-code-description-node">SCAN ME</div>
@@ -386,8 +406,12 @@
         let setSeconds = 0;
         let lastSetTracked = 1;
         let isMatchFinishedCurrently = false;
-
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"];
+
+        // ДИНАМІЧНЕ ВИЗНАЧЕННЯ КОРТУ З URL (?court=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const courtId = urlParams.get('court') || "1"; 
+        const databasePath = `padel/courts/court_${courtId}`;
 
         const formatTime = (sec) => {
             const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -407,7 +431,7 @@
             if(tSet) tSet.innerText = formatTime(setSeconds);
         }, 1000);
 
-        onValue(ref(db, "padel/standalone_board"), (snapshot) => {
+        onValue(ref(db, databasePath), (snapshot) => {
             const state = snapshot.val();
             if (state) {
                 isMatchFinishedCurrently = !!state.isMatchFinished;
@@ -415,17 +439,22 @@
                 const setResultPanel = document.getElementById('set-result-panel');
                 const stPanel = document.getElementById('statistics-panel');
 
-                // ПРИХОВУЄМО КУТОВЕ ТАБЛО, якщо відкритий екран Сету або Статистика або Фінал
                 if (state.showMainBoard === false || state.showStatsOverlay === true || state.isMatchFinished === true || !!state.showSetOverlayTrigger) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
                 }
 
-                // Екран Сету замість статистики
+                const tbCenterPanel = document.getElementById('tiebreak-center-panel');
+                if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger) {
+                    tbCenterPanel.classList.add('visible');
+                } else {
+                    tbCenterPanel.classList.remove('visible');
+                }
+
                 if (state.showSetOverlayTrigger && !state.isMatchFinished) {
                     const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
-                    document.getElementById('sr-set-number-label').innerText = `ЗАВЕРШЕНО СЕТ ${targetSetForOverlay}`;
+                    document.getElementById('sr-set-number-label').innerText = `ЗАВЕРШЕНО СЕТ ${targetSetForOverlay} • КОРТ ${courtId}`;
                     document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
                     document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
                     
@@ -438,7 +467,6 @@
                     setResultPanel.classList.remove('visible');
                 }
 
-                // Генерація QR-коду
                 const qrWrapper = document.getElementById('qr-code-panel');
                 if (state.showQrCode) {
                     const targetUrl = state.qrCodeUrl || "https://google.com";
@@ -544,7 +572,6 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                // ЕКРАН СТАТИСТИКИ ТА КІНЦЯ МАТЧУ
                 if (state.showStatsOverlay || state.isMatchFinished) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('st-name2').innerText = state.p2name || "Команда B";
@@ -554,7 +581,7 @@
                     document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
 
                     if (state.isMatchFinished) {
-                        document.getElementById('stats-main-header').innerText = "МАТЧ ЗАВЕРШЕНО • ПІДСУМКИ";
+                        document.getElementById('stats-main-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
                         document.getElementById('row-stats-current-set-games').style.display = 'none';
                         document.getElementById('row-stats-history').style.display = 'none';
                         document.getElementById('row-stats-timers').style.display = 'none';
@@ -581,7 +608,7 @@
                         }
                         document.getElementById('final-sets-summary-block').style.display = (validSetsRendered > 0 && !state.isAmericano) ? 'flex' : 'none';
                     } else {
-                        document.getElementById('stats-main-header').innerText = "Матч-Статистика";
+                        document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
