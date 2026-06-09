@@ -49,6 +49,7 @@
         .serve-btn:active { transform: scale(0.95); }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         
+        /* ЗБІЛЬШЕНІ СТРАТЕГІЧНІ КНОПКИ */
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s; }
@@ -569,9 +570,9 @@
                     state.gamesTimeHistory = [];
                     state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
                 }
-                trigger6SecSetOverlay(finishedSetNum); // Показ прозорого фону Сету
+                trigger6SecSetOverlay(finishedSetNum); 
             } else {
-                // Звичайна авто-статистика геймів через один розіграш (якщо сума геймів непарна)
+                // Авто-статистика геймів через один розіграш (якщо сума геймів непарна)
                 if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) {
                     trigger6SecStats();
                 }
