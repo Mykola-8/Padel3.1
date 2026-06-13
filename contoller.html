@@ -1,3 +1,5 @@
+
+Controller · HTML
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -466,24 +468,12 @@
         function trigger6SecStats() {
             if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
-            // Якщо статистика вже показана — сховати і перезапустити
-            if (state.showStatsOverlay) {
-                state.showStatsOverlay = false;
-                set(matchRef, state);
-                statsTimeout = setTimeout(() => {
-                    state.showStatsOverlay = true; set(matchRef, state);
-                    statsTimeout = setTimeout(() => {
-                        state.showStatsOverlay = false; set(matchRef, state);
-                    }, 5000);
-                }, 400);
-            } else {
-                state.showStatsOverlay = true;
-                state.showSetOverlayTrigger = false;
-                set(matchRef, state);
-                statsTimeout = setTimeout(() => {
-                    state.showStatsOverlay = false; set(matchRef, state);
-                }, 5000);
-            }
+            // Встановлюємо прапорець — фінальний set() в scorePointWithoutHistorySave запише його
+            state.showStatsOverlay = true;
+            state.showSetOverlayTrigger = false;
+            statsTimeout = setTimeout(() => {
+                state.showStatsOverlay = false; set(matchRef, state);
+            }, 5000);
         }
 
         function trigger6SecSetOverlay(finishedSetNum) {
@@ -491,7 +481,7 @@
             state.showStatsOverlay = false;
             state.showSetOverlayTrigger = true;
             state.lastFinishedSetNum = finishedSetNum;
-            set(matchRef, state);
+            // Фінальний set() буде викликаний в scorePointWithoutHistorySave
             statsTimeout = setTimeout(() => {
                 state.showSetOverlayTrigger = false; set(matchRef, state);
             }, 5000);
