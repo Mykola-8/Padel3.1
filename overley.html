@@ -1,5 +1,3 @@
-
-Overlay · HTML
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -97,7 +95,6 @@ Overlay · HTML
         .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
         .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
         .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
-        .points { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #ffffff; width: 65px; font-size: 24px; display: flex; justify-content: center; align-items: center; }
 
         /* ===== СТРІЧКИ ВГОРУ (ПОЗИЦІОНУВАННЯ PRO-SET ТА TIEBREAK) ===== */
         .ribbons-top-container {
@@ -352,7 +349,6 @@ Overlay · HTML
                         <div class="score-box" id="t1-s3">0</div>
                         <div class="score-box" id="t1-s4">0</div>
                         <div class="score-box" id="t1-s5">0</div>
-                        <div class="score-box points" id="t1-pts">0</div>
                     </div>
                     <div class="team-row" id="row-team-2">
                         <div class="team-names" id="block-anim-2">
@@ -364,7 +360,6 @@ Overlay · HTML
                         <div class="score-box" id="t2-s3">0</div>
                         <div class="score-box" id="t2-s4">0</div>
                         <div class="score-box" id="t2-s5">0</div>
-                        <div class="score-box points" id="t2-pts">0</div>
                     </div>
                 </div>
 
@@ -563,12 +558,18 @@ Overlay · HTML
                     txtNode.style.display = 'block';
                 }
 
-                if (state.isAmericano || state.isTiebreak) {
-                    document.getElementById('t1-pts').innerText = state.p1Index;
-                    document.getElementById('t2-pts').innerText = state.p2Index;
+                // ===== RIBBON ПЛАШКИ =====
+                const ribbonMatch = document.getElementById('ribbon-match');
+                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
+                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
+                    ribbonMatch.className = "ribbon visible";
+                    if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
+                    else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
+                    else if (state.activeMatchRibbon === "BREAK_POINT") ribbonMatch.classList.add('ribbon-breakpoint');
+                    else if (state.activeMatchRibbon === "GOLDEN_POINT") ribbonMatch.classList.add('ribbon-goldenpoint');
+                    else if (state.activeMatchRibbon === "GAME_POINT") ribbonMatch.classList.add('ribbon-gamepoint');
                 } else {
-                    document.getElementById('t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                    document.getElementById('t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
+                    ribbonMatch.classList.remove('visible');
                 }
 
                 // ===== ТАБЛО ОЧОК (15/30/40/AD) =====
@@ -664,19 +665,7 @@ Overlay · HTML
                     ribbonProset.classList.remove('visible');
                 }
 
-                const ribbonMatch = document.getElementById('ribbon-match');
-                // Модифіковане правило: в Pro-Set не виводиться Match Point
-                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
-                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
-                    ribbonMatch.className = "ribbon visible"; 
-                    if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
-                    else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
-                    else if (state.activeMatchRibbon === "BREAK_POINT") ribbonMatch.classList.add('ribbon-breakpoint');
-                    else if (state.activeMatchRibbon === "GOLDEN_POINT") ribbonMatch.classList.add('ribbon-goldenpoint');
-                    else if (state.activeMatchRibbon === "GAME_POINT") ribbonMatch.classList.add('ribbon-gamepoint');
-                } else {
-                    ribbonMatch.classList.remove('visible');
-                }
+                // ribbon-match замінено на slide-banner вище
 
                 if (state.showStatsOverlay) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
@@ -700,38 +689,27 @@ Overlay · HTML
                         for(let i = 1; i <= totalSetsToRender; i++) {
                             let g1_set = state[`t1_s${i}`] || 0;
                             let g2_set = state[`t2_s${i}`] || 0;
-                            // Показуємо лише зіграні сети (де хоча б один гейм зіграно)
                             if (g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
-                                const lg1 = state[`t1_lg_s${i}`] || 0;
-                                const lg2 = state[`t2_lg_s${i}`] || 0;
-                                const lgTotal = lg1 + lg2;
-                                const lgText = lgTotal > 0
-                                    ? `🎯 ГЕЙМ ПІД НУЛЬ: ${lg1} — ${lg2} <span class="h-set-lovegame">love game</span>`
-                                    : '';
                                 const setRow = document.createElement('div');
                                 setRow.className = 'history-set-row';
-                                setRow.style.flexDirection = 'column';
-                                setRow.style.alignItems = 'flex-start';
-                                setRow.style.gap = '3px';
                                 setRow.innerHTML = `
-                                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
-                                        <span class="h-set-title">Сет ${i}</span>
-                                        <span class="h-set-score">${g1_set} : ${g2_set}</span>
-                                        <span class="h-set-time">⏱️ ${setsTimeDurationsHistory[i-1] || "00:00"}</span>
-                                    </div>
-                                    ${lgTotal > 0 ? `<div style="font-size:11px;color:#c69f66;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.9);">🎯 Гейм під нуль: ${lg1} — ${lg2} <span class="h-set-lovegame">love game</span></div>` : ''}
+                                    <span class="h-set-title">Сет ${i}</span>
+                                    <span class="h-set-score">${g1_set} : ${g2_set}</span>
+                                    <span class="h-set-time">${setsTimeDurationsHistory[i-1] || "00:00"}</span>
                                 `;
                                 targetList.appendChild(setRow);
                             }
                         }
                         document.getElementById('final-sets-summary-block').style.display = (validSetsRendered > 0 && !state.isAmericano) ? 'flex' : 'none';
+                        document.getElementById('row-stats-lovegame').style.display = 'none';
                     } else {
                         document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
                         document.getElementById('final-sets-summary-block').style.display = 'none';
+                        document.getElementById('row-stats-lovegame').style.display = 'none';
                         
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
                         document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
