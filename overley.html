@@ -1,3 +1,5 @@
+
+Overlay · HTML
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -170,14 +172,55 @@
         .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
 
-        /* ===== ТАБЛО СТАТИСТИКИ ТА КІНЦЯ МАТЧУ ===== */
+        /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
+        .points-board-outer {
+            overflow: hidden;
+            height: 96px;
+            width: 0;
+            transition: width 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            flex-shrink: 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .points-board-outer.visible {
+            width: 100px;
+        }
+        .points-board {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100px;
+            height: 96px;
+        }
+        .points-cell {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 26px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .points-cell.team1 {
+            background: linear-gradient(to right, rgba(50,50,50,0.95), rgba(65,65,65,0.92));
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .points-cell.team2 {
+            background: linear-gradient(to right, rgba(30,30,30,0.95), rgba(42,42,42,0.92));
+            color: #fff;
+        }
+        .points-cell.ad-active {
+            color: #c69f66;
+        }
         .statistics-overlay {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 550px;
-            background: linear-gradient(to bottom, rgba(16, 16, 16, 0.88), rgba(6, 6, 6, 0.88));
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.55), rgba(4, 4, 4, 0.55));
             border: 1px solid rgba(198, 159, 102, 0.35);
             border-radius: 8px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.7);
@@ -190,24 +233,25 @@
             transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
             padding: 24px;
             box-sizing: border-box;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(12px);
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+        .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
         .stats-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
         .stats-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
-        .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .stats-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .stats-label { font-size: 10px; font-weight: 700; color: #bbbbbb; text-transform: uppercase; letter-spacing: 1px; }
-        .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; }
-        .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; }
+        .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .stats-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .stats-label { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
 
-        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.35); border-radius: 6px; padding: 10px; margin-top: 5px; }
+        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .h-set-title { font-weight: 700; color: #ddd; text-transform: uppercase; font-size: 11px; }
-        .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; }
-        .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; }
+        .h-set-title { font-weight: 700; color: #eeeeee; text-transform: uppercase; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .h-set-lovegame { font-size: 10px; color: #aaa; font-weight: 600; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
 
         /* ===== ТАБЛИЦЯ РЕЗУЛЬТАТУ СЕТУ (ЗМЕНШЕНО ТА ЗТИСНЕНО ТЕКСТ КОМАНД) ===== */
         .set-result-overlay {
@@ -216,7 +260,7 @@
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 820px;
-            background: rgba(12, 12, 12, 0.88);
+            background: rgba(8, 8, 8, 0.52);
             border: 1px solid rgba(198, 159, 102, 0.4);
             border-radius: 6px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
@@ -231,29 +275,30 @@
             padding: 35px;
             box-sizing: border-box;
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(14px);
         }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
-        .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; }
+        .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
         .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 20px; }
         
         /* Зменшення, стиснення та ліміт ширини, щоб 100% вмістити у табло */
         .sr-team { 
             flex: 1; 
-            font-size: 20px; /* Зменшено з 28px */
+            font-size: 20px;
             font-weight: 800; 
             text-transform: uppercase; 
-            letter-spacing: -0.2px; /* Стиснення міжлітерного простору */
-            max-width: 280px; /* Обмеження по ширині */
+            letter-spacing: -0.2px;
+            max-width: 280px;
             overflow: hidden; 
             text-overflow: ellipsis; 
-            white-space: nowrap; 
+            white-space: nowrap;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.95);
         }
         .sr-team.left { text-align: right; }
         .sr-team.right { text-align: left; }
         .sr-vs-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
-        .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; }
-        .sr-vs { font-size: 14px; font-weight: 800; color: #aaa; letter-spacing: 1px; margin-top: 5px; }
+        .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.95); }
+        .sr-vs { font-size: 14px; font-weight: 800; color: #ccc; letter-spacing: 1px; margin-top: 5px; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
 
         /* ===== QR КОД (ПРАВИЙ НИЖНІЙ КУТ) ===== */
         .qr-code-wrapper {
@@ -295,32 +340,43 @@
                 <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
             </div>
 
-            <div class="main-board">
-                <div class="team-row" id="row-team-1">
-                    <div class="team-names" id="block-anim-1">
-                        <span id="name-display-t1">TELLO / ARCE</span>
-                        <span class="server-indicator" id="srv1">🎾</span>
+            <div style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
+                <div class="main-board" style="position:relative; z-index:2;">
+                    <div class="team-row" id="row-team-1">
+                        <div class="team-names" id="block-anim-1">
+                            <span id="name-display-t1">TELLO / ARCE</span>
+                            <span class="server-indicator" id="srv1">🎾</span>
+                        </div>
+                        <div class="score-box" id="t1-s1">0</div>
+                        <div class="score-box" id="t1-s2">0</div>
+                        <div class="score-box" id="t1-s3">0</div>
+                        <div class="score-box" id="t1-s4">0</div>
+                        <div class="score-box" id="t1-s5">0</div>
+                        <div class="score-box points" id="t1-pts">0</div>
                     </div>
-                    <div class="score-box" id="t1-s1">0</div>
-                    <div class="score-box" id="t1-s2">0</div>
-                    <div class="score-box" id="t1-s3">0</div>
-                    <div class="score-box" id="t1-s4">0</div>
-                    <div class="score-box" id="t1-s5">0</div>
-                    <div class="score-box points" id="t1-pts">0</div>
+                    <div class="team-row" id="row-team-2">
+                        <div class="team-names" id="block-anim-2">
+                            <span id="name-display-t2">GALAN / CHINGOTTO</span>
+                            <span class="server-indicator" id="srv2">🎾</span>
+                        </div>
+                        <div class="score-box" id="t2-s1">0</div>
+                        <div class="score-box" id="t2-s2">0</div>
+                        <div class="score-box" id="t2-s3">0</div>
+                        <div class="score-box" id="t2-s4">0</div>
+                        <div class="score-box" id="t2-s5">0</div>
+                        <div class="score-box points" id="t2-pts">0</div>
+                    </div>
                 </div>
-                <div class="team-row" id="row-team-2">
-                    <div class="team-names" id="block-anim-2">
-                        <span id="name-display-t2">GALAN / CHINGOTTO</span>
-                        <span class="server-indicator" id="srv2">🎾</span>
+
+                <!-- Табло очок: висувається вправо з-під основного табла -->
+                <div class="points-board-outer" id="points-board-outer">
+                    <div class="points-board" id="points-board">
+                        <div class="points-cell team1" id="pb-t1-pts">0</div>
+                        <div class="points-cell team2" id="pb-t2-pts">0</div>
                     </div>
-                    <div class="score-box" id="t2-s1">0</div>
-                    <div class="score-box" id="t2-s2">0</div>
-                    <div class="score-box" id="t2-s3">0</div>
-                    <div class="score-box" id="t2-s4">0</div>
-                    <div class="score-box" id="t2-s5">0</div>
-                    <div class="score-box points" id="t2-pts">0</div>
                 </div>
             </div>
+
             <div class="info-ribbons-container">
                 <div class="ribbon" id="ribbon-match">MATCH POINT</div>
             </div>
@@ -515,6 +571,33 @@
                     document.getElementById('t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
                 }
 
+                // ===== ТАБЛО ОЧОК (15/30/40/AD) =====
+                const pb = document.getElementById('points-board-outer');
+                const pbT1 = document.getElementById('pb-t1-pts');
+                const pbT2 = document.getElementById('pb-t2-pts');
+                const p1 = state.p1Index || 0;
+                const p2 = state.p2Index || 0;
+                const isZeroZero = (p1 === 0 && p2 === 0);
+
+                if (isZeroZero || state.isAmericano || state.isMatchFinished) {
+                    pb.classList.remove('visible');
+                } else {
+                    pb.classList.add('visible');
+                    if (state.isTiebreak) {
+                        pbT1.innerText = p1;
+                        pbT2.innerText = p2;
+                        pbT1.classList.remove('ad-active');
+                        pbT2.classList.remove('ad-active');
+                    } else {
+                        const lbl1 = p1 === 4 ? "AD" : (p2 === 4 ? "" : pointSequence[p1]);
+                        const lbl2 = p2 === 4 ? "AD" : (p1 === 4 ? "" : pointSequence[p2]);
+                        pbT1.innerText = lbl1;
+                        pbT2.innerText = lbl2;
+                        pbT1.classList.toggle('ad-active', p1 === 4);
+                        pbT2.classList.toggle('ad-active', p2 === 4);
+                    }
+                }
+
                 document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
 
@@ -620,12 +703,24 @@
                             // Показуємо лише зіграні сети (де хоча б один гейм зіграно)
                             if (g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
+                                const lg1 = state[`t1_lg_s${i}`] || 0;
+                                const lg2 = state[`t2_lg_s${i}`] || 0;
+                                const lgTotal = lg1 + lg2;
+                                const lgText = lgTotal > 0
+                                    ? `🎯 ГЕЙМ ПІД НУЛЬ: ${lg1} — ${lg2} <span class="h-set-lovegame">love game</span>`
+                                    : '';
                                 const setRow = document.createElement('div');
                                 setRow.className = 'history-set-row';
+                                setRow.style.flexDirection = 'column';
+                                setRow.style.alignItems = 'flex-start';
+                                setRow.style.gap = '3px';
                                 setRow.innerHTML = `
-                                    <span class="h-set-title">Сет ${i}</span>
-                                    <span class="h-set-score">${g1_set} : ${g2_set}</span>
-                                    <span class="h-set-time">⏱️ Час: ${setsTimeDurationsHistory[i-1] || "00:00"}</span>
+                                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                                        <span class="h-set-title">Сет ${i}</span>
+                                        <span class="h-set-score">${g1_set} : ${g2_set}</span>
+                                        <span class="h-set-time">⏱️ ${setsTimeDurationsHistory[i-1] || "00:00"}</span>
+                                    </div>
+                                    ${lgTotal > 0 ? `<div style="font-size:11px;color:#c69f66;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.9);">🎯 Гейм під нуль: ${lg1} — ${lg2} <span class="h-set-lovegame">love game</span></div>` : ''}
                                 `;
                                 targetList.appendChild(setRow);
                             }
