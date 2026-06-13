@@ -564,6 +564,10 @@
 
         function winGame(winningTeam) {
             const wasTiebreak = !!state.isTiebreak;
+            // Фіксуємо love game: переможець виграв при 0 очках суперника
+            const loserPoints = winningTeam === 1 ? (state.p2Index || 0) : (state.p1Index || 0);
+            const isLoveGame = !wasTiebreak && loserPoints === 0;
+
             state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
             let cSet = state.currentSet || 1;
             const server = state.currentServer || 1;
@@ -573,6 +577,11 @@
             }
             if (winningTeam === 1) state['t1_s' + cSet] = (state['t1_s' + cSet] || 0) + 1;
             else state['t2_s' + cSet] = (state['t2_s' + cSet] || 0) + 1;
+
+            if (isLoveGame) {
+                const lgKey = `t${winningTeam}_lg_s${cSet}`;
+                state[lgKey] = (state[lgKey] || 0) + 1;
+            }
             
             const elapsedMinutes = Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000));
             if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
