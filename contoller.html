@@ -466,12 +466,24 @@
         function trigger6SecStats() {
             if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
-            state.showStatsOverlay = true;
-            state.showSetOverlayTrigger = false;
-            set(matchRef, state);
-            statsTimeout = setTimeout(() => {
-                state.showStatsOverlay = false; set(matchRef, state);
-            }, 6000);
+            // Якщо статистика вже показана — сховати і перезапустити
+            if (state.showStatsOverlay) {
+                state.showStatsOverlay = false;
+                set(matchRef, state);
+                statsTimeout = setTimeout(() => {
+                    state.showStatsOverlay = true; set(matchRef, state);
+                    statsTimeout = setTimeout(() => {
+                        state.showStatsOverlay = false; set(matchRef, state);
+                    }, 5000);
+                }, 400);
+            } else {
+                state.showStatsOverlay = true;
+                state.showSetOverlayTrigger = false;
+                set(matchRef, state);
+                statsTimeout = setTimeout(() => {
+                    state.showStatsOverlay = false; set(matchRef, state);
+                }, 5000);
+            }
         }
 
         function trigger6SecSetOverlay(finishedSetNum) {
@@ -482,7 +494,7 @@
             set(matchRef, state);
             statsTimeout = setTimeout(() => {
                 state.showSetOverlayTrigger = false; set(matchRef, state);
-            }, 8000);
+            }, 5000);
         }
 
         window.toggleMainBoardVisibility = function(isChecked) {
@@ -516,6 +528,11 @@
         window.scorePoint = function(team) {
             if (state.isMatchFinished) return;
             saveToHistory(state);
+            // Якщо показується overlay сету — ховаємо одразу
+            if (state.showSetOverlayTrigger) {
+                if (statsTimeout) clearTimeout(statsTimeout);
+                state.showSetOverlayTrigger = false;
+            }
             window.scorePointWithoutHistorySave(team);
         }
 
