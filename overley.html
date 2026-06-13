@@ -702,14 +702,12 @@
                             }
                         }
                         document.getElementById('final-sets-summary-block').style.display = (validSetsRendered > 0 && !state.isAmericano) ? 'flex' : 'none';
-                        document.getElementById('row-stats-lovegame').style.display = 'none';
                     } else {
                         document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
                         document.getElementById('final-sets-summary-block').style.display = 'none';
-                        document.getElementById('row-stats-lovegame').style.display = 'none';
                         
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
                         document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
