@@ -139,10 +139,20 @@
         </button>
     </div>
 
+    <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:10px; font-weight:700; color:#c69f66; text-transform:uppercase; letter-spacing:1px; text-align:center;">Поточний гравець на подачі:</div>
+        <div class="serve-box">
+            <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+            <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+        </div>
+    </div>
+
     <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
     <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад (Скасувати)</button>
     
     <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+
+    <button class="btn" id="btn-hide-board" style="width:100%; padding:14px; font-size:13px; font-weight:800; background:#374151; border:1px solid #555;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
     
     <button class="btn btn-red" style="width:100%; padding:14px; font-size:13px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
 
@@ -392,6 +402,17 @@
             document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
             document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
             document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
+
+            // Тайбрейк: перша подача - 1, потім кожні 2 очки змінюємо
+            if (state.isTiebreak) {
+                const totalPoints = (state.p1Index || 0) + (state.p2Index || 0);
+                const initialServer = state.currentServer;
+                const otherServer = initialServer === 1 ? 2 : 1;
+                const segment = Math.floor((totalPoints + 1) / 2);
+                const tbServer = (segment % 2 === 0) ? initialServer : otherServer;
+                document.getElementById('pr-srv1').classList.toggle('active', tbServer === 1);
+                document.getElementById('pr-srv2').classList.toggle('active', tbServer === 2);
+            }
             
             if (state.isAmericano || state.isTiebreak) {
                 document.getElementById('pr-t1-pts').innerText = state.p1Index;
@@ -421,6 +442,13 @@
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
+
+            const boardHidden = state.showMainBoard === false;
+            const hideBoardBtn = document.getElementById('btn-hide-board');
+            if (hideBoardBtn) {
+                hideBoardBtn.innerText = boardHidden ? '👁️ ПОКАЗАТИ ТАБЛО' : '👁️ СХОВАТИ ТАБЛО';
+                hideBoardBtn.style.background = boardHidden ? '#b28a55' : '#374151';
+            }
 
             document.getElementById('scale-slider').value = state.scale || 1;
             document.getElementById('scale-factor-display').innerText = (state.scale || 1).toFixed(2) + "x";
@@ -460,6 +488,9 @@
         window.toggleMainBoardVisibility = function(isChecked) {
             saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
         }
+        window.toggleMainBoard = function() {
+            saveToHistory(state); state.showMainBoard = (state.showMainBoard === false) ? true : false; set(matchRef, state);
+        }
         window.toggleQrCodeVisibility = function(isChecked) {
             saveToHistory(state); state.showQrCode = isChecked; set(matchRef, state);
         }
@@ -471,6 +502,12 @@
         }
 
         window.finishMatchPro = function() {
+            // Якщо матч вже завершено — друге натискання згортає статистику
+            if (state.isMatchFinished) {
+                state.showStatsOverlay = !state.showStatsOverlay;
+                set(matchRef, state);
+                return;
+            }
             if(confirm("Завершити матч на поточному корті?")) {
                 saveToHistory(state); state.isMatchFinished = true; state.showStatsOverlay = true; state.showSetOverlayTrigger = false; set(matchRef, state);
             }
@@ -667,8 +704,8 @@
                 deuceStyle: "one-golden", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
                 isStatsAutomated: state.isStatsAutomated !== false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
                 logoFontFamily: "Montserrat", logoFontColor: "#ffffff", logoFontSize: 13,
-                // showMainBoard: true, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
-                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }  
+                showMainBoard: true, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
+                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
             });
         }
 
@@ -676,3 +713,4 @@
     </script>
 </body>
 </html>
+ 
