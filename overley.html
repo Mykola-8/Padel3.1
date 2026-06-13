@@ -23,13 +23,14 @@
             align-items: flex-start;
             width: max-content;
             transform-origin: top left;
-            transition: transform 0.2s ease, top 0.3s ease, left 0.3s ease, opacity 0.4s ease, visibility 0.4s;
+            transition: transform 0.2s ease, opacity 0.4s ease, visibility 0.4s;
             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6));
             position: absolute;
-            top: 25px;
-            left: 20px;
+            top: 0;
+            left: 0;
             opacity: 1;
             visibility: visible;
+            will-change: transform;
         }
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
 
@@ -439,7 +440,7 @@
                 const setResultPanel = document.getElementById('set-result-panel');
                 const stPanel = document.getElementById('statistics-panel');
 
-                if (state.showMainBoard === false || state.showStatsOverlay === true || state.isMatchFinished === true || !!state.showSetOverlayTrigger) {
+                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
@@ -484,9 +485,9 @@
                 document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
 
                 const currentScale = state.scale || 1;
-                boardWrapper.style.transform = `scale(${currentScale})`;
-                boardWrapper.style.left = (state.posX || 0) + 'px';
-                boardWrapper.style.top = (state.posY || 0) + 'px';
+                const posX = state.posX || 0;
+                const posY = state.posY || 0;
+                boardWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${currentScale})`;
 
                 document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
 
@@ -516,6 +517,24 @@
 
                 document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
+
+                // Тайбрейк: перша подача - 1, далі кожні 2 очки змінюється подача
+                if (state.isTiebreak) {
+                    const totalPoints = (state.p1Index || 0) + (state.p2Index || 0);
+                    let tbServer;
+                    if (totalPoints === 0) {
+                        tbServer = state.currentServer; // перша подача — той хто подає
+                    } else {
+                        // після першого очка — кожні 2 очки міняємо
+                        const initialServer = state.currentServer;
+                        const otherServer = initialServer === 1 ? 2 : 1;
+                        // очко 0: initial подає, далі: 1-2 other, 3-4 initial, 5-6 other ...
+                        const segment = Math.floor((totalPoints + 1) / 2); // 0->0, 1-2->1, 3-4->2 ...
+                        tbServer = (segment % 2 === 0) ? initialServer : otherServer;
+                    }
+                    document.getElementById('srv1').classList.toggle('active', tbServer === 1);
+                    document.getElementById('srv2').classList.toggle('active', tbServer === 2);
+                }
 
                 const activeSet = state.currentSet || 1;
                 if (activeSet !== lastSetTracked) {
@@ -576,7 +595,7 @@
                     ribbonMatch.classList.remove('visible');
                 }
 
-                if (state.showStatsOverlay || state.isMatchFinished) {
+                if (state.showStatsOverlay) {
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('st-name2').innerText = state.p2name || "Команда B";
                     document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0;
@@ -598,7 +617,8 @@
                         for(let i = 1; i <= totalSetsToRender; i++) {
                             let g1_set = state[`t1_s${i}`] || 0;
                             let g2_set = state[`t2_s${i}`] || 0;
-                            if (i <= activeSet || g1_set > 0 || g2_set > 0) {
+                            // Показуємо лише зіграні сети (де хоча б один гейм зіграно)
+                            if (g1_set > 0 || g2_set > 0) {
                                 validSetsRendered++;
                                 const setRow = document.createElement('div');
                                 setRow.className = 'history-set-row';
@@ -656,3 +676,4 @@
     </script>
 </body>
 </html>
+ 
