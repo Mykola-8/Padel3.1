@@ -1,5 +1,3 @@
-
-Overlay · HTML
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -214,8 +212,98 @@ Overlay · HTML
             background: linear-gradient(to bottom, #fff0c0, #e8c96a);
             color: #3a2a00;
         }
-        .statistics-overlay {
+        /* ===== ТАБЛО "МАТЧ ЗАВЕРШЕНО" — анімоване, з результатами сетів і переможцем ===== */
+        .match-finished-board {
             position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85) translateY(-40px);
+            width: 620px;
+            background: rgba(8, 8, 8, 0.55);
+            border: 1px solid rgba(198, 159, 102, 0.45);
+            border-radius: 8px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.65);
+            backdrop-filter: blur(14px);
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            padding: 28px 32px;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s;
+        }
+        .match-finished-board.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1) translateY(0);
+            pointer-events: auto;
+        }
+        .mfb-header {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #c69f66;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.95);
+        }
+        .mfb-winner {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffe9c2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 0 18px rgba(198,159,102,0.5);
+            margin-bottom: 20px;
+        }
+        .mfb-winner .trophy { margin-right: 8px; }
+        .mfb-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .mfb-table th {
+            font-size: 10px;
+            font-weight: 700;
+            color: #cccccc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 6px 8px;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            border-bottom: 1px solid rgba(198,159,102,0.3);
+        }
+        .mfb-table th:first-child { text-align: left; }
+        .mfb-table td {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            padding: 10px 8px;
+            text-align: center;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .mfb-table td.mfb-team-name {
+            text-align: left;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 220px;
+        }
+        .mfb-table tr:last-child td { border-bottom: none; }
+        .mfb-table td.mfb-set-win {
+            color: #c69f66;
+        }
+        .mfb-table tr.mfb-winner-row td.mfb-team-name {
+            color: #ffe9c2;
+        }
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
@@ -379,6 +467,19 @@ Overlay · HTML
                 <div class="ribbon" id="ribbon-match">MATCH POINT</div>
             </div>
         </div>
+    </div>
+
+    <div class="match-finished-board" id="match-finished-board">
+        <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
+        <div class="mfb-winner" id="mfb-winner"><span class="trophy">🏆</span><span id="mfb-winner-name">Команда A</span></div>
+        <table class="mfb-table">
+            <thead>
+                <tr id="mfb-head-row">
+                    <th>Команда</th>
+                </tr>
+            </thead>
+            <tbody id="mfb-body"></tbody>
+        </table>
     </div>
 
     <div class="statistics-overlay" id="statistics-panel">
@@ -670,56 +771,92 @@ Overlay · HTML
 
                 // ribbon-match замінено на slide-banner вище
 
-                if (state.showStatsOverlay) {
-                    document.getElementById('st-name1').innerText = state.p1name || "Команда A";
-                    document.getElementById('st-name2').innerText = state.p2name || "Команда B";
-                    document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0;
-                    document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
-                    document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0;
-                    document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+                const mfb = document.getElementById('match-finished-board');
 
-                    if (state.isMatchFinished) {
-                        document.getElementById('stats-main-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
-                        document.getElementById('row-stats-current-set-games').style.display = 'none';
-                        document.getElementById('row-stats-history').style.display = 'none';
-                        document.getElementById('row-stats-timers').style.display = 'none';
-                        
-                        const targetList = document.getElementById('final-sets-list-target');
-                        targetList.innerHTML = "";
-                        let totalSetsToRender = state.isAmericano ? 0 : 5;
-                        let validSetsRendered = 0;
+                if (state.isMatchFinished) {
+                    stPanel.classList.remove('visible');
 
-                        for(let i = 1; i <= totalSetsToRender; i++) {
-                            let g1_set = state[`t1_s${i}`] || 0;
-                            let g2_set = state[`t2_s${i}`] || 0;
-                            if (g1_set > 0 || g2_set > 0) {
-                                validSetsRendered++;
-                                const setRow = document.createElement('div');
-                                setRow.className = 'history-set-row';
-                                setRow.innerHTML = `
-                                    <span class="h-set-title">Сет ${i}</span>
-                                    <span class="h-set-score">${g1_set} : ${g2_set}</span>
-                                    <span class="h-set-time">${setsTimeDurationsHistory[i-1] || "00:00"}</span>
-                                `;
-                                targetList.appendChild(setRow);
-                            }
+                    if (state.showStatsOverlay !== false) {
+                        const p1name = state.p1name || "Команда A";
+                        const p2name = state.p2name || "Команда B";
+                        document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
+
+                        // Зібрати зіграні сети
+                        let playedSets = [];
+                        let setsToCheck = state.isAmericano ? 0 : 5;
+                        for (let i = 1; i <= setsToCheck; i++) {
+                            let g1 = state[`t1_s${i}`] || 0;
+                            let g2 = state[`t2_s${i}`] || 0;
+                            if (g1 > 0 || g2 > 0) playedSets.push({set: i, g1, g2});
                         }
-                        document.getElementById('final-sets-summary-block').style.display = (validSetsRendered > 0 && !state.isAmericano) ? 'flex' : 'none';
+
+                        // Визначення переможця по кількості виграних сетів
+                        let setsWon1 = 0, setsWon2 = 0;
+                        playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                        let winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
+                        let winnerIs1 = setsWon1 > setsWon2;
+
+                        document.getElementById('mfb-winner-name').innerText = winnerName ? winnerName : "Нічия";
+
+                        // Заголовок таблиці: Команда | Сет 1 | Сет 2 | ...
+                        const headRow = document.getElementById('mfb-head-row');
+                        headRow.innerHTML = '<th>Команда</th>';
+                        playedSets.forEach(s => {
+                            headRow.innerHTML += `<th>Сет ${s.set}</th>`;
+                        });
+
+                        // Рядки команд
+                        const body = document.getElementById('mfb-body');
+                        body.innerHTML = '';
+
+                        const row1 = document.createElement('tr');
+                        row1.className = winnerIs1 ? 'mfb-winner-row' : '';
+                        let row1Html = `<td class="mfb-team-name">${winnerIs1 ? '🏆 ' : ''}${p1name}</td>`;
+                        playedSets.forEach(s => {
+                            row1Html += `<td class="${s.g1 > s.g2 ? 'mfb-set-win' : ''}">${s.g1}</td>`;
+                        });
+                        row1.innerHTML = row1Html;
+                        body.appendChild(row1);
+
+                        const row2 = document.createElement('tr');
+                        row2.className = !winnerIs1 && winnerName ? 'mfb-winner-row' : '';
+                        let row2Html = `<td class="mfb-team-name">${(!winnerIs1 && winnerName) ? '🏆 ' : ''}${p2name}</td>`;
+                        playedSets.forEach(s => {
+                            row2Html += `<td class="${s.g2 > s.g1 ? 'mfb-set-win' : ''}">${s.g2}</td>`;
+                        });
+                        row2.innerHTML = row2Html;
+                        body.appendChild(row2);
+
+                        mfb.classList.add('visible');
                     } else {
+                        mfb.classList.remove('visible');
+                    }
+                } else {
+                    mfb.classList.remove('visible');
+
+                    if (state.showStatsOverlay) {
+                        document.getElementById('st-name1').innerText = state.p1name || "Команда A";
+                        document.getElementById('st-name2').innerText = state.p2name || "Команда B";
+                        document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0;
+                        document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
+                        document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0;
+                        document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+
                         document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
                         document.getElementById('final-sets-summary-block').style.display = 'none';
-                        
+
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0;
                         document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                         const historyArray = state.gamesTimeHistory || [];
                         document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
+
+                        stPanel.classList.add('visible');
+                    } else {
+                        stPanel.classList.remove('visible');
                     }
-                    stPanel.classList.add('visible');
-                } else {
-                    stPanel.classList.remove('visible');
                 }
 
                 // Логіка анімацій та підсвічування
