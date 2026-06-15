@@ -169,6 +169,45 @@
         .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
 
+        /* ===== СЛАЙД-ТАБЛИЧКА (лівий нижній кут) — гейм/брейк/сет поінт, тайбрейк, deuce, дабл фол ===== */
+        .corner-slide-wrapper {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            overflow: hidden;
+            border-radius: 0 6px 6px 0;
+            z-index: 9997;
+            width: 0;
+            height: 54px;
+            transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+        .corner-slide-wrapper.visible { width: 320px; }
+        .corner-slide-plate {
+            width: 320px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            padding: 0 22px;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            color: #fff;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.9);
+            backdrop-filter: blur(8px);
+        }
+        .csp-gamepoint   { background: rgba(42, 42, 42, 0.55); }
+        .csp-breakpoint  { background: rgba(198, 159, 102, 0.55); }
+        .csp-setpoint    { background: rgba(29, 78, 216, 0.55); }
+        .csp-matchpoint  { background: rgba(185, 28, 28, 0.55); }
+        .csp-goldenpoint { background: rgba(245, 158, 11, 0.55); }
+        .csp-tiebreak    { background: rgba(75, 85, 99, 0.55); }
+        .csp-deuce       { background: rgba(91, 33, 182, 0.55); }
+        .csp-doublefault { background: rgba(220, 38, 38, 0.55); }
+ 
         /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
         .points-board-outer {
             overflow: hidden;
@@ -484,6 +523,10 @@
         </table>
     </div>
 
+    <div class="corner-slide-wrapper" id="corner-slide-wrapper">
+        <div class="corner-slide-plate" id="corner-slide-plate"></div>
+    </div>
+
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-header" id="stats-main-header">Матч-Статистика</div>
         <div class="stats-table">
@@ -557,9 +600,29 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        function showCornerSlide(text, cssClass) {
+            const wrapper = document.getElementById('corner-slide-wrapper');
+            const plate = document.getElementById('corner-slide-plate');
+            if (cornerSlideTimeout) clearTimeout(cornerSlideTimeout);
+            plate.innerText = text;
+            plate.className = 'corner-slide-plate ' + cssClass;
+            wrapper.classList.remove('visible');
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                wrapper.classList.add('visible');
+            }));
+            cornerSlideTimeout = setTimeout(() => {
+                wrapper.classList.remove('visible');
+            }, 5000);
+        }
+
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0;
         let currentQrUrl = "";
+        let cornerSlideTimeout = null;
+        let lastCornerRibbon = null;
+        let lastCornerDeuce = 0;
+        let lastCornerTiebreak = false;
 
         let totalSeconds = 0;
         let setSeconds = 0;
@@ -676,6 +739,39 @@
                     else if (state.activeMatchRibbon === "GAME_POINT") ribbonMatch.classList.add('ribbon-gamepoint');
                 } else {
                     ribbonMatch.classList.remove('visible');
+                }
+
+                // ===== СЛАЙД-ТАБЛИЧКА (лівий нижній кут) =====
+                if (!state.isMatchFinished && !state.showStatsOverlay && !state.showSetOverlayTrigger) {
+                    const curRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
+                    const curDeuce = state.deuceCounter || 0;
+                    const curTiebreak = !!state.isTiebreak;
+
+                    // Тайбрейк — щойно почався
+                    if (curTiebreak && !lastCornerTiebreak) {
+                        showCornerSlide('⚡ ТАЙБРЕЙК', 'csp-tiebreak');
+                    }
+                    // Дюс — щойно з'явився (рахунок очок зрівнявся повторно)
+                    else if (curDeuce > lastCornerDeuce && !state.isAmericano) {
+                        showCornerSlide('DEUCE', 'csp-deuce');
+                    }
+                    // Зміна активного ribbon (game/break/set/match/golden point, tiebreak point)
+                    else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano) {
+                        if (curRibbon === "MATCH_POINT")        showCornerSlide('МАТЧ ПОІНТ', 'csp-matchpoint');
+                        else if (curRibbon === "SET_POINT")     showCornerSlide('СЕТ ПОІНТ', 'csp-setpoint');
+                        else if (curRibbon === "BREAK_POINT")   showCornerSlide('БРЕЙК ПОІНТ', 'csp-breakpoint');
+                        else if (curRibbon === "GOLDEN_POINT")  showCornerSlide('ГОЛДЕН ПОІНТ', 'csp-goldenpoint');
+                        else if (curRibbon === "GAME_POINT")    showCornerSlide('ГЕЙМ ПОІНТ', 'csp-gamepoint');
+                        else if (curRibbon === "TIEBREAK_POINT") showCornerSlide('⚡ ТАЙБРЕЙК', 'csp-tiebreak');
+                    }
+
+                    lastCornerRibbon = curRibbon;
+                    lastCornerDeuce = curDeuce;
+                    lastCornerTiebreak = curTiebreak;
+                } else {
+                    lastCornerRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
+                    lastCornerDeuce = state.deuceCounter || 0;
+                    lastCornerTiebreak = !!state.isTiebreak;
                 }
 
                 // ===== ТАБЛО ОЧОК (15/30/40/AD) =====
@@ -872,6 +968,7 @@
                             // ОНОВЛЕНО: Команда, яка зробила помилку, підсвічується червоним
                             targetBlock.classList.add('double-fault-red-flash');
                             setTimeout(() => targetBlock.classList.remove('double-fault-red-flash'), 900);
+                            showCornerSlide('ДАБЛ ФОЛ', 'csp-doublefault');
                         } else {
                             targetBlock.style.transition = 'none';
                             targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
