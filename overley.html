@@ -57,6 +57,85 @@
         .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
+        /* ===== ЗАСТАВКА (IDLE SCREEN) — перекриває всю трансляцію ===== */
+        .idle-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #0a0a0a;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.6s ease, visibility 0.6s;
+            overflow: hidden;
+        }
+        .idle-screen.visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .idle-screen-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 64px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-align: center;
+            text-shadow: 0 0 40px rgba(198,159,102,0.6), 0 4px 20px rgba(0,0,0,0.8);
+            background: linear-gradient(120deg, #ffffff, #c69f66, #ffffff, #c69f66);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: idlePulse 4s ease-in-out infinite, idleShine 6s linear infinite;
+            padding: 0 40px;
+        }
+        @keyframes idlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        @keyframes idleShine {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+ 
+        /* ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ (зліва-зверху над табло) ===== */
+        .game-timer-clock {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 4px;
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(198, 159, 102, 0.4);
+            border-radius: 4px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+            transform: translateY(8px) scale(0.85);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s ease, visibility 0.4s;
+            z-index: 5;
+        }
+        .game-timer-clock.visible {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .game-timer-clock .clock-icon { font-size: 13px; }
+ 
         /* ===== ОСНОВНЕ ТАБЛО ===== */
         .scoreboard-container {
             display: flex;
@@ -211,7 +290,7 @@
         .csp-tiebreak    { background: rgba(75, 85, 99, 0.55); }
         .csp-deuce       { background: rgba(91, 33, 182, 0.55); }
         .csp-doublefault { background: rgba(220, 38, 38, 0.55); }
-
+ 
         /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
         .points-board-outer {
             overflow: hidden;
@@ -254,6 +333,34 @@
         .points-cell.ad-active {
             background: linear-gradient(to bottom, #fff0c0, #e8c96a);
             color: #3a2a00;
+        }
+ 
+        /* ===== ТЕМА: СВІТЛО-СІРИЙ ===== */
+        .theme-light-gray .team-names {
+            background: linear-gradient(to bottom, #e8e8e8, #d4d4d4);
+            color: #2b2b2b;
+        }
+        .theme-light-gray .server-indicator { color: #555555; }
+        .theme-light-gray .server-indicator.active { color: #3a3a3a; }
+        .theme-light-gray .set-past { background-color: #ffffff; color: #2b2b2b; }
+        .theme-light-gray .set-current { background-color: #b0b0b0; color: #2b2b2b; }
+        .theme-light-gray .points-cell.team1 {
+            background: linear-gradient(to bottom, #f2f2f2, #cfcfcf);
+            color: #2b2b2b;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .theme-light-gray .points-cell.team2 {
+            background: linear-gradient(to bottom, #cfcfcf, #a8a8a8);
+            color: #2b2b2b;
+        }
+        .theme-light-gray .points-cell.ad-active {
+            background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+            color: #1a1a1a;
+        }
+        .theme-light-gray .ribbon-top-item.r-proset-style,
+        .theme-light-gray .ribbon-top-item.r-tiebreak-style {
+            background: #d4d4d4;
+            color: #2b2b2b;
         }
         /* ===== ТАБЛО "МАТЧ ЗАВЕРШЕНО" — анімоване, з результатами сетів і переможцем ===== */
         .match-finished-board {
@@ -461,6 +568,10 @@
 </head>
 <body>
 
+    <div class="idle-screen" id="idle-screen">
+        <div class="idle-screen-text" id="idle-screen-text-display">PADEL TOURNAMENT</div>
+    </div>
+
     <div class="scoreboard-wrapper" id="main-scoreboard">
         <div class="logo-panel" id="logo-panel">
             <div class="logo-panel-text" id="logo-text-node">QATAR AIRWAYS</div>
@@ -468,6 +579,9 @@
         </div>
 
         <div class="scoreboard-container">
+            <div class="game-timer-clock" id="game-timer-clock">
+                <span class="clock-icon">⏱️</span><span id="game-timer-value">00:00</span>
+            </div>
             <div class="ribbons-top-container">
                 <div class="ribbon-top-item r-proset-style" id="ribbon-proset">PRO-SET 8</div>
                 <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
@@ -671,6 +785,8 @@
             return `${m}:${s}`;
         };
 
+        let lastGameStartTs = null;
+
         setInterval(() => {
             if (isMatchFinishedCurrently) return;
             totalSeconds++;
@@ -681,6 +797,21 @@
             const tSet = document.getElementById('st-time-set');
             if(tMatch) tMatch.innerText = formatTime(totalSeconds);
             if(tSet) tSet.innerText = formatTime(setSeconds);
+
+            // ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ =====
+            const clockEl = document.getElementById('game-timer-clock');
+            const clockValEl = document.getElementById('game-timer-value');
+            if (lastGameStartTs && !isMatchFinishedCurrently) {
+                const elapsed = Math.floor((Date.now() - lastGameStartTs) / 1000);
+                if (elapsed >= 10) {
+                    clockEl.classList.add('visible');
+                    clockValEl.innerText = formatTime(elapsed);
+                } else {
+                    clockEl.classList.remove('visible');
+                }
+            } else {
+                clockEl.classList.remove('visible');
+            }
         }, 1000);
 
         onValue(ref(db, databasePath), (snapshot) => {
@@ -745,6 +876,20 @@
 
                 document.documentElement.style.setProperty('--team-name-width', (state.teamNameWidth || 320) + 'px');
                 document.documentElement.style.setProperty('--team-name-font', (state.teamNameFontSize || 22) + 'px');
+
+                // ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ — синхронізація стартового часу =====
+                lastGameStartTs = state.currentGameStartTs || null;
+                if (!lastGameStartTs || state.isMatchFinished) {
+                    document.getElementById('game-timer-clock').classList.remove('visible');
+                }
+
+                // ===== ТЕМА ТАБЛА =====
+                boardWrapper.classList.toggle('theme-light-gray', state.boardTheme === 'light-gray');
+
+                // ===== ЗАСТАВКА (IDLE SCREEN) =====
+                const idleScreenEl = document.getElementById('idle-screen');
+                idleScreenEl.classList.toggle('visible', !!state.showIdleScreen);
+                document.getElementById('idle-screen-text-display').innerText = state.idleScreenText || 'PADEL TOURNAMENT';
 
                 document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
 
@@ -1032,3 +1177,4 @@
     </script>
 </body>
 </html>
+ 
