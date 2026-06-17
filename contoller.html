@@ -204,6 +204,14 @@
                     </select>
                 </div>
                 
+                <div class="row" style="margin-top:10px;">
+                    <span style="font-size:12px; color:#aaa;">Тема табла:</span>
+                    <select id="s-board-theme" style="padding:6px; text-align:center; background:#222; color:#fff; border:1px solid #555; border-radius:4px;" onchange="updateBoardTheme(this.value)">
+                        <option value="default">Класична (темна)</option>
+                        <option value="light-gray">Світло-сіра</option>
+                    </select>
+                </div>
+
                 <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
 
                 <div class="switch-row">
@@ -214,6 +222,18 @@
                     <span style="font-size:12px; color:#aaa;">Ліміт геймів сету (1-10):</span>
                     <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateProSetLimit(this.value)">
                 </div>
+            </div>
+
+            <div class="card">
+                <div style="font-size:12px; font-weight:700; color:#c69f66; margin-bottom:8px; text-transform:uppercase;">Заставка (перекриває всю трансляцію):</div>
+                <div class="switch-row">
+                    <span style="font-size:13px; font-weight:700;">Показати заставку:</span>
+                    <input type="checkbox" id="idle-screen-checkbox" style="width:20px; height:20px;" onchange="toggleIdleScreen(this.checked)">
+                </div>
+                <div class="row" style="margin-top:10px;">
+                    <span style="font-size:12px; color:#aaa;">Текст заставки (тема турніру):</span>
+                </div>
+                <input type="text" id="idle-screen-text" placeholder="напр. PADEL CHAMPIONSHIP 2026" style="width:100%; padding:8px; margin-top:4px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;" onchange="updateIdleScreenText(this.value)">
             </div>
 
             <div class="card">
@@ -467,6 +487,9 @@
             document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
             document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
             document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
+            document.getElementById('idle-screen-checkbox').checked = !!state.showIdleScreen;
+            document.getElementById('idle-screen-text').value = state.idleScreenText || '';
+            document.getElementById('s-board-theme').value = state.boardTheme === 'light-gray' ? 'light-gray' : 'default';
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
@@ -519,6 +542,15 @@
             }, 5000);
         }
 
+        window.updateBoardTheme = function(v) {
+            state.boardTheme = v; set(matchRef, state);
+        }
+        window.toggleIdleScreen = function(isChecked) {
+            state.showIdleScreen = isChecked; set(matchRef, state);
+        }
+        window.updateIdleScreenText = function(v) {
+            state.idleScreenText = v; set(matchRef, state);
+        }
         window.toggleMainBoardVisibility = function(isChecked) {
             saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
         }
@@ -563,6 +595,10 @@
 
         window.scorePointWithoutHistorySave = function(teamIndex) {
             let style = state.deuceStyle || "one-golden";
+            // Якщо це перший розіграш нового гейму — фіксуємо момент початку для годинника на overlay
+            if ((state.p1Index || 0) === 0 && (state.p2Index || 0) === 0 && !state.currentGameStartTs) {
+                state.currentGameStartTs = Date.now();
+            }
             if (state.isAmericano) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 let total = state.p1Index + state.p2Index;
@@ -629,6 +665,7 @@
             if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
             state.gamesTimeHistory.push(elapsedMinutes + '`');
             gameStartTimestamp = Date.now();
+            state.currentGameStartTs = null;
 
             let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + cSet]; let totalGamesInSet = g1 + g2;
             let isSetOver = false; let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
@@ -767,3 +804,4 @@
     </script>
 </body>
 </html>
+ 
