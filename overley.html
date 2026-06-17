@@ -187,6 +187,7 @@
             height: 54px;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             padding: 0 22px;
             box-sizing: border-box;
             font-family: 'Montserrat', sans-serif;
@@ -196,6 +197,7 @@
             text-transform: uppercase;
             white-space: nowrap;
             color: #fff;
+            text-align: right;
             text-shadow: 0 1px 5px rgba(0,0,0,0.9);
             backdrop-filter: blur(8px);
         }
@@ -207,7 +209,7 @@
         .csp-tiebreak    { background: rgba(75, 85, 99, 0.55); }
         .csp-deuce       { background: rgba(91, 33, 182, 0.55); }
         .csp-doublefault { background: rgba(220, 38, 38, 0.55); }
- 
+
         /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
         .points-board-outer {
             overflow: hidden;
@@ -601,6 +603,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        const CORNER_SLIDE_LABELS = {
+            tiebreak:    { en: '⚡ TIEBREAK',     ua: '⚡ ТАЙБРЕЙК' },
+            deuce:       { en: 'DEUCE',           ua: 'РІВНО' },
+            matchpoint:  { en: 'MATCH POINT',     ua: 'МАТЧ ПОІНТ' },
+            setpoint:    { en: 'SET POINT',       ua: 'СЕТ ПОІНТ' },
+            breakpoint:  { en: 'BREAK POINT',     ua: 'БРЕЙК ПОІНТ' },
+            goldenpoint: { en: 'GOLDEN POINT',    ua: 'ГОЛДЕН ПОІНТ' },
+            gamepoint:   { en: 'GAME POINT',      ua: 'ГЕЙМ ПОІНТ' },
+            doublefault: { en: 'DOUBLE FAULT',    ua: 'ДАБЛ ФОЛ' }
+        };
+
+        function getCornerSlideText(key, state) {
+            const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
+            return CORNER_SLIDE_LABELS[key][lang];
+        }
+
         function showCornerSlide(text, cssClass) {
             const wrapper = document.getElementById('corner-slide-wrapper');
             const plate = document.getElementById('corner-slide-plate');
@@ -749,20 +767,20 @@
 
                     // Тайбрейк — щойно почався
                     if (curTiebreak && !lastCornerTiebreak) {
-                        showCornerSlide('⚡ ТАЙБРЕЙК', 'csp-tiebreak');
+                        showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
                     }
                     // Дюс — щойно з'явився (рахунок очок зрівнявся повторно)
                     else if (curDeuce > lastCornerDeuce && !state.isAmericano) {
-                        showCornerSlide('DEUCE', 'csp-deuce');
+                        showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
                     }
                     // Зміна активного ribbon (game/break/set/match/golden point, tiebreak point)
                     else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano) {
-                        if (curRibbon === "MATCH_POINT")        showCornerSlide('МАТЧ ПОІНТ', 'csp-matchpoint');
-                        else if (curRibbon === "SET_POINT")     showCornerSlide('СЕТ ПОІНТ', 'csp-setpoint');
-                        else if (curRibbon === "BREAK_POINT")   showCornerSlide('БРЕЙК ПОІНТ', 'csp-breakpoint');
-                        else if (curRibbon === "GOLDEN_POINT")  showCornerSlide('ГОЛДЕН ПОІНТ', 'csp-goldenpoint');
-                        else if (curRibbon === "GAME_POINT")    showCornerSlide('ГЕЙМ ПОІНТ', 'csp-gamepoint');
-                        else if (curRibbon === "TIEBREAK_POINT") showCornerSlide('⚡ ТАЙБРЕЙК', 'csp-tiebreak');
+                        if (curRibbon === "MATCH_POINT")        showCornerSlide(getCornerSlideText('matchpoint', state), 'csp-matchpoint');
+                        else if (curRibbon === "SET_POINT")     showCornerSlide(getCornerSlideText('setpoint', state), 'csp-setpoint');
+                        else if (curRibbon === "BREAK_POINT")   showCornerSlide(getCornerSlideText('breakpoint', state), 'csp-breakpoint');
+                        else if (curRibbon === "GOLDEN_POINT")  showCornerSlide(getCornerSlideText('goldenpoint', state), 'csp-goldenpoint');
+                        else if (curRibbon === "GAME_POINT")    showCornerSlide(getCornerSlideText('gamepoint', state), 'csp-gamepoint');
+                        else if (curRibbon === "TIEBREAK_POINT") showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
                     }
 
                     lastCornerRibbon = curRibbon;
@@ -968,7 +986,7 @@
                             // ОНОВЛЕНО: Команда, яка зробила помилку, підсвічується червоним
                             targetBlock.classList.add('double-fault-red-flash');
                             setTimeout(() => targetBlock.classList.remove('double-fault-red-flash'), 900);
-                            showCornerSlide('ДАБЛ ФОЛ', 'csp-doublefault');
+                            showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
                         } else {
                             targetBlock.style.transition = 'none';
                             targetBlock.style.background = animType === 'set' ? '#ffffff' : '#c69f66';
@@ -986,4 +1004,3 @@
     </script>
 </body>
 </html>
- 
