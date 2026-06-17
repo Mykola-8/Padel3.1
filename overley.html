@@ -351,10 +351,10 @@
             left: 50%;
             transform: translate(-50%, -50%) scale(0.8);
             width: 550px;
-            background: transparent;
+            background: rgba(8, 8, 8, 0.55);
             border: 1px solid rgba(198, 159, 102, 0.35);
             border-radius: 8px;
-            box-shadow: none;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             font-family: 'Montserrat', sans-serif;
             color: white;
             z-index: 9999;
@@ -364,7 +364,7 @@
             transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s;
             padding: 24px;
             box-sizing: border-box;
-            backdrop-filter: none;
+            backdrop-filter: blur(10px);
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
@@ -552,10 +552,21 @@
                 <div class="stats-label">Дабл фоли</div>
                 <div class="stats-val" id="st-df2">0</div>
             </div>
+            <div class="stats-row" id="row-stats-lovegames">
+                <div class="stats-val" id="st-lg1">0</div>
+                <div class="stats-label">Геймів "в суху"</div>
+                <div class="stats-val" id="st-lg2">0</div>
+            </div>
             <div class="stats-row" id="row-stats-timers">
-                <div class="stats-val gold" id="st-time-set" style="font-size:18px; font-weight:800;">00:00</div>
-                <div class="stats-label">Загальний час сету</div>
-                <div class="stats-val gold" id="st-time-match" style="font-size:13px; font-weight:600; color:#aaa;">00:00</div>
+                <div style="text-align:center;">
+                    <div class="stats-val gold" id="st-time-set" style="font-size:18px; font-weight:800;">00:00</div>
+                    <div class="stats-label" style="margin-top:2px;">Час сету</div>
+                </div>
+                <div class="stats-label">&nbsp;</div>
+                <div style="text-align:center;">
+                    <div class="stats-val gold" id="st-time-match" style="font-size:18px; font-weight:800;">00:00</div>
+                    <div class="stats-label" style="margin-top:2px;">Загальний час матчу</div>
+                </div>
             </div>
             <div class="stats-row" id="row-stats-history">
                 <div class="stats-val gold" id="st-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 5px; font-size: 16px;">0`</div>
@@ -666,7 +677,7 @@
             
             const tMatch = document.getElementById('st-time-match');
             const tSet = document.getElementById('st-time-set');
-            if(tMatch) tMatch.innerText = "Матч: " + formatTime(totalSeconds);
+            if(tMatch) tMatch.innerText = formatTime(totalSeconds);
             if(tSet) tSet.innerText = formatTime(setSeconds);
         }, 1000);
 
@@ -957,6 +968,15 @@
                         document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
                         document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0;
                         document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+
+                        let lgTotal1 = 0, lgTotal2 = 0;
+                        for (let i = 1; i <= 5; i++) {
+                            lgTotal1 += state[`t1_lg_s${i}`] || 0;
+                            lgTotal2 += state[`t2_lg_s${i}`] || 0;
+                        }
+                        document.getElementById('st-lg1').innerText = lgTotal1;
+                        document.getElementById('st-lg2').innerText = lgTotal2;
+                        document.getElementById('row-stats-lovegames').style.display = state.isAmericano ? 'none' : 'grid';
 
                         document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
