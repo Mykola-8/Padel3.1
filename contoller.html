@@ -195,6 +195,14 @@
                     <span style="font-size:12px; color:#aaa;">Ліміт в сумі очок (1-30):</span>
                     <input type="number" id="s-americano-limit" min="1" max="30" value="21" style="width:70px; padding:6px; text-align:center;" onchange="updateAmericanoLimit(this.value)">
                 </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <span style="font-size:12px; color:#aaa;">Мова слайд-таблички (кут):</span>
+                    <select id="s-corner-slide-lang" style="padding:6px; text-align:center; background:#222; color:#fff; border:1px solid #555; border-radius:4px;" onchange="updateCornerSlideLang(this.value)">
+                        <option value="en">English</option>
+                        <option value="ua">Українська</option>
+                    </select>
+                </div>
                 
                 <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
 
@@ -439,6 +447,7 @@
             document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
             document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
             document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
+            document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
@@ -487,6 +496,9 @@
 
         window.toggleMainBoardVisibility = function(isChecked) {
             saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
+        }
+        window.updateCornerSlideLang = function(lang) {
+            state.cornerSlideLang = lang; set(matchRef, state);
         }
         window.toggleMainBoard = function() {
             saveToHistory(state); state.showMainBoard = (state.showMainBoard === false) ? true : false; set(matchRef, state);
@@ -727,4 +739,3 @@
     </script>
 </body>
 </html>
- 
