@@ -73,15 +73,16 @@
             z-index: 2;
             position: relative;
             overflow: hidden;
+            transform-origin: left center;
         }
         .team-row { display: flex; height: 48px; }
         .team-names {
-            width: 320px;
+            width: var(--team-name-width, 320px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 15px;
-            font-size: 22px;
+            font-size: var(--team-name-font, 22px);
             font-weight: 800;
             letter-spacing: 0.5px;
             background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75));
@@ -89,6 +90,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             flex-shrink: 0;
+            transition: width 0.3s ease, font-size 0.3s ease;
         }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
         .server-indicator.active { visibility: visible; }
@@ -734,9 +736,15 @@
                 document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
 
                 const currentScale = state.scale || 1;
+                const currentScaleX = state.scaleX || 1;
                 const posX = state.posX || 0;
                 const posY = state.posY || 0;
                 boardWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${currentScale})`;
+                const mainBoardEl = document.querySelector('.main-board');
+                if (mainBoardEl) mainBoardEl.style.transform = `scaleX(${currentScaleX})`;
+
+                document.documentElement.style.setProperty('--team-name-width', (state.teamNameWidth || 320) + 'px');
+                document.documentElement.style.setProperty('--team-name-font', (state.teamNameFontSize || 22) + 'px');
 
                 document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
 
