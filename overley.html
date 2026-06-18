@@ -158,6 +158,41 @@
         }
         .game-timer-clock .clock-icon { font-size: 13px; }
 
+        /* ===== ПАНЕЛЬ ЛОГОТИПІВ СПОНСОРІВ (зверху по центру, до 8 логотипів) ===== */
+        .top-logos-bar {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+            background: transparent;
+            z-index: 9990;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        .top-logos-bar.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .top-logo-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .top-logo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            display: block;
+        }
+
         /* ===== ОСНОВНЕ ТАБЛО ===== */
         .scoreboard-container {
             display: flex;
@@ -597,6 +632,8 @@
         <div id="idle-media-slides-container"></div>
     </div>
 
+    <div class="top-logos-bar" id="top-logos-bar"></div>
+
     <div class="scoreboard-wrapper" id="main-scoreboard">
         <div class="logo-panel" id="logo-panel">
             <div class="logo-panel-text" id="logo-text-node">QATAR AIRWAYS</div>
@@ -1002,6 +1039,31 @@
                     txtNode.style.fontSize = (state.logoFontSize || 13) + 'px';
                     txtNode.style.color = state.logoFontColor || '#ffffff';
                     txtNode.style.display = 'block';
+                }
+
+                // ===== ПАНЕЛЬ ЛОГОТИПІВ СПОНСОРІВ (зверху по центру, до 8 шт) =====
+                const topLogosBar = document.getElementById('top-logos-bar');
+                const topLogosList = state.topLogos || [];
+                const topLogoW = state.topLogoWidth || 90;
+                const topLogoH = state.topLogoHeight || 60;
+                const topLogosSig = JSON.stringify(topLogosList.map(l => l.url)) + '|' + topLogoW + '|' + topLogoH;
+
+                if (topLogosList.length > 0 && state.showTopLogos !== false) {
+                    if (topLogosBar.dataset.sig !== topLogosSig) {
+                        topLogosBar.dataset.sig = topLogosSig;
+                        topLogosBar.innerHTML = '';
+                        topLogosList.slice(0, 8).forEach((logo) => {
+                            const item = document.createElement('div');
+                            item.className = 'top-logo-item';
+                            item.style.width = topLogoW + 'px';
+                            item.style.height = topLogoH + 'px';
+                            item.innerHTML = `<img src="${logo.url}">`;
+                            topLogosBar.appendChild(item);
+                        });
+                    }
+                    topLogosBar.classList.add('visible');
+                } else {
+                    topLogosBar.classList.remove('visible');
                 }
 
                 // ===== RIBBON ПЛАШКИ =====
