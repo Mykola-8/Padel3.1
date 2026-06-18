@@ -377,6 +377,15 @@
                 </div>
             </div>
 
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; color:#aaa; margin-bottom:6px; text-transform:uppercase;">Масштаб матч-статистики:</div>
+                <div class="row">
+                    <span>Масштаб статистики:</span>
+                    <input type="range" id="stats-scale-slider" min="0.5" max="1.8" step="0.05" value="1" oninput="updateStatsScale(this.value)">
+                    <span id="stats-scale-display" style="color:#c69f66; min-width:45px; text-align:right;">1.00x</span>
+                </div>
+            </div>
+
             <button class="btn btn-red" style="width:100%; padding:14px; font-weight:800;" onclick="resetMatch()">Скинути корт до замовчування</button>
         </div>
     </div>
@@ -620,6 +629,8 @@
             document.getElementById('pos-y-display').innerText = (state.posY || 0) + "px";
             document.getElementById('scalex-slider').value = state.scaleX || 1;
             document.getElementById('scalex-factor-display').innerText = (state.scaleX || 1).toFixed(2) + "x";
+            document.getElementById('stats-scale-slider').value = state.statsScale || 1;
+            document.getElementById('stats-scale-display').innerText = (state.statsScale || 1).toFixed(2) + "x";
             document.getElementById('team-font-slider').value = state.teamNameFontSize || 22;
             document.getElementById('team-font-display').innerText = (state.teamNameFontSize || 22) + "px";
             document.getElementById('team-width-slider').value = state.teamNameWidth || 320;
@@ -1225,6 +1236,7 @@
         window.updateProSetLimit = function(v) { let parsed = parseInt(v) || 8; state.proSetLimit = parsed; set(matchRef, state); };
         window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
         window.updateScaleX = function(v) { state.scaleX = parseFloat(v); set(matchRef, state); };
+        window.updateStatsScale = function(v) { state.statsScale = parseFloat(v); set(matchRef, state); };
         window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); };
         window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); };
         window.updatePosition = function() {
