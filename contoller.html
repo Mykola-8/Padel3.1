@@ -629,10 +629,29 @@
 
             // Видаляємо сам файл з Firebase Storage, якщо він був завантажений з пристрою
             if (slide.storagePath) {
+                const progressEl = document.getElementById('idle-upload-progress');
+                progressEl.style.display = 'block';
+                progressEl.style.color = '#c69f66';
+                progressEl.innerText = 'Видалення файлу...';
                 try {
                     await deleteObject(storageRef(storage, slide.storagePath));
+                    progressEl.innerText = '✓ Файл видалено';
+                    setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
                 } catch (err) {
-                    console.warn('Не вдалося видалити файл зі Storage (можливо вже видалений):', err);
+                    console.error('Не вдалося видалити файл зі Storage:', err);
+                    let reason = err && err.code ? err.code : 'невідома помилка';
+                    if (reason === 'storage/object-not-found') {
+                        // Файл вже видалений раніше — це не помилка, просто прибираємо зі списку
+                        progressEl.style.display = 'none';
+                    } else if (reason === 'storage/unauthorized' || /unauthorized/i.test(reason)) {
+                        progressEl.style.color = '#ff6b6b';
+                        progressEl.innerText = '✕ Немає дозволу на видалення (перевір Storage Rules)';
+                        setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
+                    } else {
+                        progressEl.style.color = '#ff6b6b';
+                        progressEl.innerText = '✕ Помилка видалення: ' + reason;
+                        setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
+                    }
                 }
             }
 
@@ -650,21 +669,40 @@
 
             const progressEl = document.getElementById('idle-upload-progress');
             progressEl.style.display = 'block';
+            progressEl.style.color = '#c69f66';
             progressEl.innerText = 'Очищення файлів...';
 
+            let failCount = 0;
+            let lastErrorReason = '';
             for (const slide of uploadedSlides) {
                 try {
                     await deleteObject(storageRef(storage, slide.storagePath));
                 } catch (err) {
-                    console.warn('Не вдалося видалити файл зі Storage:', slide.storagePath, err);
+                    const code = err && err.code ? err.code : '';
+                    if (code !== 'storage/object-not-found') {
+                        failCount++;
+                        lastErrorReason = code || (err && err.message) || 'невідома помилка';
+                        console.error('Не вдалося видалити файл зі Storage:', slide.storagePath, err);
+                    }
                 }
             }
 
             state.idleSlides = state.idleSlides.filter(s => !s.storagePath);
             set(matchRef, state);
 
-            progressEl.innerText = '✓ Очищено';
-            setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
+            if (failCount > 0) {
+                progressEl.style.color = '#ff6b6b';
+                let reasonText = lastErrorReason;
+                if (/unauthorized/i.test(lastErrorReason)) {
+                    reasonText = 'немає дозволу (перевір Storage Rules в Firebase Console)';
+                }
+                progressEl.innerText = `⚠ Видалено зі списку, але ${failCount} файл(ів) могли лишитись у Storage: ${reasonText}`;
+                setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 7000);
+            } else {
+                progressEl.style.color = '#c69f66';
+                progressEl.innerText = '✓ Очищено';
+                setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
+            }
         }
         // Стиснення зображення через Canvas: зменшує роздільну здатність і перекодовує в JPEG з заданою якістю
         function compressImage(file, maxDimension = 1920, quality = 0.8) {
@@ -752,12 +790,24 @@
                 state.idleSlides.push({ url: downloadUrl, type: isVideo ? 'video' : 'image', storagePath });
                 set(matchRef, state);
 
+                progressEl.style.color = '#c69f66';
                 progressEl.innerText = '✓ Завантажено';
                 setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
             } catch (err) {
                 console.error('Upload error:', err);
-                progressEl.innerText = '✕ Помилка завантаження';
-                setTimeout(() => { progressEl.style.display = 'none'; }, 3000);
+                progressEl.style.color = '#ff6b6b';
+
+                let reason = err && err.code ? err.code : (err && err.message ? err.message : 'невідома помилка');
+                if (reason === 'storage/unauthorized' || /unauthorized/i.test(reason)) {
+                    reason = 'немає дозволу на запис у Storage. Перевір Firebase Console → Storage → Rules: має бути дозволено allow write.';
+                } else if (reason === 'storage/unknown' || /CORS/i.test(reason)) {
+                    reason = 'помилка з\'єднання зі Storage (можливо CORS або немає бакета). Перевір storageBucket у конфігурації.';
+                } else if (reason === 'storage/quota-exceeded') {
+                    reason = 'перевищено квоту Storage на цьому тарифному плані Firebase.';
+                }
+
+                progressEl.innerText = '✕ Помилка: ' + reason;
+                setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
             }
 
             event.target.value = '';
