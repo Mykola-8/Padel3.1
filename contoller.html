@@ -234,6 +234,18 @@
                     <span style="font-size:12px; color:#aaa;">Текст заставки (тема турніру):</span>
                 </div>
                 <input type="text" id="idle-screen-text" placeholder="напр. PADEL CHAMPIONSHIP 2026" style="width:100%; padding:8px; margin-top:4px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;" onchange="updateIdleScreenText(this.value)">
+
+                <div class="row" style="margin-top:12px;">
+                    <span style="font-size:12px; color:#aaa;">Тривалість слайду (сек):</span>
+                    <input type="number" id="idle-slide-duration" min="3" max="60" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateIdleSlideDuration(this.value)">
+                </div>
+
+                <div style="font-size:11px; font-weight:700; color:#888; margin-top:12px; margin-bottom:4px; text-transform:uppercase;">Слайди (фото / відео URL, текст завжди першим):</div>
+                <div id="idle-slides-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    <input type="text" id="idle-slide-new-url" placeholder="https://... (jpg/png/mp4)" style="flex:1; padding:8px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;">
+                    <button class="btn" style="padding:8px 14px; font-size:12px;" onclick="addIdleSlide()">+ Додати</button>
+                </div>
             </div>
 
             <div class="card">
@@ -489,6 +501,20 @@
             document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
             document.getElementById('idle-screen-checkbox').checked = !!state.showIdleScreen;
             document.getElementById('idle-screen-text').value = state.idleScreenText || '';
+            document.getElementById('idle-slide-duration').value = state.idleSlideDuration || 8;
+
+            const idleSlidesList = document.getElementById('idle-slides-list');
+            idleSlidesList.innerHTML = '';
+            (state.idleSlides || []).forEach((slide, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; gap:6px; background:#1a1a1a; padding:6px 8px; border-radius:4px; border:1px solid #333;';
+                row.innerHTML = `
+                    <span style="font-size:11px; color:#c69f66; flex-shrink:0;">${slide.type === 'video' ? '🎬' : '🖼️'}</span>
+                    <span style="font-size:11px; color:#ccc; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${slide.url}</span>
+                    <button onclick="removeIdleSlide(${idx})" style="background:#7a1f1f; color:#fff; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer; flex-shrink:0;">✕</button>
+                `;
+                idleSlidesList.appendChild(row);
+            });
             document.getElementById('s-board-theme').value = state.boardTheme === 'light-gray' ? 'light-gray' : 'default';
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
@@ -550,6 +576,24 @@
         }
         window.updateIdleScreenText = function(v) {
             state.idleScreenText = v; set(matchRef, state);
+        }
+        window.updateIdleSlideDuration = function(v) {
+            state.idleSlideDuration = parseInt(v) || 8; set(matchRef, state);
+        }
+        window.addIdleSlide = function() {
+            const input = document.getElementById('idle-slide-new-url');
+            const url = input.value.trim();
+            if (!url) return;
+            if (!state.idleSlides) state.idleSlides = [];
+            const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(url);
+            state.idleSlides.push({ url, type: isVideo ? 'video' : 'image' });
+            input.value = '';
+            set(matchRef, state);
+        }
+        window.removeIdleSlide = function(idx) {
+            if (!state.idleSlides) return;
+            state.idleSlides.splice(idx, 1);
+            set(matchRef, state);
         }
         window.toggleMainBoardVisibility = function(isChecked) {
             saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
@@ -804,4 +848,3 @@
     </script>
 </body>
 </html>
- 
