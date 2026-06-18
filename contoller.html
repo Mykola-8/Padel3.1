@@ -355,7 +355,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -536,9 +536,13 @@
             (state.idleSlides || []).forEach((slide, idx) => {
                 const row = document.createElement('div');
                 row.style.cssText = 'display:flex; align-items:center; gap:6px; background:#1a1a1a; padding:6px 8px; border-radius:4px; border:1px solid #333;';
+                const sourceLabel = slide.storagePath ? '📁 Завантажено' : '🔗 URL';
                 row.innerHTML = `
                     <span style="font-size:11px; color:#c69f66; flex-shrink:0;">${slide.type === 'video' ? '🎬' : '🖼️'}</span>
-                    <span style="font-size:11px; color:#ccc; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${slide.url}</span>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="font-size:10px; color:#777;">${sourceLabel}</div>
+                        <div style="font-size:11px; color:#ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${slide.url}</div>
+                    </div>
                     <button onclick="removeIdleSlide(${idx})" style="background:#7a1f1f; color:#fff; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer; flex-shrink:0;">✕</button>
                 `;
                 idleSlidesList.appendChild(row);
@@ -618,11 +622,54 @@
             input.value = '';
             set(matchRef, state);
         }
-        window.removeIdleSlide = function(idx) {
-            if (!state.idleSlides) return;
+        window.removeIdleSlide = async function(idx) {
+            if (!state.idleSlides || !state.idleSlides[idx]) return;
+            const slide = state.idleSlides[idx];
+
+            // Видаляємо сам файл з Firebase Storage, якщо він був завантажений з пристрою
+            if (slide.storagePath) {
+                try {
+                    await deleteObject(storageRef(storage, slide.storagePath));
+                } catch (err) {
+                    console.warn('Не вдалося видалити файл зі Storage (можливо вже видалений):', err);
+                }
+            }
+
             state.idleSlides.splice(idx, 1);
             set(matchRef, state);
         }
+        // Стиснення зображення через Canvas: зменшує роздільну здатність і перекодовує в JPEG з заданою якістю
+        function compressImage(file, maxDimension = 1920, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    let { width, height } = img;
+                    if (width > maxDimension || height > maxDimension) {
+                        if (width > height) {
+                            height = Math.round(height * (maxDimension / width));
+                            width = maxDimension;
+                        } else {
+                            width = Math.round(width * (maxDimension / height));
+                            height = maxDimension;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Не вдалося стиснути зображення'));
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Не вдалося завантажити зображення')); };
+                img.src = objectUrl;
+            });
+        }
+
         window.handleIdleSlideFileSelect = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -635,7 +682,7 @@
                 return;
             }
 
-            // Обмеження розміру: фото до 15MB, відео до 100MB (орієнтовно)
+            // Обмеження розміру: фото до 15MB, відео до 100MB (орієнтовно), перевіряється до стиснення
             const maxSize = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
             if (file.size > maxSize) {
                 alert(`Файл занадто великий. Максимум ${isVideo ? '100MB для відео' : '15MB для фото'}.`);
@@ -648,18 +695,33 @@
             progressEl.innerText = 'Завантаження... 0%';
 
             try {
-                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const fileRef = storageRef(storage, `idle_slides/court_${courtId}/${Date.now()}_${safeName}`);
+                let uploadBlob = file;
+                let uploadExt = isVideo ? (file.name.split('.').pop() || 'mp4') : 'jpg';
 
-                // uploadBytes не дає прогрес по байтах напряму в усіх версіях SDK,
-                // тож показуємо індикатор активності, а по завершенню — 100%.
+                if (isImage) {
+                    progressEl.innerText = 'Стиснення фото...';
+                    try {
+                        uploadBlob = await compressImage(file, 1920, 0.8);
+                    } catch (compressErr) {
+                        console.warn('Стиснення не вдалося, завантажуємо оригінал:', compressErr);
+                        uploadBlob = file;
+                        uploadExt = file.name.split('.').pop() || 'jpg';
+                    }
+                }
+                // Відео: браузер не може перекодувати/стиснути без важких бібліотек,
+                // тож відео завантажується як є (обмеження розміру вище це частково компенсує).
+
+                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '') + '.' + uploadExt;
+                const storagePath = `idle_slides/court_${courtId}/${Date.now()}_${safeName}`;
+                const fileRef = storageRef(storage, storagePath);
+
                 progressEl.innerText = 'Завантаження...';
-                const snapshot = await uploadBytes(fileRef, file);
+                const snapshot = await uploadBytes(fileRef, uploadBlob);
                 progressEl.innerText = 'Отримання посилання...';
                 const downloadUrl = await getDownloadURL(snapshot.ref);
 
                 if (!state.idleSlides) state.idleSlides = [];
-                state.idleSlides.push({ url: downloadUrl, type: isVideo ? 'video' : 'image' });
+                state.idleSlides.push({ url: downloadUrl, type: isVideo ? 'video' : 'image', storagePath });
                 set(matchRef, state);
 
                 progressEl.innerText = '✓ Завантажено';
