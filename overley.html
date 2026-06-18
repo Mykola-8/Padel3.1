@@ -103,7 +103,29 @@
             0% { background-position: 0% 50%; }
             100% { background-position: 300% 50%; }
         }
- 
+        .idle-slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        .idle-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .idle-slide img, .idle-slide video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
         /* ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ (зліва-зверху над табло) ===== */
         .game-timer-clock {
             position: absolute;
@@ -135,7 +157,7 @@
             visibility: visible;
         }
         .game-timer-clock .clock-icon { font-size: 13px; }
- 
+
         /* ===== ОСНОВНЕ ТАБЛО ===== */
         .scoreboard-container {
             display: flex;
@@ -290,7 +312,7 @@
         .csp-tiebreak    { background: rgba(75, 85, 99, 0.55); }
         .csp-deuce       { background: rgba(91, 33, 182, 0.55); }
         .csp-doublefault { background: rgba(220, 38, 38, 0.55); }
- 
+
         /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
         .points-board-outer {
             overflow: hidden;
@@ -334,7 +356,7 @@
             background: linear-gradient(to bottom, #fff0c0, #e8c96a);
             color: #3a2a00;
         }
- 
+
         /* ===== ТЕМА: СВІТЛО-СІРИЙ ===== */
         .theme-light-gray .team-names {
             background: linear-gradient(to bottom, #e8e8e8, #d4d4d4);
@@ -569,7 +591,10 @@
 <body>
 
     <div class="idle-screen" id="idle-screen">
-        <div class="idle-screen-text" id="idle-screen-text-display">PADEL TOURNAMENT</div>
+        <div class="idle-slide active" id="idle-slide-text">
+            <div class="idle-screen-text" id="idle-screen-text-display">PADEL TOURNAMENT</div>
+        </div>
+        <div id="idle-media-slides-container"></div>
     </div>
 
     <div class="scoreboard-wrapper" id="main-scoreboard">
@@ -787,6 +812,11 @@
 
         let lastGameStartTs = null;
 
+        let idleSlideInterval = null;
+        let idleSlidesBuilt = [];
+        let idleSlideIdx = 0;
+        let idleSlidesSignature = '';
+
         setInterval(() => {
             if (isMatchFinishedCurrently) return;
             totalSeconds++;
@@ -886,10 +916,52 @@
                 // ===== ТЕМА ТАБЛА =====
                 boardWrapper.classList.toggle('theme-light-gray', state.boardTheme === 'light-gray');
 
-                // ===== ЗАСТАВКА (IDLE SCREEN) =====
+                // ===== ЗАСТАВКА (IDLE SCREEN) — циклічний показ тексту, фото, відео =====
                 const idleScreenEl = document.getElementById('idle-screen');
-                idleScreenEl.classList.toggle('visible', !!state.showIdleScreen);
+                const isIdleVisible = !!state.showIdleScreen;
+                idleScreenEl.classList.toggle('visible', isIdleVisible);
                 document.getElementById('idle-screen-text-display').innerText = state.idleScreenText || 'PADEL TOURNAMENT';
+
+                if (isIdleVisible) {
+                    const slidesData = state.idleSlides || [];
+                    const duration = (state.idleSlideDuration || 8) * 1000;
+                    const signature = JSON.stringify(slidesData) + '|' + duration;
+
+                    if (signature !== idleSlidesSignature) {
+                        idleSlidesSignature = signature;
+                        if (idleSlideInterval) clearInterval(idleSlideInterval);
+                        idleSlideIdx = 0;
+
+                        const container = document.getElementById('idle-media-slides-container');
+                        container.innerHTML = '';
+                        idleSlidesBuilt = [document.getElementById('idle-slide-text')];
+
+                        slidesData.forEach((slide) => {
+                            const slideEl = document.createElement('div');
+                            slideEl.className = 'idle-slide';
+                            if (slide.type === 'video') {
+                                slideEl.innerHTML = `<video src="${slide.url}" autoplay muted loop playsinline></video>`;
+                            } else {
+                                slideEl.innerHTML = `<img src="${slide.url}">`;
+                            }
+                            container.appendChild(slideEl);
+                            idleSlidesBuilt.push(slideEl);
+                        });
+
+                        idleSlidesBuilt.forEach((el, i) => el.classList.toggle('active', i === 0));
+
+                        if (idleSlidesBuilt.length > 1) {
+                            idleSlideInterval = setInterval(() => {
+                                idleSlidesBuilt[idleSlideIdx].classList.remove('active');
+                                idleSlideIdx = (idleSlideIdx + 1) % idleSlidesBuilt.length;
+                                idleSlidesBuilt[idleSlideIdx].classList.add('active');
+                            }, duration);
+                        }
+                    }
+                } else {
+                    if (idleSlideInterval) { clearInterval(idleSlideInterval); idleSlideInterval = null; }
+                    idleSlidesSignature = '';
+                }
 
                 document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
 
@@ -1177,4 +1249,3 @@
     </script>
 </body>
 </html>
- 
