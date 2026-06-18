@@ -36,6 +36,9 @@
 
         /* ===== ПАНЕЛЬ ЛОГОТИПУ ===== */
         .logo-panel {
+            position: absolute;
+            right: 100%;
+            top: 0;
             transform: translateX(100%);
             opacity: 0;
             height: 96px;
@@ -49,7 +52,6 @@
             flex-shrink: 0;
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
             box-sizing: border-box;
-            order: 1;
             padding: 0 !important;
             margin: 0 !important;
         }
@@ -132,31 +134,29 @@
             bottom: 100%;
             left: 0;
             margin-bottom: 4px;
-            background: rgba(20, 20, 20, 0.7);
-            border: 1px solid rgba(198, 159, 102, 0.4);
+            background: rgba(10, 10, 10, 0.72);
+            border: 1px solid rgba(198, 159, 102, 0.5);
             border-radius: 4px;
-            padding: 4px 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            padding: 5px 12px;
             font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-            font-size: 13px;
-            color: #fff;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+            font-weight: 900;
+            font-size: 15px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.95), 0 0 12px rgba(198,159,102,0.3);
             transform: translateY(8px) scale(0.85);
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s ease, visibility 0.4s;
             z-index: 5;
+            white-space: nowrap;
         }
         .game-timer-clock.visible {
             transform: translateY(0) scale(1);
             opacity: 1;
             visibility: visible;
         }
-        .game-timer-clock .clock-icon { font-size: 13px; }
 
         /* ===== ПАНЕЛЬ ЛОГОТИПІВ СПОНСОРІВ (зверху по центру, до 8 логотипів) ===== */
         .top-logos-bar {
@@ -532,15 +532,20 @@
             box-sizing: border-box;
             backdrop-filter: blur(10px);
         }
-        .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .stats-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
+        .statistics-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(var(--stats-scale, 1));
+            pointer-events: auto;
+        }
+        .stats-header { text-align: center; font-size: 15px; font-weight: 900; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 8px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,0.8); }
         .stats-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
         .stats-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
-        .stats-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .stats-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .stats-label { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .stats-val { font-size: 18px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        .stats-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .stats-team-left { text-align: left; font-weight: 800; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 6px rgba(0,0,0,1); }
+        .stats-team-right { text-align: right; font-weight: 800; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 6px rgba(0,0,0,1); }
+        .stats-label { font-size: 10px; font-weight: 800; color: #dddddd; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 4px rgba(0,0,0,1); }
+        .stats-val { font-size: 22px; font-weight: 900; color: #ffffff; text-shadow: 0 1px 8px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.6); }
+        .stats-val.gold { color: #f0c070; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 1px 8px rgba(0,0,0,1); }
 
         .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
@@ -641,9 +646,7 @@
         </div>
 
         <div class="scoreboard-container">
-            <div class="game-timer-clock" id="game-timer-clock">
-                <span class="clock-icon">⏱️</span><span id="game-timer-value">00:00</span>
-            </div>
+            <div class="game-timer-clock" id="game-timer-clock"><span id="game-timer-value">00:00</span></div>
             <div class="ribbons-top-container">
                 <div class="ribbon-top-item r-proset-style" id="ribbon-proset">PRO-SET 8</div>
                 <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
@@ -966,6 +969,7 @@
                 document.documentElement.style.setProperty('--points-board-width', finalPointsWidth + 'px');
                 document.documentElement.style.setProperty('--points-board-font', finalPointsFont + 'px');
                 document.documentElement.style.setProperty('--score-box-width', finalScoreBoxWidth + 'px');
+                document.documentElement.style.setProperty('--stats-scale', state.statsScale || 1);
 
                 // ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ — синхронізація стартового часу =====
                 lastGameStartTs = state.currentGameStartTs || null;
