@@ -195,7 +195,7 @@
         }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
         .server-indicator.active { visibility: visible; }
-        .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
+        .score-box { width: var(--score-box-width, 40px); display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; transition: width 0.3s ease; }
         .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
         .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
 
@@ -323,13 +323,13 @@
             border-radius: 0 4px 4px 0;
         }
         .points-board-outer.visible {
-            width: 100px;
+            width: var(--points-board-width, 100px);
         }
         .points-board {
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            width: 100px;
+            width: var(--points-board-width, 100px);
             height: 96px;
         }
         .points-cell {
@@ -339,7 +339,7 @@
             justify-content: center;
             font-family: 'Montserrat', sans-serif;
             font-weight: 900;
-            font-size: 26px;
+            font-size: var(--points-board-font, 26px);
             letter-spacing: 1px;
             white-space: nowrap;
         }
@@ -901,11 +901,34 @@
                 const posX = state.posX || 0;
                 const posY = state.posY || 0;
                 boardWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${currentScale})`;
-                const mainBoardEl = document.querySelector('.main-board');
-                if (mainBoardEl) mainBoardEl.style.transform = `scaleX(${currentScaleX})`;
 
-                document.documentElement.style.setProperty('--team-name-width', (state.teamNameWidth || 320) + 'px');
-                document.documentElement.style.setProperty('--team-name-font', (state.teamNameFontSize || 22) + 'px');
+                // ===== РОЗТЯГ ПО ГОРИЗОНТАЛІ — реальні розміри, без спотворення тексту =====
+                const baseTeamWidth = state.teamNameWidth || 320;
+                const baseTeamFont = state.teamNameFontSize || 22;
+                const basePointsWidth = 100;
+                const basePointsFont = 26;
+                const baseScoreBoxWidth = 40;
+
+                // Авто-підлаштування під найдовшу назву команди (приблизна оцінка ширини символу)
+                const longestNameLen = Math.max(
+                    (state.p1name || "Команда 1").length,
+                    (state.p2name || "Команда 2").length
+                );
+                const estCharWidth = baseTeamFont * 0.62;
+                const neededWidthForText = longestNameLen * estCharWidth + 70; // + паддінги та індикатор подачі
+                const autoFitWidth = Math.max(baseTeamWidth, neededWidthForText);
+
+                const finalTeamWidth = Math.round(autoFitWidth * currentScaleX);
+                const finalTeamFont = Math.round(baseTeamFont * Math.min(currentScaleX, 1.6));
+                const finalPointsWidth = Math.round(basePointsWidth * currentScaleX);
+                const finalPointsFont = Math.round(basePointsFont * Math.min(currentScaleX, 1.6));
+                const finalScoreBoxWidth = Math.round(baseScoreBoxWidth * currentScaleX);
+
+                document.documentElement.style.setProperty('--team-name-width', finalTeamWidth + 'px');
+                document.documentElement.style.setProperty('--team-name-font', finalTeamFont + 'px');
+                document.documentElement.style.setProperty('--points-board-width', finalPointsWidth + 'px');
+                document.documentElement.style.setProperty('--points-board-font', finalPointsFont + 'px');
+                document.documentElement.style.setProperty('--score-box-width', finalScoreBoxWidth + 'px');
 
                 // ===== ГОДИННИК РОЗІГРАШУ ГЕЙМУ — синхронізація стартового часу =====
                 lastGameStartTs = state.currentGameStartTs || null;
