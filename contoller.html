@@ -312,6 +312,34 @@
             </div>
 
             <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Логотипи спонсорів (зверху по центру, до 8 шт):</div>
+                <div class="switch-row">
+                    <span style="font-size:13px; font-weight:700;">Показати логотипи:</span>
+                    <input type="checkbox" id="top-logos-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleTopLogosVisibility(this.checked)">
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <span style="font-size:12px; color:#aaa;">Висота логотипу (px):</span>
+                    <input type="number" id="top-logo-height" min="20" max="200" value="60" style="width:70px; padding:6px; text-align:center;" onchange="updateTopLogoSize()">
+                </div>
+                <div class="row">
+                    <span style="font-size:12px; color:#aaa;">Ширина логотипу (px):</span>
+                    <input type="number" id="top-logo-width" min="20" max="300" value="90" style="width:70px; padding:6px; text-align:center;" onchange="updateTopLogoSize()">
+                </div>
+                <div style="font-size:10px; color:#777; margin-top:-4px; margin-bottom:8px;">Розмір застосовується однаково до всіх логотипів (зображення розтягуються/витискаються під цей розмір).</div>
+
+                <div id="top-logos-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+
+                <input type="file" id="top-logo-file-input" accept="image/*" style="display:none;" onchange="handleTopLogoFileSelect(event)">
+                <div id="top-logo-upload-progress" style="display:none; font-size:11px; color:#c69f66; margin-top:8px; text-align:center;"></div>
+
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    <button class="btn" id="top-logo-add-btn" style="flex:1; padding:10px; font-size:12px; background:#2a4a2a; border:1px solid #4a7a4a;" onclick="document.getElementById('top-logo-file-input').click()">📁 Додати логотип (1-8)</button>
+                    <button class="btn" style="padding:10px 12px; font-size:12px; background:#4a2a2a; border:1px solid #7a4a4a;" onclick="clearAllTopLogos()">🗑️ Очистити всі</button>
+                </div>
+            </div>
+
+            <div class="card">
                 <div style="font-size:11px; font-weight:700; color:#aaa; margin-bottom:6px; text-transform:uppercase;">Масштаб та позиція табла на екрані OBS:</div>
                 <div class="row">
                     <span>Масштаб:</span>
@@ -548,6 +576,30 @@
                 `;
                 idleSlidesList.appendChild(row);
             });
+
+            document.getElementById('top-logos-visibility-checkbox').checked = state.showTopLogos !== false;
+            document.getElementById('top-logo-height').value = state.topLogoHeight || 60;
+            document.getElementById('top-logo-width').value = state.topLogoWidth || 90;
+
+            const topLogosCount = (state.topLogos || []).length;
+            const addLogoBtn = document.getElementById('top-logo-add-btn');
+            addLogoBtn.disabled = topLogosCount >= 8;
+            addLogoBtn.style.opacity = topLogosCount >= 8 ? '0.5' : '1';
+            addLogoBtn.innerText = topLogosCount >= 8 ? '📁 Максимум 8 логотипів' : `📁 Додати логотип (${topLogosCount}/8)`;
+
+            const topLogosList = document.getElementById('top-logos-list');
+            topLogosList.innerHTML = '';
+            (state.topLogos || []).forEach((logo, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; gap:6px; background:#1a1a1a; padding:6px 8px; border-radius:4px; border:1px solid #333;';
+                row.innerHTML = `
+                    <span style="font-size:11px; color:#c69f66; flex-shrink:0;">${idx + 1}.</span>
+                    <img src="${logo.url}" style="width:32px; height:24px; object-fit:contain; background:#fff; border-radius:2px; flex-shrink:0;">
+                    <div style="flex:1; overflow:hidden; font-size:11px; color:#ccc; text-overflow:ellipsis; white-space:nowrap;">${logo.url}</div>
+                    <button onclick="removeTopLogo(${idx})" style="background:#7a1f1f; color:#fff; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer; flex-shrink:0;">✕</button>
+                `;
+                topLogosList.appendChild(row);
+            });
             document.getElementById('s-board-theme').value = state.boardTheme === 'light-gray' ? 'light-gray' : 'default';
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
@@ -700,6 +752,147 @@
                 setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 7000);
             } else {
                 progressEl.style.color = '#c69f66';
+                progressEl.innerText = '✓ Очищено';
+                setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
+            }
+        }
+
+        // ===== ЛОГОТИПИ СПОНСОРІВ (зверху по центру, 1-8 шт, однаковий розмір) =====
+        window.toggleTopLogosVisibility = function(isChecked) {
+            state.showTopLogos = isChecked; set(matchRef, state);
+        }
+        window.updateTopLogoSize = function() {
+            const h = parseInt(document.getElementById('top-logo-height').value) || 60;
+            const w = parseInt(document.getElementById('top-logo-width').value) || 90;
+            state.topLogoHeight = h;
+            state.topLogoWidth = w;
+            set(matchRef, state);
+        }
+        window.handleTopLogoFileSelect = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Підтримуються лише зображення (логотипи).');
+                event.target.value = '';
+                return;
+            }
+
+            if (!state.topLogos) state.topLogos = [];
+            if (state.topLogos.length >= 8) {
+                alert('Досягнуто максимуму — 8 логотипів. Видали один, щоб додати новий.');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Файл занадто великий. Максимум 10MB для логотипу.');
+                event.target.value = '';
+                return;
+            }
+
+            const progressEl = document.getElementById('top-logo-upload-progress');
+            progressEl.style.display = 'block';
+            progressEl.style.color = '#c69f66';
+            progressEl.innerText = 'Стиснення логотипу...';
+
+            try {
+                let uploadBlob = file;
+                try {
+                    // Логотипи зазвичай малі, тож компактний максимум 800px достатній і прискорює завантаження
+                    uploadBlob = await compressImage(file, 800, 0.9);
+                } catch (compressErr) {
+                    console.warn('Стиснення логотипу не вдалося, завантажуємо оригінал:', compressErr);
+                    uploadBlob = file;
+                }
+
+                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '') + '.jpg';
+                const storagePath = `top_logos/court_${courtId}/${Date.now()}_${safeName}`;
+                const fileRef = storageRef(storage, storagePath);
+
+                progressEl.innerText = 'Завантаження...';
+                const snapshot = await uploadBytes(fileRef, uploadBlob);
+                const downloadUrl = await getDownloadURL(snapshot.ref);
+
+                state.topLogos.push({ url: downloadUrl, storagePath });
+                if (state.showTopLogos === undefined) state.showTopLogos = true;
+                set(matchRef, state);
+
+                progressEl.innerText = '✓ Логотип додано';
+                setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
+            } catch (err) {
+                console.error('Top logo upload error:', err);
+                progressEl.style.color = '#ff6b6b';
+                let reason = err && err.code ? err.code : 'невідома помилка';
+                if (reason === 'storage/unauthorized' || /unauthorized/i.test(reason)) {
+                    reason = 'немає дозволу на запис у Storage. Перевір Firebase Console → Storage → Rules.';
+                }
+                progressEl.innerText = '✕ Помилка: ' + reason;
+                setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
+            }
+
+            event.target.value = '';
+        }
+        window.removeTopLogo = async function(idx) {
+            if (!state.topLogos || !state.topLogos[idx]) return;
+            const logo = state.topLogos[idx];
+
+            if (logo.storagePath) {
+                const progressEl = document.getElementById('top-logo-upload-progress');
+                progressEl.style.display = 'block';
+                progressEl.style.color = '#c69f66';
+                progressEl.innerText = 'Видалення логотипу...';
+                try {
+                    await deleteObject(storageRef(storage, logo.storagePath));
+                    progressEl.innerText = '✓ Логотип видалено';
+                    setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
+                } catch (err) {
+                    const code = err && err.code ? err.code : '';
+                    if (code === 'storage/object-not-found') {
+                        progressEl.style.display = 'none';
+                    } else {
+                        console.error('Не вдалося видалити логотип зі Storage:', err);
+                        progressEl.style.color = '#ff6b6b';
+                        progressEl.innerText = '✕ Помилка видалення: ' + (code || 'невідома помилка');
+                        setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
+                    }
+                }
+            }
+
+            state.topLogos.splice(idx, 1);
+            set(matchRef, state);
+        }
+        window.clearAllTopLogos = async function() {
+            if (!state.topLogos || state.topLogos.length === 0) return;
+            if (!confirm(`Видалити всі ${state.topLogos.length} логотип(и) з хранилища? Цю дію не можна скасувати.`)) return;
+
+            const progressEl = document.getElementById('top-logo-upload-progress');
+            progressEl.style.display = 'block';
+            progressEl.style.color = '#c69f66';
+            progressEl.innerText = 'Очищення логотипів...';
+
+            let failCount = 0;
+            for (const logo of state.topLogos) {
+                if (!logo.storagePath) continue;
+                try {
+                    await deleteObject(storageRef(storage, logo.storagePath));
+                } catch (err) {
+                    const code = err && err.code ? err.code : '';
+                    if (code !== 'storage/object-not-found') {
+                        failCount++;
+                        console.error('Не вдалося видалити логотип зі Storage:', logo.storagePath, err);
+                    }
+                }
+            }
+
+            state.topLogos = [];
+            set(matchRef, state);
+
+            if (failCount > 0) {
+                progressEl.style.color = '#ff6b6b';
+                progressEl.innerText = `⚠ Видалено зі списку, але ${failCount} файл(ів) могли лишитись у Storage`;
+                setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 7000);
+            } else {
                 progressEl.innerText = '✓ Очищено';
                 setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
             }
