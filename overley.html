@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&family=Roboto:wght=700;900&family=Playfair+Display:wght=700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Roboto:wght@700;900&family=Playfair+Display:wght@700;900&family=Bebas+Neue&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     <style>
         html, body {
             background: transparent !important;
@@ -81,21 +81,44 @@
             pointer-events: auto;
         }
         .idle-screen-text {
-            font-family: 'Montserrat', sans-serif;
+            font-family: var(--idle-text-font, 'Montserrat', sans-serif);
             font-weight: 900;
-            font-size: 64px;
+            font-size: var(--idle-text-size, 64px);
             letter-spacing: 8px;
             text-transform: uppercase;
-            color: #ffffff;
+            color: var(--idle-text-color, #ffffff);
             text-align: center;
             text-shadow: 0 0 40px rgba(198,159,102,0.6), 0 4px 20px rgba(0,0,0,0.8);
-            background: linear-gradient(120deg, #ffffff, #c69f66, #ffffff, #c69f66);
+            padding: 0 40px;
+        }
+        /* Варіант анімації: переливання кольором (градієнт) */
+        .idle-screen-text.anim-shine {
+            background: linear-gradient(120deg, var(--idle-text-color, #ffffff), #c69f66, var(--idle-text-color, #ffffff), #c69f66);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: idlePulse 4s ease-in-out infinite, idleShine 6s linear infinite;
-            padding: 0 40px;
+        }
+        /* Варіант анімації: пульсація розміру */
+        .idle-screen-text.anim-pulse {
+            animation: idlePulse 2.2s ease-in-out infinite;
+        }
+        /* Варіант анімації: плавне затухання/прояв */
+        .idle-screen-text.anim-fade {
+            animation: idleFade 3s ease-in-out infinite;
+        }
+        /* Варіант анімації: похитування */
+        .idle-screen-text.anim-bounce {
+            animation: idleBounce 2.4s ease-in-out infinite;
+        }
+        /* Варіант анімації: набір літер (typewriter-стиль через прояв) */
+        .idle-screen-text.anim-glow {
+            animation: idleGlow 2.6s ease-in-out infinite;
+        }
+        /* Без анімації */
+        .idle-screen-text.anim-none {
+            animation: none;
         }
         @keyframes idlePulse {
             0%, 100% { transform: scale(1); }
@@ -104,6 +127,18 @@
         @keyframes idleShine {
             0% { background-position: 0% 50%; }
             100% { background-position: 300% 50%; }
+        }
+        @keyframes idleFade {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+        @keyframes idleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+        @keyframes idleGlow {
+            0%, 100% { text-shadow: 0 0 40px rgba(198,159,102,0.6), 0 4px 20px rgba(0,0,0,0.8); }
+            50% { text-shadow: 0 0 70px rgba(198,159,102,1), 0 0 30px rgba(255,255,255,0.6), 0 4px 20px rgba(0,0,0,0.8); }
         }
         .idle-slide {
             position: absolute;
@@ -715,47 +750,47 @@
         <div class="stats-table">
             <div class="stats-row">
                 <div class="stats-team-left" id="st-name1">Команда A</div>
-                <div class="stats-label">Команди</div>
+                <div class="stats-label" id="lbl-teams">Команди</div>
                 <div class="stats-team-right" id="st-name2">Команда B</div>
             </div>
             <div class="stats-row" id="row-stats-current-set-games">
                 <div class="stats-val" id="st-g1">0</div>
-                <div class="stats-label">Гейми (сет)</div>
+                <div class="stats-label" id="lbl-games-set">Гейми (сет)</div>
                 <div class="stats-val" id="st-g2">0</div>
             </div>
             <div class="stats-row">
                 <div class="stats-val" id="st-bp1">0</div>
-                <div class="stats-label">Брейк-поінти</div>
+                <div class="stats-label" id="lbl-break-points">Брейк-поінти</div>
                 <div class="stats-val" id="st-bp2">0</div>
             </div>
             <div class="stats-row">
                 <div class="stats-val" id="st-df1">0</div>
-                <div class="stats-label">Дабл фоли</div>
+                <div class="stats-label" id="lbl-double-faults">Дабл фоли</div>
                 <div class="stats-val" id="st-df2">0</div>
             </div>
             <div class="stats-row" id="row-stats-lovegames">
                 <div class="stats-val" id="st-lg1">0</div>
-                <div class="stats-label">Геймів "в суху"</div>
+                <div class="stats-label" id="lbl-love-games">Геймів "в суху"</div>
                 <div class="stats-val" id="st-lg2">0</div>
             </div>
             <div class="stats-row" id="row-stats-timers">
                 <div style="text-align:center;">
                     <div class="stats-val gold" id="st-time-set" style="font-size:18px; font-weight:800;">00:00</div>
-                    <div class="stats-label" style="margin-top:2px;">Час сету</div>
+                    <div class="stats-label" id="lbl-set-time" style="margin-top:2px;">Час сету</div>
                 </div>
                 <div class="stats-label">&nbsp;</div>
                 <div style="text-align:center;">
                     <div class="stats-val gold" id="st-time-match" style="font-size:18px; font-weight:800;">00:00</div>
-                    <div class="stats-label" style="margin-top:2px;">Загальний час матчу</div>
+                    <div class="stats-label" id="lbl-match-time" style="margin-top:2px;">Загальний час матчу</div>
                 </div>
             </div>
             <div class="stats-row" id="row-stats-history">
                 <div class="stats-val gold" id="st-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 5px; font-size: 16px;">0`</div>
-                <div class="stats-label" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
+                <div class="stats-label" id="lbl-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
             </div>
 
             <div id="final-sets-summary-block" style="display:none; flex-direction:column; gap:4px;">
-                <div class="stats-label" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
+                <div class="stats-label" id="lbl-sets-results" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
                 <div class="history-sets-container" id="final-sets-list-target"></div>
             </div>
         </div>
@@ -809,6 +844,28 @@
         function getCornerSlideText(key, state) {
             const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
             return CORNER_SLIDE_LABELS[key][lang];
+        }
+
+        const STATS_LABELS = {
+            statsHeader:    { en: 'Match Statistics',      ua: 'Матч-Статистика' },
+            teams:          { en: 'Teams',                 ua: 'Команди' },
+            gamesSet:       { en: 'Games (set)',            ua: 'Гейми (сет)' },
+            breakPoints:    { en: 'Break Points',           ua: 'Брейк-поінти' },
+            doubleFaults:   { en: 'Double Faults',          ua: 'Дабл фоли' },
+            loveGames:      { en: 'Love Games',             ua: 'Геймів "в суху"' },
+            setTime:        { en: 'Set Time',               ua: 'Час сету' },
+            matchTime:      { en: 'Total Match Time',       ua: 'Загальний час матчу' },
+            gameHistory:    { en: 'Game Timeline (cumulative)', ua: 'Хронологія геймів (в сумі)' },
+            matchFinished:  { en: 'MATCH FINISHED',         ua: 'МАТЧ ЗАВЕРШЕНО' },
+            draw:           { en: 'Draw',                   ua: 'Нічия' },
+            setsResults:    { en: 'Set results and time:',  ua: 'Результати по сетам та час:' },
+            team:           { en: 'Team',                   ua: 'Команда' },
+            court:          { en: 'Court',                  ua: 'Корт' }
+        };
+
+        function getStatsText(key, state) {
+            const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
+            return STATS_LABELS[key][lang];
         }
 
         function showCornerSlide(text, cssClass) {
@@ -984,7 +1041,17 @@
                 const idleScreenEl = document.getElementById('idle-screen');
                 const isIdleVisible = !!state.showIdleScreen;
                 idleScreenEl.classList.toggle('visible', isIdleVisible);
-                document.getElementById('idle-screen-text-display').innerText = state.idleScreenText || 'PADEL TOURNAMENT';
+                const idleTextEl = document.getElementById('idle-screen-text-display');
+                idleTextEl.innerText = state.idleScreenText || 'PADEL TOURNAMENT';
+
+                document.documentElement.style.setProperty('--idle-text-color', state.idleTextColor || '#ffffff');
+                document.documentElement.style.setProperty('--idle-text-size', (state.idleTextSize || 64) + 'px');
+                document.documentElement.style.setProperty('--idle-text-font', state.idleTextFont || "'Montserrat', sans-serif");
+
+                const idleAnimClass = 'anim-' + (state.idleTextAnimation || 'shine');
+                if (!idleTextEl.classList.contains(idleAnimClass)) {
+                    idleTextEl.className = 'idle-screen-text ' + idleAnimClass;
+                }
 
                 if (isIdleVisible) {
                     const slidesData = state.idleSlides || [];
@@ -1220,7 +1287,7 @@
                     if (state.showStatsOverlay !== false) {
                         const p1name = state.p1name || "Команда A";
                         const p2name = state.p2name || "Команда B";
-                        document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
+                        document.getElementById('mfb-header').innerText = `${getStatsText('court', state)} ${courtId} • ${getStatsText('matchFinished', state)}`;
 
                         // Зібрати зіграні сети
                         let playedSets = [];
@@ -1237,13 +1304,14 @@
                         let winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
                         let winnerIs1 = setsWon1 > setsWon2;
 
-                        document.getElementById('mfb-winner-name').innerText = winnerName ? winnerName : "Нічия";
+                        document.getElementById('mfb-winner-name').innerText = winnerName ? winnerName : getStatsText('draw', state);
 
                         // Заголовок таблиці: Команда | Сет 1 | Сет 2 | ...
                         const headRow = document.getElementById('mfb-head-row');
-                        headRow.innerHTML = '<th>Команда</th>';
+                        const setWordLabel = (state.cornerSlideLang === 'ua') ? 'Сет' : 'Set';
+                        headRow.innerHTML = `<th>${getStatsText('team', state)}</th>`;
                         playedSets.forEach(s => {
-                            headRow.innerHTML += `<th>Сет ${s.set}</th>`;
+                            headRow.innerHTML += `<th>${setWordLabel} ${s.set}</th>`;
                         });
 
                         // Рядки команд
@@ -1292,7 +1360,7 @@
                         document.getElementById('st-lg2').innerText = lgTotal2;
                         document.getElementById('row-stats-lovegames').style.display = state.isAmericano ? 'none' : 'grid';
 
-                        document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
+                        document.getElementById('stats-main-header').innerText = `${getStatsText('statsHeader', state)} • ${getStatsText('court', state)} ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
@@ -1302,6 +1370,17 @@
                         document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                         const historyArray = state.gamesTimeHistory || [];
                         document.getElementById('st-game-history').innerText = historyArray.length > 0 ? historyArray.join(' ') : "-";
+
+                        // Переклад статичних лейблів таблиці статистики
+                        document.getElementById('lbl-teams').innerText = getStatsText('teams', state);
+                        document.getElementById('lbl-games-set').innerText = getStatsText('gamesSet', state);
+                        document.getElementById('lbl-break-points').innerText = getStatsText('breakPoints', state);
+                        document.getElementById('lbl-double-faults').innerText = getStatsText('doubleFaults', state);
+                        document.getElementById('lbl-love-games').innerText = getStatsText('loveGames', state);
+                        document.getElementById('lbl-set-time').innerText = getStatsText('setTime', state);
+                        document.getElementById('lbl-match-time').innerText = getStatsText('matchTime', state);
+                        document.getElementById('lbl-game-history').innerText = getStatsText('gameHistory', state);
+                        document.getElementById('lbl-sets-results').innerText = getStatsText('setsResults', state);
 
                         stPanel.classList.add('visible');
                     } else {
