@@ -197,7 +197,7 @@
                 </div>
 
                 <div class="row" style="margin-top:10px;">
-                    <span style="font-size:12px; color:#aaa;">Мова слайд-таблички (кут):</span>
+                    <span style="font-size:12px; color:#aaa;">Мова тексту (плашки + статистика):</span>
                     <select id="s-corner-slide-lang" style="padding:6px; text-align:center; background:#222; color:#fff; border:1px solid #555; border-radius:4px;" onchange="updateCornerSlideLang(this.value)">
                         <option value="en">English</option>
                         <option value="ua">Українська</option>
@@ -235,23 +235,49 @@
                 </div>
                 <input type="text" id="idle-screen-text" placeholder="напр. PADEL CHAMPIONSHIP 2026" style="width:100%; padding:8px; margin-top:4px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;" onchange="updateIdleScreenText(this.value)">
 
+                <div class="row" style="margin-top:10px;">
+                    <span style="font-size:12px; color:#aaa;">Колір тексту:</span>
+                    <input type="color" id="idle-text-color" value="#ffffff" style="width:50px; height:30px; padding:2px; background:#1a1a1a; border:1px solid #444; border-radius:4px; cursor:pointer;" onchange="updateIdleTextColor(this.value)">
+                </div>
+                <div class="row">
+                    <span style="font-size:12px; color:#aaa;">Розмір тексту (px):</span>
+                    <input type="range" id="idle-text-size" min="24" max="120" step="2" value="64" oninput="updateIdleTextSize(this.value)">
+                    <span id="idle-text-size-display" style="color:#c69f66; min-width:45px; text-align:right;">64px</span>
+                </div>
+                <div class="row">
+                    <span style="font-size:12px; color:#aaa;">Шрифт:</span>
+                    <select id="idle-text-font" style="flex:1; padding:6px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;" onchange="updateIdleTextFont(this.value)">
+                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Playfair Display', serif">Playfair Display</option>
+                        <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                        <option value="'Oswald', sans-serif">Oswald</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <span style="font-size:12px; color:#aaa;">Анімація тексту:</span>
+                    <select id="idle-text-animation" style="flex:1; padding:6px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;" onchange="updateIdleTextAnimation(this.value)">
+                        <option value="shine">Переливання кольором</option>
+                        <option value="pulse">Пульсація розміру</option>
+                        <option value="fade">Затухання/прояв</option>
+                        <option value="bounce">Похитування</option>
+                        <option value="glow">Світіння</option>
+                        <option value="none">Без анімації</option>
+                    </select>
+                </div>
+
                 <div class="row" style="margin-top:12px;">
                     <span style="font-size:12px; color:#aaa;">Тривалість слайду (сек):</span>
                     <input type="number" id="idle-slide-duration" min="3" max="60" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateIdleSlideDuration(this.value)">
                 </div>
 
-                <div style="font-size:11px; font-weight:700; color:#888; margin-top:12px; margin-bottom:4px; text-transform:uppercase;">Слайди (фото / відео, текст завжди першим):</div>
+                <div style="font-size:11px; font-weight:700; color:#888; margin-top:12px; margin-bottom:4px; text-transform:uppercase;">Слайди (фото / відео URL, текст завжди першим):</div>
                 <div id="idle-slides-list" style="display:flex; flex-direction:column; gap:6px;"></div>
 
-                <input type="file" id="idle-slide-file-input" accept="image/*,video/*" style="display:none;" onchange="handleIdleSlideFileSelect(event)">
-                <div id="idle-upload-progress" style="display:none; font-size:11px; color:#c69f66; margin-top:8px; text-align:center;">Завантаження... 0%</div>
+                <div id="idle-upload-progress" style="display:none; font-size:11px; color:#c69f66; margin-top:8px; text-align:center;"></div>
 
                 <div style="display:flex; gap:6px; margin-top:8px;">
-                    <button class="btn" style="flex:1; padding:10px; font-size:12px; background:#2a4a2a; border:1px solid #4a7a4a;" onclick="document.getElementById('idle-slide-file-input').click()">📁 Завантажити з пристрою</button>
-                    <button class="btn" style="padding:10px 12px; font-size:12px; background:#4a2a2a; border:1px solid #7a4a4a;" onclick="clearAllUploadedIdleSlides()">🗑️ Очистити завантажене</button>
-                </div>
-                <div style="display:flex; gap:6px; margin-top:8px;">
-                    <input type="text" id="idle-slide-new-url" placeholder="або вставити https://... (jpg/png/mp4)" style="flex:1; padding:8px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;">
+                    <input type="text" id="idle-slide-new-url" placeholder="https://... (jpg/png/mp4)" style="flex:1; padding:8px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;">
                     <button class="btn" style="padding:8px 14px; font-size:12px;" onclick="addIdleSlide()">+ Додати</button>
                 </div>
             </div>
@@ -330,12 +356,14 @@
 
                 <div id="top-logos-list" style="display:flex; flex-direction:column; gap:6px;"></div>
 
-                <input type="file" id="top-logo-file-input" accept="image/*" style="display:none;" onchange="handleTopLogoFileSelect(event)">
                 <div id="top-logo-upload-progress" style="display:none; font-size:11px; color:#c69f66; margin-top:8px; text-align:center;"></div>
 
                 <div style="display:flex; gap:6px; margin-top:8px;">
-                    <button class="btn" id="top-logo-add-btn" style="flex:1; padding:10px; font-size:12px; background:#2a4a2a; border:1px solid #4a7a4a;" onclick="document.getElementById('top-logo-file-input').click()">📁 Додати логотип (1-8)</button>
-                    <button class="btn" style="padding:10px 12px; font-size:12px; background:#4a2a2a; border:1px solid #7a4a4a;" onclick="clearAllTopLogos()">🗑️ Очистити всі</button>
+                    <input type="text" id="top-logo-new-url" placeholder="https://... (посилання на логотип jpg/png)" style="flex:1; padding:8px; box-sizing:border-box; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:4px;">
+                    <button class="btn" id="top-logo-add-btn" style="padding:8px 14px; font-size:12px; background:#2a4a2a; border:1px solid #4a7a4a;" onclick="addTopLogoFromUrl()">+ Додати</button>
+                </div>
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    <button class="btn" style="width:100%; padding:10px 12px; font-size:12px; background:#4a2a2a; border:1px solid #7a4a4a;" onclick="clearAllTopLogos()">🗑️ Очистити всі</button>
                 </div>
             </div>
 
@@ -567,6 +595,11 @@
             document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
             document.getElementById('idle-screen-checkbox').checked = !!state.showIdleScreen;
             document.getElementById('idle-screen-text').value = state.idleScreenText || '';
+            document.getElementById('idle-text-color').value = state.idleTextColor || '#ffffff';
+            document.getElementById('idle-text-size').value = state.idleTextSize || 64;
+            document.getElementById('idle-text-size-display').innerText = (state.idleTextSize || 64) + 'px';
+            document.getElementById('idle-text-font').value = state.idleTextFont || "'Montserrat', sans-serif";
+            document.getElementById('idle-text-animation').value = state.idleTextAnimation || 'shine';
             document.getElementById('idle-slide-duration').value = state.idleSlideDuration || 8;
 
             const idleSlidesList = document.getElementById('idle-slides-list');
@@ -672,6 +705,18 @@
         }
         window.updateIdleScreenText = function(v) {
             state.idleScreenText = v; set(matchRef, state);
+        }
+        window.updateIdleTextColor = function(v) {
+            state.idleTextColor = v; set(matchRef, state);
+        }
+        window.updateIdleTextSize = function(v) {
+            state.idleTextSize = parseInt(v) || 64; set(matchRef, state);
+        }
+        window.updateIdleTextFont = function(v) {
+            state.idleTextFont = v; set(matchRef, state);
+        }
+        window.updateIdleTextAnimation = function(v) {
+            state.idleTextAnimation = v; set(matchRef, state);
         }
         window.updateIdleSlideDuration = function(v) {
             state.idleSlideDuration = parseInt(v) || 8; set(matchRef, state);
@@ -779,70 +824,21 @@
             state.topLogoWidth = w;
             set(matchRef, state);
         }
-        window.handleTopLogoFileSelect = async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!file.type.startsWith('image/')) {
-                alert('Підтримуються лише зображення (логотипи).');
-                event.target.value = '';
-                return;
-            }
+        window.addTopLogoFromUrl = function() {
+            const input = document.getElementById('top-logo-new-url');
+            const url = input.value.trim();
+            if (!url) return;
 
             if (!state.topLogos) state.topLogos = [];
             if (state.topLogos.length >= 8) {
                 alert('Досягнуто максимуму — 8 логотипів. Видали один, щоб додати новий.');
-                event.target.value = '';
                 return;
             }
 
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Файл занадто великий. Максимум 10MB для логотипу.');
-                event.target.value = '';
-                return;
-            }
-
-            const progressEl = document.getElementById('top-logo-upload-progress');
-            progressEl.style.display = 'block';
-            progressEl.style.color = '#c69f66';
-            progressEl.innerText = 'Стиснення логотипу...';
-
-            try {
-                let uploadBlob = file;
-                try {
-                    // Логотипи зазвичай малі, тож компактний максимум 800px достатній і прискорює завантаження
-                    uploadBlob = await compressImage(file, 800, 0.9);
-                } catch (compressErr) {
-                    console.warn('Стиснення логотипу не вдалося, завантажуємо оригінал:', compressErr);
-                    uploadBlob = file;
-                }
-
-                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '') + '.jpg';
-                const storagePath = `top_logos/court_${courtId}/${Date.now()}_${safeName}`;
-                const fileRef = storageRef(storage, storagePath);
-
-                progressEl.innerText = 'Завантаження...';
-                const snapshot = await uploadBytes(fileRef, uploadBlob);
-                const downloadUrl = await getDownloadURL(snapshot.ref);
-
-                state.topLogos.push({ url: downloadUrl, storagePath });
-                if (state.showTopLogos === undefined) state.showTopLogos = true;
-                set(matchRef, state);
-
-                progressEl.innerText = '✓ Логотип додано';
-                setTimeout(() => { progressEl.style.display = 'none'; }, 2000);
-            } catch (err) {
-                console.error('Top logo upload error:', err);
-                progressEl.style.color = '#ff6b6b';
-                let reason = err && err.code ? err.code : 'невідома помилка';
-                if (reason === 'storage/unauthorized' || /unauthorized/i.test(reason)) {
-                    reason = 'немає дозволу на запис у Storage. Перевір Firebase Console → Storage → Rules.';
-                }
-                progressEl.innerText = '✕ Помилка: ' + reason;
-                setTimeout(() => { progressEl.style.display = 'none'; progressEl.style.color = '#c69f66'; }, 6000);
-            }
-
-            event.target.value = '';
+            state.topLogos.push({ url });
+            if (state.showTopLogos === undefined) state.showTopLogos = true;
+            input.value = '';
+            set(matchRef, state);
         }
         window.removeTopLogo = async function(idx) {
             if (!state.topLogos || !state.topLogos[idx]) return;
