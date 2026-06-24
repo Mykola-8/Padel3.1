@@ -77,6 +77,40 @@
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
+        /* ===== ТЕМА "СІРО-ТЕМНА" (МІНІМАЛІЗМ, ВИСОКИЙ КОНТРАСТ) =====
+           Активується класом theme-graydark на <html>. Перевизначає лише змінні вище —
+           жодне з оригінальних правил CSS не торкнуте і не видалене. */
+        html.theme-graydark {
+            --accent: #d1d5db;
+            --accent-soft: rgba(209, 213, 219, 0.45);
+            --team-bg-top: rgba(55, 65, 81, 0.82);
+            --team-bg-bottom: rgba(17, 24, 39, 0.85);
+            --team-text: #f3f4f6;
+            --score-set-past-bg: rgba(243, 244, 246, 0.92);
+            --score-set-past-text: #111827;
+            --score-set-current-bg: rgba(107, 114, 128, 0.8);
+            --score-set-current-text: #f9fafb;
+            --points-team1-top: #6b7280;
+            --points-team1-bottom: #374151;
+            --points-team2-top: #4b5563;
+            --points-team2-bottom: #1f2937;
+            --points-text: #f9fafb;
+            --points-ad-top: #e5e7eb;
+            --points-ad-bottom: #9ca3af;
+            --points-ad-text: #111827;
+            --panel-bg: rgba(10, 12, 16, 0.62);
+            --panel-border: rgba(209, 213, 219, 0.35);
+            --panel-text: #f3f4f6;
+            --slide-gamepoint: rgba(55, 65, 81, 0.6);
+            --slide-breakpoint: rgba(156, 163, 175, 0.55);
+            --slide-setpoint: rgba(75, 85, 99, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(202, 138, 4, 0.6);
+            --slide-tiebreak: rgba(31, 41, 55, 0.75);
+            --slide-deuce: rgba(88, 28, 135, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+ 
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -604,6 +638,82 @@
         html.theme-courtgreen .mfb-table td {
             border-bottom-color: rgba(74, 222, 128, 0.25);
         }
+
+        /* ============================================================
+           ТЕМА "СІРО-ТЕМНА" — ДОДАТКОВІ ПРАВИЛА
+           Усі правила нижче діють ТІЛЬКИ якщо на <html> стоїть клас
+           .theme-graydark. Жодне з оригінальних правил вище не
+           змінено й не видалене — це окремий, додатковий шар стилів,
+           що перефарбовує фон, текст, цифри та слайди табла.
+           ============================================================ */
+        html.theme-graydark .team-names {
+            background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom));
+            color: var(--team-text);
+        }
+        html.theme-graydark .server-indicator { color: var(--accent); }
+        html.theme-graydark .set-past {
+            background-color: var(--score-set-past-bg);
+            color: var(--score-set-past-text);
+        }
+        html.theme-graydark .set-current {
+            background-color: var(--score-set-current-bg);
+            color: var(--score-set-current-text);
+        }
+        html.theme-graydark .r-proset-style { color: var(--accent); border-color: rgba(209,213,219,0.35); }
+        html.theme-graydark .ribbon-matchpoint { background: var(--slide-matchpoint); }
+        html.theme-graydark .ribbon-setpoint { background: var(--slide-setpoint); }
+        html.theme-graydark .ribbon-breakpoint { background: var(--slide-breakpoint); color: #111827; }
+        html.theme-graydark .ribbon-gamepoint { background: var(--slide-gamepoint); }
+        html.theme-graydark .ribbon-goldenpoint { background: var(--slide-goldenpoint); }
+        html.theme-graydark .csp-gamepoint   { background: var(--slide-gamepoint); }
+        html.theme-graydark .csp-breakpoint  { background: var(--slide-breakpoint); color: #111827; }
+        html.theme-graydark .csp-setpoint    { background: var(--slide-setpoint); }
+        html.theme-graydark .csp-matchpoint  { background: var(--slide-matchpoint); }
+        html.theme-graydark .csp-goldenpoint { background: var(--slide-goldenpoint); }
+        html.theme-graydark .csp-tiebreak    { background: var(--slide-tiebreak); }
+        html.theme-graydark .csp-deuce       { background: var(--slide-deuce); }
+        html.theme-graydark .csp-doublefault { background: var(--slide-doublefault); }
+        html.theme-graydark .points-cell.team1 {
+            background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom));
+            color: var(--points-text);
+        }
+        html.theme-graydark .points-cell.team2 {
+            background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom));
+            color: var(--points-text);
+        }
+        html.theme-graydark .points-cell.ad-active {
+            background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom));
+            color: var(--points-ad-text);
+        }
+        html.theme-graydark .match-finished-board,
+        html.theme-graydark .statistics-overlay,
+        html.theme-graydark .set-result-overlay {
+            background: var(--panel-bg);
+            border-color: var(--panel-border);
+            color: var(--panel-text);
+        }
+        html.theme-graydark .mfb-header,
+        html.theme-graydark .mfb-winner,
+        html.theme-graydark .sr-set-label,
+        html.theme-graydark .stats-header,
+        html.theme-graydark .h-set-time,
+        html.theme-graydark .mfb-table td.mfb-set-win,
+        html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name,
+        html.theme-graydark .stats-val.gold {
+            color: var(--accent);
+        }
+        html.theme-graydark .mfb-table th,
+        html.theme-graydark .mfb-table td,
+        html.theme-graydark .stats-val,
+        html.theme-graydark .h-set-score,
+        html.theme-graydark .sr-score,
+        html.theme-graydark .sr-team {
+            color: var(--panel-text);
+        }
+        html.theme-graydark .mfb-table th,
+        html.theme-graydark .mfb-table td {
+            border-bottom-color: rgba(209, 213, 219, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -835,6 +945,7 @@
             if (state) {
                 // ===== ТЕМА ТАБЛА: перемикання класу на <html> на основі state.boardTheme =====
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
+                document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
 
                 isMatchFinishedCurrently = !!state.isMatchFinished;
                 const boardWrapper = document.getElementById('main-scoreboard');
