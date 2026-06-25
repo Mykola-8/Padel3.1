@@ -614,7 +614,7 @@
                 if ((state.p1Index >= limit && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= limit && (state.p2Index - state.p1Index >= 2))) {
                     const winner = state.p1Index > state.p2Index ? 1 : 2;
                     state.animation = { team: winner, type: 'set', ts: Date.now() };
-                    state.isMatchFinished = true; state.showStatsOverlay = true; state.showSetOverlayTrigger = false;
+                    // Матч НЕ завершується автоматично — тренер завершує вручну кнопкою "Завершити матч"
                 }
             } else if (state.isAmericano) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
