@@ -1165,7 +1165,8 @@
 
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) {
-                    ribbonProset.innerText = `СУПЕР-ТАЙБРЕЙК ДО ${state.superTiebreakLimit || 10}`;
+                    const stbLabel = (state.cornerSlideLang === 'ua') ? 'СУПЕР-ТАЙБРЕЙК ДО' : 'SUPER TIEBREAK TO';
+                    ribbonProset.innerText = `${stbLabel} ${state.superTiebreakLimit || 10}`;
                     ribbonProset.classList.add('visible');
                 } else if (state.isProSet) {
                     ribbonProset.innerText = `PRO-SET ${state.proSetLimit || 8}`;
