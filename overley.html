@@ -110,7 +110,7 @@
             --slide-deuce: rgba(88, 28, 135, 0.5);
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
- 
+
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -316,7 +316,7 @@
         .csp-tiebreak    { background: rgba(75, 85, 99, 0.55); }
         .csp-deuce       { background: rgba(91, 33, 182, 0.55); }
         .csp-doublefault { background: rgba(220, 38, 38, 0.55); }
- 
+
         /* ===== ТАБЛО ОЧОК (15/30/40/AD) — висувається вправо з-під основного табла ===== */
         .points-board-outer {
             overflow: hidden;
@@ -959,7 +959,7 @@
                 }
 
                 const topTiebreakRibbon = document.getElementById('ribbon-top-tiebreak');
-                if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger) {
+                if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
                     topTiebreakRibbon.classList.add('visible');
                 } else {
                     topTiebreakRibbon.classList.remove('visible');
@@ -1033,7 +1033,7 @@
 
                 // ===== RIBBON ПЛАШКИ =====
                 const ribbonMatch = document.getElementById('ribbon-match');
-                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
+                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !state.isSuperTiebreak && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
                     ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' ');
                     ribbonMatch.className = "ribbon visible";
                     if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
@@ -1086,11 +1086,11 @@
                 const p2 = state.p2Index || 0;
                 const isZeroZero = (p1 === 0 && p2 === 0);
 
-                if (isZeroZero || state.isAmericano || state.isMatchFinished) {
+                if ((isZeroZero && !state.isAmericano && !state.isSuperTiebreak) || state.isMatchFinished) {
                     pb.classList.remove('visible');
                 } else {
                     pb.classList.add('visible');
-                    if (state.isTiebreak) {
+                    if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1;
                         pbT2.innerText = p2;
                         pbT1.classList.remove('ad-active');
@@ -1132,7 +1132,7 @@
                     lastSetTracked = activeSet;
                 }
 
-                const totalSetsToShow = state.isAmericano ? 0 : 5;
+                const totalSetsToShow = (state.isAmericano || state.isSuperTiebreak) ? 0 : 5;
 
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`t1-s${s}`);
@@ -1164,7 +1164,10 @@
                 }
 
                 const ribbonProset = document.getElementById('ribbon-proset');
-                if (state.isProSet) {
+                if (state.isSuperTiebreak) {
+                    ribbonProset.innerText = `СУПЕР-ТАЙБРЕЙК ДО ${state.superTiebreakLimit || 10}`;
+                    ribbonProset.classList.add('visible');
+                } else if (state.isProSet) {
                     ribbonProset.innerText = `PRO-SET ${state.proSetLimit || 8}`;
                     ribbonProset.classList.add('visible');
                 } else {
@@ -1185,24 +1188,34 @@
 
                         // Зібрати зіграні сети
                         let playedSets = [];
-                        let setsToCheck = state.isAmericano ? 0 : 5;
+                        let setsToCheck = (state.isAmericano || state.isSuperTiebreak) ? 0 : 5;
                         for (let i = 1; i <= setsToCheck; i++) {
                             let g1 = state[`t1_s${i}`] || 0;
                             let g2 = state[`t2_s${i}`] || 0;
                             if (g1 > 0 || g2 > 0) playedSets.push({set: i, g1, g2});
                         }
 
-                        // Визначення переможця по кількості виграних сетів
-                        let setsWon1 = 0, setsWon2 = 0;
-                        playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                        let winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
-                        let winnerIs1 = setsWon1 > setsWon2;
+                        // Визначення переможця: для супер-тайбрейку - по фінальному рахунку очок, інакше - по сетах
+                        let winnerName, winnerIs1;
+                        if (state.isSuperTiebreak) {
+                            const fp1 = state.p1Index || 0, fp2 = state.p2Index || 0;
+                            winnerIs1 = fp1 > fp2;
+                            winnerName = fp1 > fp2 ? p1name : (fp2 > fp1 ? p2name : "");
+                        } else {
+                            let setsWon1 = 0, setsWon2 = 0;
+                            playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                            winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
+                            winnerIs1 = setsWon1 > setsWon2;
+                        }
 
                         document.getElementById('mfb-winner-name').innerText = winnerName ? winnerName : "Нічия";
 
                         // Заголовок таблиці: Команда | Сет 1 | Сет 2 | ...
                         const headRow = document.getElementById('mfb-head-row');
                         headRow.innerHTML = '<th>Команда</th>';
+                        if (state.isSuperTiebreak) {
+                            headRow.innerHTML += '<th>Тайбрейк</th>';
+                        }
                         playedSets.forEach(s => {
                             headRow.innerHTML += `<th>Сет ${s.set}</th>`;
                         });
@@ -1214,6 +1227,9 @@
                         const row1 = document.createElement('tr');
                         row1.className = winnerIs1 ? 'mfb-winner-row' : '';
                         let row1Html = `<td class="mfb-team-name">${winnerIs1 ? '🏆 ' : ''}${p1name}</td>`;
+                        if (state.isSuperTiebreak) {
+                            row1Html += `<td class="${winnerIs1 ? 'mfb-set-win' : ''}">${state.p1Index || 0}</td>`;
+                        }
                         playedSets.forEach(s => {
                             row1Html += `<td class="${s.g1 > s.g2 ? 'mfb-set-win' : ''}">${s.g1}</td>`;
                         });
@@ -1223,6 +1239,9 @@
                         const row2 = document.createElement('tr');
                         row2.className = !winnerIs1 && winnerName ? 'mfb-winner-row' : '';
                         let row2Html = `<td class="mfb-team-name">${(!winnerIs1 && winnerName) ? '🏆 ' : ''}${p2name}</td>`;
+                        if (state.isSuperTiebreak) {
+                            row2Html += `<td class="${!winnerIs1 && winnerName ? 'mfb-set-win' : ''}">${state.p2Index || 0}</td>`;
+                        }
                         playedSets.forEach(s => {
                             row2Html += `<td class="${s.g2 > s.g1 ? 'mfb-set-win' : ''}">${s.g2}</td>`;
                         });
@@ -1251,7 +1270,7 @@
                         }
                         document.getElementById('st-lg1').innerText = lgTotal1;
                         document.getElementById('st-lg2').innerText = lgTotal2;
-                        document.getElementById('row-stats-lovegames').style.display = state.isAmericano ? 'none' : 'grid';
+                        document.getElementById('row-stats-lovegames').style.display = (state.isAmericano || state.isSuperTiebreak) ? 'none' : 'grid';
 
                         document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
@@ -1299,4 +1318,3 @@
     </script>
 </body>
 </html>
- 
