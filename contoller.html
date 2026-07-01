@@ -619,7 +619,7 @@
                     state['t1_s' + cSet] = state.p1Index;
                     state['t2_s' + cSet] = state.p2Index;
                     state.p1Index = 0; state.p2Index = 0;
-                    if (state.currentSet < 5) state.currentSet++;
+                    state.currentSet++;
                     // Матч НЕ завершується автоматично — тренер завершує вручну кнопкою "Завершити матч"
                 }
             } else if (state.isAmericano) {
@@ -629,10 +629,11 @@
                 let limit = parseInt(state.americanoLimit) || 21;
                 if (total >= limit) {
                     state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
-                    if (state.currentSet < 5) {
-                        state.currentSet++;
-                        state.p1Index = 0; state.p2Index = 0; state.gamesTimeHistory = [];
-                    }
+                    const cSetA = state.currentSet;
+                    state['t1_s' + cSetA] = state.p1Index;
+                    state['t2_s' + cSetA] = state.p2Index;
+                    state.p1Index = 0; state.p2Index = 0; state.gamesTimeHistory = [];
+                    state.currentSet++;
                 }
             } else if (state.isTiebreak) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
@@ -714,10 +715,8 @@
 
             if (isSetOver) {
                 const finishedSetNum = state.currentSet;
-                if (state.currentSet < 5) {
-                    state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = [];
-                    state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
-                }
+                state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = [];
+                state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
                 trigger6SecSetOverlay(finishedSetNum); 
             } else {
                 if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) trigger6SecStats();
@@ -829,7 +828,7 @@
                 isStatsAutomated: false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", logoUrl: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
                 logoFontFamily: "Montserrat", logoFontColor: "#ffffff", logoFontSize: 13,
                 showMainBoard: true, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
-                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, animation: { team: 0, type: "", ts: 0 }
+                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t1_s6: 0, t1_s7: 0, t1_s8: 0, t1_s9: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, t2_s6: 0, t2_s7: 0, t2_s8: 0, t2_s9: 0, animation: { team: 0, type: "", ts: 0 }
             });
         }
 
