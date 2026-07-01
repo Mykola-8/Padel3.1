@@ -1086,7 +1086,7 @@
                 const p2 = state.p2Index || 0;
                 const isZeroZero = (p1 === 0 && p2 === 0);
 
-                if ((isZeroZero && !state.isAmericano && !state.isSuperTiebreak) || state.isMatchFinished) {
+                if (isZeroZero || state.isMatchFinished) {
                     pb.classList.remove('visible');
                 } else {
                     pb.classList.add('visible');
