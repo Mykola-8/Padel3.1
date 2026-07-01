@@ -1132,7 +1132,7 @@
                     lastSetTracked = activeSet;
                 }
 
-                const totalSetsToShow = (state.isAmericano || state.isSuperTiebreak) ? 0 : 5;
+                const totalSetsToShow = state.isAmericano ? 0 : 5;
 
                 for (let s = 1; s <= 5; s++) {
                     const box1 = document.getElementById(`t1-s${s}`);
@@ -1143,15 +1143,17 @@
                         continue;
                     }
 
-                    const g1 = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
-                    const g2 = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
+                    // В режимі супер-тайбрейку поточний (вирішальний) сет показує очки тайбрейку
+                    const isCurSuperTB = state.isSuperTiebreak && s === activeSet;
+                    const g1 = isCurSuperTB ? (state.p1Index || 0) : (state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0);
+                    const g2 = isCurSuperTB ? (state.p2Index || 0) : (state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0);
 
                     if (s < activeSet) {
                         box1.style.display = 'flex'; box1.className = 'score-box set-past';
                         box2.style.display = 'flex'; box2.className = 'score-box set-past';
                         box1.innerText = g1; box2.innerText = g2;
                     } else if (s === activeSet) {
-                        if (state.isProSet || g1 > 0 || g2 > 0) {
+                        if (state.isProSet || state.isSuperTiebreak || g1 > 0 || g2 > 0) {
                             box1.style.display = 'flex'; box1.className = 'score-box set-current';
                             box2.style.display = 'flex'; box2.className = 'score-box set-current';
                             box1.innerText = g1; box2.innerText = g2;
@@ -1189,14 +1191,19 @@
 
                         // Зібрати зіграні сети
                         let playedSets = [];
-                        let setsToCheck = (state.isAmericano || state.isSuperTiebreak) ? 0 : 5;
+                        let setsToCheck = state.isAmericano ? 0 : 5;
                         for (let i = 1; i <= setsToCheck; i++) {
-                            let g1 = state[`t1_s${i}`] || 0;
-                            let g2 = state[`t2_s${i}`] || 0;
-                            if (g1 > 0 || g2 > 0) playedSets.push({set: i, g1, g2});
+                            if (state.isSuperTiebreak && i === activeSet) {
+                                // Поточний (вирішальний) сет — рахунок тайбрейку
+                                playedSets.push({set: i, g1: state.p1Index || 0, g2: state.p2Index || 0, isTB: true});
+                            } else {
+                                let g1 = state[`t1_s${i}`] || 0;
+                                let g2 = state[`t2_s${i}`] || 0;
+                                if (g1 > 0 || g2 > 0 || i < activeSet) playedSets.push({set: i, g1, g2, isTB: false});
+                            }
                         }
 
-                        // Визначення переможця: для супер-тайбрейку - по фінальному рахунку очок, інакше - по сетах
+                        // Визначення переможця
                         let winnerName, winnerIs1;
                         if (state.isSuperTiebreak) {
                             const fp1 = state.p1Index || 0, fp2 = state.p2Index || 0;
@@ -1214,11 +1221,9 @@
                         // Заголовок таблиці: Команда | Сет 1 | Сет 2 | ...
                         const headRow = document.getElementById('mfb-head-row');
                         headRow.innerHTML = '<th>Команда</th>';
-                        if (state.isSuperTiebreak) {
-                            headRow.innerHTML += '<th>Тайбрейк</th>';
-                        }
                         playedSets.forEach(s => {
-                            headRow.innerHTML += `<th>Сет ${s.set}</th>`;
+                            const label = s.isTB ? 'TB' : `Сет ${s.set}`;
+                            headRow.innerHTML += `<th>${label}</th>`;
                         });
 
                         // Рядки команд
@@ -1228,9 +1233,6 @@
                         const row1 = document.createElement('tr');
                         row1.className = winnerIs1 ? 'mfb-winner-row' : '';
                         let row1Html = `<td class="mfb-team-name">${winnerIs1 ? '🏆 ' : ''}${p1name}</td>`;
-                        if (state.isSuperTiebreak) {
-                            row1Html += `<td class="${winnerIs1 ? 'mfb-set-win' : ''}">${state.p1Index || 0}</td>`;
-                        }
                         playedSets.forEach(s => {
                             row1Html += `<td class="${s.g1 > s.g2 ? 'mfb-set-win' : ''}">${s.g1}</td>`;
                         });
@@ -1240,9 +1242,6 @@
                         const row2 = document.createElement('tr');
                         row2.className = !winnerIs1 && winnerName ? 'mfb-winner-row' : '';
                         let row2Html = `<td class="mfb-team-name">${(!winnerIs1 && winnerName) ? '🏆 ' : ''}${p2name}</td>`;
-                        if (state.isSuperTiebreak) {
-                            row2Html += `<td class="${!winnerIs1 && winnerName ? 'mfb-set-win' : ''}">${state.p2Index || 0}</td>`;
-                        }
                         playedSets.forEach(s => {
                             row2Html += `<td class="${s.g2 > s.g1 ? 'mfb-set-win' : ''}">${s.g2}</td>`;
                         });
