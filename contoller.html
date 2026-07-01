@@ -614,6 +614,12 @@
                 if ((state.p1Index >= limit && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= limit && (state.p2Index - state.p1Index >= 2))) {
                     const winner = state.p1Index > state.p2Index ? 1 : 2;
                     state.animation = { team: winner, type: 'set', ts: Date.now() };
+                    // Фіксуємо результат тайбрейку в t1_sX/t2_sX як завершений сет
+                    const cSet = state.currentSet;
+                    state['t1_s' + cSet] = state.p1Index;
+                    state['t2_s' + cSet] = state.p2Index;
+                    state.p1Index = 0; state.p2Index = 0;
+                    if (state.currentSet < 5) state.currentSet++;
                     // Матч НЕ завершується автоматично — тренер завершує вручну кнопкою "Завершити матч"
                 }
             } else if (state.isAmericano) {
