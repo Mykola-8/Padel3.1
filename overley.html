@@ -1130,19 +1130,22 @@
 
                 // Визначаємо скільки боксів потрібно показати (всі режими)
                 let setsToRender = 0;
-                // Показуємо всі сети де є рахунок + поточний (якщо не американо в процесі 0:0)
+                const curSetG1 = state[`t1_s${activeSet}`] !== undefined ? parseInt(state[`t1_s${activeSet}`]) : 0;
+                const curSetG2 = state[`t2_s${activeSet}`] !== undefined ? parseInt(state[`t2_s${activeSet}`]) : 0;
+                const curP1 = state.p1Index || 0;
+                const curP2 = state.p2Index || 0;
+                // Поточний сет показуємо тільки якщо вже є рахунок (гейм або очко)
+                // або це pro-set/super-tb (де табло з'являється одразу)
+                const showCurrentSet = curSetG1 > 0 || curSetG2 > 0 || curP1 > 0 || curP2 > 0
+                    || state.isProSet || (state.isSuperTiebreak && (curP1 > 0 || curP2 > 0));
                 for (let s = activeSet; s >= 1; s--) {
+                    if (s === activeSet) {
+                        if (showCurrentSet) { setsToRender = s; break; }
+                        continue;
+                    }
                     const g1t = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
                     const g2t = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
-                    if (g1t > 0 || g2t > 0 || s === activeSet) { setsToRender = s; break; }
-                }
-                // Для американо та супер-тайбрейку поточний пустий сет не показуємо
-                if ((state.isAmericano || state.isSuperTiebreak) && setsToRender === activeSet) {
-                    const curG1 = state[`t1_s${activeSet}`] !== undefined ? parseInt(state[`t1_s${activeSet}`]) : 0;
-                    const curG2 = state[`t2_s${activeSet}`] !== undefined ? parseInt(state[`t2_s${activeSet}`]) : 0;
-                    const curP1 = state.p1Index || 0;
-                    const curP2 = state.p2Index || 0;
-                    if (curG1 === 0 && curG2 === 0 && curP1 === 0 && curP2 === 0) setsToRender = activeSet - 1;
+                    if (g1t > 0 || g2t > 0) { setsToRender = s; break; }
                 }
 
                 // Переконуємось що в DOM є потрібна кількість боксів (додаємо якщо бракує)
