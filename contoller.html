@@ -223,6 +223,17 @@
                     <span style="font-size:12px; color:#aaa;">Ліміт геймів сету (1-10):</span>
                     <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateProSetLimit(this.value)">
                 </div>
+
+                <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
+
+                <div class="switch-row">
+                    <span style="font-size:13px; font-weight:700;">Режим Супер-тайбрейк:</span>
+                    <input type="checkbox" id="mode-supertb-checkbox" style="width:20px; height:20px;" onchange="toggleSuperTiebreakMode(this.checked)">
+                </div>
+                <div class="row" id="supertb-limit-row" style="margin-top:10px; display:none;">
+                    <span style="font-size:12px; color:#aaa;">Ліміт очок (1-30):</span>
+                    <input type="number" id="s-supertb-limit" min="1" max="30" value="10" style="width:70px; padding:6px; text-align:center;" onchange="updateSuperTiebreakLimit(this.value)">
+                </div>
             </div>
 
             <div class="card">
@@ -380,18 +391,6 @@
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // Перевірка чи прийшла команда Undo з годинника Garmin
-                    if (data.garminUndoTrigger && data.garminUndoTrigger !== window._lastGarminUndo) {
-                        window._lastGarminUndo = data.garminUndoTrigger;
-                        if (stateHistory.length > 0) {
-                            state = stateHistory.pop();
-                        } else {
-                            state = data;
-                            delete state.garminUndoTrigger;
-                        }
-                        set(matchRef, state);
-                        return;
-                    }
                     state = data;
                     renderUI();
                 } else {
@@ -411,6 +410,7 @@
             document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
             document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
+            document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak;
             document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
             
             document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
@@ -443,13 +443,14 @@
             } else {
                 badge.style.background = "#2a2a2a";
                 badge.style.color = "#c69f66";
-                if (state.isAmericano) badge.innerText = `АМЕРИКАНО (ДО: ${state.americanoLimit || 21})`;
+                if (state.isSuperTiebreak) badge.innerText = `СУПЕР-ТАЙБРЕЙК (ДО: ${state.superTiebreakLimit || 10})`;
+                else if (state.isAmericano) badge.innerText = `АМЕРИКАНО (ДО: ${state.americanoLimit || 21})`;
                 else if (state.isTiebreak) badge.innerText = "TIEBREAK (ДО 7)";
                 else if (state.isProSet) badge.innerText = `PRO-SET (ДО ${state.proSetLimit || 8})`;
                 else badge.innerText = `Сет ${state.currentSet || 1}`;
             }
 
-            if (state.isAmericano || state.isTiebreak) {
+            if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
                 document.getElementById('view-p1-pts').innerText = state.p1Index;
                 document.getElementById('view-p2-pts').innerText = state.p2Index;
             } else {
@@ -465,8 +466,8 @@
             document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
             document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
 
-            // Тайбрейк: перша подача - 1, потім кожні 2 очки змінюємо
-            if (state.isTiebreak) {
+            // Тайбрейк / супер-тайбрейк: перша подача - 1, потім кожні 2 очки змінюємо
+            if (state.isTiebreak || state.isSuperTiebreak) {
                 const totalPoints = (state.p1Index || 0) + (state.p2Index || 0);
                 const initialServer = state.currentServer;
                 const otherServer = initialServer === 1 ? 2 : 1;
@@ -476,7 +477,7 @@
                 document.getElementById('pr-srv2').classList.toggle('active', tbServer === 2);
             }
             
-            if (state.isAmericano || state.isTiebreak) {
+            if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
                 document.getElementById('pr-t1-pts').innerText = state.p1Index;
                 document.getElementById('pr-t2-pts').innerText = state.p2Index;
             } else {
@@ -504,8 +505,10 @@
             document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
             document.getElementById('board-theme-selector').value = (state.boardTheme === 'courtgreen' || state.boardTheme === 'graydark') ? state.boardTheme : 'gold';
             document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
+            document.getElementById('s-supertb-limit').value = state.superTiebreakLimit || 10;
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
+            document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
 
             const boardHidden = state.showMainBoard === false;
             const hideBoardBtn = document.getElementById('btn-hide-board');
@@ -545,6 +548,7 @@
         }
 
         function trigger6SecSetOverlay(finishedSetNum) {
+            if (!state.isStatsAutomated || state.isMatchFinished) return;
             if (statsTimeout) clearTimeout(statsTimeout);
             state.showStatsOverlay = false;
             state.showSetOverlayTrigger = true;
@@ -602,7 +606,17 @@
 
         window.scorePointWithoutHistorySave = function(teamIndex) {
             let style = state.deuceStyle || "one-golden";
-            if (state.isAmericano) {
+            if (state.isSuperTiebreak) {
+                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
+                let total = state.p1Index + state.p2Index;
+                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                let limit = parseInt(state.superTiebreakLimit) || 10;
+                if ((state.p1Index >= limit && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= limit && (state.p2Index - state.p1Index >= 2))) {
+                    const winner = state.p1Index > state.p2Index ? 1 : 2;
+                    state.animation = { team: winner, type: 'set', ts: Date.now() };
+                    // Матч НЕ завершується автоматично — тренер завершує вручну кнопкою "Завершити матч"
+                }
+            } else if (state.isAmericano) {
                 if (teamIndex === 1) state.p1Index++; else state.p2Index++;
                 let total = state.p1Index + state.p2Index;
                 if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -610,9 +624,8 @@
                 if (total >= limit) {
                     state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
                     if (state.currentSet < 5) {
-                        const justFinishedSet = state.currentSet; state.currentSet++;
+                        state.currentSet++;
                         state.p1Index = 0; state.p2Index = 0; state.gamesTimeHistory = [];
-                        trigger6SecSetOverlay(justFinishedSet);
                     }
                 }
             } else if (state.isTiebreak) {
@@ -742,7 +755,7 @@
         window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
 
         function recalculateRibbons(s) {
-            if (s.isAmericano) { s.activeMatchRibbon = "NONE"; return; }
+            if (s.isAmericano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
             let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
             let cSet = s.currentSet || 1; let g1 = s['t1_s' + cSet] || 0; let g2 = s['t2_s' + cSet] || 0;
             
@@ -771,8 +784,14 @@
             s.activeMatchRibbon = "GAME_POINT";
         }
 
-        window.toggleAmericanoMode = function(c) { saveToHistory(state); state.isAmericano = c; if(c) state.isProSet = false; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
-        window.toggleProSetMode = function(c) { saveToHistory(state); state.isProSet = c; if(c) state.isAmericano = false; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
+        window.toggleAmericanoMode = function(c) { saveToHistory(state); state.isAmericano = c; if(c) { state.isProSet = false; state.isSuperTiebreak = false; } state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
+        window.toggleProSetMode = function(c) { saveToHistory(state); state.isProSet = c; if(c) { state.isAmericano = false; state.isSuperTiebreak = false; } state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
+        window.toggleSuperTiebreakMode = function(c) {
+            saveToHistory(state); state.isSuperTiebreak = c;
+            if(c) { state.isAmericano = false; state.isProSet = false; }
+            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; set(matchRef, state);
+        };
+        window.updateSuperTiebreakLimit = function(v) { let parsed = parseInt(v) || 10; state.superTiebreakLimit = parsed; set(matchRef, state); };
         window.changeDeuceStyle = function(s) { saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); }
         window.updateAmericanoLimit = function(v) { let parsed = parseInt(v) || 21; state.americanoLimit = parsed; set(matchRef, state); };
         window.updateProSetLimit = function(v) { let parsed = parseInt(v) || 8; state.proSetLimit = parsed; set(matchRef, state); };
@@ -798,7 +817,7 @@
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B",
                 p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
-                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, activeMatchRibbon: "NONE",
+                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, activeMatchRibbon: "NONE",
                 boardTheme: "gold",
                 deuceStyle: "classic", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
                 isStatsAutomated: false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", logoUrl: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
