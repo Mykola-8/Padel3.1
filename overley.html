@@ -737,22 +737,14 @@
                             <span id="name-display-t1">TELLO / ARCE</span>
                             <span class="server-indicator" id="srv1">🎾</span>
                         </div>
-                        <div class="score-box" id="t1-s1">0</div>
-                        <div class="score-box" id="t1-s2">0</div>
-                        <div class="score-box" id="t1-s3">0</div>
-                        <div class="score-box" id="t1-s4">0</div>
-                        <div class="score-box" id="t1-s5">0</div>
+                        <!-- score-box боксів генеруються динамічно в JS -->
                     </div>
                     <div class="team-row" id="row-team-2">
                         <div class="team-names" id="block-anim-2">
                             <span id="name-display-t2">GALAN / CHINGOTTO</span>
                             <span class="server-indicator" id="srv2">🎾</span>
                         </div>
-                        <div class="score-box" id="t2-s1">0</div>
-                        <div class="score-box" id="t2-s2">0</div>
-                        <div class="score-box" id="t2-s3">0</div>
-                        <div class="score-box" id="t2-s4">0</div>
-                        <div class="score-box" id="t2-s5">0</div>
+                        <!-- score-box боксів генеруються динамічно в JS -->
                     </div>
                 </div>
 
@@ -1132,13 +1124,54 @@
                     lastSetTracked = activeSet;
                 }
 
-                const totalSetsToShow = state.isAmericano ? 0 : 5;
+                // Динамічне генерування score-box (підтримка необмеженої кількості сетів)
+                const row1El = document.getElementById('row-team-1');
+                const row2El = document.getElementById('row-team-2');
 
-                for (let s = 1; s <= 5; s++) {
+                // Визначаємо скільки боксів потрібно показати (всі режими)
+                let setsToRender = 0;
+                // Показуємо всі сети де є рахунок + поточний (якщо не американо в процесі 0:0)
+                for (let s = activeSet; s >= 1; s--) {
+                    const g1t = state[`t1_s${s}`] !== undefined ? parseInt(state[`t1_s${s}`]) : 0;
+                    const g2t = state[`t2_s${s}`] !== undefined ? parseInt(state[`t2_s${s}`]) : 0;
+                    if (g1t > 0 || g2t > 0 || s === activeSet) { setsToRender = s; break; }
+                }
+                // Для американо та супер-тайбрейку поточний пустий сет не показуємо
+                if ((state.isAmericano || state.isSuperTiebreak) && setsToRender === activeSet) {
+                    const curG1 = state[`t1_s${activeSet}`] !== undefined ? parseInt(state[`t1_s${activeSet}`]) : 0;
+                    const curG2 = state[`t2_s${activeSet}`] !== undefined ? parseInt(state[`t2_s${activeSet}`]) : 0;
+                    const curP1 = state.p1Index || 0;
+                    const curP2 = state.p2Index || 0;
+                    if (curG1 === 0 && curG2 === 0 && curP1 === 0 && curP2 === 0) setsToRender = activeSet - 1;
+                }
+
+                // Переконуємось що в DOM є потрібна кількість боксів (додаємо якщо бракує)
+                for (let s = 1; s <= setsToRender; s++) {
+                    if (!document.getElementById(`t1-s${s}`)) {
+                        const b1 = document.createElement('div');
+                        b1.className = 'score-box'; b1.id = `t1-s${s}`; b1.innerText = '0';
+                        row1El.appendChild(b1);
+                    }
+                    if (!document.getElementById(`t2-s${s}`)) {
+                        const b2 = document.createElement('div');
+                        b2.className = 'score-box'; b2.id = `t2-s${s}`; b2.innerText = '0';
+                        row2El.appendChild(b2);
+                    }
+                }
+
+                // Оновлюємо всі існуючі боксів (від 1 до максимального що є в DOM)
+                let sMax = 0;
+                document.querySelectorAll('[id^="t1-s"]').forEach(el => {
+                    const n = parseInt(el.id.replace('t1-s',''));
+                    if (!isNaN(n) && n > sMax) sMax = n;
+                });
+
+                for (let s = 1; s <= sMax; s++) {
                     const box1 = document.getElementById(`t1-s${s}`);
                     const box2 = document.getElementById(`t2-s${s}`);
+                    if (!box1 || !box2) continue;
 
-                    if (s > totalSetsToShow) {
+                    if (s > setsToRender) {
                         box1.style.display = 'none'; box2.style.display = 'none';
                         continue;
                     }
@@ -1189,32 +1222,23 @@
                         const p2name = state.p2name || "Команда B";
                         document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
 
-                        // Зібрати зіграні сети
+                        // Зібрати всі зіграні сети (динамічно — будь-яка кількість, всі режими)
                         let playedSets = [];
-                        let setsToCheck = state.isAmericano ? 0 : 5;
-                        for (let i = 1; i <= setsToCheck; i++) {
-                            if (state.isSuperTiebreak && i === activeSet) {
-                                // Поточний (вирішальний) сет — рахунок тайбрейку
-                                playedSets.push({set: i, g1: state.p1Index || 0, g2: state.p2Index || 0, isTB: true});
-                            } else {
+                        {
+                            let maxSet = (state.currentSet || 1) - 1;
+                            for (let i = 1; i <= maxSet; i++) {
                                 let g1 = state[`t1_s${i}`] || 0;
                                 let g2 = state[`t2_s${i}`] || 0;
-                                if (g1 > 0 || g2 > 0 || i < activeSet) playedSets.push({set: i, g1, g2, isTB: false});
+                                if (g1 > 0 || g2 > 0) playedSets.push({set: i, g1, g2});
                             }
                         }
 
-                        // Визначення переможця
+                        // Визначення переможця по кількості виграних сетів
                         let winnerName, winnerIs1;
-                        if (state.isSuperTiebreak) {
-                            const fp1 = state.p1Index || 0, fp2 = state.p2Index || 0;
-                            winnerIs1 = fp1 > fp2;
-                            winnerName = fp1 > fp2 ? p1name : (fp2 > fp1 ? p2name : "");
-                        } else {
-                            let setsWon1 = 0, setsWon2 = 0;
-                            playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                            winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
-                            winnerIs1 = setsWon1 > setsWon2;
-                        }
+                        let setsWon1 = 0, setsWon2 = 0;
+                        playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                        winnerName = setsWon1 > setsWon2 ? p1name : (setsWon2 > setsWon1 ? p2name : "");
+                        winnerIs1 = setsWon1 > setsWon2;
 
                         document.getElementById('mfb-winner-name').innerText = winnerName ? winnerName : "Нічия";
 
