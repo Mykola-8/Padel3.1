@@ -1225,14 +1225,18 @@
                         const p2name = state.p2name || "Команда B";
                         document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
 
-                        // Зібрати всі зіграні сети (динамічно — будь-яка кількість, всі режими)
+                        // Зібрати всі сети включно з недограним поточним (щоб бачити повну картину гри)
                         let playedSets = [];
                         {
-                            let maxSet = (state.currentSet || 1) - 1;
-                            for (let i = 1; i <= maxSet; i++) {
+                            const lastSet = state.currentSet || 1;
+                            for (let i = 1; i <= lastSet; i++) {
                                 let g1 = state[`t1_s${i}`] || 0;
                                 let g2 = state[`t2_s${i}`] || 0;
-                                if (g1 > 0 || g2 > 0) playedSets.push({set: i, g1, g2});
+                                // Для поточного (недограного) сету додаємо навіть якщо 0:0 — але тільки якщо є очки (p1Index/p2Index)
+                                const isCur = i === lastSet;
+                                const hasGames = g1 > 0 || g2 > 0;
+                                const hasPoints = isCur && ((state.p1Index || 0) > 0 || (state.p2Index || 0) > 0);
+                                if (hasGames || hasPoints) playedSets.push({set: i, g1, g2, unfinished: isCur && !state.isMatchFinished});
                             }
                         }
 
@@ -1249,8 +1253,8 @@
                         const headRow = document.getElementById('mfb-head-row');
                         headRow.innerHTML = '<th>Команда</th>';
                         playedSets.forEach(s => {
-                            const label = s.isTB ? 'TB' : `Сет ${s.set}`;
-                            headRow.innerHTML += `<th>${label}</th>`;
+                            const label = s.isTB ? 'TB' : `Сет ${s.set}${s.unfinished ? '*' : ''}`;
+                            headRow.innerHTML += `<th style="${s.unfinished ? 'opacity:0.65' : ''}">${label}</th>`;
                         });
 
                         // Рядки команд
@@ -1261,7 +1265,8 @@
                         row1.className = winnerIs1 ? 'mfb-winner-row' : '';
                         let row1Html = `<td class="mfb-team-name">${winnerIs1 ? '🏆 ' : ''}${p1name}</td>`;
                         playedSets.forEach(s => {
-                            row1Html += `<td class="${s.g1 > s.g2 ? 'mfb-set-win' : ''}">${s.g1}</td>`;
+                            const tdStyle = s.unfinished ? ' style="opacity:0.65"' : '';
+                            row1Html += `<td class="${!s.unfinished && s.g1 > s.g2 ? 'mfb-set-win' : ''}"${tdStyle}>${s.g1}</td>`;
                         });
                         row1.innerHTML = row1Html;
                         body.appendChild(row1);
@@ -1270,7 +1275,8 @@
                         row2.className = !winnerIs1 && winnerName ? 'mfb-winner-row' : '';
                         let row2Html = `<td class="mfb-team-name">${(!winnerIs1 && winnerName) ? '🏆 ' : ''}${p2name}</td>`;
                         playedSets.forEach(s => {
-                            row2Html += `<td class="${s.g2 > s.g1 ? 'mfb-set-win' : ''}">${s.g2}</td>`;
+                            const tdStyle = s.unfinished ? ' style="opacity:0.65"' : '';
+                            row2Html += `<td class="${!s.unfinished && s.g2 > s.g1 ? 'mfb-set-win' : ''}"${tdStyle}>${s.g2}</td>`;
                         });
                         row2.innerHTML = row2Html;
                         body.appendChild(row2);
