@@ -785,47 +785,47 @@
         <div class="stats-table">
             <div class="stats-row">
                 <div class="stats-team-left" id="st-name1">Команда A</div>
-                <div class="stats-label">Команди</div>
+                <div class="stats-label" id="lbl-teams">Команди</div>
                 <div class="stats-team-right" id="st-name2">Команда B</div>
             </div>
             <div class="stats-row" id="row-stats-current-set-games">
                 <div class="stats-val" id="st-g1">0</div>
-                <div class="stats-label">Гейми (сет)</div>
+                <div class="stats-label" id="lbl-games-set">Гейми (сет)</div>
                 <div class="stats-val" id="st-g2">0</div>
             </div>
             <div class="stats-row">
                 <div class="stats-val" id="st-bp1">0</div>
-                <div class="stats-label">Брейк-поінти</div>
+                <div class="stats-label" id="lbl-breakpoints">Брейк-поінти</div>
                 <div class="stats-val" id="st-bp2">0</div>
             </div>
             <div class="stats-row">
                 <div class="stats-val" id="st-df1">0</div>
-                <div class="stats-label">Дабл фоли</div>
+                <div class="stats-label" id="lbl-doublefaults">Дабл фоли</div>
                 <div class="stats-val" id="st-df2">0</div>
             </div>
             <div class="stats-row" id="row-stats-lovegames">
                 <div class="stats-val" id="st-lg1">0</div>
-                <div class="stats-label">Геймів "в суху"</div>
+                <div class="stats-label" id="lbl-lovegames">Геймів "в суху"</div>
                 <div class="stats-val" id="st-lg2">0</div>
             </div>
             <div class="stats-row" id="row-stats-timers">
                 <div style="text-align:center;">
                     <div class="stats-val gold" id="st-time-set" style="font-size:18px; font-weight:800;">00:00</div>
-                    <div class="stats-label" style="margin-top:2px;">Час сету</div>
+                    <div class="stats-label" id="lbl-set-time" style="margin-top:2px;">Час сету</div>
                 </div>
                 <div class="stats-label">&nbsp;</div>
                 <div style="text-align:center;">
                     <div class="stats-val gold" id="st-time-match" style="font-size:18px; font-weight:800;">00:00</div>
-                    <div class="stats-label" style="margin-top:2px;">Загальний час матчу</div>
+                    <div class="stats-label" id="lbl-match-time" style="margin-top:2px;">Загальний час матчу</div>
                 </div>
             </div>
             <div class="stats-row" id="row-stats-history">
                 <div class="stats-val gold" id="st-game-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 5px; font-size: 16px;">0`</div>
-                <div class="stats-label" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
+                <div class="stats-label" id="lbl-history" style="grid-column: 1 / span 3; text-align: center; margin-top: 2px;">Хронологія геймів (в сумі)</div>
             </div>
 
             <div id="final-sets-summary-block" style="display:none; flex-direction:column; gap:4px;">
-                <div class="stats-label" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
+                <div class="stats-label" id="lbl-sets-summary" style="text-align:center; margin-bottom:4px; margin-top:10px; color:#c69f66;">Результати по сетам та час:</div>
                 <div class="history-sets-container" id="final-sets-list-target"></div>
             </div>
         </div>
@@ -875,6 +875,27 @@
             gamepoint:   { en: 'GAME POINT',      ua: 'ГЕЙМ ПОІНТ' },
             doublefault: { en: 'DOUBLE FAULT',    ua: 'ДАБЛ ФОЛ' }
         };
+
+        const STATS_LABELS = {
+            header:        { en: `MATCH STATS • COURT`,      ua: `Матч-Статистика • Корт` },
+            teams:         { en: 'Teams',                    ua: 'Команди' },
+            gamesSet:      { en: 'Games (set)',               ua: 'Гейми (сет)' },
+            breakpoints:   { en: 'Break Points',             ua: 'Брейк-поінти' },
+            doublefaults:  { en: 'Double Faults',            ua: 'Дабл фоли' },
+            lovegames:     { en: 'Games "to love"',          ua: 'Геймів "в суху"' },
+            setTime:       { en: 'Set time',                 ua: 'Час сету' },
+            matchTime:     { en: 'Total match time',         ua: 'Загальний час матчу' },
+            history:       { en: 'Game history (total)',     ua: 'Хронологія геймів (в сумі)' },
+            setsSummary:   { en: 'Sets & time results:',    ua: 'Результати по сетам та час:' },
+            setFinished:   { en: 'SET FINISHED',             ua: 'ЗАВЕРШЕНО СЕТ' },
+            court:         { en: 'COURT',                    ua: 'КОРТ' },
+        };
+
+        function getStatsLabel(key, state, extra) {
+            const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
+            const base = STATS_LABELS[key][lang];
+            return extra !== undefined ? base + extra : base;
+        }
 
         function getCornerSlideText(key, state) {
             const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
@@ -959,7 +980,10 @@
 
                 if (state.showSetOverlayTrigger && !state.isMatchFinished) {
                     const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
-                    document.getElementById('sr-set-number-label').innerText = `ЗАВЕРШЕНО СЕТ ${targetSetForOverlay} • КОРТ ${courtId}`;
+                    const srLang = (state.cornerSlideLang === 'ua') ? 'ua' : 'en';
+                    const srSetFinished = STATS_LABELS.setFinished[srLang];
+                    const srCourt = STATS_LABELS.court[srLang];
+                    document.getElementById('sr-set-number-label').innerText = `${srSetFinished} ${targetSetForOverlay} • ${srCourt} ${courtId}`;
                     document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
                     document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
                     
@@ -1305,7 +1329,18 @@
                         document.getElementById('st-lg2').innerText = lgTotal2;
                         document.getElementById('row-stats-lovegames').style.display = (state.isAmericano || state.isSuperTiebreak) ? 'none' : 'grid';
 
-                        document.getElementById('stats-main-header').innerText = `Матч-Статистика • Корт ${courtId}`;
+                        // Переклад всіх текстових міток статистики
+                        document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                        document.getElementById('lbl-teams').innerText       = getStatsLabel('teams', state);
+                        document.getElementById('lbl-games-set').innerText   = getStatsLabel('gamesSet', state);
+                        document.getElementById('lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
+                        document.getElementById('lbl-doublefaults').innerText= getStatsLabel('doublefaults', state);
+                        document.getElementById('lbl-lovegames').innerText   = getStatsLabel('lovegames', state);
+                        document.getElementById('lbl-set-time').innerText    = getStatsLabel('setTime', state);
+                        document.getElementById('lbl-match-time').innerText  = getStatsLabel('matchTime', state);
+                        document.getElementById('lbl-history').innerText     = getStatsLabel('history', state);
+                        document.getElementById('lbl-sets-summary').innerText= getStatsLabel('setsSummary', state);
+
                         document.getElementById('row-stats-current-set-games').style.display = 'grid';
                         document.getElementById('row-stats-history').style.display = 'grid';
                         document.getElementById('row-stats-timers').style.display = 'grid';
