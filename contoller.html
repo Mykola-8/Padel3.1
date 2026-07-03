@@ -78,6 +78,13 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
         .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+
+        /* Попередній перегляд трансляції — з'являється, коли активне табло-статистика/слайд сету */
+        .overlay-preview-box { display: none; flex-direction: column; gap: 6px; position: fixed; left: 15px; right: 15px; bottom: 15px; z-index: 150; background: #0a0a0a; border: 2px solid #c69f66; border-radius: 10px; padding: 8px; box-shadow: 0 -6px 20px rgba(0,0,0,0.6); }
+        .overlay-preview-box.visible { display: flex; }
+        .overlay-preview-label { font-size: 10px; font-weight: 800; color: #c69f66; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .overlay-preview-frame-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 6px; overflow: hidden; }
+        .overlay-preview-frame-wrap iframe { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; border: 0; transform-origin: top left; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -347,6 +354,13 @@
         </div>
     </div>
 
+    <div class="overlay-preview-box" id="overlay-preview-box">
+        <div class="overlay-preview-label">📺 Наживо на трансляції</div>
+        <div class="overlay-preview-frame-wrap">
+            <iframe id="overlay-preview-frame" src=""></iframe>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -378,6 +392,16 @@
         window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
 
+        // Масштабуємо iframe прев'ю (розрахований на 1920x1080, як OBS) під ширину панелі
+        function scaleOverlayPreview() {
+            const wrap = document.querySelector('.overlay-preview-frame-wrap');
+            const frame = document.getElementById('overlay-preview-frame');
+            if (!wrap || !frame) return;
+            const scale = wrap.clientWidth / 1920;
+            frame.style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleOverlayPreview);
+
         function initCourtConnection() {
             const urlParams = new URLSearchParams(window.location.search);
             courtId = urlParams.get('court') || "1";
@@ -386,6 +410,11 @@
             databasePath = `padel/courts/court_${courtId}`;
             matchRef = ref(db, databasePath);
             stateHistory = [];
+
+            // Прев'ю трансляції — окрема сторінка overlay.html, підписана на Firebase
+            // ЛИШЕ НА ЧИТАННЯ (onValue без set()), тому нічого в трансляції не тригериться.
+            const previewFrame = document.getElementById('overlay-preview-frame');
+            if (previewFrame) { previewFrame.src = `overlay.html?court=${courtId}`; }
 
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
 
@@ -530,6 +559,16 @@
             document.getElementById('team-font-display').innerText = (state.teamNameFontSize || 22) + "px";
             document.getElementById('team-width-slider').value = state.teamNameWidth || 320;
             document.getElementById('team-width-display').innerText = (state.teamNameWidth || 320) + "px";
+
+            // Прев'ю трансляції: показуємо панель, лише коли реально активне
+            // табло-статистика або слайд завершеного сету (ті самі прапорці,
+            // що й так вмикаються при натисканні кнопок команд).
+            const previewBox = document.getElementById('overlay-preview-box');
+            if (previewBox) {
+                const shouldShowPreview = !!(state.showStatsOverlay || state.showSetOverlayTrigger);
+                previewBox.classList.toggle('visible', shouldShowPreview);
+                if (shouldShowPreview) { requestAnimationFrame(scaleOverlayPreview); }
+            }
         }
 
         function saveToHistory(s) {
