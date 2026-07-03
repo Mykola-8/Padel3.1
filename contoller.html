@@ -36,23 +36,23 @@
         
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { 
-            height: 140px; 
+            height: 190px; 
             border: none; 
             border-radius: 12px; 
             color: white; 
             font-weight: 800; 
-            font-size: 18px; 
+            font-size: 22px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
-            gap: 8px; 
+            gap: 10px; 
             cursor: pointer; 
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
             transition: transform 0.05s ease, filter 0.05s ease;
         }
         .score-btn:active { transform: scale(0.93) !important; filter: brightness(0.75) !important; }
-        .score-btn span { font-size: 42px; font-weight: 900; }
+        .score-btn span { font-size: 56px; font-weight: 900; }
         
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
@@ -154,7 +154,6 @@
 
     <button class="btn" id="btn-hide-board" style="width:100%; padding:14px; font-size:13px; font-weight:800; background:#374151; border:1px solid #555;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
     
-    <button class="btn btn-red" style="width:100%; padding:14px; font-size:13px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
 
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
@@ -175,8 +174,8 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#c69f66; text-transform:uppercase;">Назви команд:</div>
                 <div class="row" style="gap:10px;">
-                    <input type="text" id="p1-name-input" placeholder="Команда 1">
-                    <input type="text" id="p2-name-input" placeholder="Команда 2">
+                    <input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)">
+                    <input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)">
                 </div>
                 <button class="btn btn-gold" style="width:100%; margin-top:5px;" onclick="updateNames()">Оновити назви команд</button>
             </div>
@@ -342,7 +341,9 @@
                 </div>
             </div>
 
-            <button class="btn btn-red" style="width:100%; padding:14px; font-weight:800;" onclick="resetMatch()">Скинути корт до замовчування</button>
+            <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
+            <button class="btn btn-red" style="width:100%; padding:16px; font-size:14px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+            <button class="btn btn-red" style="width:100%; padding:14px; font-weight:800; margin-top:6px; opacity:0.7;" onclick="resetMatch()">Скинути корт до замовчування</button>
         </div>
     </div>
 
@@ -813,6 +814,15 @@
             const p1 = document.getElementById('p1-name-input').value; const p2 = document.getElementById('p2-name-input').value;
             if(p1) state.p1name = p1; if(p2) state.p2name = p2; set(matchRef, state);
         }
+        // Live оновлення назви команди при введенні (без натискання кнопки)
+        let liveNameTimeout = null;
+        window.liveUpdateName = function(team, val) {
+            clearTimeout(liveNameTimeout);
+            liveNameTimeout = setTimeout(() => {
+                if (team === 1) { if(val) state.p1name = val; } else { if(val) state.p2name = val; }
+                set(matchRef, state);
+            }, 400);
+        };
         
         window.resetMatch = function() { if(confirm("Скинути поточний корт?")) { resetMatchWithoutConfirm(); } }
 
