@@ -152,7 +152,10 @@
     
     <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
-    <button class="btn" id="btn-hide-board" style="width:100%; padding:14px; font-size:13px; font-weight:800; background:#374151; border:1px solid #555;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
+    <div style="display:flex; gap:8px;">
+        <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; font-size:13px; font-weight:800; background:#374151; border:1px solid #555;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
+        <button class="btn" id="btn-break" style="flex:1; padding:14px; font-size:13px; font-weight:800; background:#7c3aed; border:1px solid #a78bfa;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
+    </div>
     
 
     <div class="modal-overlay" id="settings-modal">
@@ -517,6 +520,12 @@
                 hideBoardBtn.innerText = boardHidden ? '👁️ ПОКАЗАТИ ТАБЛО' : '👁️ СХОВАТИ ТАБЛО';
                 hideBoardBtn.style.background = boardHidden ? '#b28a55' : '#374151';
             }
+            const breakBtn = document.getElementById('btn-break');
+            if (breakBtn) {
+                breakBtn.style.background = state.showBreak ? '#dc2626' : '#7c3aed';
+                breakBtn.style.borderColor = state.showBreak ? '#fca5a5' : '#a78bfa';
+                breakBtn.innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
+            }
 
             document.getElementById('scale-slider').value = state.scale || 1;
             document.getElementById('scale-factor-display').innerText = (state.scale || 1).toFixed(2) + "x";
@@ -824,6 +833,17 @@
             }, 400);
         };
         
+        window.toggleBreak = function() {
+            saveToHistory(state);
+            state.showBreak = !state.showBreak;
+            const btn = document.getElementById('btn-break');
+            if (btn) {
+                btn.style.background = state.showBreak ? '#dc2626' : '#7c3aed';
+                btn.style.borderColor = state.showBreak ? '#fca5a5' : '#a78bfa';
+                btn.innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
+            }
+            set(matchRef, state);
+        };
         window.resetMatch = function() { if(confirm("Скинути поточний корт?")) { resetMatchWithoutConfirm(); } }
 
         function resetMatchWithoutConfirm() {
@@ -837,7 +857,7 @@
                 deuceStyle: "classic", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
                 isStatsAutomated: false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", logoUrl: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
                 logoFontFamily: "Montserrat", logoFontColor: "#ffffff", logoFontSize: 13,
-                showMainBoard: true, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
+                showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
                 t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t1_s6: 0, t1_s7: 0, t1_s8: 0, t1_s9: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, t2_s6: 0, t2_s7: 0, t2_s8: 0, t2_s9: 0, animation: { team: 0, type: "", ts: 0 }
             });
         }
