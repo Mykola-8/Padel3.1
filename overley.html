@@ -517,31 +517,56 @@
         }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ "ПЕРЕРВА" ===== */
+        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
         .break-overlay {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            width: 700px;
-            background: rgba(8, 8, 8, 0.6);
-            border: 1px solid rgba(198, 159, 102, 0.4);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            width: 680px;
+            background: rgba(8, 8, 8, 0.60);
+            border: 1px solid rgba(198, 159, 102, 0.45);
             border-radius: 8px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            z-index: 9998;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 50px 35px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+            z-index: 9999;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 50px;
             box-sizing: border-box;
-            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
-            backdrop-filter: blur(14px);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.4s;
+            backdrop-filter: blur(18px);
+            gap: 10px;
         }
-        .break-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        .break-overlay-text { font-family: 'Montserrat', sans-serif; font-size: 44px; font-weight: 800; color: #c69f66; letter-spacing: 10px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.95); }
+        .break-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .break-label {
+            font-size: 13px; font-weight: 800; letter-spacing: 5px; text-transform: uppercase;
+            color: #c69f66; margin-bottom: 6px;
+        }
+        .break-teams-row {
+            display: flex; align-items: center; gap: 18px; width: 100%; justify-content: center;
+        }
+        .break-team-name {
+            font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #fff; flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .break-score-sep { font-size: 22px; font-weight: 900; color: #c69f66; }
+        .break-timer {
+            font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(198,159,102,0.5);
+            margin: 8px 0 4px;
+        }
+        .break-sets-line {
+            font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.7); letter-spacing: 1px;
+        }
+        html.theme-courtgreen .break-overlay {
+            background: var(--panel-bg); border-color: var(--panel-border);
+        }
+        html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
+        html.theme-courtgreen .break-team-name, html.theme-courtgreen .break-timer { color: var(--panel-text); }
+        html.theme-graydark .break-overlay {
+            background: var(--panel-bg); border-color: var(--panel-border);
+        }
+        html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
+        html.theme-graydark .break-team-name, html.theme-graydark .break-timer { color: var(--panel-text); }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
         .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 20px; }
         
@@ -869,13 +894,21 @@
         </div>
     </div>
 
+    <!-- ===== ПАНЕЛЬ ПЕРЕРВИ ===== -->
+    <div class="break-overlay" id="break-panel">
+        <div class="break-label" id="brk-label">☕ ПЕРЕРВА • BREAK</div>
+        <div class="break-teams-row">
+            <div class="break-team-name" id="brk-t1">Команда 1</div>
+            <div class="break-score-sep">VS</div>
+            <div class="break-team-name" id="brk-t2">Команда 2</div>
+        </div>
+        <div class="break-timer" id="brk-timer">00:00</div>
+        <div class="break-sets-line" id="brk-sets"></div>
+    </div>
+
     <div class="qr-code-wrapper" id="qr-code-panel">
         <img id="qr-code-image" src="" alt="QR Code">
         <div class="qr-code-text" id="qr-code-description-node">SCAN ME</div>
-    </div>
-
-    <div class="break-overlay" id="break-overlay-panel">
-        <div class="break-overlay-text">ПЕРЕРВА</div>
     </div>
 
     <script type="module">
@@ -960,6 +993,10 @@
         let lastSetTracked = 1;
         let isMatchFinishedCurrently = false;
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"];
+        let matchTimerStarted = false; // таймер стартує тільки після першого очка/зміни подачі
+        let breakSeconds = 0;
+        let isBreakActive = false;
+        let breakInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         const courtId = urlParams.get('court') || "1"; 
@@ -972,11 +1009,10 @@
         };
 
         setInterval(() => {
-            if (isMatchFinishedCurrently) return;
+            if (isMatchFinishedCurrently || !matchTimerStarted || isBreakActive) return;
             totalSeconds++;
             setSeconds++;
             setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
-            
             const tMatch = document.getElementById('st-time-match');
             const tSet = document.getElementById('st-time-set');
             if(tMatch) tMatch.innerText = formatTime(totalSeconds);
@@ -991,21 +1027,60 @@
                 document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
 
                 isMatchFinishedCurrently = !!state.isMatchFinished;
+
+                // ===== СТАРТ ТАЙМЕРА: при першому очку або зміні подачі =====
+                const hasAnyActivity = (state.p1Index || 0) > 0 || (state.p2Index || 0) > 0
+                    || (state.t1_s1 || 0) > 0 || (state.t2_s1 || 0) > 0
+                    || state.currentServer > 0;
+                if (hasAnyActivity && !matchTimerStarted && !state.isMatchFinished) {
+                    matchTimerStarted = true;
+                }
+                if (state.isMatchFinished) { matchTimerStarted = false; }
+
+                // ===== ПАНЕЛЬ ПЕРЕРВИ =====
+                const breakPanel = document.getElementById('break-panel');
+                const newBreakActive = !!state.showBreak;
+                if (newBreakActive && !isBreakActive) {
+                    // перерва щойно увімкнена — скидаємо таймер
+                    breakSeconds = 0;
+                    document.getElementById('brk-timer').innerText = '00:00';
+                    if (breakInterval) clearInterval(breakInterval);
+                    breakInterval = setInterval(() => {
+                        breakSeconds++;
+                        const el = document.getElementById('brk-timer');
+                        if (el) el.innerText = formatTime(breakSeconds);
+                    }, 1000);
+                } else if (!newBreakActive && isBreakActive) {
+                    if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
+                }
+                isBreakActive = newBreakActive;
+
+                if (newBreakActive) {
+                    const brkLang = (state.cornerSlideLang === 'ua') ? 'ua' : 'en';
+                    document.getElementById('brk-label').innerText = brkLang === 'ua' ? '☕ ПЕРЕРВА' : '☕ BREAK';
+                    document.getElementById('brk-t1').innerText = state.p1name || 'Команда 1';
+                    document.getElementById('brk-t2').innerText = state.p2name || 'Команда 2';
+                    // Показуємо поточний рахунок по сетам
+                    const brkActiveSet = state.currentSet || 1;
+                    let setsLine = '';
+                    for (let si = 1; si < brkActiveSet; si++) {
+                        const sg1 = state[`t1_s${si}`] || 0, sg2 = state[`t2_s${si}`] || 0;
+                        if (sg1 > 0 || sg2 > 0) setsLine += (setsLine ? '  |  ' : '') + `${sg1}:${sg2}`;
+                    }
+                    document.getElementById('brk-sets').innerText = setsLine;
+                    breakPanel.classList.add('visible');
+                } else {
+                    breakPanel.classList.remove('visible');
+                }
+
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
                 const stPanel = document.getElementById('statistics-panel');
 
-                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger || !!state.showBreakOverlay) {
+                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
-                }
-
-                const breakPanel = document.getElementById('break-overlay-panel');
-                if (!!state.showBreakOverlay && !state.isMatchFinished) {
-                    breakPanel.classList.add('visible');
-                } else {
-                    breakPanel.classList.remove('visible');
                 }
 
                 const topTiebreakRibbon = document.getElementById('ribbon-top-tiebreak');
