@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -1078,7 +1077,7 @@
                 const setResultPanel = document.getElementById('set-result-panel');
                 const stPanel = document.getElementById('statistics-panel');
 
-                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger) {
+                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger || newBreakActive) {
                     boardWrapper.classList.add('hidden');
                 } else {
                     boardWrapper.classList.remove('hidden');
