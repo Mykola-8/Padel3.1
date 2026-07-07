@@ -7,60 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
         body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; gap: 12px; -webkit-tap-highlight-color: transparent; position: relative; }
-        
         .settings-gear-btn { position: absolute; top: 12px; right: 15px; font-size: 24px; background: transparent; border: none; color: #c69f66; cursor: pointer; padding: 5px; transition: transform 0.2s; z-index: 100; }
         .settings-gear-btn:active { transform: scale(0.85) rotate(45deg); }
-
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
-        
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
-
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
-        
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
         .btn-green { background: #15803d; }
         .btn-blue { background: #1d4ed8; }
         .btn-red { background: #b91c1c; }
-        
-        /* ОНОВЛЕНО: СТИЛЬНЕ КОЛЬОРОВЕ ВИДІЛЕННЯ ДЛЯ КНОПКИ ДАБЛ ФОЛ */
-        .btn-orange-fault {
-            background: linear-gradient(to bottom, #ea580c, #b91c1c) !important;
-            color: white !important;
-            border: 1px solid #ff781f !important;
-        }
-        
+        .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
-        .score-btn { 
-            height: 190px; 
-            border: none; 
-            border-radius: 12px; 
-            color: white; 
-            font-weight: 800; 
-            font-size: 22px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px; 
-            cursor: pointer; 
-            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-            transition: transform 0.05s ease, filter 0.05s ease;
-        }
+        .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn:active { transform: scale(0.93) !important; filter: brightness(0.75) !important; }
         .score-btn span { font-size: 56px; font-weight: 900; }
-        
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
-        
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
         .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; font-family: 'Montserrat', sans-serif; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
         .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -72,7 +42,6 @@
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 200; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
@@ -139,12 +108,9 @@
         </button>
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="font-size:10px; font-weight:700; color:#c69f66; text-transform:uppercase; letter-spacing:1px; text-align:center;">Поточний гравець на подачі:</div>
-        <div class="serve-box">
-            <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-            <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-        </div>
+    <div class="serve-box" style="margin-bottom:5px;">
+        <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+        <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
     </div>
 
     <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
@@ -156,7 +122,6 @@
         <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; font-size:13px; font-weight:800; background:#374151; border:1px solid #555;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
         <button class="btn" id="btn-break" style="flex:1; padding:14px; font-size:13px; font-weight:800; background:#7c3aed; border:1px solid #a78bfa;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
     </div>
-    
 
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
@@ -169,7 +134,7 @@
                 <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#4ade80; text-transform:uppercase;">Тема кольорів табла:</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)" style="width:100%; padding:10px; text-align:center; font-weight:700;">
                     <option value="gold">Стандартна (Золото)</option>
-                    <option value="courtgreen">Корт (Зелено-чорна)</option>
+                    <option value="courtgreen">Court (Зелено-чорна)</option>
                     <option value="graydark">Сіро-темна</option>
                 </select>
             </div>
@@ -180,21 +145,12 @@
                     <input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)">
                     <input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)">
                 </div>
-                <button class="btn btn-gold" style="width:100%; margin-top:5px;" onclick="updateNames()">Оновити назви команд</button>
-            </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#c69f66; text-transform:uppercase;">Поточний гравець на подачі:</div>
-                <div class="serve-box">
-                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-                </div>
             </div>
 
             <div class="card">
                 <div class="switch-row" style="background: #2563eb; padding: 8px; border-radius: 6px; margin-bottom: 10px;">
                     <span style="font-size:13px; font-weight:800; color: white;">Авто-статистика геймів:</span>
-                    <input type="checkbox" id="mode-enable-stats-checkbox" style="width:22px; height:22px;" checked onchange="toggleStatsAutomation(this.checked)">
+                    <input type="checkbox" id="mode-enable-stats-checkbox" style="width:22px; height:22px;" onchange="toggleStatsAutomation(this.checked)">
                 </div>
                 <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; margin-bottom:10px;" onclick="toggleStatsManual()">📊 Ручне перемикання вікна статистики</button>
 
@@ -203,18 +159,10 @@
                     <input type="checkbox" id="mode-americano-checkbox" style="width:20px; height:20px;" onchange="toggleAmericanoMode(this.checked)">
                 </div>
                 <div class="row" id="americano-limit-row" style="margin-top:10px; display:none;">
-                    <span style="font-size:12px; color:#aaa;">Ліміт в сумі очок (1-30):</span>
-                    <input type="number" id="s-americano-limit" min="1" max="30" value="21" style="width:70px; padding:6px; text-align:center;" onchange="updateAmericanoLimit(this.value)">
+                    <span style="font-size:12px; color:#aaa;">Ліміт очок (1-30):</span>
+                    <input type="number" id="s-americano-limit" min="1" max="30" value="21" onchange="updateAmericanoLimit(this.value)">
                 </div>
 
-                <div class="row" style="margin-top:10px;">
-                    <span style="font-size:12px; color:#aaa;">Мова слайд-таблички (кут):</span>
-                    <select id="s-corner-slide-lang" style="padding:6px; text-align:center; background:#222; color:#fff; border:1px solid #555; border-radius:4px;" onchange="updateCornerSlideLang(this.value)">
-                        <option value="en">English</option>
-                        <option value="ua">Українська</option>
-                    </select>
-                </div>
-                
                 <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
 
                 <div class="switch-row">
@@ -223,7 +171,7 @@
                 </div>
                 <div class="row" id="proset-limit-row" style="margin-top:10px; display:none;">
                     <span style="font-size:12px; color:#aaa;">Ліміт геймів сету (1-10):</span>
-                    <input type="number" id="s-proset-limit" min="1" max="10" value="8" style="width:70px; padding:6px; text-align:center;" onchange="updateProSetLimit(this.value)">
+                    <input type="number" id="s-proset-limit" min="1" max="10" value="8" onchange="updateProSetLimit(this.value)">
                 </div>
 
                 <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
@@ -234,7 +182,7 @@
                 </div>
                 <div class="row" id="supertb-limit-row" style="margin-top:10px; display:none;">
                     <span style="font-size:12px; color:#aaa;">Ліміт очок (1-30):</span>
-                    <input type="number" id="s-supertb-limit" min="1" max="30" value="10" style="width:70px; padding:6px; text-align:center;" onchange="updateSuperTiebreakLimit(this.value)">
+                    <input type="number" id="s-supertb-limit" min="1" max="30" value="10" onchange="updateSuperTiebreakLimit(this.value)">
                 </div>
             </div>
 
@@ -245,11 +193,11 @@
                     <input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')">
                 </div>
                 <div class="switch-row" style="margin-top:4px;">
-                    <span style="font-size:12px; color:#ddd;">2. Один Golden Point (Золоте очко):</span>
-                    <input type="radio" name="deuce-style" id="deuce-one-golden" checked onchange="changeDeuceStyle('one-golden')">
+                    <span style="font-size:12px; color:#ddd;">2. Один Golden Point:</span>
+                    <input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')">
                 </div>
                 <div class="switch-row" style="margin-top:4px;">
-                    <span style="font-size:12px; color:#ddd;">3. Два переваги → на 3-й GP:</span>
+                    <span style="font-size:12px; color:#ddd;">3. Два переваги → 3-й GP:</span>
                     <input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')">
                 </div>
             </div>
@@ -257,96 +205,39 @@
             <div class="card" style="border: 1px dashed #b28a55;">
                 <div class="switch-row">
                     <span style="font-size:13px; font-weight:700; color:#c69f66;">Показувати QR-код у кутку:</span>
-                    <input type="checkbox" id="mode-show-qr-checkbox" style="width:20px; height:20px;" onchange="toggleQrCodeVisibility(this.checked)">
+                    <input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)">
                 </div>
                 <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
                     <input type="text" id="qr-code-url-input" placeholder="Посилання для QR-коду" onchange="updateQrCodeUrl(this.value)">
-                    <input type="text" id="qr-code-desc-input" placeholder="Опис під кодом (напр. SCAN ME)" onchange="updateQrDescription(this.value)">
+                    <input type="text" id="qr-code-desc-input" placeholder="Опис під кодом" onchange="updateQrDescription(this.value)">
                 </div>
             </div>
 
             <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Панель Спонсора (Логотип / Текст):</div>
-                <div class="row">
-                    <input type="text" id="custom-logo-text-input" placeholder="Введіть текст логотипу спонсора" oninput="updateLogoText(this.value)">
-                </div>
-                <div class="row" style="gap:5px;">
-                    <select id="logo-font-select" onchange="updateLogoFontFamily(this.value)">
-                        <option value="Montserrat">Montserrat (Стандарт)</option>
-                        <option value="Roboto">Roboto (Bold)</option>
-                        <option value="Arial">Arial (SANS)</option>
-                        <option value="Times New Roman">Times (Serif)</option>
-                    </select>
-                    <input type="color" id="logo-color-picker" style="width:50px; height:38px; padding:0; border:1px solid #444; border-radius:4px;" onchange="updateLogoColor(this.value)">
-                </div>
-                <div class="row">
-                    <span style="font-size:11px; color:#aaa;">Розмір тексту (Великі/малі):</span>
-                    <input type="range" id="logo-size-slider" min="8" max="24" step="1" value="13" oninput="updateLogoFontSize(this.value)">
-                </div>
-                <div class="row">
-                    <button class="btn" id="logo-visibility-btn" style="flex:1; background:#b28a55;" onclick="toggleLogoVisibility()">Показати / Сховати спонсора</button>
-                    <button class="btn btn-red" onclick="clearLogoData()">Скинути Лого</button>
-                </div>
-
-                <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
-
-                <div style="font-size:10px; font-weight:700; margin-bottom:6px; color:#4ade80; text-transform:uppercase;">🔗 Лого через посилання (URL фото):</div>
-                <div style="font-size:10px; color:#888; margin-bottom:8px; line-height:1.4;">
-                    Не завантажує файл у Firebase — передається лише посилання. Завантажте фото на будь-який безкоштовний хостинг (напр. imgur.com, postimages.org) і вставте сюди пряме посилання на зображення.
-                </div>
-                <div class="row" style="gap:8px;">
-                    <input type="text" id="logo-url-input" placeholder="https://i.imgur.com/...jpg" oninput="updateLogoUrl(this.value)">
-                </div>
-                <button class="btn" style="width:100%; margin-top:5px; background:#15803d;" onclick="window.open('https://imgur.com/upload', '_blank')">📤 Відкрити imgur.com для завантаження фото</button>
-
-                <label class="btn btn-gold" style="display: block; text-align: center; margin-top: 10px;">
-                    📁 Завантажити нове графічне Лого (На весь екран)
-                    <input type="file" accept="image/*" style="display:none" onchange="uploadLogoFile(event)">
-                </label>
-                <div style="font-size:9px; color:#666; margin-top:4px; text-align:center;">⚠️ Файлове завантаження вшиває фото у базу даних — використовуйте лише для невеликих логотипів. Для фото краще скористайтесь посиланням вище.</div>
+                <div style="font-size:11px; font-weight:700; margin-bottom:8px; color:#aaa; text-transform: uppercase;">Панель Спонсора (Логотип):</div>
+                <input type="text" id="custom-logo-text-input" placeholder="Текст спонсора" oninput="updateLogoText(this.value)">
+                <input type="text" id="logo-url-input" placeholder="URL пряме посилання фото" oninput="updateLogoUrl(this.value)">
+                <button class="btn" id="logo-visibility-btn" style="width:100%; background:#b28a55; margin-top:5px;" onclick="toggleLogoVisibility()">Показати / Сховати спонсора</button>
             </div>
 
             <div class="card">
                 <div style="font-size:11px; font-weight:700; color:#aaa; margin-bottom:6px; text-transform:uppercase;">Масштаб та позиція табла на екрані OBS:</div>
                 <div class="row">
                     <span>Масштаб:</span>
-                    <input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" value="1" oninput="updateScale(this.value)">
-                    <span id="scale-factor-display" style="color:#c69f66; min-width:45px; text-align:right;">1.00x</span>
+                    <input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)">
                 </div>
                 <div class="row">
                     <span>Позиція X:</span>
-                    <input type="range" id="pos-x-slider" min="-960" max="1920" step="5" value="0" oninput="updatePosition()">
-                    <span id="pos-x-display" style="color:#c69f66; min-width:45px; text-align:right;">0px</span>
+                    <input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()">
                 </div>
                 <div class="row">
                     <span>Позиція Y:</span>
-                    <input type="range" id="pos-y-slider" min="-540" max="1080" step="5" value="0" oninput="updatePosition()">
-                    <span id="pos-y-display" style="color:#c69f66; min-width:45px; text-align:right;">0px</span>
-                </div>
-                <div class="row">
-                    <span>Розтяг по горизонталі:</span>
-                    <input type="range" id="scalex-slider" min="0.7" max="2.5" step="0.05" value="1" oninput="updateScaleX(this.value)">
-                    <span id="scalex-factor-display" style="color:#c69f66; min-width:45px; text-align:right;">1.00x</span>
+                    <input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()">
                 </div>
             </div>
 
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; color:#aaa; margin-bottom:6px; text-transform:uppercase;">Назви команд: розмір шрифту та ширина блоку:</div>
-                <div class="row">
-                    <span>Розмір шрифту:</span>
-                    <input type="range" id="team-font-slider" min="10" max="32" step="1" value="22" oninput="updateTeamFont(this.value)">
-                    <span id="team-font-display" style="color:#c69f66; min-width:45px; text-align:right;">22px</span>
-                </div>
-                <div class="row">
-                    <span>Ширина блоку назв:</span>
-                    <input type="range" id="team-width-slider" min="200" max="700" step="10" value="320" oninput="updateTeamWidth(this.value)">
-                    <span id="team-width-display" style="color:#c69f66; min-width:45px; text-align:right;">320px</span>
-                </div>
-            </div>
-
-            <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
-            <button class="btn btn-red" style="width:100%; padding:16px; font-size:14px; font-weight:800; border:2px solid #fff;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-            <button class="btn btn-red" style="width:100%; padding:14px; font-weight:800; margin-top:6px; opacity:0.7;" onclick="resetMatch()">Скинути корт до замовчування</button>
+            <button class="btn btn-red" style="width:100%; padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ</button>
+            <button class="btn btn-red" style="width:100%; padding:14px; margin-top:6px; opacity:0.7;" onclick="resetMatch()">Скинути корт до замовчування</button>
         </div>
     </div>
 
@@ -385,75 +276,24 @@
             const urlParams = new URLSearchParams(window.location.search);
             courtId = urlParams.get('court') || "1";
             document.getElementById('court-selector').value = courtId;
-            
             databasePath = `padel/courts/court_${courtId}`;
             matchRef = ref(db, databasePath);
-            stateHistory = [];
-
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
-
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    state = data;
-                    renderUI();
-                } else {
-                    resetMatchWithoutConfirm();
-                }
+                if (data) { state = data; renderUI(); }
             });
-        }
-
-        window.switchCourt = function(newCourtValue) {
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?court=' + newCourtValue;
-            window.history.pushState({ path: newUrl }, '', newUrl);
-            initCourtConnection();
         }
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A";
             document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            document.getElementById('board-theme-selector').value = state.boardTheme || "gold";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano;
             document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak;
-            document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
             
-            document.getElementById('custom-logo-text-input').value = state.customLogoText || "";
-            document.getElementById('logo-url-input').value = state.logoUrl || "";
-            document.getElementById('logo-font-select').value = state.logoFontFamily || "Montserrat";
-            document.getElementById('logo-color-picker').value = state.logoFontColor || "#ffffff";
-            document.getElementById('logo-size-slider').value = state.logoFontSize || 13;
-
-            document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
-            document.getElementById('qr-code-url-input').value = state.qrCodeUrl || "";
-            document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
-
-            if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) {
-                document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
-            }
-
-            const badge = document.getElementById('mode-status');
-            let isGoldenAlert = false;
-            if (!state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3) {
-                if (state.deuceStyle === "one-golden") isGoldenAlert = true;
-                if (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2) isGoldenAlert = true;
-            }
-
-            if (state.isMatchFinished) {
-                badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
-                badge.style.background = "#b91c1c";
-                badge.style.color = "white";
-            } else if (isGoldenAlert) {
-                badge.innerText = "🔥 GOLDEN POINT! 🔥";
-            } else {
-                badge.style.background = "#2a2a2a";
-                badge.style.color = "#c69f66";
-                if (state.isSuperTiebreak) badge.innerText = `СУПЕР-ТАЙБРЕЙК (ДО: ${state.superTiebreakLimit || 10})`;
-                else if (state.isAmericano) badge.innerText = `АМЕРИКАНО (ДО: ${state.americanoLimit || 21})`;
-                else if (state.isTiebreak) badge.innerText = "TIEBREAK (ДО 7)";
-                else if (state.isProSet) badge.innerText = `PRO-SET (ДО ${state.proSetLimit || 8})`;
-                else badge.innerText = `Сет ${state.currentSet || 1}`;
-            }
-
             if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
                 document.getElementById('view-p1-pts').innerText = state.p1Index;
                 document.getElementById('view-p2-pts').innerText = state.p2Index;
@@ -462,405 +302,37 @@
                 document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
             }
 
-            document.getElementById('btn-toggle-stats').innerText = state.showStatsOverlay ? "Приховати Статистику" : "Показати Статистику";
-            document.getElementById('logo-visibility-btn').innerText = state.showLogo ? "Сховати Спонсора" : "Показати Спонсора";
-
+            const breakBtn = document.getElementById('btn-break');
+            if (breakBtn) {
+                breakBtn.style.background = state.showBreak ? '#dc2626' : '#7c3aed';
+                breakBtn.innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
+            }
+            
+            document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
+            document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
             document.getElementById('pr-name1').innerText = state.p1name || "Команда A";
             document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
             document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1);
             document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
-
-            // Тайбрейк / супер-тайбрейк: перша подача - 1, потім кожні 2 очки змінюємо
-            if (state.isTiebreak || state.isSuperTiebreak) {
-                const totalPoints = (state.p1Index || 0) + (state.p2Index || 0);
-                const initialServer = state.currentServer;
-                const otherServer = initialServer === 1 ? 2 : 1;
-                const segment = Math.floor((totalPoints + 1) / 2);
-                const tbServer = (segment % 2 === 0) ? initialServer : otherServer;
-                document.getElementById('pr-srv1').classList.toggle('active', tbServer === 1);
-                document.getElementById('pr-srv2').classList.toggle('active', tbServer === 2);
-            }
+            document.getElementById('pr-t1-pts').innerText = state.p1Index;
+            document.getElementById('pr-t2-pts').innerText = state.p2Index;
             
-            if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
-                document.getElementById('pr-t1-pts').innerText = state.p1Index;
-                document.getElementById('pr-t2-pts').innerText = state.p2Index;
-            } else {
-                document.getElementById('pr-t1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                document.getElementById('pr-t2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
-            }
-
             for (let s = 1; s <= 5; s++) {
-                const box1 = document.getElementById('pr-t1-s' + s);
-                const box2 = document.getElementById('pr-t2-s' + s);
-                box1.innerText = state['t1_s' + s] || 0;
-                box2.innerText = state['t2_s' + s] || 0;
-                if (s < state.currentSet) {
-                    box1.className = 'preview-box p-past'; box2.className = 'preview-box p-past';
-                } else if (s === state.currentSet) {
-                    box1.className = 'preview-box p-curr'; box2.className = 'preview-box p-curr';
-                } else {
-                    box1.className = 'preview-box'; box2.className = 'preview-box';
-                }
-            }
-
-            document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
-            document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
-            document.getElementById('s-americano-limit').value = state.americanoLimit || 21;
-            document.getElementById('s-corner-slide-lang').value = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
-            document.getElementById('board-theme-selector').value = (state.boardTheme === 'courtgreen' || state.boardTheme === 'graydark') ? state.boardTheme : 'gold';
-            document.getElementById('s-proset-limit').value = state.proSetLimit || 8;
-            document.getElementById('s-supertb-limit').value = state.superTiebreakLimit || 10;
-            document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
-            document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
-            document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
-
-            const boardHidden = state.showMainBoard === false;
-            const hideBoardBtn = document.getElementById('btn-hide-board');
-            if (hideBoardBtn) {
-                hideBoardBtn.innerText = boardHidden ? '👁️ ПОКАЗАТИ ТАБЛО' : '👁️ СХОВАТИ ТАБЛО';
-                hideBoardBtn.style.background = boardHidden ? '#b28a55' : '#374151';
-            }
-            const breakBtn = document.getElementById('btn-break');
-            if (breakBtn) {
-                breakBtn.style.background = state.showBreak ? '#dc2626' : '#7c3aed';
-                breakBtn.style.borderColor = state.showBreak ? '#fca5a5' : '#a78bfa';
-                breakBtn.innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
-            }
-
-            document.getElementById('scale-slider').value = state.scale || 1;
-            document.getElementById('scale-factor-display').innerText = (state.scale || 1).toFixed(2) + "x";
-            document.getElementById('pos-x-slider').value = state.posX || 0;
-            document.getElementById('pos-x-display').innerText = (state.posX || 0) + "px";
-            document.getElementById('pos-y-slider').value = state.posY || 0;
-            document.getElementById('pos-y-display').innerText = (state.posY || 0) + "px";
-            document.getElementById('scalex-slider').value = state.scaleX || 1;
-            document.getElementById('scalex-factor-display').innerText = (state.scaleX || 1).toFixed(2) + "x";
-            document.getElementById('team-font-slider').value = state.teamNameFontSize || 22;
-            document.getElementById('team-font-display').innerText = (state.teamNameFontSize || 22) + "px";
-            document.getElementById('team-width-slider').value = state.teamNameWidth || 320;
-            document.getElementById('team-width-display').innerText = (state.teamNameWidth || 320) + "px";
-        }
-
-        function saveToHistory(s) {
-            stateHistory.push(JSON.parse(JSON.stringify(s)));
-            if (stateHistory.length > 30) stateHistory.shift();
-        }
-
-        function trigger6SecStats() {
-            if (!state.isStatsAutomated || state.isMatchFinished) return;
-            if (statsTimeout) clearTimeout(statsTimeout);
-            // Встановлюємо прапорець — фінальний set() в scorePointWithoutHistorySave запише його
-            state.showStatsOverlay = true;
-            state.showSetOverlayTrigger = false;
-            statsTimeout = setTimeout(() => {
-                state.showStatsOverlay = false; set(matchRef, state);
-            }, 4000);
-        }
-
-        function trigger6SecSetOverlay(finishedSetNum) {
-            if (!state.isStatsAutomated || state.isMatchFinished) return;
-            if (statsTimeout) clearTimeout(statsTimeout);
-            state.showStatsOverlay = false;
-            state.showSetOverlayTrigger = true;
-            state.lastFinishedSetNum = finishedSetNum;
-            // Фінальний set() буде викликаний в scorePointWithoutHistorySave
-            statsTimeout = setTimeout(() => {
-                state.showSetOverlayTrigger = false; set(matchRef, state);
-            }, 5000);
-        }
-
-        window.toggleMainBoardVisibility = function(isChecked) {
-            saveToHistory(state); state.showMainBoard = isChecked; set(matchRef, state);
-        }
-        window.updateCornerSlideLang = function(lang) {
-            state.cornerSlideLang = lang; set(matchRef, state);
-        }
-        window.updateBoardTheme = function(theme) {
-            state.boardTheme = theme; set(matchRef, state);
-        }
-        window.toggleMainBoard = function() {
-            saveToHistory(state); state.showMainBoard = (state.showMainBoard === false) ? true : false; set(matchRef, state);
-        }
-        window.toggleQrCodeVisibility = function(isChecked) {
-            saveToHistory(state); state.showQrCode = isChecked; set(matchRef, state);
-        }
-        window.updateQrCodeUrl = function(val) {
-            state.qrCodeUrl = val; set(matchRef, state);
-        }
-        window.updateQrDescription = function(val) {
-            state.qrCodeDescription = val; set(matchRef, state);
-        }
-
-        window.finishMatchPro = function() {
-            // Якщо матч вже завершено — друге натискання згортає статистику
-            if (state.isMatchFinished) {
-                state.showStatsOverlay = !state.showStatsOverlay;
-                set(matchRef, state);
-                return;
-            }
-            if(confirm("Завершити матч на поточному корті?")) {
-                saveToHistory(state); state.isMatchFinished = true; state.showStatsOverlay = true; state.showSetOverlayTrigger = false; set(matchRef, state);
+                document.getElementById('pr-t1-s' + s).innerText = state['t1_s' + s] || 0;
+                document.getElementById('pr-t2-s' + s).innerText = state['t2_s' + s] || 0;
             }
         }
 
         window.scorePoint = function(team) {
-            if (state.isMatchFinished) return;
-            saveToHistory(state);
-            // Якщо показується overlay сету — ховаємо одразу
-            if (state.showSetOverlayTrigger) {
-                if (statsTimeout) clearTimeout(statsTimeout);
-                state.showSetOverlayTrigger = false;
-            }
-            window.scorePointWithoutHistorySave(team);
-        }
-
-        window.scorePointWithoutHistorySave = function(teamIndex) {
-            let style = state.deuceStyle || "one-golden";
-            if (state.isSuperTiebreak) {
-                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
-                let total = state.p1Index + state.p2Index;
-                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                let limit = parseInt(state.superTiebreakLimit) || 10;
-                if ((state.p1Index >= limit && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= limit && (state.p2Index - state.p1Index >= 2))) {
-                    const winner = state.p1Index > state.p2Index ? 1 : 2;
-                    state.animation = { team: winner, type: 'set', ts: Date.now() };
-                    // Фіксуємо результат тайбрейку в t1_sX/t2_sX як завершений сет
-                    const cSet = state.currentSet;
-                    state['t1_s' + cSet] = state.p1Index;
-                    state['t2_s' + cSet] = state.p2Index;
-                    state.p1Index = 0; state.p2Index = 0;
-                    state.currentSet++;
-                    // Матч НЕ завершується автоматично — тренер завершує вручну кнопкою "Завершити матч"
-                }
-            } else if (state.isAmericano) {
-                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
-                let total = state.p1Index + state.p2Index;
-                if (total === 1 || (total > 1 && (total - 1) % 2 === 0)) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                let limit = parseInt(state.americanoLimit) || 21;
-                if (total >= limit) {
-                    state.animation = { team: teamIndex, type: 'set', ts: Date.now() };
-                    const cSetA = state.currentSet;
-                    state['t1_s' + cSetA] = state.p1Index;
-                    state['t2_s' + cSetA] = state.p2Index;
-                    state.p1Index = 0; state.p2Index = 0; state.gamesTimeHistory = [];
-                    state.currentSet++;
-                }
-            } else if (state.isTiebreak) {
-                if (teamIndex === 1) state.p1Index++; else state.p2Index++;
-                if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
-                else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) winGame(2);
-            } else {
-                if (teamIndex === 1) {
-                    if (state.p1Index === 3 && state.p2Index === 3) {
-                        if (style === "one-golden") winGame(1);
-                        else if (style === "double") { if ((state.deuceCounter || 0) >= 2) winGame(1); else state.p1Index = 4; }
-                        else state.p1Index = 4;
-                    } else if (state.p1Index === 3 && state.p2Index === 4) { state.p2Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
-                    else if (state.p1Index === 4) winGame(1);
-                    else if (state.p1Index === 3 && state.p2Index < 3) winGame(1);
-                    else state.p1Index++;
-                } else {
-                    if (state.p2Index === 3 && state.p1Index === 3) {
-                        if (style === "one-golden") winGame(2);
-                        else if (style === "double") { if ((state.deuceCounter || 0) >= 2) winGame(2); else state.p2Index = 4; }
-                        else state.p2Index = 4;
-                    } else if (state.p2Index === 3 && state.p1Index === 4) { state.p1Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
-                    else if (state.p2Index === 4) winGame(2);
-                    else if (state.p2Index === 3 && state.p1Index < 3) winGame(2);
-                    else state.p2Index++;
-                }
-            }
-            recalculateRibbons(state); set(matchRef, state);
-        }
-
-        function winGame(winningTeam) {
-            const wasTiebreak = !!state.isTiebreak;
-            // Фіксуємо love game: переможець виграв при 0 очках суперника
-            const loserPoints = winningTeam === 1 ? (state.p2Index || 0) : (state.p1Index || 0);
-            const isLoveGame = !wasTiebreak && loserPoints === 0;
-
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            let cSet = state.currentSet || 1;
-            const server = state.currentServer || 1;
-            if (winningTeam !== server) {
-                if (winningTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1;
-                else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1;
-            }
-            if (winningTeam === 1) state['t1_s' + cSet] = (state['t1_s' + cSet] || 0) + 1;
-            else state['t2_s' + cSet] = (state['t2_s' + cSet] || 0) + 1;
-
-            if (isLoveGame) {
-                const lgKey = `t${winningTeam}_lg_s${cSet}`;
-                state[lgKey] = (state[lgKey] || 0) + 1;
-            }
-            
-            const elapsedMinutes = Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000));
-            if (!state.gamesTimeHistory) state.gamesTimeHistory = [];
-            state.gamesTimeHistory.push(elapsedMinutes + '`');
-            gameStartTimestamp = Date.now();
-
-            let g1 = state['t1_s' + cSet]; let g2 = state['t2_s' + cSet]; let totalGamesInSet = g1 + g2;
-            let isSetOver = false; let limit = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
-
-            if (state.isProSet) {
-                // Якщо тайбрейк щойно завершився — сет одразу закінчується
-                if (wasTiebreak) { isSetOver = true; }
-                else {
-                    const halfLimit = limit - 1;
-                    if (g1 === (limit + 1) && g2 === halfLimit) isSetOver = true;
-                    else if (g2 === (limit + 1) && g1 === halfLimit) isSetOver = true;
-                    else if (g1 === limit && g2 === limit) { state.isTiebreak = true; }
-                    else if (g1 >= limit && (g1 - g2 >= 2)) isSetOver = true;
-                    else if (g2 >= limit && (g2 - g1 >= 2)) isSetOver = true;
-                }
-            } else {
-                // Якщо тайбрейк щойно завершився — сет одразу закінчується
-                if (wasTiebreak) { isSetOver = true; }
-                else if ((g1 >= 6 && g1 - g2 >= 2) || g1 === 7) isSetOver = true;
-                else if ((g2 >= 6 && g2 - g1 >= 2) || g2 === 7) isSetOver = true;
-                else if (g1 === 6 && g2 === 6) state.isTiebreak = true;
-            }
-            
-            state.animation = { team: winningTeam, type: isSetOver ? 'set' : 'game', ts: Date.now() };
-
-            if (isSetOver) {
-                const finishedSetNum = state.currentSet;
-                state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = [];
-                state['t1_s' + state.currentSet] = 0; state['t2_s' + state.currentSet] = 0;
-                trigger6SecSetOverlay(finishedSetNum); 
-            } else {
-                if (totalGamesInSet === 1 || (totalGamesInSet > 1 && (totalGamesInSet - 1) % 2 === 0)) trigger6SecStats();
-            }
-            state.currentServer = state.currentServer === 1 ? 2 : 1;
-        }
-
-        window.triggerServerDoubleFault = function() {
-            if (state.isMatchFinished) return;
-            saveToHistory(state); const server = state.currentServer || 1;
-            if (server === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1;
-            else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1;
-            state.animation = { team: server, type: 'double_fault', ts: Date.now() };
-            window.scorePointWithoutHistorySave(server === 1 ? 2 : 1);
-        }
-
-        window.toggleStatsAutomation = function(isChecked) { saveToHistory(state); state.isStatsAutomated = isChecked; set(matchRef, state); }
-        window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
-        window.updateLogoText = function(val) { state.customLogoText = val; set(matchRef, state); }
-        window.updateLogoFontFamily = function(val) { state.logoFontFamily = val; set(matchRef, state); }
-        window.updateLogoColor = function(val) { state.logoFontColor = val; set(matchRef, state); }
-        window.updateLogoFontSize = function(val) { state.logoFontSize = parseInt(val); set(matchRef, state); }
-        window.toggleLogoVisibility = function() { state.showLogo = !state.showLogo; set(matchRef, state); }
-        window.updateLogoUrl = function(val) {
-            // Зберігаємо лише текстове посилання — НЕ сам файл. Це обходить ліміти Firebase
-            // на розмір значення, бо в базу йде короткий рядок URL, а не base64-вміст фото.
-            state.logoUrl = val; if (val) state.logoSrc = ""; set(matchRef, state);
-        }
-        
-        window.uploadLogoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) { state.logoSrc = evt.target.result; state.logoUrl = ""; set(matchRef, state); };
-            reader.readAsDataURL(file);
-        }
-        window.clearLogoData = function() { 
-            state.logoSrc = ""; state.logoUrl = ""; state.customLogoText = ""; state.showLogo = false; 
-            state.logoFontFamily = "Montserrat"; state.logoFontColor = "#ffffff"; state.logoFontSize = 13;
-            set(matchRef, state); 
-        }
-        window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
-
-        function recalculateRibbons(s) {
-            if (s.isAmericano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
-            let p1 = s.p1Index; let p2 = s.p2Index; let server = s.currentServer;
-            let cSet = s.currentSet || 1; let g1 = s['t1_s' + cSet] || 0; let g2 = s['t2_s' + cSet] || 0;
-            
-            if (!!s.isTiebreak) {
-                if (p1 >= 6 && p1 > p2) { s.activeMatchRibbon = (cSet >= 3 || s.isProSet) ? "MATCH_POINT" : "SET_POINT"; return; }
-                if (p2 >= 6 && p2 > p1) { s.activeMatchRibbon = (cSet >= 3 || s.isProSet) ? "MATCH_POINT" : "SET_POINT"; return; }
-                s.activeMatchRibbon = "TIEBREAK_POINT"; return;
-            }
-
-            let isGolden = (p1 === 3 && p2 === 3 && (s.deuceStyle === "one-golden" || (s.deuceStyle === "double" && (s.deuceCounter || 0) >= 2)));
-            let p1GP = ((p1 === 3 && p2 < 3) || p1 === 4 || isGolden); let p2GP = ((p2 === 3 && p1 < 3) || p2 === 4 || isGolden);
-            if (!p1GP && !p2GP) { s.activeMatchRibbon = "NONE"; return; }
-            
-            let limit = s.isProSet ? (parseInt(s.proSetLimit) || 8) : 6;
-            let p1SP = false; let p2SP = false;
-            if (s.isProSet) {
-                if ((g1 === limit - 1 && g2 <= limit - 2) || g1 === limit) p1SP = true;
-                if ((g2 === limit - 1 && g1 <= limit - 2) || g2 === limit) p2SP = true;
-            } else {
-                if ((g1 === 5 && g2 <= 4) || g1 === 6) p1SP = true;
-                if ((g2 === 5 && g1 <= 4) || g2 === 6) p2SP = true;
-            }
-            if ((p1GP && p1SP) || (p2GP && p2SP)) { s.activeMatchRibbon = (s.isProSet || cSet >= 3) ? "MATCH_POINT" : "SET_POINT"; return; }
-            if (isGolden) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
-            if ((p1GP && server === 2) || (p2GP && server === 1)) { s.activeMatchRibbon = "BREAK_POINT"; return; }
-            s.activeMatchRibbon = "GAME_POINT";
-        }
-
-        window.toggleAmericanoMode = function(c) { saveToHistory(state); state.isAmericano = c; if(c) { state.isProSet = false; state.isSuperTiebreak = false; } state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
-        window.toggleProSetMode = function(c) { saveToHistory(state); state.isProSet = c; if(c) { state.isAmericano = false; state.isSuperTiebreak = false; } state.p1Index = 0; state.p2Index = 0; set(matchRef, state); };
-        window.toggleSuperTiebreakMode = function(c) {
-            saveToHistory(state); state.isSuperTiebreak = c;
-            if(c) { state.isAmericano = false; state.isProSet = false; }
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; set(matchRef, state);
-        };
-        window.updateSuperTiebreakLimit = function(v) { let parsed = parseInt(v) || 10; state.superTiebreakLimit = parsed; set(matchRef, state); };
-        window.changeDeuceStyle = function(s) { saveToHistory(state); state.deuceStyle = s; state.p1Index = 0; state.p2Index = 0; set(matchRef, state); }
-        window.updateAmericanoLimit = function(v) { let parsed = parseInt(v) || 21; state.americanoLimit = parsed; set(matchRef, state); };
-        window.updateProSetLimit = function(v) { let parsed = parseInt(v) || 8; state.proSetLimit = parsed; set(matchRef, state); };
-        window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
-        window.updateScaleX = function(v) { state.scaleX = parseFloat(v); set(matchRef, state); };
-        window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); };
-        window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); };
-        window.updatePosition = function() {
-            state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
-            state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0; set(matchRef, state);
-        };
-        window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); };
-        window.updateNames = function() {
-            const p1 = document.getElementById('p1-name-input').value; const p2 = document.getElementById('p2-name-input').value;
-            if(p1) state.p1name = p1; if(p2) state.p2name = p2; set(matchRef, state);
-        }
-        // Live оновлення назви команди при введенні (без натискання кнопки)
-        let liveNameTimeout = null;
-        window.liveUpdateName = function(team, val) {
-            clearTimeout(liveNameTimeout);
-            liveNameTimeout = setTimeout(() => {
-                if (team === 1) { if(val) state.p1name = val; } else { if(val) state.p2name = val; }
-                set(matchRef, state);
-            }, 400);
-        };
-        
-        window.toggleBreak = function() {
-            saveToHistory(state);
-            state.showBreak = !state.showBreak;
-            const btn = document.getElementById('btn-break');
-            if (btn) {
-                btn.style.background = state.showBreak ? '#dc2626' : '#7c3aed';
-                btn.style.borderColor = state.showBreak ? '#fca5a5' : '#a78bfa';
-                btn.innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
-            }
+            if (team === 1) state.p1Index++; else state.p2Index++;
             set(matchRef, state);
-        };
-        window.resetMatch = function() { if(confirm("Скинути поточний корт?")) { resetMatchWithoutConfirm(); } }
-
-        function resetMatchWithoutConfirm() {
-            if (statsTimeout) clearTimeout(statsTimeout);
-            gameStartTimestamp = Date.now();
-            set(matchRef, {
-                p1name: "Команда A", p2name: "Команда B",
-                p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
-                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, activeMatchRibbon: "NONE",
-                boardTheme: "gold",
-                deuceStyle: "classic", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
-                isStatsAutomated: false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoSrc: "", logoUrl: "", customLogoText: state.customLogoText || "QATAR AIRWAYS",
-                logoFontFamily: "Montserrat", logoFontColor: "#ffffff", logoFontSize: 13,
-                showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", isMatchFinished: false,
-                t1_s1: 0, t1_s2: 0, t1_s3: 0, t1_s4: 0, t1_s5: 0, t1_s6: 0, t1_s7: 0, t1_s8: 0, t1_s9: 0, t2_s1: 0, t2_s2: 0, t2_s3: 0, t2_s4: 0, t2_s5: 0, t2_s6: 0, t2_s7: 0, t2_s8: 0, t2_s9: 0, animation: { team: 0, type: "", ts: 0 }
-            });
         }
+        window.setServer = function(s) { state.currentServer = s; set(matchRef, state); };
+        window.updateBoardTheme = function(theme) { state.boardTheme = theme; set(matchRef, state); }
+        window.toggleStatsAutomation = function(c) { state.isStatsAutomated = c; set(matchRef, state); }
+        window.toggleBreak = function() { state.showBreak = !state.showBreak; set(matchRef, state); };
+        window.undoAction = function() { };
+        window.resetMatch = function() { };
 
         initCourtConnection();
     </script>
