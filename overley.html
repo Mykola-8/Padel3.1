@@ -517,56 +517,53 @@
         }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
+        /* ===== ПАНЕЛЬ ПЕРЕРВИ — ПОВНОЕКРАННА ===== */
         .break-overlay {
             position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.85);
-            width: 680px;
-            background: rgba(8, 8, 8, 0.60);
-            border: 1px solid rgba(198, 159, 102, 0.45);
-            border-radius: 8px;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+            inset: 0;
+            transform: scale(0.96);
+            background: rgba(6, 6, 10, 0.38);
+            backdrop-filter: blur(14px) saturate(1.1);
+            -webkit-backdrop-filter: blur(14px) saturate(1.1);
             z-index: 9999;
             opacity: 0; visibility: hidden; pointer-events: none;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 50px;
-            box-sizing: border-box;
-            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.4s;
-            backdrop-filter: blur(18px);
-            gap: 10px;
+            gap: 0;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s;
         }
-        .break-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
+
         .break-label {
-            font-size: 13px; font-weight: 800; letter-spacing: 5px; text-transform: uppercase;
-            color: #c69f66; margin-bottom: 6px;
+            font-size: 13px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase;
+            color: #c69f66; margin-bottom: 18px;
+        }
+        .break-clock-wrap {
+            position: relative; width: 220px; height: 220px; margin-bottom: 18px;
+        }
+        .break-clock-wrap svg { width: 100%; height: 100%; }
+        .break-timer-digital {
+            position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+            font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 3px;
+            text-shadow: 0 0 14px rgba(198,159,102,0.7);
+            white-space: nowrap;
         }
         .break-teams-row {
-            display: flex; align-items: center; gap: 18px; width: 100%; justify-content: center;
+            display: flex; align-items: center; gap: 22px; justify-content: center;
+            margin-bottom: 10px;
         }
         .break-team-name {
-            font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-            color: #fff; flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #fff; max-width: 300px; text-align: center;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
-        .break-score-sep { font-size: 22px; font-weight: 900; color: #c69f66; }
-        .break-timer {
-            font-size: 64px; font-weight: 900; color: #fff; letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(198,159,102,0.5);
-            margin: 8px 0 4px;
-        }
+        .break-score-sep { font-size: 24px; font-weight: 900; color: #c69f66; }
         .break-sets-line {
-            font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.7); letter-spacing: 1px;
-        }
-        html.theme-courtgreen .break-overlay {
-            background: var(--panel-bg); border-color: var(--panel-border);
+            font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 2px;
         }
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
-        html.theme-courtgreen .break-team-name, html.theme-courtgreen .break-timer { color: var(--panel-text); }
-        html.theme-graydark .break-overlay {
-            background: var(--panel-bg); border-color: var(--panel-border);
-        }
+        html.theme-courtgreen .break-team-name { color: var(--panel-text); }
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
-        html.theme-graydark .break-team-name, html.theme-graydark .break-timer { color: var(--panel-text); }
+        html.theme-graydark .break-team-name { color: var(--panel-text); }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
         .sr-main-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 20px; }
         
@@ -896,13 +893,70 @@
 
     <!-- ===== ПАНЕЛЬ ПЕРЕРВИ ===== -->
     <div class="break-overlay" id="break-panel">
-        <div class="break-label" id="brk-label">☕ ПЕРЕРВА • BREAK</div>
+        <div class="break-label" id="brk-label">☕ ПЕРЕРВА</div>
+
+        <!-- Аналоговий SVG годинник -->
+        <div class="break-clock-wrap">
+            <svg id="brk-clock-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Зовнішнє кільце з градієнтом -->
+                <defs>
+                    <radialGradient id="clockFace" cx="50%" cy="40%" r="60%">
+                        <stop offset="0%" stop-color="rgba(40,36,30,0.85)"/>
+                        <stop offset="100%" stop-color="rgba(10,10,12,0.92)"/>
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+                <!-- Корпус годинника -->
+                <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(198,159,102,0.25)" stroke-width="1.5"/>
+                <circle cx="100" cy="100" r="92" fill="url(#clockFace)" stroke="rgba(198,159,102,0.55)" stroke-width="2"/>
+                <!-- Мітки годин -->
+                <g stroke="rgba(198,159,102,0.9)" stroke-linecap="round">
+                    <line x1="100" y1="14" x2="100" y2="22" stroke-width="3"/>
+                    <line x1="100" y1="178" x2="100" y2="186" stroke-width="3"/>
+                    <line x1="14" y1="100" x2="22" y2="100" stroke-width="3"/>
+                    <line x1="178" y1="100" x2="186" y2="100" stroke-width="3"/>
+                    <line x1="46.4" y1="19.6" x2="50.4" y2="26.5" stroke-width="1.5"/>
+                    <line x1="19.6" y1="46.4" x2="26.5" y2="50.4" stroke-width="1.5"/>
+                    <line x1="19.6" y1="153.6" x2="26.5" y2="149.6" stroke-width="1.5"/>
+                    <line x1="46.4" y1="180.4" x2="50.4" y2="173.5" stroke-width="1.5"/>
+                    <line x1="153.6" y1="19.6" x2="149.6" y2="26.5" stroke-width="1.5"/>
+                    <line x1="180.4" y1="46.4" x2="173.5" y2="50.4" stroke-width="1.5"/>
+                    <line x1="180.4" y1="153.6" x2="173.5" y2="149.6" stroke-width="1.5"/>
+                    <line x1="153.6" y1="180.4" x2="149.6" y2="173.5" stroke-width="1.5"/>
+                </g>
+                <!-- Годинна стрілка -->
+                <g id="brk-hand-h" transform="rotate(0, 100, 100)">
+                    <line x1="100" y1="100" x2="100" y2="48"
+                        stroke="rgba(198,159,102,0.95)" stroke-width="5" stroke-linecap="round"
+                        filter="url(#glow)"/>
+                </g>
+                <!-- Хвилинна стрілка -->
+                <g id="brk-hand-m" transform="rotate(0, 100, 100)">
+                    <line x1="100" y1="100" x2="100" y2="28"
+                        stroke="#ffffff" stroke-width="3" stroke-linecap="round"
+                        filter="url(#glow)"/>
+                </g>
+                <!-- Секундна стрілка -->
+                <g id="brk-hand-s" transform="rotate(0, 100, 100)">
+                    <line x1="100" y1="108" x2="100" y2="22"
+                        stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                <!-- Центральна точка -->
+                <circle cx="100" cy="100" r="5" fill="rgba(198,159,102,1)" filter="url(#glow)"/>
+                <circle cx="100" cy="100" r="2.5" fill="#fff"/>
+            </svg>
+            <!-- Цифровий таймер перерви всередині -->
+            <div class="break-timer-digital" id="brk-timer">00:00</div>
+        </div>
+
         <div class="break-teams-row">
             <div class="break-team-name" id="brk-t1">Команда 1</div>
             <div class="break-score-sep">VS</div>
             <div class="break-team-name" id="brk-t2">Команда 2</div>
         </div>
-        <div class="break-timer" id="brk-timer">00:00</div>
         <div class="break-sets-line" id="brk-sets"></div>
     </div>
 
@@ -1045,10 +1099,24 @@
                     breakSeconds = 0;
                     document.getElementById('brk-timer').innerText = '00:00';
                     if (breakInterval) clearInterval(breakInterval);
+                    const updateClock = () => {
+                        const now = new Date();
+                        const hDeg = (now.getHours() % 12) * 30 + now.getMinutes() * 0.5;
+                        const mDeg = now.getMinutes() * 6 + now.getSeconds() * 0.1;
+                        const sDeg = now.getSeconds() * 6;
+                        const hHand = document.getElementById('brk-hand-h');
+                        const mHand = document.getElementById('brk-hand-m');
+                        const sHand = document.getElementById('brk-hand-s');
+                        if (hHand) hHand.setAttribute('transform', `rotate(${hDeg}, 100, 100)`);
+                        if (mHand) mHand.setAttribute('transform', `rotate(${mDeg}, 100, 100)`);
+                        if (sHand) sHand.setAttribute('transform', `rotate(${sDeg}, 100, 100)`);
+                    };
+                    updateClock();
                     breakInterval = setInterval(() => {
                         breakSeconds++;
                         const el = document.getElementById('brk-timer');
                         if (el) el.innerText = formatTime(breakSeconds);
+                        updateClock();
                     }, 1000);
                 } else if (!newBreakActive && isBreakActive) {
                     if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
