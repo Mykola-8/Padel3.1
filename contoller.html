@@ -6,7 +6,17 @@
     <title>Padel Controller Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; gap: 12px; -webkit-tap-highlight-color: transparent; position: relative; }
+        body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; position: relative; }
+        
+        /* НОВА НАВІГАЦІЯ (ВКЛАДКИ) */
+        .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); }
+        .nav-btn { flex: 1; background: transparent; border: none; color: #888; padding: 12px 5px; font-weight: 700; font-size: 10px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.2s; }
+        .nav-btn.active { color: #c69f66; }
+        .nav-btn span { font-size: 18px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+
         .settings-gear-btn { position: absolute; top: 12px; right: 15px; font-size: 24px; background: transparent; border: none; color: #c69f66; cursor: pointer; padding: 5px; transition: transform 0.2s; z-index: 100; }
         .settings-gear-btn:active { transform: scale(0.85) rotate(45deg); }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
@@ -15,6 +25,7 @@
         .row:last-child { margin-bottom: 0; }
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
+        
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
@@ -22,16 +33,19 @@
         .btn-blue { background: #1d4ed8; }
         .btn-red { background: #b91c1c; }
         .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
+        
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
-        .score-btn:active { transform: scale(0.93) !important; filter: brightness(0.75) !important; }
         .score-btn span { font-size: 56px; font-weight: 900; }
+        
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+        
+        /* ПРЕВ'Ю ТАБЛО */
         .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
         .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .preview-row:last-child { border-bottom: none; }
@@ -42,65 +56,131 @@
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 200; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
         .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+
+        /* СТИЛІ ДЛЯ НОВИХ СТОРІНОК */
+        .match-card { background: #222; border-left: 4px solid #c69f66; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
+        .match-card-header { display: flex; justify-content: space-between; font-size: 11px; color: #888; font-weight: 700; }
+        .match-card-teams { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; padding: 4px 0; }
+        .match-card-scores { font-size: 13px; color: #c69f66; font-weight: 700; }
+        
+        .player-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #333; }
+        .player-info { display: flex; flex-direction: column; gap: 2px; }
+        .player-name { font-weight: 700; font-size: 14px; }
+        .player-stats-mini { font-size: 11px; color: #aaa; }
     </style>
 </head>
 <body>
 
-    <button class="settings-gear-btn" onclick="openModalSettings()">⚙️</button>
+    <!-- НАВІГАЦІЙНА ПАНЕЛЬ (ВКЛАДКИ) -->
+    <nav class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
+        <button class="nav-btn" onclick="switchTab('tab-history')"><span>📜</span>Історія</button>
+        <button class="nav-btn" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
+        <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
+    </nav>
 
-    <div class="card" style="border: 2px solid #c69f66;">
-        <select id="court-selector" onchange="switchCourt(this.value)" style="font-weight:800; color:#fff; background:#15803d; text-align:center;">
-            <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
-            <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
-        </select>
-    </div>
-
-    <h2>Пульт Padel Pro (Master)</h2>
-
-    <div class="preview-scoreboard">
-        <div class="preview-row">
-            <div class="preview-name-block"><span id="pr-name1">Команда A</span><span class="preview-srv" id="pr-srv1">🎾</span></div>
-            <div class="preview-box" id="pr-t1-s1">0</div><div class="preview-box" id="pr-t1-s2">0</div><div class="preview-box" id="pr-t1-s3">0</div><div class="preview-box" id="pr-t1-s4">0</div><div class="preview-box" id="pr-t1-s5">0</div><div class="preview-box p-past p-pts" id="pr-t1-pts">0</div>
+    <!-- ВКЛАДКА 1: ГОЛОВНИЙ ПУЛЬТ КЕРУВАННЯ -->
+    <div id="tab-remote" class="tab-content active">
+        <button class="settings-gear-btn" onclick="openModalSettings()">⚙️</button>
+        <div class="card" style="border: 2px solid #c69f66;">
+            <select id="court-selector" onchange="switchCourt(this.value)" style="font-weight:800; color:#fff; background:#15803d; text-align:center;">
+                <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
+                <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
+            </select>
         </div>
-        <div class="preview-row">
-            <div class="preview-name-block"><span id="pr-name2">Команда B</span><span class="preview-srv" id="pr-srv2">🎾</span></div>
-            <div class="preview-box" id="pr-t2-s1">0</div><div class="preview-box" id="pr-t2-s2">0</div><div class="preview-box" id="pr-t2-s3">0</div><div class="preview-box" id="pr-t2-s4">0</div><div class="preview-box" id="pr-t2-s5">0</div><div class="preview-box p-past p-pts" id="pr-t2-pts">0</div>
+
+        <h2>Пульт Padel Pro (Master)</h2>
+
+        <div class="preview-scoreboard">
+            <div class="preview-row">
+                <div class="preview-name-block"><span id="pr-name1">Команда A</span><span class="preview-srv" id="pr-srv1">🎾</span></div>
+                <div class="preview-box" id="pr-t1-s1">0</div><div class="preview-box" id="pr-t1-s2">0</div><div class="preview-box" id="pr-t1-s3">0</div><div class="preview-box" id="pr-t1-s4">0</div><div class="preview-box" id="pr-t1-s5">0</div><div class="preview-box p-past p-pts" id="pr-t1-pts">0</div>
+            </div>
+            <div class="preview-row">
+                <div class="preview-name-block"><span id="pr-name2">Команда B</span><span class="preview-srv" id="pr-srv2">🎾</span></div>
+                <div class="preview-box" id="pr-t2-s1">0</div><div class="preview-box" id="pr-t2-s2">0</div><div class="preview-box" id="pr-t2-s3">0</div><div class="preview-box" id="pr-t2-s4">0</div><div class="preview-box" id="pr-t2-s5">0</div><div class="preview-box p-past p-pts" id="pr-t2-pts">0</div>
+            </div>
+        </div>
+
+        <div class="score-grid">
+            <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)"><small id="lbl-p1">Команда 1</small><span id="view-p1-pts">0</span></button>
+            <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="serve-box">
+                <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+            </div>
+        </div>
+
+        <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
+        <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
+        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+
+        <div style="display:flex; gap:8px;">
+            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
+            <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
         </div>
     </div>
 
-    <div class="score-grid">
-        <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)"><small id="lbl-p1">Команда 1</small><span id="view-p1-pts">0</span></button>
-        <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
-    </div>
-
-    <div style="display:flex; flex-direction:column; gap:8px;">
-        <div class="serve-box">
-            <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-            <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+    <!-- 🆕 ВКЛАДКА 2: ІСТОРІЯ МАТЧІВ -->
+    <div id="tab-history" class="tab-content">
+        <h2>📜 Історія матчів</h2>
+        <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія матчів завантажується...</div>
         </div>
     </div>
 
-    <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
-    <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
-    <div class="status-badge" id="mode-status">Режим: Сет 1</div>
-
-    <div style="display:flex; gap:8px;">
-        <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
-        <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
+    <!-- 🆕 ВКЛАДКА 3: СТАТИСТИКА ГРАВЦІВ ТА ПОШУК -->
+    <div id="tab-players" class="tab-content">
+        <h2>📊 База та статистика гравців</h2>
+        <div class="card">
+            <input type="text" id="player-search-input" placeholder="🔍 Пошук гравця за ім'ям..." oninput="filterPlayers(this.value)">
+        </div>
+        <div id="players-container" style="display:flex; flex-direction:column; gap:10px; margin-top:5px;">
+            <!-- Сюди рендеряться гравці -->
+        </div>
     </div>
 
-    <!-- МОВАЛЬНЕ ВІКНО НАЛАШТУВАНЬ -->
+    <!-- 🆕 ВКЛАДКА 4: НАЛАШТУВАННЯ ПРОФІЛЮ -->
+    <div id="tab-profile" class="tab-content">
+        <h2>👤 Налаштування профілю користувача</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Ім'я та Прізвище організатора:</span>
+                <input type="text" id="profile-name" value="Коля" placeholder="Введіть ваше ім'я">
+            </div>
+            <div>
+                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Клуб / Організація:</span>
+                <input type="text" id="profile-club" value="Padel Khmelnytskyi" placeholder="Назва клубу">
+            </div>
+            <button class="btn btn-gold" onclick="saveProfileData()">Зберегти профіль</button>
+        </div>
+
+        <h2>➕ Створити нового гравця в базі</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я гравця">
+            <select id="new-player-hand">
+                <option value="Права">Права рука</option>
+                <option value="Ліва">Ліва рука</option>
+            </select>
+            <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця до бази</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНЕ ВІКНО НАЛАШТУВАНЬ КОРТУ -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
             <div class="modal-title">⚙️ Налаштування корту</div>
             <button class="modal-close-btn" onclick="closeModalSettings()">Закрити</button>
         </div>
-
         <div style="display:flex; flex-direction:column; gap:14px;">
             <!-- ЗАСТАВКА МЕДІА (РЕКЛАМА) -->
             <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
@@ -164,13 +244,14 @@
                 <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
             </div>
 
-            <!-- МАСШТАБ, ШРИФТИ, QR -->
+            <!-- QR -->
             <div class="card">
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
                 <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
             </div>
 
+            <!-- ПОЗИЦІОНУВАННЯ -->
             <div class="card">
                 <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
                 <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
@@ -186,7 +267,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -202,6 +283,15 @@
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now();
+        let allPlayersData = {};
+
+        // Навігаційна логіка вкладок
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
 
         window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
@@ -220,8 +310,116 @@
             window.history.pushState({ path: nUrl }, '', nUrl); initCourtConnection();
         }
 
+        // Слухачі для глобальної історії матчів та бази гравців
+        onValue(ref(db, 'padel/history'), (snapshot) => {
+            const historyData = snapshot.val();
+            const container = document.getElementById('history-container');
+            if (!historyData) {
+                container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>';
+                return;
+            }
+            container.innerHTML = '';
+            Object.keys(historyData).reverse().forEach(key => {
+                const m = historyData[key];
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `
+                    <div class="match-card-header">
+                        <span>Корт №${m.courtId || 1} • ${m.date || ''}</span>
+                        <button class="btn btn-red" style="padding:4px 8px; font-size:9px;" onclick="deleteMatchHistory('${key}')">Видалити 🗑️</button>
+                    </div>
+                    <div class="match-card-teams">
+                        <span>${m.p1name}</span>
+                        <span>vs</span>
+                        <span>${m.p2name}</span>
+                    </div>
+                    <div class="match-card-scores">Рахунок по сетам: ${m.scoreLine || '0:0'}</div>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        onValue(ref(db, 'padel/players'), (snapshot) => {
+            allPlayersData = snapshot.val() || {};
+            renderPlayersList(allPlayersData);
+        });
+
+        function renderPlayersList(playersObj) {
+            const container = document.getElementById('players-container');
+            if (Object.keys(playersObj).length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено. Створіть у вкладці Профіль.</div>';
+                return;
+            }
+            container.innerHTML = '';
+            Object.keys(playersObj).forEach(key => {
+                const p = playersObj[key];
+                const item = document.createElement('div');
+                card.className = 'player-list-item'; // Використовує ідентичний гнучкий flex-box клас
+                item.className = 'player-list-item';
+                item.innerHTML = `
+                    <div class="player-info">
+                        <div class="player-name">${p.name}</div>
+                        <div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div>
+                    </div>
+                    <button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        window.filterPlayers = function(query) {
+            if (!query) { renderPlayersList(allPlayersData); return; }
+            const filtered = {};
+            Object.keys(allPlayersData).forEach(k => {
+                if (allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) {
+                    filtered[k] = allPlayersData[k];
+                }
+            });
+            renderPlayersList(filtered);
+        }
+
+        window.deleteMatchHistory = function(key) {
+            if (confirm("Ви дійсно хочете видалити цей матч з історії?")) {
+                remove(ref(db, `padel/history/${key}`));
+            }
+        }
+
+        window.deletePlayer = function(key) {
+            if (confirm("Видалити гравця з бази даних?")) {
+                remove(ref(db, `padel/players/${key}`));
+            }
+        }
+
+        window.createNewPlayer = function() {
+            const name = document.getElementById('new-player-name').value.trim();
+            const hand = document.getElementById('new-player-hand').value;
+            if (!name) { alert("Будь ласка, введіть ім'я гравця."); return; }
+            push(ref(db, 'padel/players'), {
+                name: name,
+                hand: hand,
+                matchesPlayed: 0,
+                wins: 0
+            });
+            document.getElementById('new-player-name').value = '';
+            alert(`Гравець ${name} успішно доданий!`);
+        }
+
+        window.saveProfileData = function() {
+            const name = document.getElementById('profile-name').value;
+            const club = document.getElementById('profile-club').value;
+            localStorage.setItem('padel_org_name', name);
+            localStorage.setItem('padel_org_club', club);
+            alert("Дані профілю організатора збережено локально!");
+        }
+
+        // Завантаження профілю при старті
+        document.addEventListener("DOMContentLoaded", () => {
+            if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
+            if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
+        });
+
         // ============================================================
-        // 🆕 МЕДІА ЗАСТАВКА ФУНКЦІЇ КЕРУВАННЯ
+        // МЕДІА ЗАСТАВКА ФУНКЦІЇ КЕРУВАННЯ
         // ============================================================
         window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
         window.updatePromoUrl = function(url) {
@@ -366,7 +564,35 @@
         window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); }
         window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); }
         window.updatePosition = function() { state.posX = parseInt(document.getElementById('pos-x-slider').value)||0; state.posY = parseInt(document.getElementById('pos-y-slider').value)||0; set(matchRef, state); }
-        window.finishMatchPro = function() { if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; } if(confirm("Завершити матч?")){ state.isMatchFinished=true; state.showStatsOverlay=true; set(matchRef,state); } }
+        
+        window.finishMatchPro = function() {
+            if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
+            if(confirm("Завершити матч та зберегти в історію?")){
+                state.isMatchFinished = true;
+                state.showStatsOverlay = true;
+                
+                // Формування рядка з рахунком по сетах для збереження в історію
+                let scoreLines = [];
+                for(let i = 1; i <= 5; i++) {
+                    let s1 = state[`t1_s${i}`] || 0;
+                    let s2 = state[`t2_s${i}`] || 0;
+                    if(s1 > 0 || s2 > 0) scoreLines.push(`${s1}:${s2}`);
+                }
+                
+                // Збереження в Firebase вузол історії
+                push(ref(db, 'padel/history'), {
+                    courtId: courtId,
+                    p1name: state.p1name || "Команда A",
+                    p2name: state.p2name || "Команда B",
+                    scoreLine: scoreLines.join(', '),
+                    date: new Date().toLocaleString('uk-UA')
+                });
+
+                set(matchRef, state);
+                closeModalSettings();
+            }
+        }
+        
         window.resetMatch = function() { if(confirm("Скинути корт?")) resetMatchWithoutConfirm(); }
         let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
 
