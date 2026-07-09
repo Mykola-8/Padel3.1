@@ -464,7 +464,7 @@
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, 
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
@@ -573,8 +573,8 @@
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
             if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
             state.completedGamesCount = (state.completedGamesCount || 0) + 1;
-            if (state.showStatsBetweenGames && !state.isMatchFinished) {
-                state.showStatsOverlay = (state.completedGamesCount % 2 === 1);
+            if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
+                state.statsAutoTrigger = Date.now();
             }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
         }
