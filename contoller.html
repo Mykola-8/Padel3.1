@@ -32,6 +32,7 @@
         .btn-green { background: #15803d; }
         .btn-blue { background: #1d4ed8; }
         .btn-red { background: #b91c1c; }
+        .btn-orange { background: linear-gradient(to bottom, #f97316, #ea580c); color: white; }
         .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
         
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
@@ -238,10 +239,12 @@
                 <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
             </div>
 
-            <div class="card">
+            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
                 <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
             </div>
 
             <div class="card">
@@ -253,7 +256,6 @@
             </div>
 
             <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-            <button class="btn btn-red" style="opacity:0.5;" onclick="resetMatch()">Повне скидання поточного корту</button>
         </div>
     </div>
 
@@ -277,7 +279,6 @@
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now();
         let allPlayersData = {};
 
-        // Навігаційна логіка вкладок
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -302,7 +303,6 @@
             window.history.pushState({ path: nUrl }, '', nUrl); initCourtConnection();
         }
 
-        // Слухачі Firebase для історії матчів та списку гравців
         onValue(ref(db, 'padel/history'), (snapshot) => {
             const historyData = snapshot.val();
             const container = document.getElementById('history-container');
@@ -411,14 +411,12 @@
             }
         }
 
-        // ВИПРАВЛЕНО: Клікова функція скидання корту тепер глобально доступна з модуля
         window.resetMatch = function() { 
             if (confirm("Скинути поточний корт?")) {
                 resetMatchWithoutConfirm(); 
             } 
         }
 
-        // ВИПРАВЛЕНО: Функція правильно закриває модалку та зберігає налаштування OBS екрану
         function resetMatchWithoutConfirm() {
             if (statsTimeout) clearTimeout(statsTimeout); 
             gameStartTimestamp = Date.now();
@@ -448,7 +446,6 @@
             if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
         });
 
-        // МЕДІА ЗАСТАВКА
         window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
         window.updatePromoUrl = function(url) {
             state.promoUrl = url;
