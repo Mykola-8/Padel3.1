@@ -6,7 +6,7 @@
     <title>Padel Controller Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; position: relative; }
+        body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 95px; -webkit-tap-highlight-color: transparent; position: relative; }
         
         /* НАВІГАЦІЯ (ВКЛАДКИ) */
         .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); }
@@ -58,7 +58,8 @@
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 200; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* Додано відступ знизу для модалки, щоб уникнути перекриття кнопками табів */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 1100; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
@@ -126,6 +127,14 @@
         <div style="display:flex; gap:8px;">
             <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
             <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
+        </div>
+
+        <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
+            <div class="switch-row">
+                <span style="font-size:12px; font-weight:700;">🤖 Автоматичний збір статистики:</span>
+                <input type="checkbox" id="mode-enable-stats-checkbox" style="width:20px; height:20px;" onchange="toggleStatsAutomation(this.checked)">
+            </div>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         </div>
     </div>
 
@@ -222,8 +231,6 @@
             </div>
 
             <div class="card">
-                <div class="switch-row"><span>Авто-статистика:</span><input type="checkbox" id="mode-enable-stats-checkbox" onchange="toggleStatsAutomation(this.checked)"></div>
-                <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; margin-bottom:8px;" onclick="toggleStatsManual()">📊 Ручна статистика OBS</button>
                 <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
                 <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
                 <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
@@ -243,7 +250,6 @@
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
                 <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
-                
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
             </div>
 
@@ -475,7 +481,19 @@
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
-            document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
+            
+            // Оновлення елементів статистики (тепер на головному екрані пульта)
+            document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            const btnStats = document.getElementById('btn-toggle-stats');
+            if (state.showStatsOverlay) {
+                btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS";
+                btnStats.style.background = "#b91c1c";
+            } else {
+                btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)";
+                btnStats.style.background = "#15803d";
+            }
+
             document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode; document.getElementById('qr-code-url-input').value = state.qrCodeUrl || ""; document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
             
             if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
