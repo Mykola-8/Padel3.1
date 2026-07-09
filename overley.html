@@ -237,6 +237,25 @@
         .fullscreen-media-content.active {
             display: block;
         }
+        .fullscreen-text-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            padding: 60px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            line-height: 1.25;
+            word-break: break-word;
+            white-space: pre-wrap;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.85);
+        }
+        .fullscreen-text-content.active {
+            display: flex;
+        }
 
         .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
@@ -288,6 +307,7 @@
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
+        <div id="promo-text" class="fullscreen-text-content"></div>
     </div>
 
     <div class="scoreboard-wrapper" id="main-scoreboard">
@@ -491,26 +511,36 @@
         onValue(ref(db, databasePath), (snapshot) => {
             const state = snapshot.val();
             if (state) {
-                // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА)
+                // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
                 const promoVideo = document.getElementById('promo-video');
+                const promoTextEl = document.getElementById('promo-text');
 
                 if (!!state.showFullscreenPromo) {
-                    let mediaUrl = state.promoUrl || state.promoSrc || "";
-                    let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
-                    if (mediaUrl && mediaUrl !== lastPromoSource) {
-                        lastPromoSource = mediaUrl;
-                        if (isVideo) {
-                            promoImg.classList.remove('active'); promoVideo.src = mediaUrl; promoVideo.classList.add('active');
-                            promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
-                        } else {
-                            promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
+                    if (!!state.promoTypeIsText) {
+                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = "";
+                        promoTextEl.innerText = state.promoText || "";
+                        promoTextEl.style.color = state.promoTextColor || "#ffffff";
+                        promoTextEl.style.fontSize = (state.promoTextSize || 60) + "px";
+                        promoTextEl.classList.add('active');
+                    } else {
+                        promoTextEl.classList.remove('active');
+                        let mediaUrl = state.promoUrl || state.promoSrc || "";
+                        let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
+                        if (mediaUrl && mediaUrl !== lastPromoSource) {
+                            lastPromoSource = mediaUrl;
+                            if (isVideo) {
+                                promoImg.classList.remove('active'); promoVideo.src = mediaUrl; promoVideo.classList.add('active');
+                                promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
+                            } else {
+                                promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
+                            }
                         }
                     }
                     promoOverlay.classList.add('visible');
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = "";
+                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; promoTextEl.classList.remove('active');
                 }
 
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
