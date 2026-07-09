@@ -111,7 +111,7 @@
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <div style="display:flex; gap:8px;">
-            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁️ СХОВАТИ ТАБЛО</button>
+            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
             <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
         </div>
 
@@ -185,9 +185,19 @@
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Посилання Інтернет (URL):</span>
-                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4 або image.jpg" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання Інтернет (URL):</span>
+                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
                     </div>
+                    
+                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл безпосередньо з пристрою (стискати):</span>
+                        <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
+                            📁 Вибрати Фото чи короткий Відеоролик
+                            <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
+                        </label>
+                        <div id="promo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
+                    </div>
+
                     <div class="switch-row">
                         <span style="font-size:11px; color:#ccc;">Медіа є Відеороликом:</span>
                         <input type="checkbox" id="promo-type-video-checkbox" style="width:18px; height:18px;" onchange="togglePromoTypeVideo(this.checked)">
@@ -339,17 +349,72 @@
             }
         }
 
+        // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
+        window.uploadAndCompressPromoFile = function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const statusEl = document.getElementById('promo-file-status');
+            const isVideo = file.type.startsWith('video/');
+            
+            if (isVideo) {
+                // Стискати відео прямо в браузері без сторонніх важких бібліотек неможливо, 
+                // тому ставимо ліміт на розмір файлу, щоб не перевантажувати пам'ять GitHub/Firebase.
+                if (file.size > 2.5 * 1024 * 1024) {
+                    alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
+                    statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
+                    return;
+                }
+                statusEl.innerText = "⏳ Обробка відео...";
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    state.promoSrc = evt.target.result; state.promoUrl = ""; 
+                    state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true;
+                    document.getElementById('promo-url-input').value = "";
+                    statusEl.innerText = "✅ Відео додано"; set(matchRef, state);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Стиснення фотографій через HTML5 Canvas (зменшення роздільної здатності до 1280px та оптимізація якості)
+                statusEl.innerText = "⏳ Стиснення фото...";
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        const max_size = 1280; // Оптимальний розмір для трансляцій
+                        
+                        if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
+                        else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+                        
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Стискаємо в якість 0.7 (JPEG), зменшуючи вагу файлу на 80-90%
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        state.promoSrc = compressedBase64; state.promoUrl = ""; 
+                        state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
+                        document.getElementById('promo-url-input').value = "";
+                        statusEl.innerText = "✅ Фото стиснуто та збережено"; set(matchRef, state);
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
         window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
         window.updatePromoUrl = function(url) {
-            state.promoUrl = url;
+            state.promoUrl = url; state.promoSrc = "";
             if (url.match(/\.(mp4|webm|mov|avi)/i)) { state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true; }
-            set(matchRef, state);
+            document.getElementById('promo-file-status').innerText = "Використовується URL"; set(matchRef, state);
         };
         window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
         window.clearPromoData = function() {
-            state.promoUrl = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
+            state.promoUrl = ""; state.promoSrc = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
             document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
-            document.getElementById('promo-type-video-checkbox').checked = false; set(matchRef, state);
+            document.getElementById('promo-type-video-checkbox').checked = false; document.getElementById('promo-file-status').innerText = "Файл не вибрано";
+            set(matchRef, state);
         };
 
         window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
@@ -367,7 +432,7 @@
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
-                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoTypeIsVideo: false, t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
 
@@ -386,7 +451,7 @@
             
             if(document.getElementById('promo-visibility-checkbox')) {
                 document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
-                document.getElementById('promo-url-input').value = state.promoUrl || "";
+                if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
             }
 
