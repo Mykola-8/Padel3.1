@@ -202,6 +202,24 @@
                         <span style="font-size:11px; color:#ccc;">Медіа є Відеороликом:</span>
                         <input type="checkbox" id="promo-type-video-checkbox" style="width:18px; height:18px;" onchange="togglePromoTypeVideo(this.checked)">
                     </div>
+
+                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
+                        <textarea id="promo-text-input" placeholder="Введіть текст, який зʼявиться на весь екран..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+                        <div class="row" style="margin-top:8px;">
+                            <span style="font-size:11px; color:#ccc;">Колір тексту:</span>
+                            <input type="color" id="promo-text-color-input" value="#ffffff" style="flex:0 0 60px; height:34px; padding:2px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updatePromoTextColor(this.value)">
+                        </div>
+                        <div class="row">
+                            <span style="font-size:11px; color:#ccc;">Розмір тексту:</span>
+                            <input type="range" id="promo-text-size-input" min="20" max="150" step="2" value="60" oninput="updatePromoTextSize(this.value)">
+                        </div>
+                        <div class="switch-row" style="background: rgba(124, 58, 237, 0.15); padding: 8px; border-radius: 6px;">
+                            <span style="font-size:12px; font-weight:800; color: #a78bfa;">ПОКАЗУВАТИ ТЕКСТ (ЗАМІСТЬ МЕДІА):</span>
+                            <input type="checkbox" id="promo-type-text-checkbox" style="width:22px; height:22px;" onchange="togglePromoTypeText(this.checked)">
+                        </div>
+                    </div>
+
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
                 </div>
             </div>
@@ -405,15 +423,33 @@
 
         window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
         window.updatePromoUrl = function(url) {
-            state.promoUrl = url; state.promoSrc = "";
+            state.promoUrl = url; state.promoSrc = ""; state.promoTypeIsText = false;
+            document.getElementById('promo-type-text-checkbox').checked = false;
             if (url.match(/\.(mp4|webm|mov|avi)/i)) { state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true; }
             document.getElementById('promo-file-status').innerText = "Використовується URL"; set(matchRef, state);
         };
         window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
+
+        let pTextTimeout = null;
+        window.updatePromoText = function(v) {
+            clearTimeout(pTextTimeout);
+            pTextTimeout = setTimeout(() => { state.promoText = v; set(matchRef, state); }, 400);
+        };
+        window.updatePromoTextColor = function(v) { state.promoTextColor = v; set(matchRef, state); };
+        window.updatePromoTextSize = function(v) { state.promoTextSize = parseInt(v) || 60; set(matchRef, state); };
+        window.togglePromoTypeText = function(c) {
+            state.promoTypeIsText = c;
+            if (c) { state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false; }
+            set(matchRef, state);
+        };
+
         window.clearPromoData = function() {
             state.promoUrl = ""; state.promoSrc = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
+            state.promoText = ""; state.promoTypeIsText = false; state.promoTextColor = "#ffffff"; state.promoTextSize = 60;
             document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
             document.getElementById('promo-type-video-checkbox').checked = false; document.getElementById('promo-file-status').innerText = "Файл не вибрано";
+            document.getElementById('promo-text-input').value = ""; document.getElementById('promo-type-text-checkbox').checked = false;
+            document.getElementById('promo-text-color-input').value = "#ffffff"; document.getElementById('promo-text-size-input').value = 60;
             set(matchRef, state);
         };
 
@@ -432,7 +468,9 @@
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
-                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60,
+                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
 
@@ -453,6 +491,10 @@
                 document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
                 if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
+                if (document.activeElement !== document.getElementById('promo-text-input')) document.getElementById('promo-text-input').value = state.promoText || "";
+                document.getElementById('promo-type-text-checkbox').checked = !!state.promoTypeIsText;
+                document.getElementById('promo-text-color-input').value = state.promoTextColor || "#ffffff";
+                document.getElementById('promo-text-size-input').value = state.promoTextSize || 60;
             }
 
             const badge = document.getElementById('mode-status');
