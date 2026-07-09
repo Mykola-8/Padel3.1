@@ -117,8 +117,8 @@
 
         <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
             <div class="switch-row">
-                <span style="font-size:12px; font-weight:700;">🤖 Автоматичний збір статистики:</span>
-                <input type="checkbox" id="mode-enable-stats-checkbox" style="width:20px; height:20px;" onchange="toggleStatsAutomation(this.checked)">
+                <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
+                <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         </div>
@@ -464,7 +464,7 @@
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, isStatsAutomated: false, 
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, 
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
@@ -478,7 +478,7 @@
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
-            document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            document.getElementById('mode-stats-between-games-checkbox').checked = !!state.showStatsBetweenGames;
             
             const btnStats = document.getElementById('btn-toggle-stats');
             if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
@@ -572,6 +572,10 @@
             else { if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; else if (g1 === 6 && g2 === 6) state.isTiebreak = true; }
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
             if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
+            state.completedGamesCount = (state.completedGamesCount || 0) + 1;
+            if (state.showStatsBetweenGames && !state.isMatchFinished) {
+                state.showStatsOverlay = (state.completedGamesCount % 2 === 1);
+            }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
         }
 
@@ -581,7 +585,7 @@
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); }
         window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); }
-        window.toggleStatsAutomation = function(c) { state.isStatsAutomated = c; set(matchRef, state); }
+        window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
         window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
