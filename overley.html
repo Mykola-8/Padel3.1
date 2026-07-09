@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
-    <!-- Підключено спортивний акцентний шрифт Teko для яскравого вигляду таймерів та написів перерви -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗМІННІ ТЕМИ ТАБЛА ===== */
@@ -180,18 +179,18 @@
         .mfb-table td.mfb-set-win { color: #c69f66; }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
-        /* НОВА ЦЕНТРАЛЬНА ПАНЕЛЬ СТАТИСТИКИ З АНІМАЦІЄЮ ПОЯВИ ТА ВИХОДУ */
+        /* ===== НОВА ЦЕНТРАЛЬНА РУЧНА ПАНЕЛЬ СТАТИСТИКИ С РЕГУЛИРУЕМОЙ АНИМАЦИЕЙ ===== */
         .central-statistics-card {
             position: fixed; top: 50%; left: 50%;
-            width: 680px; background: rgba(8, 8, 8, 0.75);
+            width: 660px; background: rgba(8, 8, 8, 0.72);
             border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px);
             font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9995;
             padding: 30px; box-sizing: border-box;
             
-            /* Ефект анімованої появи та виходу */
+            /* Анімований вхід та вихід */
             opacity: 0; visibility: hidden; pointer-events: none;
-            transform: translate(-50%, -50%) scale(0.8);
+            transform: translate(-50%, -50%) scale(0.85);
             transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
                         transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
                         visibility 0.4s;
@@ -204,15 +203,15 @@
         .c-stats-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         .c-stats-table td { padding: 12px 10px; font-size: 15px; font-weight: 700; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .c-stats-table tr:last-child td { border-bottom: none; }
-        .c-stats-val { width: 20%; font-size: 18px; font-weight: 900; }
+        .c-stats-val { width: 22%; font-size: 18px; font-weight: 900; }
         .c-stats-val.t1 { text-align: right; color: #fff; }
         .c-stats-val.t2 { text-align: left; color: #fff; }
-        .c-stats-label { width: 60%; color: #b3b3b3; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .c-stats-label { width: 56%; color: #b3b3b3; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
         .c-stats-teams-head td { font-size: 18px; font-weight: 900; color: #ffe9c2; text-transform: uppercase; border-bottom: 2px solid rgba(198, 159, 102, 0.4) !important; padding-bottom: 15px !important; }
         .c-stats-match-time { text-align: center; font-size: 12px; font-weight: 700; color: #888; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .c-stats-match-time span { color: #c69f66; font-weight: 800; }
 
-        /* АВТО-СТАТИСТИКА (НИЖНІЙ РЯДОК) */
+        /* СТАТИСТИКА ГЕЙМУ (НИЖНЯ АВТО-ПАНЕЛЬ) */
         .statistics-overlay { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: rgba(8, 8, 8, 0.85); border-top: 1px solid rgba(198, 159, 102, 0.4); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s; transform: translateY(100%); padding: 10px 30px; box-sizing: border-box; backdrop-filter: blur(10px); }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
         .stats-header { font-size: 10px; font-weight: 800; color: #c69f66; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.9); flex-shrink: 0; }
@@ -302,7 +301,6 @@
 </head>
 <body>
 
-    <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
@@ -362,7 +360,6 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
-    <!-- НОВА ЦЕНТРАЛЬНА ПАНЕЛЬ ПОВНОЇ СТАТИСТИКИ (РУЧНА) -->
     <div class="central-statistics-card" id="central-full-stats">
         <div class="c-stats-header" id="cs-main-header">Статистика Матчу • Корт 1</div>
         <table class="c-stats-table">
@@ -395,7 +392,6 @@
         <div class="c-stats-match-time" id="cs-total-time-label">Загальний час матчу: <span id="cs-time-match">00:00</span></div>
     </div>
 
-    <!-- АВТО-СТАТИСТИКА (НИЖНІЙ ТІКЕР — КЕРУЄТЬСЯ ЛИШЕ АВТО-ТРИГЕРОМ) -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-ticker-side">
             <span class="stats-ticker-name" id="st-name1">Команда A</span>
@@ -417,7 +413,6 @@
         <div class="sr-main-row"><div class="sr-team left" id="sr-team1-name">Команда 1</div><div class="sr-vs-score-block"><div class="sr-score" id="sr-sets-score-value">6 : 4</div><div class="sr-vs">VS</div></div><div class="sr-team right" id="sr-team2-name">Команда 2</div></div>
     </div>
 
-    <!-- ПАНЕЛЬ ПЕРЕРВИ -->
     <div class="break-overlay" id="break-panel">
         <div class="break-label" id="brk-label">ПЕРЕРВА</div>
         <div class="break-clock-wrap">
@@ -482,7 +477,7 @@
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
-            history: { en: 'Game history (total)', ua: 'Хронологія геймів (в сумі)' },
+            history: { en: 'Game history (total)', ua: 'Хронологія геймів (в sumi)' },
             setsSummary: { en: 'Sets & time results:', ua: 'Результати по сетам та час:' },
             setFinished: { en: 'SET FINISHED', ua: 'ЗАВЕРШЕНО СЕТ' },
             court: { en: 'COURT', ua: 'КОРТ' },
@@ -515,17 +510,15 @@
         function updateStatsPanelVisibility() {
             const sp = document.getElementById('statistics-panel');
             if (!sp || !lastKnownState) return;
-            // Тікер знизу керується ВИКЛЮЧНО авто-тригером
-            const showTicker = statsAutoActive && !lastKnownState.isMatchFinished;
-            sp.classList.toggle('visible', showTicker);
+            // Нижня авто-панель керується виключно авто-тригером
+            sp.classList.toggle('visible', statsAutoActive && !lastKnownState.isMatchFinished);
         }
 
         function updateCentralPanelVisibility() {
             const cp = document.getElementById('central-full-stats');
             if (!cp || !lastKnownState) return;
-            // Нова велика центральна панель керується ВИКЛЮЧНО ручною кнопкою з пульту
-            const showCentral = !!lastKnownState.showStatsOverlay && !lastKnownState.isMatchFinished;
-            cp.classList.toggle('visible', showCentral);
+            // Велика центральна панель керується виключно ручним перемикачем
+            cp.classList.toggle('visible', !!lastKnownState.showStatsOverlay && !lastKnownState.isMatchFinished);
         }
 
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
@@ -567,6 +560,7 @@
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
+                
                 // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
@@ -791,7 +785,7 @@
                 } else {
                     mfb.classList.remove('visible');
 
-                    // ОБРОБКА АВТО-ТРИГЕРА (ДЛЯ НИЖНЬОЇ ПАНЕЛІ)
+                    // ОБРОБКА АВТО-ТРИГЕРА
                     if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
                         statsAutoActive = true;
@@ -799,14 +793,14 @@
                         statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); }, 4000);
                     }
 
-                    // Оновлення текстових даних нижньої авто-панелі
+                    // Текст нижньої панелі
                     document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
                     document.getElementById('st-lg1').innerText = (state[`t1_lg_s${activeSet}`] || 0) + " в суху"; document.getElementById('st-lg2').innerText = (state[`t2_lg_s${activeSet}`] || 0) + " в суху";
                     document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                     document.getElementById('lbl-set-time-footer').firstChild.textContent = getStatsLabel('setTime', state) + ': ';
                     document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                     
-                    // ОНОВЛЕННЯ ДАНИХ НОВОЇ ЦЕНТРАЛЬНОЇ ПАНЕЛІ (РУЧНА)
+                    // ДАНІ ДЛЯ НОВОЇ ЦЕНТРАЛЬНОЇ КАРТКИ (РУЧНОЇ)
                     document.getElementById('cs-main-header').innerText = getStatsLabel('headerFull', state) + ' ' + courtId;
                     document.getElementById('cs-head-name1').innerText = state.p1name || "Команда A";
                     document.getElementById('cs-head-name2').innerText = state.p2name || "Команда B";
