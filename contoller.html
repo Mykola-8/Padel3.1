@@ -7,16 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
         body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 95px; -webkit-tap-highlight-color: transparent; position: relative; }
-        
-        /* НАВІГАЦІЯ (ВКЛАДКИ) */
         .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); }
         .nav-btn { flex: 1; background: transparent; border: none; color: #888; padding: 12px 5px; font-weight: 700; font-size: 10px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.2s; }
         .nav-btn.active { color: #c69f66; }
         .nav-btn span { font-size: 18px; }
-        
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
-
         .settings-gear-btn { position: absolute; top: 12px; right: 15px; font-size: 24px; background: transparent; border: none; color: #c69f66; cursor: pointer; padding: 5px; transition: transform 0.2s; z-index: 100; }
         .settings-gear-btn:active { transform: scale(0.85) rotate(45deg); }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
@@ -25,7 +21,6 @@
         .row:last-child { margin-bottom: 0; }
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
-        
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
@@ -34,19 +29,15 @@
         .btn-red { background: #b91c1c; }
         .btn-orange { background: linear-gradient(to bottom, #f97316, #ea580c); color: white; }
         .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
-        
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn span { font-size: 56px; font-weight: 900; }
-        
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
-        
-        /* ПРЕВ'Ю ТАБЛО */
         .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
         .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .preview-row:last-child { border-bottom: none; }
@@ -57,20 +48,15 @@
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
-        
-        /* Додано відступ знизу для модалки, щоб уникнути перекриття кнопками табів */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 1100; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
         .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-
-        /* СТИЛІ КАРТОК ІСТОРІЇ ТА ГРАВЦІВ */
         .match-card { background: #222; border-left: 4px solid #c69f66; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
         .match-card-header { display: flex; justify-content: space-between; font-size: 11px; color: #888; font-weight: 700; align-items: center; }
         .match-card-teams { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; padding: 4px 0; }
         .match-card-scores { font-size: 13px; color: #c69f66; font-weight: 700; }
-        
         .player-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #333; }
         .player-info { display: flex; flex-direction: column; gap: 2px; }
         .player-name { font-weight: 700; font-size: 14px; }
@@ -179,7 +165,7 @@
 
         <h2>🚨 Глобальне керування базою даних</h2>
         <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
-            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase (включаючи ВСІ корти, ВСЮ історію за всі дні та ВСІХ збережених гравців). Застосовувати лише при капітальному перезапуску системи.</p>
+            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
             <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
         </div>
     </div>
@@ -199,16 +185,8 @@
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">1. Посилання Інтернет (URL):</span>
-                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
-                    </div>
-                    <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">2. Або файл з цього пристрою:</span>
-                        <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
-                            📁 Вибрати Відео чи Фото
-                            <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadPromoFile(event)">
-                        </label>
-                        <div id="promo-file-status" style="font-size:10px; color:#9fa6b2; text-align:center; margin-top:4px;">Файл не вибрано</div>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Посилання Інтернет (URL):</span>
+                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4 або image.jpg" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
                     </div>
                     <div class="switch-row">
                         <span style="font-size:11px; color:#ccc;">Медіа є Відеороликом:</span>
@@ -282,8 +260,7 @@
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
-        let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now();
-        let allPlayersData = {};
+        let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -310,56 +287,25 @@
         }
 
         onValue(ref(db, 'padel/history'), (snapshot) => {
-            const historyData = snapshot.val();
-            const container = document.getElementById('history-container');
-            if (!historyData) {
-                container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>';
-                return;
-            }
+            const historyData = snapshot.val(); const container = document.getElementById('history-container');
+            if (!historyData) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>'; return; }
             container.innerHTML = '';
             Object.keys(historyData).reverse().forEach(key => {
-                const m = historyData[key];
-                const card = document.createElement('div');
-                card.className = 'match-card';
-                card.innerHTML = `
-                    <div class="match-card-header">
-                        <span>Корт №${m.courtId || 1} • ${m.date || ''}</span>
-                        <button class="btn btn-red" style="padding:4px 8px; font-size:9px;" onclick="deleteMatchHistory('${key}')">Видалити 🗑️</button>
-                    </div>
-                    <div class="match-card-teams">
-                        <span>${m.p1name}</span>
-                        <span>vs</span>
-                        <span>${m.p2name}</span>
-                    </div>
-                    <div class="match-card-scores">Рахунок по сетам: ${m.scoreLine || '0:0'}</div>
-                `;
+                const m = historyData[key]; const card = document.createElement('div'); card.className = 'match-card';
+                card.innerHTML = `<div class="match-card-header"><span>Корт №${m.courtId || 1} • ${m.date || ''}</span><button class="btn btn-red" style="padding:4px 8px; font-size:9px;" onclick="deleteMatchHistory('${key}')">Видалити 🗑</button></div><div class="match-card-teams"><span>${m.p1name}</span><span>vs</span><span>${m.p2name}</span></div><div class="match-card-scores">Рахунок по сетам: ${m.scoreLine || '0:0'}</div>`;
                 container.appendChild(card);
             });
         });
 
-        onValue(ref(db, 'padel/players'), (snapshot) => {
-            allPlayersData = snapshot.val() || {};
-            renderPlayersList(allPlayersData);
-        });
+        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
 
         function renderPlayersList(playersObj) {
             const container = document.getElementById('players-container');
-            if (Object.keys(playersObj).length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено. Створіть у вкладці Профіль.</div>';
-                return;
-            }
+            if (Object.keys(playersObj).length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено.</div>'; return; }
             container.innerHTML = '';
             Object.keys(playersObj).forEach(key => {
-                const p = playersObj[key];
-                const item = document.createElement('div');
-                item.className = 'player-list-item';
-                item.innerHTML = `
-                    <div class="player-info">
-                        <div class="player-name">${p.name}</div>
-                        <div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div>
-                    </div>
-                    <button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>
-                `;
+                const p = playersObj[key]; const item = document.createElement('div'); item.className = 'player-list-item';
+                item.innerHTML = `<div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div></div><button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>`;
                 container.appendChild(item);
             });
         }
@@ -367,135 +313,75 @@
         window.filterPlayers = function(query) {
             if (!query) { renderPlayersList(allPlayersData); return; }
             const filtered = {};
-            Object.keys(allPlayersData).forEach(k => {
-                if (allPlayersData[k].name && allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) {
-                    filtered[k] = allPlayersData[k];
-                }
-            });
+            Object.keys(allPlayersData).forEach(k => { if (allPlayersData[k].name && allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) filtered[k] = allPlayersData[k]; });
             renderPlayersList(filtered);
         }
 
-        window.deleteMatchHistory = function(key) {
-            if (confirm("Ви дійсно хочете видалити цей матч з історії?")) {
-                remove(ref(db, `padel/history/${key}`));
-            }
-        }
-
-        window.deletePlayer = function(key) {
-            if (confirm("Видалити гравця з бази даних?")) {
-                remove(ref(db, `padel/players/${key}`));
-            }
-        }
+        window.deleteMatchHistory = function(key) { if (confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); }
+        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
 
         window.createNewPlayer = function() {
-            const name = document.getElementById('new-player-name').value.trim();
-            const hand = document.getElementById('new-player-hand').value;
-            if (!name) { alert("Будь ласка, введіть ім'я гравця."); return; }
+            const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
+            if (!name) { alert("Введіть ім'я."); return; }
             push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
             document.getElementById('new-player-name').value = '';
-            alert(`Гравець ${name} успішно доданий!`);
         }
 
         window.saveProfileData = function() {
-            const name = document.getElementById('profile-name').value;
-            const club = document.getElementById('profile-club').value;
-            localStorage.setItem('padel_org_name', name);
-            localStorage.setItem('padel_org_club', club);
-            alert("Дані профілю організатора збережено локально!");
+            localStorage.setItem('padel_org_name', document.getElementById('profile-name').value);
+            localStorage.setItem('padel_org_club', document.getElementById('profile-club').value);
+            alert("Збережено!");
         }
 
         window.hardResetAllFirebase = function() {
-            if (confirm("🚨 УВАГА! Ця дія видалить ВСІ корти, всю ІСТОРІЮ та всіх ГРАВЦІВ. Ви впевнені?")) {
-                if (confirm("ПІДТВЕРДЖУЄТЕ ПОВНЕ ЗНИЩЕННЯ ДАНИХ FIREBASE?")) {
-                    remove(ref(db, 'padel')).then(() => {
-                        alert("Базу даних успішно повністю очищено! Перезавантаження...");
-                        window.location.reload();
-                    }).catch(err => {
-                        alert("Помилка очищення: " + err.message);
-                    });
-                }
+            if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
+                remove(ref(db, 'padel')).then(() => window.location.reload());
             }
         }
 
-        window.resetMatch = function() { 
-            if (confirm("Скинути поточний корт?")) {
-                resetMatchWithoutConfirm(); 
-            } 
-        }
+        window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
+        window.updatePromoUrl = function(url) {
+            state.promoUrl = url;
+            if (url.match(/\.(mp4|webm|mov|avi)/i)) { state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true; }
+            set(matchRef, state);
+        };
+        window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
+        window.clearPromoData = function() {
+            state.promoUrl = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
+            document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
+            document.getElementById('promo-type-video-checkbox').checked = false; set(matchRef, state);
+        };
+
+        window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
 
         function resetMatchWithoutConfirm() {
-            if (statsTimeout) clearTimeout(statsTimeout); 
-            gameStartTimestamp = Date.now();
+            if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, 
                 scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
-                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold",
-                deuceStyle: "classic", deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, 
-                isStatsAutomated: false, showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], 
-                showLogo: false, customLogoText: "QATAR AIRWAYS", logoFontFamily: "Montserrat", logoFontColor: "#ffffff", logoFontSize: 13, 
+                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", deuceStyle: "classic", deuceCounter: 0, 
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, isStatsAutomated: false, 
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
-                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
-                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
-            }).then(() => {
-                closeModalSettings();
-            }).catch((err) => {
-                alert("Помилка скидання корту: " + err.message);
-            });
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoTypeIsVideo: false, t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+            }).then(() => closeModalSettings());
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
-            if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
-        });
-
-        window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
-        window.updatePromoUrl = function(url) {
-            state.promoUrl = url;
-            if (url.match(/\.(mp4|webm|mov|avi)/i)) { state.promoTypeIsVideo = true; if(document.getElementById('promo-type-video-checkbox')) document.getElementById('promo-type-video-checkbox').checked = true; }
-            set(matchRef, state);
-        };
-        window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
-        window.uploadPromoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            document.getElementById('promo-file-status').innerText = `Завантаження...`;
-            const isVideo = file.type.startsWith('video/'); state.promoTypeIsVideo = isVideo;
-            document.getElementById('promo-type-video-checkbox').checked = isVideo;
-            const r = new FileReader();
-            r.onload = function(evt) {
-                state.promoSrc = evt.target.result; state.promoUrl = ""; document.getElementById('promo-url-input').value = "";
-                document.getElementById('promo-file-status').innerText = `✅ Завантажено (${isVideo?'Відео':'Фото'})`; set(matchRef, state);
-            };
-            r.readAsDataURL(file);
-        };
-        window.clearPromoData = function() {
-            state.promoSrc = ""; state.promoUrl = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
-            document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
-            document.getElementById('promo-type-video-checkbox').checked = false; document.getElementById('promo-file-status').innerText = "Файл не вибрано";
-            set(matchRef, state);
-        };
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
-            
-            // Оновлення елементів статистики (тепер на головному екрані пульта)
             document.getElementById('mode-enable-stats-checkbox').checked = state.isStatsAutomated !== false;
+            
             const btnStats = document.getElementById('btn-toggle-stats');
-            if (state.showStatsOverlay) {
-                btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS";
-                btnStats.style.background = "#b91c1c";
-            } else {
-                btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)";
-                btnStats.style.background = "#15803d";
-            }
+            if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
+            else { btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)"; btnStats.style.background = "#15803d"; }
 
             document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode; document.getElementById('qr-code-url-input').value = state.qrCodeUrl || ""; document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
-            
             if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
             
             if(document.getElementById('promo-visibility-checkbox')) {
@@ -524,8 +410,8 @@
                 document.getElementById('pr-t1-s' + s).innerText = state['t1_s' + s] || 0; document.getElementById('pr-t2-s' + s).innerText = state['t2_s' + s] || 0;
             }
 
-            document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁️ ПОКАЗАТИ ТАБЛО' : '👁️ СХОВАТИ ТАБЛО';
-            document.getElementById('btn-break').innerText = state.showBreak ? '▶️ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
+            document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁 ПОКАЗАТИ ТАБЛО' : '👁 СХОВАТИ ТАБЛО';
+            document.getElementById('btn-break').innerText = state.showBreak ? '▶ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
@@ -572,14 +458,11 @@
             if (winTeam !== state.currentServer) { if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; }
             state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
             state['t2_s' + state.currentSet] = (state['t2_s' + state.currentSet] || 0) + (winTeam === 2 ? 1 : 0);
-            
             if(!state.gamesTimeHistory) state.gamesTimeHistory = [];
             state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); gameStartTimestamp = Date.now();
-
             let g1 = state['t1_s' + state.currentSet], g2 = state['t2_s' + state.currentSet], isOver = false, lim = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
             if (state.isProSet) { if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; else if (g1 === lim && g2 === lim) state.isTiebreak = true; }
             else { if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; else if (g1 === 6 && g2 === 6) state.isTiebreak = true; }
-            
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
             if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
             state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -611,26 +494,10 @@
         window.finishMatchPro = function() {
             if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
             if(confirm("Завершити матч та зберегти в історію?")){
-                state.isMatchFinished = true;
-                state.showStatsOverlay = true;
-                
-                let scoreLines = [];
-                for(let i = 1; i <= 5; i++) {
-                    let s1 = state[`t1_s${i}`] || 0;
-                    let s2 = state[`t2_s${i}`] || 0;
-                    if(s1 > 0 || s2 > 0) scoreLines.push(`${s1}:${s2}`);
-                }
-                
-                push(ref(db, 'padel/history'), {
-                    courtId: courtId,
-                    p1name: state.p1name || "Команда A",
-                    p2name: state.p2name || "Команда B",
-                    scoreLine: scoreLines.join(', '),
-                    date: new Date().toLocaleString('uk-UA')
-                });
-
-                set(matchRef, state);
-                closeModalSettings();
+                state.isMatchFinished = true; state.showStatsOverlay = true; let scoreLines = [];
+                for(let i = 1; i <= 5; i++) { let s1 = state[`t1_s${i}`] || 0; let s2 = state[`t2_s${i}`] || 0; if(s1 > 0 || s2 > 0) scoreLines.push(`${s1}:${s2}`); }
+                push(ref(db, 'padel/history'), { courtId: courtId, p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B", scoreLine: scoreLines.join(', '), date: new Date().toLocaleString('uk-UA') });
+                set(matchRef, state); closeModalSettings();
             }
         }
         
@@ -648,6 +515,10 @@
             if(isG) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
             s.activeMatchRibbon = (p1G && s.currentServer===2) || (p2G && s.currentServer===1) ? "BREAK_POINT" : "GAME_POINT";
         }
+        document.addEventListener("DOMContentLoaded", () => {
+            if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
+            if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
+        });
         initCourtConnection();
     </script>
 </body>
