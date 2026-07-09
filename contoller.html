@@ -120,7 +120,7 @@
                 <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
-            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ ЦЕНТРАЛЬНЕ ТАБЛО СТАТИСТИКИ (РУЧНА)</button>
         </div>
     </div>
 
@@ -204,7 +204,7 @@
                     </div>
 
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати text на екрані (замість фото/відео):</span>
                         <textarea id="promo-text-input" placeholder="Введіть текст, який зʼявиться на весь екран..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
                         <div class="row" style="margin-top:8px;">
                             <span style="font-size:11px; color:#ccc;">Колір тексту:</span>
@@ -258,7 +258,6 @@
             </div>
 
             <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Розміщення та Масштаб табла:</div>
                 <div class="row"><span>Зсув X (px):</span><input type="number" id="s-pos-x" value="0" onchange="updatePosition('posX', this.value)"></div>
                 <div class="row"><span>Зсув Y (px):</span><input type="number" id="s-pos-y" value="0" onchange="updatePosition('posY', this.value)"></div>
                 <div class="row"><span>Загальний масштаб:</span><input type="number" id="s-scale" value="1" step="0.05" onchange="updatePosition('scale', this.value)"></div>
@@ -477,7 +476,6 @@
             else {
                 state.currentSet = setNum + 1;
                 if (state.currentSet === 3 && !state.isProSet) {
-                    // Перевірка на опцію супер-тайбрейку в третьому сеті
                     if (document.getElementById('mode-supertb-checkbox').checked) { state.isSuperTiebreak = true; }
                 }
             }
@@ -496,11 +494,6 @@
                 matchData.scores[`set_${i}`] = { t1: state[`t1_s${i}`] || 0, t2: state[`t2_s${i}`] || 0 };
             }
             push(ref(db, 'padel/history'), matchData);
-            updateGlobalPlayersStats(winnerTeam);
-        }
-
-        function updateGlobalPlayersStats(winnerTeam) {
-            // Спрощена заглушка для оновлення статистики гравців (за потреби розширити)
         }
 
         window.setServer = function(team) { saveToStack(); state.currentServer = team; update(ref(db, databasePath), { currentServer: team }); };
@@ -518,13 +511,14 @@
         window.toggleStatsBetweenGames = function(val) { update(ref(db, databasePath), { showStatsBetweenGames: val }); };
         
         window.toggleStatsManual = function() {
-            // Керує ВИКЛЮЧНО ручною великою центральною панелєю статистики
             const current = !!state.showStatsOverlay;
             update(ref(db, databasePath), { showStatsOverlay: !current });
         };
 
         window.liveUpdateName = function(team, val) { const obj = {}; obj[`p${team}name`] = val; update(ref(db, databasePath), obj); };
         window.updateBoardTheme = function(val) { update(ref(db, databasePath), { boardTheme: val }); };
+        
+        /* ЗМІНЕНО: Прибрано занулення p1Index та p2Index з функцій перемикання */
         window.toggleAmericanoMode = function(val) { update(ref(db, databasePath), { isAmericano: val }); };
         window.updateAmericanoLimit = function(val) { update(ref(db, databasePath), { americanoLimit: parseInt(val) || 21 }); };
         window.toggleProSetMode = function(val) { update(ref(db, databasePath), { isProSet: val }); };
@@ -532,6 +526,7 @@
         window.toggleSuperTiebreakMode = function(val) { update(ref(db, databasePath), { isSuperTiebreak: val }); };
         window.updateSuperTiebreakLimit = function(val) { update(ref(db, databasePath), { superTiebreakLimit: parseInt(val) || 10 }); };
         window.changeDeuceStyle = function(val) { update(ref(db, databasePath), { deuceStyle: val }); };
+        
         window.updatePosition = function(field, val) { const obj = {}; obj[field] = parseFloat(val) || 0; update(ref(db, databasePath), obj); };
         window.toggleLogoVisibility = function(val) { update(ref(db, databasePath), { showLogo: val }); };
         window.updateLogoCustomText = function(val) { update(ref(db, databasePath), { customLogoText: val, logoUrl: "", logoSrc: "" }); };
@@ -579,7 +574,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 if (isVideo) {
-                    if (file.size > 1.8 * 1024 * 1024) { alert("Відео занадто велике! Максимум 1.8MB для прямої бази."); document.getElementById('promo-file-status').innerText = "Помилка (великий файл)"; return; }
+                    if (file.size > 1.8 * 1024 * 1024) { alert("Відео занадто велике! Максимум 1.8MB."); document.getElementById('promo-file-status').innerText = "Помилка"; return; }
                     update(ref(db, databasePath), { promoSrc: e.target.result, promoUrl: "", promoTypeIsVideo: true, promoTypeIsText: false });
                     document.getElementById('promo-file-status').innerText = "Відео додано!";
                 } else {
@@ -612,7 +607,7 @@
         };
 
         window.hardResetAllFirebase = function() {
-            if (!confirm("⚠️ КРИТИЧНА ДІЯ!\nВи дійсно хочете повністю видалити ВСЮ базу даних Firebase (всі корти, налаштування та історію матчів)?")) return;
+            if (!confirm("⚠️ КРИТИЧНА ДІЯ!\nВи дійсно хочете повністю видалити ВСЮ базу даних Firebase?")) return;
             remove(ref(db, 'padel')).then(() => { alert("Базу даних повністю очищено!"); location.reload(); });
         };
 
