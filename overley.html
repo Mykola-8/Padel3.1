@@ -180,6 +180,39 @@
         .mfb-table td.mfb-set-win { color: #c69f66; }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
+        /* НОВА ЦЕНТРАЛЬНА ПАНЕЛЬ СТАТИСТИКИ З АНІМАЦІЄЮ ПОЯВИ ТА ВИХОДУ */
+        .central-statistics-card {
+            position: fixed; top: 50%; left: 50%;
+            width: 680px; background: rgba(8, 8, 8, 0.75);
+            border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px);
+            font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9995;
+            padding: 30px; box-sizing: border-box;
+            
+            /* Ефект анімованої появи та виходу */
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.8);
+            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        visibility 0.4s;
+        }
+        .central-statistics-card.visible {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .c-stats-header { text-align: center; font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; }
+        .c-stats-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .c-stats-table td { padding: 12px 10px; font-size: 15px; font-weight: 700; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .c-stats-table tr:last-child td { border-bottom: none; }
+        .c-stats-val { width: 20%; font-size: 18px; font-weight: 900; }
+        .c-stats-val.t1 { text-align: right; color: #fff; }
+        .c-stats-val.t2 { text-align: left; color: #fff; }
+        .c-stats-label { width: 60%; color: #b3b3b3; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .c-stats-teams-head td { font-size: 18px; font-weight: 900; color: #ffe9c2; text-transform: uppercase; border-bottom: 2px solid rgba(198, 159, 102, 0.4) !important; padding-bottom: 15px !important; }
+        .c-stats-match-time { text-align: center; font-size: 12px; font-weight: 700; color: #888; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .c-stats-match-time span { color: #c69f66; font-weight: 800; }
+
+        /* АВТО-СТАТИСТИКА (НИЖНІЙ РЯДОК) */
         .statistics-overlay { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: rgba(8, 8, 8, 0.85); border-top: 1px solid rgba(198, 159, 102, 0.4); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s; transform: translateY(100%); padding: 10px 30px; box-sizing: border-box; backdrop-filter: blur(10px); }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
         .stats-header { font-size: 10px; font-weight: 800; color: #c69f66; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.9); flex-shrink: 0; }
@@ -201,7 +234,7 @@
         .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ ПЕРЕРВИ — ОНОВЛЕНИЙ СПОРТИВНИЙ СТИЛЬ ===== */
+        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
         .break-overlay { position: fixed; inset: 0; transform: scale(0.96); background: rgba(6, 6, 10, 0.42); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s; }
         .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
         .break-label { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #c69f66; margin-bottom: 12px; line-height: 1; }
@@ -213,50 +246,15 @@
         .break-score-sep { font-family: 'Teko', sans-serif; font-size: 34px; font-weight: 700; color: #c69f66; line-height: 1; }
         .break-sets-line { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 3px; }
 
-        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (РЕКЛАМА / СПОНСОР) ===== */
+        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
         .fullscreen-media-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: #000000;
-            z-index: 100000; /* Перекриває абсолютно все */
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            position: fixed; inset: 0; background-color: #000000; z-index: 100000; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s ease, visibility 0.6s ease;
         }
-        .fullscreen-media-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        .fullscreen-media-content {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        .fullscreen-media-content.active {
-            display: block;
-        }
-        .fullscreen-text-content {
-            display: none;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-sizing: border-box;
-            padding: 60px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
-            line-height: 1.25;
-            word-break: break-word;
-            white-space: pre-wrap;
-            text-shadow: 0 4px 18px rgba(0,0,0,0.85);
-        }
-        .fullscreen-text-content.active {
-            display: flex;
-        }
+        .fullscreen-media-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+        .fullscreen-media-content { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .fullscreen-media-content.active { display: block; }
+        .fullscreen-text-content { display: none; width: 100%; height: 100%; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 60px; font-family: 'Montserrat', sans-serif; font-weight: 900; line-height: 1.25; word-break: break-word; white-space: pre-wrap; text-shadow: 0 4px 18px rgba(0,0,0,0.85); }
+        .fullscreen-text-content.active { display: flex; }
 
         .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
@@ -281,9 +279,9 @@
         html.theme-courtgreen .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-ticker-time span { color: var(--accent); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-ticker-score, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
+        html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay, html.theme-courtgreen .central-statistics-card { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-ticker-time span, html.theme-courtgreen .c-stats-header, html.theme-courtgreen .c-stats-match-time span { color: var(--accent); }
+        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-ticker-score, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team, html.theme-courtgreen .c-stats-table td { color: var(--panel-text); }
         html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(74, 222, 128, 0.25); }
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
 
@@ -295,9 +293,9 @@
         html.theme-graydark .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-ticker-time span { color: var(--accent); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-ticker-score, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
+        html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay, html.theme-graydark .central-statistics-card { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-ticker-time span, html.theme-graydark .c-stats-header, html.theme-graydark .c-stats-match-time span { color: var(--accent); }
+        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-ticker-score, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team, html.theme-graydark .c-stats-table td { color: var(--panel-text); }
         html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td { border-bottom-color: rgba(209, 213, 219, 0.25); }
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
     </style>
@@ -364,6 +362,40 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
+    <!-- НОВА ЦЕНТРАЛЬНА ПАНЕЛЬ ПОВНОЇ СТАТИСТИКИ (РУЧНА) -->
+    <div class="central-statistics-card" id="central-full-stats">
+        <div class="c-stats-header" id="cs-main-header">Статистика Матчу • Корт 1</div>
+        <table class="c-stats-table">
+            <tr class="c-stats-teams-head">
+                <td class="c-stats-val t1" id="cs-head-name1">Команда A</td>
+                <td class="c-stats-label">Параметр</td>
+                <td class="c-stats-val t2" id="cs-head-name2">Команда B</td>
+            </tr>
+            <tr>
+                <td class="c-stats-val t1" id="cs-games1">0</td>
+                <td class="c-stats-label" id="lbl-cs-games">Гейми в сеті</td>
+                <td class="c-stats-val t2" id="cs-games2">0</td>
+            </tr>
+            <tr>
+                <td class="c-stats-val t1" id="cs-bp1">0</td>
+                <td class="c-stats-label" id="lbl-cs-bp">Брейк-поінти</td>
+                <td class="c-stats-val t2" id="cs-bp2">0</td>
+            </tr>
+            <tr>
+                <td class="c-stats-val t1" id="cs-df1">0</td>
+                <td class="c-stats-label" id="lbl-cs-df">Дабл фоли</td>
+                <td class="c-stats-val t2" id="cs-df2">0</td>
+            </tr>
+            <tr>
+                <td class="c-stats-val t1" id="cs-love1">0</td>
+                <td class="c-stats-label" id="lbl-cs-love">Гейми "в суху"</td>
+                <td class="c-stats-val t2" id="cs-love2">0</td>
+            </tr>
+        </table>
+        <div class="c-stats-match-time" id="cs-total-time-label">Загальний час матчу: <span id="cs-time-match">00:00</span></div>
+    </div>
+
+    <!-- АВТО-СТАТИСТИКА (НИЖНІЙ ТІКЕР — КЕРУЄТЬСЯ ЛИШЕ АВТО-ТРИГЕРОМ) -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-ticker-side">
             <span class="stats-ticker-name" id="st-name1">Команда A</span>
@@ -442,6 +474,7 @@
 
         const STATS_LABELS = {
             header: { en: `GAME STATS • COURT`, ua: `Статистика гейму • Корт` },
+            headerFull: { en: `MATCH STATISTICS • COURT`, ua: `Статистика матчу • Корт` },
             teams: { en: 'Teams', ua: 'Команди' },
             gamesSet: { en: 'Games (set)', ua: 'Гейми (сет)' },
             breakpoints: { en: 'Break Points', ua: 'Брейк-поінти' },
@@ -478,12 +511,23 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "";
         let statsAutoTimer = null, statsAutoActive = false, lastStatsAutoTrigger = 0;
+
         function updateStatsPanelVisibility() {
             const sp = document.getElementById('statistics-panel');
             if (!sp || !lastKnownState) return;
-            const show = (!!lastKnownState.showStatsOverlay || statsAutoActive) && !lastKnownState.isMatchFinished;
-            sp.classList.toggle('visible', show);
+            // Тікер знизу керується ВИКЛЮЧНО авто-тригером
+            const showTicker = statsAutoActive && !lastKnownState.isMatchFinished;
+            sp.classList.toggle('visible', showTicker);
         }
+
+        function updateCentralPanelVisibility() {
+            const cp = document.getElementById('central-full-stats');
+            if (!cp || !lastKnownState) return;
+            // Нова велика центральна панель керується ВИКЛЮЧНО ручною кнопкою з пульту
+            const showCentral = !!lastKnownState.showStatsOverlay && !lastKnownState.isMatchFinished;
+            cp.classList.toggle('visible', showCentral);
+        }
+
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
         function refreshBoardVisibility() {
             const bw = document.getElementById('main-scoreboard');
@@ -516,6 +560,7 @@
             if (isMatchFinishedCurrently || !matchTimerStarted || isBreakActive) return;
             totalSeconds++; setSeconds++; setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
             if(document.getElementById('st-time-set')) document.getElementById('st-time-set').innerText = formatTime(setSeconds);
+            if(document.getElementById('cs-time-match')) document.getElementById('cs-time-match').innerText = formatTime(totalSeconds);
         }, 1000);
 
         onValue(ref(db, databasePath), (snapshot) => {
@@ -587,7 +632,6 @@
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
-                const stPanel = document.getElementById('statistics-panel');
 
                 if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
@@ -715,11 +759,12 @@
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
                 else if (state.isProSet) { ribbonProset.innerText = `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
-                else ribbonProset.classList.remove('visible');
+                else ribbonProset.classList.remove('remove');
 
                 const mfb = document.getElementById('match-finished-board');
                 if (state.isMatchFinished) {
-                    stPanel.classList.remove('visible');
+                    document.getElementById('central-full-stats').classList.remove('visible');
+                    document.getElementById('statistics-panel').classList.remove('visible');
                     if (state.showStatsOverlay !== false) {
                         document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
                         let playedSets = [];
@@ -746,21 +791,42 @@
                 } else {
                     mfb.classList.remove('visible');
 
+                    // ОБРОБКА АВТО-ТРИГЕРА (ДЛЯ НИЖНЬОЇ ПАНЕЛІ)
                     if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
                         statsAutoActive = true;
                         clearTimeout(statsAutoTimer);
-                        statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); refreshBoardVisibility(); }, 4000);
+                        statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); }, 4000);
                     }
 
-                    if (state.showStatsOverlay || statsAutoActive) {
-                        document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
-                        document.getElementById('st-lg1').innerText = (state[`t1_lg_s${activeSet}`] || 0) + " в суху"; document.getElementById('st-lg2').innerText = (state[`t2_lg_s${activeSet}`] || 0) + " в суху";
-                        document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        document.getElementById('lbl-set-time-footer').firstChild.textContent = getStatsLabel('setTime', state) + ': ';
-                        document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
-                    }
+                    // Оновлення текстових даних нижньої авто-панелі
+                    document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
+                    document.getElementById('st-lg1').innerText = (state[`t1_lg_s${activeSet}`] || 0) + " в суху"; document.getElementById('st-lg2').innerText = (state[`t2_lg_s${activeSet}`] || 0) + " в суху";
+                    document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                    document.getElementById('lbl-set-time-footer').firstChild.textContent = getStatsLabel('setTime', state) + ': ';
+                    document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
+                    
+                    // ОНОВЛЕННЯ ДАНИХ НОВОЇ ЦЕНТРАЛЬНОЇ ПАНЕЛІ (РУЧНА)
+                    document.getElementById('cs-main-header').innerText = getStatsLabel('headerFull', state) + ' ' + courtId;
+                    document.getElementById('cs-head-name1').innerText = state.p1name || "Команда A";
+                    document.getElementById('cs-head-name2').innerText = state.p2name || "Команда B";
+                    document.getElementById('cs-games1').innerText = state[`t1_s${activeSet}`] || 0;
+                    document.getElementById('cs-games2').innerText = state[`t2_s${activeSet}`] || 0;
+                    document.getElementById('cs-bp1').innerText = state.p1BreakPoints || 0;
+                    document.getElementById('cs-bp2').innerText = state.p2BreakPoints || 0;
+                    document.getElementById('cs-df1').innerText = state.p1DoubleFaults || 0;
+                    document.getElementById('cs-df2').innerText = state.p2DoubleFaults || 0;
+                    document.getElementById('cs-love1').innerText = state[`t1_lg_s${activeSet}`] || 0;
+                    document.getElementById('cs-love2').innerText = state[`t2_lg_s${activeSet}`] || 0;
+                    
+                    document.getElementById('lbl-cs-games').innerText = getStatsLabel('gamesSet', state);
+                    document.getElementById('lbl-cs-bp').innerText = getStatsLabel('breakpoints', state);
+                    document.getElementById('lbl-cs-df').innerText = getStatsLabel('doublefaults', state);
+                    document.getElementById('lbl-cs-love').innerText = getStatsLabel('lovegames', state);
+                    document.getElementById('cs-total-time-label').firstChild.textContent = getStatsLabel('matchTime', state) + ': ';
+
                     updateStatsPanelVisibility();
+                    updateCentralPanelVisibility();
                 }
 
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
