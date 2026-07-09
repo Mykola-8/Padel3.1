@@ -237,6 +237,25 @@
         .fullscreen-media-content.active {
             display: block;
         }
+        .fullscreen-text-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            padding: 60px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            line-height: 1.25;
+            word-break: break-word;
+            white-space: pre-wrap;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.85);
+        }
+        .fullscreen-text-content.active {
+            display: flex;
+        }
 
         .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
@@ -288,6 +307,7 @@
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
+        <div id="promo-text" class="fullscreen-text-content"></div>
     </div>
 
     <div class="scoreboard-wrapper" id="main-scoreboard">
@@ -461,6 +481,14 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "";
+        let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
+        function refreshBoardVisibility() {
+            const bw = document.getElementById('main-scoreboard');
+            if (!bw || !lastKnownState) return;
+            if (lastKnownState.showMainBoard === false || lastKnownState.showStatsOverlay === true || setOverlayLocalActive || isBreakActive) {
+                bw.classList.add('hidden');
+            } else { bw.classList.remove('hidden'); }
+        }
         let totalSeconds = 0, setSeconds = 0, lastSetTracked = 1, isMatchFinishedCurrently = false, isBreakActive = false;
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
 
@@ -491,26 +519,37 @@
         onValue(ref(db, databasePath), (snapshot) => {
             const state = snapshot.val();
             if (state) {
-                // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА)
+                lastKnownState = state;
+                // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
                 const promoVideo = document.getElementById('promo-video');
+                const promoTextEl = document.getElementById('promo-text');
 
                 if (!!state.showFullscreenPromo) {
-                    let mediaUrl = state.promoUrl || state.promoSrc || "";
-                    let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
-                    if (mediaUrl && mediaUrl !== lastPromoSource) {
-                        lastPromoSource = mediaUrl;
-                        if (isVideo) {
-                            promoImg.classList.remove('active'); promoVideo.src = mediaUrl; promoVideo.classList.add('active');
-                            promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
-                        } else {
-                            promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
+                    if (!!state.promoTypeIsText) {
+                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = "";
+                        promoTextEl.innerText = state.promoText || "";
+                        promoTextEl.style.color = state.promoTextColor || "#ffffff";
+                        promoTextEl.style.fontSize = (state.promoTextSize || 60) + "px";
+                        promoTextEl.classList.add('active');
+                    } else {
+                        promoTextEl.classList.remove('active');
+                        let mediaUrl = state.promoUrl || state.promoSrc || "";
+                        let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
+                        if (mediaUrl && mediaUrl !== lastPromoSource) {
+                            lastPromoSource = mediaUrl;
+                            if (isVideo) {
+                                promoImg.classList.remove('active'); promoVideo.src = mediaUrl; promoVideo.classList.add('active');
+                                promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
+                            } else {
+                                promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
+                            }
                         }
                     }
                     promoOverlay.classList.add('visible');
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = "";
+                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; promoTextEl.classList.remove('active');
                 }
 
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
@@ -548,23 +587,33 @@
                 const setResultPanel = document.getElementById('set-result-panel');
                 const stPanel = document.getElementById('statistics-panel');
 
-                if (state.showMainBoard === false || state.showStatsOverlay === true || !!state.showSetOverlayTrigger || newBreakActive) {
-                    boardWrapper.classList.add('hidden');
-                } else { boardWrapper.classList.remove('hidden'); }
-
                 if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
                 } else { document.getElementById('ribbon-top-tiebreak').classList.remove('visible'); }
 
                 if (state.showSetOverlayTrigger && !state.isMatchFinished) {
-                    const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
-                    const srLang = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
-                    document.getElementById('sr-set-number-label').innerText = `${STATS_LABELS.setFinished[srLang]} ${targetSetForOverlay} • ${STATS_LABELS.court[srLang]} ${courtId}`;
-                    document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
-                    document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
-                    document.getElementById('sr-sets-score-value').innerText = `${state[`t1_s${targetSetForOverlay}`] || 0} : ${state[`t2_s${targetSetForOverlay}`] || 0}`;
-                    setResultPanel.classList.add('visible');
-                } else { if (setResultPanel) setResultPanel.classList.remove('visible'); }
+                    if (!setOverlayLocalActive) {
+                        setOverlayLocalActive = true;
+                        const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
+                        const srLang = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
+                        document.getElementById('sr-set-number-label').innerText = `${STATS_LABELS.setFinished[srLang]} ${targetSetForOverlay} • ${STATS_LABELS.court[srLang]} ${courtId}`;
+                        document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
+                        document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
+                        document.getElementById('sr-sets-score-value').innerText = `${state[`t1_s${targetSetForOverlay}`] || 0} : ${state[`t2_s${targetSetForOverlay}`] || 0}`;
+                        setResultPanel.classList.add('visible');
+                        clearTimeout(setOverlayTimer);
+                        setOverlayTimer = setTimeout(() => {
+                            setOverlayLocalActive = false;
+                            setResultPanel.classList.remove('visible');
+                            refreshBoardVisibility();
+                        }, 4000);
+                    }
+                } else {
+                    if (setOverlayLocalActive) { clearTimeout(setOverlayTimer); setOverlayLocalActive = false; }
+                    if (setResultPanel) setResultPanel.classList.remove('visible');
+                }
+
+                refreshBoardVisibility();
 
                 if (state.showQrCode) {
                     if ((state.qrCodeUrl || "https://google.com") !== currentQrUrl) {
