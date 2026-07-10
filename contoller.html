@@ -338,7 +338,7 @@
         // ===== ЗАХИСТ ПАРОЛЕМ =====
         // Пароль (у вигляді SHA-256 хешу) зберігається в Firebase — спільний для всіх кортів.
         // Змінити пароль можна прямо з налаштувань пульта (⚙️ → «Змінити пароль»), без коду.
-        const AUTH_DEFAULT_HASH = "d97c0fc29ac6ac54b2e8fcc3239c8c57633edde5a77ce4819828189e6f837bc"; // за замовчуванням: padel2026
+        const AUTH_DEFAULT_HASH = "d97c0fc29ac6ac54b2e8fcc3239c8c57633edde5a77ce4819828189e6f837bcc"; // за замовчуванням: padel2026
         const AUTH_STORAGE_KEY = "padel_controller_auth_ok";
         const authConfigRef = ref(db, 'padel/authConfig/passwordHash');
         let currentAuthHash = AUTH_DEFAULT_HASH;
