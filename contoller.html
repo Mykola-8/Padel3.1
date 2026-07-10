@@ -61,9 +61,44 @@
         .player-info { display: flex; flex-direction: column; gap: 2px; }
         .player-name { font-weight: 700; font-size: 14px; }
         .player-stats-mini { font-size: 11px; color: #aaa; }
+
+        /* ===== ЕКРАН ВХОДУ (ЗАХИСТ ПАРОЛЕМ) ===== */
+        #auth-gate { position: fixed; inset: 0; background: #111; z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        #auth-gate.hidden { display: none; }
+        .auth-card { background: #1c1c1c; border: 1px solid #333; border-radius: 10px; padding: 32px 28px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .auth-card h2 { margin: 0 0 6px; font-size: 18px; color: #fff; letter-spacing: 0.5px; }
+        .auth-card p { margin: 0 0 20px; font-size: 12px; color: #888; }
+        .auth-card input { width: 100%; box-sizing: border-box; background: #2a2a2a; border: 1px solid #444; color: #fff; padding: 12px 14px; border-radius: 6px; font-size: 15px; text-align: center; letter-spacing: 2px; margin-bottom: 12px; }
+        .auth-card input:focus { outline: none; border-color: #c69f66; }
+        .auth-card button { width: 100%; background: #c69f66; color: #1c1c1c; border: none; padding: 12px; font-weight: 800; border-radius: 6px; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .auth-error { color: #ef4444; font-size: 12px; margin-top: 10px; min-height: 14px; }
+        .auth-card.shake { animation: authShake 0.4s; }
+        @keyframes authShake { 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)} 30%,50%,70%{transform:translateX(-8px)} 40%,60%{transform:translateX(8px)} }
     </style>
 </head>
 <body>
+
+    <div id="auth-gate">
+        <div class="auth-card" id="auth-card">
+            <h2>🔒 Доступ до пульта</h2>
+            <p>Введіть пароль для керування трансляцією</p>
+            <input type="password" id="auth-password-input" placeholder="Пароль" autocomplete="off" onkeydown="if(event.key==='Enter') checkAuthPassword()">
+            <button onclick="checkAuthPassword()">Увійти</button>
+            <div class="auth-error" id="auth-error"></div>
+            <div style="margin-top:14px; border-top:1px solid #333; padding-top:12px;">
+                <a href="#" onclick="document.getElementById('auth-forgot-box').style.display = document.getElementById('auth-forgot-box').style.display==='block'?'none':'block'; return false;" style="color:#888; font-size:11px; text-decoration:underline;">Забули пароль?</a>
+                <div id="auth-forgot-box" style="display:none; text-align:left; font-size:11px; color:#999; line-height:1.6; margin-top:10px; background:#151515; border-radius:6px; padding:10px;">
+                    Пароль можна скинути до типового (<b style="color:#c69f66;">padel2026</b>) через Firebase, без коду:<br>
+                    1. Відкрийте <a href="https://console.firebase.google.com" target="_blank" style="color:#c69f66;">console.firebase.google.com</a><br>
+                    2. Оберіть проєкт <b>padel-2-gurskyj</b><br>
+                    3. Зліва: <b>Realtime Database</b><br>
+                    4. Розкрийте гілку <b>padel → authConfig</b><br>
+                    5. Наведіть на <b>passwordHash</b> → натисніть ✕ (видалити)<br>
+                    6. Перезавантажте цю сторінку — пароль автоматично стане <b style="color:#c69f66;">padel2026</b>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <nav class="nav-tabs">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
@@ -267,13 +302,23 @@
                 <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
             </div>
 
+            <div class="card" style="gap:8px; display:flex; flex-direction:column;">
+                <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">🔑 Змінити пароль пульта</div>
+                <input type="password" id="current-password-input" placeholder="Поточний пароль" style="width:100%; box-sizing:border-box; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px;">
+                <input type="password" id="new-password-input" placeholder="Новий пароль" style="width:100%; box-sizing:border-box; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px;">
+                <input type="password" id="new-password-confirm-input" placeholder="Повторіть новий пароль" style="width:100%; box-sizing:border-box; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px;">
+                <button class="btn" style="padding:10px; font-size:12px; background:#c69f66; color:#1c1c1c; font-weight:800;" onclick="changeAuthPassword()">Змінити пароль</button>
+                <div id="change-password-msg" style="font-size:11px; min-height:14px;"></div>
+            </div>
+
             <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+            <button class="btn" style="padding:10px; font-size:11px; background:#333; color:#ccc;" onclick="logoutAuth()">🔒 Вийти (заблокувати пульт)</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -289,6 +334,77 @@
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
+
+        // ===== ЗАХИСТ ПАРОЛЕМ =====
+        // Пароль (у вигляді SHA-256 хешу) зберігається в Firebase — спільний для всіх кортів.
+        // Змінити пароль можна прямо з налаштувань пульта (⚙️ → «Змінити пароль»), без коду.
+        const AUTH_DEFAULT_HASH = "d97c0fc29ac6ac54b2e8fcc3239c8c57633edde5a77ce4819828189e6f837bc"; // за замовчуванням: padel2026
+        const AUTH_STORAGE_KEY = "padel_controller_auth_ok";
+        const authConfigRef = ref(db, 'padel/authConfig/passwordHash');
+        let currentAuthHash = AUTH_DEFAULT_HASH;
+
+        async function sha256Hex(text) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        const authHashReadyPromise = (async () => {
+            try {
+                const snap = await get(authConfigRef);
+                if (snap.exists() && snap.val()) { currentAuthHash = snap.val(); }
+                else { await set(authConfigRef, AUTH_DEFAULT_HASH); }
+            } catch (e) { console.warn('Не вдалось завантажити пароль з Firebase, використовується типовий', e); }
+        })();
+
+        window.checkAuthPassword = async function() {
+            const input = document.getElementById('auth-password-input');
+            const errorEl = document.getElementById('auth-error');
+            const cardEl = document.getElementById('auth-card');
+            const entered = input.value || "";
+            await authHashReadyPromise;
+            const hash = await sha256Hex(entered);
+            if (hash === currentAuthHash) {
+                localStorage.setItem(AUTH_STORAGE_KEY, "true");
+                document.getElementById('auth-gate').classList.add('hidden');
+            } else {
+                errorEl.innerText = "Невірний пароль";
+                cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
+                input.value = ""; input.focus();
+            }
+        };
+
+        window.logoutAuth = function() {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            location.reload();
+        };
+
+        // Зміна пароля прямо з налаштувань (без коду і без консолі браузера).
+        // Вимагає повторного введення ПОТОЧНОГО пароля — навіть якщо пульт вже розблокований,
+        // щоб хтось випадковий за спільним пристроєм не міг тихо підмінити пароль.
+        window.changeAuthPassword = async function() {
+            const oldP = document.getElementById('current-password-input').value || "";
+            const p1 = document.getElementById('new-password-input').value || "";
+            const p2 = document.getElementById('new-password-confirm-input').value || "";
+            const msgEl = document.getElementById('change-password-msg');
+            await authHashReadyPromise;
+            const oldHash = await sha256Hex(oldP);
+            if (oldHash !== currentAuthHash) { msgEl.style.color = "#ef4444"; msgEl.innerText = "Поточний пароль невірний"; return; }
+            if (p1.length < 4) { msgEl.style.color = "#ef4444"; msgEl.innerText = "Новий пароль має бути не менше 4 символів"; return; }
+            if (p1 !== p2) { msgEl.style.color = "#ef4444"; msgEl.innerText = "Нові паролі не збігаються"; return; }
+            const newHash = await sha256Hex(p1);
+            await set(authConfigRef, newHash);
+            currentAuthHash = newHash;
+            document.getElementById('current-password-input').value = "";
+            document.getElementById('new-password-input').value = "";
+            document.getElementById('new-password-confirm-input').value = "";
+            msgEl.style.color = "#4ade80"; msgEl.innerText = "✓ Пароль змінено";
+        };
+
+        if (localStorage.getItem(AUTH_STORAGE_KEY) === "true") {
+            document.getElementById('auth-gate').classList.add('hidden');
+        } else {
+            setTimeout(() => { const inp = document.getElementById('auth-password-input'); if (inp) inp.focus(); }, 300);
+        }
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
