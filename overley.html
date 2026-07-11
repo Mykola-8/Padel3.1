@@ -698,7 +698,7 @@
                 }
 
                 const ribbonMatch = document.getElementById('ribbon-match');
-                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !state.isSuperTiebreak && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
+                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !state.isMexicano && !state.isSuperTiebreak && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
                     ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' '); ribbonMatch.className = "ribbon visible";
                     if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
                     else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
@@ -710,8 +710,8 @@
                 if (!state.isMatchFinished && !state.showStatsOverlay && !state.showSetOverlayTrigger) {
                     const curRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
                     if (!!state.isTiebreak && !lastCornerTiebreak) showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
-                    else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
-                    else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano) {
+                    else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano && !state.isMexicano) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
+                    else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
                         showCornerSlide(getCornerSlideText(curRibbon.toLowerCase().replace('_',''), state), 'csp-' + curRibbon.toLowerCase().replace('_',''));
                     }
                     lastCornerRibbon = curRibbon; lastCornerDeuce = state.deuceCounter || 0; lastCornerTiebreak = !!state.isTiebreak;
@@ -722,7 +722,7 @@
                 if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); }
                 else {
                     pb.classList.add('visible');
-                    if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
+                    if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                     } else {
                         pbT1.innerText = p1 === 4 ? "AD" : (p2 === 4 ? "" : pointSequence[p1]);
