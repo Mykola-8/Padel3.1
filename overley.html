@@ -644,27 +644,9 @@
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
                 } else { document.getElementById('ribbon-top-tiebreak').classList.remove('visible'); }
 
-                if (state.showSetOverlayTrigger && !state.isMatchFinished) {
-                    if (!setOverlayLocalActive) {
-                        setOverlayLocalActive = true;
-                        const targetSetForOverlay = state.lastFinishedSetNum || state.currentSet || 1;
-                        const srLang = state.cornerSlideLang === 'ua' ? 'ua' : 'en';
-                        document.getElementById('sr-set-number-label').innerText = `${STATS_LABELS.setFinished[srLang]} ${targetSetForOverlay} • ${STATS_LABELS.court[srLang]} ${courtId}`;
-                        document.getElementById('sr-team1-name').innerText = state.p1name || "Команда 1";
-                        document.getElementById('sr-team2-name').innerText = state.p2name || "Команда 2";
-                        document.getElementById('sr-sets-score-value').innerText = `${state[`t1_s${targetSetForOverlay}`] || 0} : ${state[`t2_s${targetSetForOverlay}`] || 0}`;
-                        setResultPanel.classList.add('visible');
-                        clearTimeout(setOverlayTimer);
-                        setOverlayTimer = setTimeout(() => {
-                            setOverlayLocalActive = false;
-                            setResultPanel.classList.remove('visible');
-                            refreshBoardVisibility();
-                        }, 4000);
-                    }
-                } else {
-                    if (setOverlayLocalActive) { clearTimeout(setOverlayTimer); setOverlayLocalActive = false; }
-                    if (setResultPanel) setResultPanel.classList.remove('visible');
-                }
+                // Плашка "ЗАВЕРШЕНО СЕТ" (VS по центру) вимкнена на прохання — ніколи не показується.
+                if (setResultPanel) setResultPanel.classList.remove('visible');
+                if (setOverlayLocalActive) { clearTimeout(setOverlayTimer); setOverlayLocalActive = false; }
 
                 refreshBoardVisibility();
 
