@@ -240,6 +240,8 @@
             <div class="card">
                 <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
                 <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
+                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
+                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
                 <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
                 <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
                 <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
@@ -462,6 +464,7 @@
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, 
                 scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
+                isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", deuceStyle: "classic", deuceCounter: 0, 
@@ -478,6 +481,7 @@
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
+            document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
             document.getElementById('mode-stats-between-games-checkbox').checked = !!state.showStatsBetweenGames;
             
@@ -499,12 +503,12 @@
             }
 
             const badge = document.getElementById('mode-status');
-            let isGolden = !state.isAmericano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3 && (state.deuceStyle === "one-golden" || (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2));
+            let isGolden = !state.isAmericano && !state.isMexicano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3 && (state.deuceStyle === "one-golden" || (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2));
             if (state.isMatchFinished) badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
             else if (isGolden) badge.innerText = "🔥 GOLDEN POINT! 🔥";
-            else badge.innerText = state.isSuperTiebreak ? `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit||10})` : (state.isAmericano ? `АМЕРИКАНО (${state.americanoLimit||21})` : (state.isTiebreak ? "TIEBREAK" : `Сет ${state.currentSet||1}`));
+            else badge.innerText = state.isSuperTiebreak ? `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit||10})` : (state.isAmericano ? `АМЕРИКАНО (${state.americanoLimit||21})` : (state.isMexicano ? `МЕКСИКАНО (${state.mexicanoLimit||24})` : (state.isTiebreak ? "TIEBREAK" : `Сет ${state.currentSet||1}`)));
 
-            if (state.isAmericano || state.isTiebreak || state.isSuperTiebreak) {
+            if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                 document.getElementById('view-p1-pts').innerText = state.p1Index; document.getElementById('view-p2-pts').innerText = state.p2Index;
             } else {
                 document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
@@ -521,6 +525,7 @@
             document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁 ПОКАЗАТИ ТАБЛО' : '👁 СХОВАТИ ТАБЛО';
             document.getElementById('btn-break').innerText = state.showBreak ? '▶ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
+            document.getElementById('mexicano-limit-row').style.display = state.isMexicano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
         }
@@ -539,6 +544,12 @@
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+            } else if (state.isMexicano) {
+                // Мексикано: кожен гравець подає по 4 очка поспіль (на відміну від Американо,
+                // де перша подача — 1 очко, далі по 2). Рахунок ведеться простими числами 1,2,3...
+                if (tIndex === 1) state.p1Index++; else state.p2Index++;
+                if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isTiebreak) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
@@ -588,9 +599,11 @@
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); }
         window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
-        window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleSuperTiebreakMode = function(c) { state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); }
+        window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleSuperTiebreakMode = function(c) { state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
         window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
         window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v)||10; set(matchRef, state); }
@@ -616,7 +629,7 @@
         let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
 
         function recalculateRibbons(s) {
-            if (s.isAmericano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
+            if (s.isAmericano || s.isMexicano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
             if (!!s.isTiebreak) { s.activeMatchRibbon = (s.p1Index >= 6 && s.p1Index>s.p2Index) || (s.p2Index >= 6 && s.p2Index>s.p1Index) ? ((s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT") : "TIEBREAK_POINT"; return; }
             let isG = s.p1Index===3 && s.p2Index===3 && (s.deuceStyle==="one-golden"||(s.deuceStyle==="double" && (s.deuceCounter||0)>=2));
             let p1G = (s.p1Index===3 && s.p2Index<3) || s.p1Index===4 || isG, p2G = (s.p2Index===3 && s.p1Index<3) || s.p2Index===4 || isG;
