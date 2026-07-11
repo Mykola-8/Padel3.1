@@ -186,7 +186,6 @@
         .stats-ticker-side { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
         .stats-ticker-side.right { justify-content: flex-end; }
         .stats-ticker-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .stats-ticker-lg { font-size: 10px; color: #ccc; white-space: nowrap; flex-shrink: 0; }
         .stats-ticker-center { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
         .stats-ticker-score { font-size: 16px; font-weight: 800; color: #ffffff; background: rgba(198, 159, 102, 0.25); border-radius: 4px; padding: 2px 12px; }
         .stats-ticker-time { font-size: 11px; color: #999; letter-spacing: 0.3px; white-space: nowrap; }
@@ -379,15 +378,14 @@
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-ticker-side">
             <span class="stats-ticker-name" id="st-name1">Команда A</span>
-            <span class="stats-ticker-lg" id="st-lg1">0 в суху</span>
         </div>
         <div class="stats-ticker-center">
             <span class="stats-header" id="stats-main-header">Статистика гейму</span>
             <span class="stats-ticker-score"><span id="st-g1">0</span> : <span id="st-g2">0</span></span>
-            <span class="stats-ticker-time" id="lbl-set-time-footer">Час сету: <span id="st-time-set">00:00</span></span>
+            <span class="stats-ticker-time" id="lbl-set-time-footer">Сет: <span id="st-time-set">00:00</span></span>
+            <span class="stats-ticker-time" id="lbl-match-time-footer">Матч: <span id="st-time-match">00:00</span></span>
         </div>
         <div class="stats-ticker-side right">
-            <span class="stats-ticker-lg" id="st-lg2">0 в суху</span>
             <span class="stats-ticker-name" id="st-name2">Команда B</span>
         </div>
     </div>
@@ -566,6 +564,7 @@
             if (isMatchFinishedCurrently || !matchTimerStarted || isBreakActive) return;
             totalSeconds++; setSeconds++; setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
             if(document.getElementById('st-time-set')) document.getElementById('st-time-set').innerText = formatTime(setSeconds);
+            if(document.getElementById('st-time-match')) document.getElementById('st-time-match').innerText = formatTime(totalSeconds);
             if(document.getElementById('stm-time-set')) document.getElementById('stm-time-set').innerText = formatTime(setSeconds);
             if(document.getElementById('stm-time-match')) document.getElementById('stm-time-match').innerText = formatTime(totalSeconds);
         }, 1000);
@@ -808,9 +807,9 @@
 
                     if (state.showStatsOverlay || statsAutoActive) {
                         document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
-                        document.getElementById('st-lg1').innerText = (state[`t1_lg_s${activeSet}`] || 0) + " в суху"; document.getElementById('st-lg2').innerText = (state[`t2_lg_s${activeSet}`] || 0) + " в суху";
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        document.getElementById('lbl-set-time-footer').firstChild.textContent = getStatsLabel('setTime', state) + ': ';
+                        document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
+                        document.getElementById('lbl-match-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Матч' : 'Match') + ': ';
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                     }
                     updateStatsPanelVisibility();
