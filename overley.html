@@ -406,6 +406,7 @@
                 <div style="text-align:center;"><div class="sm-val gold" id="stm-time-match">00:00</div><div class="sm-label" id="stm-lbl-match-time">Загальний час матчу</div></div>
             </div>
             <div class="sm-row"><div class="sm-val gold" id="stm-game-history" style="grid-column: 1 / span 3;">-</div><div class="sm-label" id="stm-lbl-history" style="grid-column: 1 / span 3;">Хронологія геймів</div></div>
+            <div class="sm-row"><div class="sm-val gold" id="stm-sets-result" style="grid-column: 1 / span 3; font-size: 20px;">-</div><div class="sm-label" id="stm-lbl-sets-result" style="grid-column: 1 / span 3;">Результат зіграних сетів</div></div>
         </div>
     </div>
 
@@ -495,6 +496,7 @@
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
             history: { en: 'Game history (total)', ua: 'Хронологія геймів (в сумі)' },
+            setsResult: { en: 'Sets result', ua: 'Результат зіграних сетів' },
             setsSummary: { en: 'Sets & time results:', ua: 'Результати по сетам та час:' },
             setFinished: { en: 'SET FINISHED', ua: 'ЗАВЕРШЕНО СЕТ' },
             court: { en: 'COURT', ua: 'КОРТ' },
@@ -533,7 +535,7 @@
         function updateManualStatsPanelVisibility() {
             const spm = document.getElementById('statistics-panel-manual');
             if (!spm || !lastKnownState) return;
-            const show = !!lastKnownState.showStatsOverlay && !lastKnownState.isMatchFinished;
+            const show = !!lastKnownState.showStatsOverlay;
             spm.classList.toggle('visible', show);
         }
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
@@ -757,39 +759,39 @@
                 const mfb = document.getElementById('match-finished-board');
                 if (state.isMatchFinished) {
                     stPanel.classList.remove('visible');
-                    document.getElementById('statistics-panel-manual').classList.remove('visible');
-                    if (state.showStatsOverlay !== false) {
-                        document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
-                        let playedSets = [];
-                        for (let i = 1; i <= (state.currentSet||1); i++) {
-                            let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
-                            if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2, unfinished: i===state.currentSet && !state.isMatchFinished});
-                        }
-                        let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                        document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||"Команда A") : (setsWon2 > setsWon1 ? (state.p2name||"Команда B") : "Нічия");
-                        
-                        let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = '<th>Команда</th>';
-                        playedSets.forEach(s => { headRow.innerHTML += `<th>Сет ${s.set}</th>`; });
-                        
-                        let body = document.getElementById('mfb-body'); body.innerHTML = '';
-                        let r1 = document.createElement('tr'), r2 = document.createElement('tr');
-                        r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
-                        
-                        let h1 = `<td class="mfb-team-name">${state.p1name||"Команда A"}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||"Команда B"}</td>`;
-                        playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
-                        r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
 
-                        // Показуємо табло і плануємо автозгасання через 15с (лише один раз на кожен показ)
-                        mfb.classList.remove('fading-out');
-                        mfb.classList.add('visible');
-                        if (!matchFinishedWasVisible) {
-                            matchFinishedWasVisible = true;
-                            if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
-                            matchFinishedFadeTimer = setTimeout(() => {
-                                mfb.classList.add('fading-out');
-                            }, 15000);
-                        }
-                    } else { mfb.classList.remove('visible'); mfb.classList.remove('fading-out'); matchFinishedWasVisible = false; if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; } }
+                    // mfb (табло переможця) завжди показується одразу при завершенні матчу
+                    // і автоматично гасне через 15с — більше НЕ залежить від showStatsOverlay
+                    document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
+                    let playedSets = [];
+                    for (let i = 1; i <= (state.currentSet||1); i++) {
+                        let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
+                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2});
+                    }
+                    let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                    document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||"Команда A") : (setsWon2 > setsWon1 ? (state.p2name||"Команда B") : "Нічия");
+
+                    let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = '<th>Команда</th>';
+                    playedSets.forEach(s => { headRow.innerHTML += `<th>Сет ${s.set}</th>`; });
+
+                    let body = document.getElementById('mfb-body'); body.innerHTML = '';
+                    let r1 = document.createElement('tr'), r2 = document.createElement('tr');
+                    r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
+
+                    let h1 = `<td class="mfb-team-name">${state.p1name||"Команда A"}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||"Команда B"}</td>`;
+                    playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
+                    r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
+
+                    // Показуємо табло і плануємо автозгасання через 15с (лише один раз на кожен показ)
+                    mfb.classList.remove('fading-out');
+                    mfb.classList.add('visible');
+                    if (!matchFinishedWasVisible) {
+                        matchFinishedWasVisible = true;
+                        if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
+                        matchFinishedFadeTimer = setTimeout(() => {
+                            mfb.classList.add('fading-out');
+                        }, 15000);
+                    }
                     if (statsAutoActive) { clearTimeout(statsAutoTimer); statsAutoActive = false; }
                 } else {
                     mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
@@ -811,36 +813,45 @@
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                     }
                     updateStatsPanelVisibility();
-
-                    if (state.showStatsOverlay) {
-                        document.getElementById('stm-name1').innerText = state.p1name || "Команда A"; document.getElementById('stm-name2').innerText = state.p2name || "Команда B";
-
-                        // Накопичувальна статистика на весь матч: в 1-му сеті показуємо все зігране,
-                        // а з 2-го сету значення продовжують додаватись (сервер вже не скидає їх по сетах)
-                        document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
-                        document.getElementById('stm-gp1').innerText = state.p1GoldenPoints || 0; document.getElementById('stm-gp2').innerText = state.p2GoldenPoints || 0;
-                        document.getElementById('stm-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('stm-df2').innerText = state.p2DoubleFaults || 0;
-
-                        // Гейми — сумарно за всі зіграні сети (накопичувально), а не лише поточний сет
-                        let totalGames1 = 0, totalGames2 = 0;
-                        for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
-                        document.getElementById('stm-g1').innerText = totalGames1; document.getElementById('stm-g2').innerText = totalGames2;
-
-                        let lg1 = 0, lg2 = 0; for(let i=1;i<=9;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
-                        document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
-
-                        document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
-                        document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
-                        document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
-                        document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
-                        document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
-                        document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
-
-                        document.getElementById('stm-game-history').innerText = (state.gamesTimeHistory || []).length > 0 ? state.gamesTimeHistory.join(' ') : "-";
-                    }
-                    updateManualStatsPanelVisibility();
                 }
+
+                // Детальна ручна статистика (statistics-panel-manual) — працює однаково і під
+                // час матчу, і ПІСЛЯ його завершення (натискання "Показати статистику" показує
+                // повну статистику матчу разом з результатом усіх зіграних сетів)
+                if (state.showStatsOverlay) {
+                    document.getElementById('stm-name1').innerText = state.p1name || "Команда A"; document.getElementById('stm-name2').innerText = state.p2name || "Команда B";
+
+                    document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
+                    document.getElementById('stm-gp1').innerText = state.p1GoldenPoints || 0; document.getElementById('stm-gp2').innerText = state.p2GoldenPoints || 0;
+                    document.getElementById('stm-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('stm-df2').innerText = state.p2DoubleFaults || 0;
+
+                    let totalGames1 = 0, totalGames2 = 0;
+                    for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
+                    document.getElementById('stm-g1').innerText = totalGames1; document.getElementById('stm-g2').innerText = totalGames2;
+
+                    let lg1 = 0, lg2 = 0; for(let i=1;i<=9;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
+                    document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
+
+                    document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                    document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
+                    document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
+                    document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
+                    document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
+                    document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
+                    document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
+
+                    document.getElementById('stm-game-history').innerText = (state.gamesTimeHistory || []).length > 0 ? state.gamesTimeHistory.join(' ') : "-";
+
+                    // Результат усіх зіграних сетів, напр. "6:4   3:6   10:8"
+                    let setsResultParts = [];
+                    for (let i = 1; i <= (state.currentSet||1); i++) {
+                        let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
+                        if (sg1 > 0 || sg2 > 0) setsResultParts.push(`${sg1}:${sg2}`);
+                    }
+                    document.getElementById('stm-sets-result').innerText = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
+                    document.getElementById('stm-lbl-sets-result').innerText = getStatsLabel('setsResult', state);
+                }
+                updateManualStatsPanelVisibility();
 
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts; const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
