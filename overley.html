@@ -220,6 +220,7 @@
         /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ, АНІМОВАНА) ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
+        .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
         .sm-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
         .sm-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
         .sm-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
@@ -566,6 +567,7 @@
         let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
         let statsRevealTimer = null, statsRevealAllowed = false;
+        let statsAfterFinishDismissTimer = null, statsAfterFinishLocallyDismissed = false;
         function updateStatsPanelVisibility() {
             const sp = document.getElementById('statistics-panel');
             if (!sp || !lastKnownState) return;
@@ -576,15 +578,17 @@
             const spm = document.getElementById('statistics-panel-manual');
             if (!spm || !lastKnownState) return;
             // Якщо матч щойно завершено — статистика матчу чекає, поки повністю
-            // закриється табло "МАТЧ ЗАВЕРШЕНО" (15с показу + плавне згасання)
-            const show = !!lastKnownState.showStatsOverlay && (!lastKnownState.isMatchFinished || statsRevealAllowed);
+            // закриється табло "МАТЧ ЗАВЕРШЕНО" (15с показу + плавне згасання), а потім
+            // сама теж ховається через 15с (statsAfterFinishLocallyDismissed)
+            const show = !!lastKnownState.showStatsOverlay && (!lastKnownState.isMatchFinished || statsRevealAllowed) && !statsAfterFinishLocallyDismissed;
             spm.classList.toggle('visible', show);
         }
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
         function refreshBoardVisibility() {
             const bw = document.getElementById('main-scoreboard');
             if (!bw || !lastKnownState) return;
-            if (lastKnownState.showMainBoard === false || lastKnownState.showStatsOverlay === true || setOverlayLocalActive || isBreakActive) {
+            const statsHidingBoard = lastKnownState.showStatsOverlay === true && !statsAfterFinishLocallyDismissed;
+            if (lastKnownState.showMainBoard === false || statsHidingBoard || setOverlayLocalActive || isBreakActive) {
                 bw.classList.add('hidden');
             } else { bw.classList.remove('hidden'); }
         }
@@ -853,10 +857,24 @@
                         }, 15000);
                         // Статистика всього матчу з'являється лише ПІСЛЯ того, як табло
                         // "МАТЧ ЗАВЕРШЕНО" повністю закриється (15с показу + 1.2с згасання)
+                        statsAfterFinishLocallyDismissed = false;
                         if (statsRevealTimer) clearTimeout(statsRevealTimer);
                         statsRevealTimer = setTimeout(() => {
                             statsRevealAllowed = true;
                             updateManualStatsPanelVisibility();
+
+                            // Показуємо статистику матчу 15с, потім плавно ховаємо —
+                            // на екрані залишається лише основне табло рахунку
+                            const spm = document.getElementById('statistics-panel-manual');
+                            if (statsAfterFinishDismissTimer) clearTimeout(statsAfterFinishDismissTimer);
+                            statsAfterFinishDismissTimer = setTimeout(() => {
+                                if (spm) spm.classList.add('fading-out');
+                                setTimeout(() => {
+                                    statsAfterFinishLocallyDismissed = true;
+                                    if (spm) spm.classList.remove('visible', 'fading-out');
+                                    refreshBoardVisibility();
+                                }, 1200);
+                            }, 15000);
                         }, 16300);
                     }
                     if (statsAutoActive) { clearTimeout(statsAutoTimer); statsAutoActive = false; }
@@ -864,8 +882,11 @@
                     mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
                     matchFinishedWasVisible = false;
                     statsRevealAllowed = false;
+                    statsAfterFinishLocallyDismissed = false;
                     if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
                     if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
+                    if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
+                    document.getElementById('statistics-panel-manual').classList.remove('fading-out');
 
                     if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
