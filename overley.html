@@ -188,8 +188,8 @@
             width: 230px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            background: rgba(8, 8, 8, 0.85);
+            gap: 8px;
+            background: rgba(8, 8, 8, 0.5);
             border: 1px solid rgba(198, 159, 102, 0.4);
             border-right: none;
             border-radius: 0 0 0 6px;
@@ -203,16 +203,16 @@
             transform: translateX(100%);
             padding: 10px 14px;
             box-sizing: border-box;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(6px);
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translateX(0); pointer-events: auto; }
         .stats-header { font-size: 9px; font-weight: 800; color: #c69f66; letter-spacing: 1.2px; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-teams { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 2px; }
-        .stats-mini-team { font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 44%; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; margin-top: 2px; }
+        .stats-mini-team { font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); text-align: center; }
         .stats-mini-vs { font-size: 9px; color: #888; font-weight: 700; flex-shrink: 0; }
-        .stats-mini-row { display: grid; grid-template-columns: 1fr auto; align-items: center; font-size: 11px; color: #ccc; }
-        .stats-mini-row .stats-mini-vals { font-size: 13px; font-weight: 800; color: #ffffff; text-align: right; }
-        .stats-mini-vals .stats-mini-sep { color: #666; margin: 0 2px; }
+        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; }
+        .stats-mini-row .stats-mini-val { font-size: 15px; font-weight: 800; color: #ffffff; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .stats-mini-row .stats-mini-lbl { font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
         .stats-mini-times { display: flex; justify-content: space-between; margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); }
         .stats-mini-times span { font-size: 10px; color: #999; }
         .stats-mini-times span b { color: #c69f66; font-weight: 700; }
@@ -409,16 +409,19 @@
             <span class="stats-mini-team" id="st-name2">Команда B</span>
         </div>
         <div class="stats-mini-row">
-            <span id="lbl-sets-mini">Сети</span>
-            <span class="stats-mini-vals"><span id="st-sets1">0</span><span class="stats-mini-sep">:</span><span id="st-sets2">0</span></span>
+            <span class="stats-mini-val" id="st-sets1">0</span>
+            <span class="stats-mini-lbl" id="lbl-sets-mini">Сет</span>
+            <span class="stats-mini-val" id="st-sets2">0</span>
         </div>
         <div class="stats-mini-row">
-            <span id="lbl-games-mini">Гейми</span>
-            <span class="stats-mini-vals"><span id="st-g1">0</span><span class="stats-mini-sep">:</span><span id="st-g2">0</span></span>
+            <span class="stats-mini-val" id="st-g1">0</span>
+            <span class="stats-mini-lbl" id="lbl-games-mini">Гейми</span>
+            <span class="stats-mini-val" id="st-g2">0</span>
         </div>
         <div class="stats-mini-row">
-            <span id="lbl-df-mini">Дабл фоли</span>
-            <span class="stats-mini-vals"><span id="st-df1">0</span><span class="stats-mini-sep">:</span><span id="st-df2">0</span></span>
+            <span class="stats-mini-val" id="st-df1">0</span>
+            <span class="stats-mini-lbl" id="lbl-df-mini">Дабл фол</span>
+            <span class="stats-mini-val" id="st-df2">0</span>
         </div>
         <div class="stats-mini-times">
             <span id="lbl-set-time-footer">Сет: <b><span id="st-time-set">00:00</span></b></span>
@@ -560,7 +563,9 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "";
         let statsAutoTimer = null, statsAutoActive = false, lastStatsAutoTrigger = 0;
+        let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
+        let statsRevealTimer = null, statsRevealAllowed = false;
         function updateStatsPanelVisibility() {
             const sp = document.getElementById('statistics-panel');
             if (!sp || !lastKnownState) return;
@@ -570,7 +575,9 @@
         function updateManualStatsPanelVisibility() {
             const spm = document.getElementById('statistics-panel-manual');
             if (!spm || !lastKnownState) return;
-            const show = !!lastKnownState.showStatsOverlay;
+            // Якщо матч щойно завершено — статистика матчу чекає, поки повністю
+            // закриється табло "МАТЧ ЗАВЕРШЕНО" (15с показу + плавне згасання)
+            const show = !!lastKnownState.showStatsOverlay && (!lastKnownState.isMatchFinished || statsRevealAllowed);
             spm.classList.toggle('visible', show);
         }
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
@@ -615,6 +622,16 @@
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
+
+                // Примусово ховаємо статистику між геймами, щойно хтось натиснув рахунок
+                // (зміна p1Index/p2Index), не чекаючи завершення 10-секундного показу
+                const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
+                if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
+                    clearTimeout(statsAutoTimer);
+                    statsAutoActive = false;
+                }
+                lastP1IndexTracked = curP1Idx; lastP2IndexTracked = curP2Idx; statsTrackerInitialized = true;
+
                 // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
@@ -827,22 +844,32 @@
                     mfb.classList.add('visible');
                     if (!matchFinishedWasVisible) {
                         matchFinishedWasVisible = true;
+                        statsRevealAllowed = false;
                         if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
                         matchFinishedFadeTimer = setTimeout(() => {
                             mfb.classList.add('fading-out');
                         }, 15000);
+                        // Статистика всього матчу з'являється лише ПІСЛЯ того, як табло
+                        // "МАТЧ ЗАВЕРШЕНО" повністю закриється (15с показу + 1.2с згасання)
+                        if (statsRevealTimer) clearTimeout(statsRevealTimer);
+                        statsRevealTimer = setTimeout(() => {
+                            statsRevealAllowed = true;
+                            updateManualStatsPanelVisibility();
+                        }, 16300);
                     }
                     if (statsAutoActive) { clearTimeout(statsAutoTimer); statsAutoActive = false; }
                 } else {
                     mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
                     matchFinishedWasVisible = false;
+                    statsRevealAllowed = false;
                     if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
+                    if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
 
                     if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
                         statsAutoActive = true;
                         clearTimeout(statsAutoTimer);
-                        statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); refreshBoardVisibility(); }, 5000);
+                        statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); refreshBoardVisibility(); }, 10000);
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
@@ -850,9 +877,9 @@
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                         if (document.getElementById('lbl-set-time-footer').firstChild) document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
                         if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
-                        document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сети' : 'Sets';
+                        document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сет' : 'Set';
                         document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
-                        document.getElementById('lbl-df-mini').innerText = getStatsLabel('doublefaults', state);
+                        document.getElementById('lbl-df-mini').innerText = state.cornerSlideLang === 'ua' ? 'Дабл фол' : 'Double fault';
 
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
                         document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
