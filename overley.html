@@ -811,7 +811,7 @@
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
                 else if (state.isProSet) { ribbonProset.innerText = `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
-                else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||16}`; ribbonProset.classList.add('visible'); }
+                else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
                 else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
                 else ribbonProset.classList.remove('visible');
 
