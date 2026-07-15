@@ -25,8 +25,8 @@
             --points-ad-top: #fff0c0;
             --points-ad-bottom: #e8c96a;
             --points-ad-text: #3a2a00;
-            --panel-bg: rgba(8, 8, 8, 0.55);
-            --panel-border: rgba(198, 159, 102, 0.4);
+            --panel-bg: rgba(8, 8, 8, 0.65);
+            --panel-border: rgba(198, 159, 102, 0.45);
             --panel-text: #ffffff;
             --slide-gamepoint: rgba(42, 42, 42, 0.55);
             --slide-breakpoint: rgba(198, 159, 102, 0.55);
@@ -56,8 +56,8 @@
             --points-ad-top: #d9ffe6;
             --points-ad-bottom: #7fe3a3;
             --points-ad-text: #06281a;
-            --panel-bg: rgba(4, 14, 9, 0.62);
-            --panel-border: rgba(74, 222, 128, 0.4);
+            --panel-bg: rgba(4, 14, 9, 0.72);
+            --panel-border: rgba(74, 222, 128, 0.5);
             --panel-text: #eafff1;
             --slide-gamepoint: rgba(15, 46, 30, 0.6);
             --slide-breakpoint: rgba(74, 222, 128, 0.55);
@@ -87,8 +87,8 @@
             --points-ad-top: #e5e7eb;
             --points-ad-bottom: #9ca3af;
             --points-ad-text: #111827;
-            --panel-bg: rgba(10, 12, 16, 0.62);
-            --panel-border: rgba(209, 213, 219, 0.35);
+            --panel-bg: rgba(10, 12, 16, 0.72);
+            --panel-border: rgba(209, 213, 219, 0.45);
             --panel-text: #f3f4f6;
             --slide-gamepoint: rgba(55, 65, 81, 0.6);
             --slide-breakpoint: rgba(156, 163, 175, 0.55);
@@ -180,65 +180,79 @@
         .mfb-table td.mfb-set-win { color: #c69f66; }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
-        /* ===== АНІМОВАНЕ АВТО ТАБЛО СТАТИСТИКИ ===== */
+        /* ===== ОНОВЛЕНЕ АВТО ТАБЛО СТАТИСТИКИ (РЯДКИ З ВЛАСНИМ ФОНОМ) ===== */
         .statistics-overlay {
             position: fixed;
-            top: 15px;
-            right: 15px;
-            width: 230px;
+            top: 20px;
+            right: 20px;
+            width: 280px; /* Трохи розширено під великий текст */
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            background: rgba(8, 8, 8, 0.6);
-            border: 1px solid rgba(198, 159, 102, 0.45);
-            border-radius: 8px;
+            gap: 6px;
+            background: transparent; /* Контейнер прозорий, фон у рядків */
+            border: none;
+            box-shadow: none;
             font-family: 'Montserrat', sans-serif;
             color: white;
             z-index: 9999;
-            opacity: 0;
+            opacity: 1;
             visibility: hidden;
             pointer-events: none;
+        }
+        .statistics-overlay.visible { visibility: visible; pointer-events: auto; }
+        
+        /* Кожен анімований рядок — це окрема суцільна плашка */
+        .stats-row-animate {
+            background: var(--panel-bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
             padding: 10px 14px;
             box-sizing: border-box;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            /* Прибираємо глобальну трансформацію переміщення, її контролюватимуть рядки */
-            transform: none;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .statistics-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
-        
-        /* Стилі для каскадної появи рядків справа наліво */
-        .stats-row-animate {
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             opacity: 0;
-            transform: translateX(120px);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+            transform: translateX(150px);
+            transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s ease;
         }
+        /* Стан появи */
         .stats-row-animate.reveal {
             opacity: 1;
             transform: translateX(0);
         }
         
-        /* Клас для одночасного повного затухання табло */
-        .statistics-overlay.fade-out-all {
+        /* Ефект одночасного повного затухання табло */
+        .statistics-overlay.fade-out-all .stats-row-animate {
             opacity: 0 !important;
-            visibility: hidden !important;
-            transform: scale(0.95) !important;
-            transition: opacity 0.8s ease, transform 0.8s ease, visibility 0.8s !important;
+            transform: translateY(-10px) scale(0.95) !important;
+            transition: opacity 0.7s ease, transform 0.7s ease !important;
         }
 
-        .stats-header { font-size: 10px; font-weight: 900; color: #e0b878; letter-spacing: 1.3px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; margin-top: 2px; }
-        .stats-mini-team { font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-vs { font-size: 9px; color: #aaa; font-weight: 800; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; }
-        .stats-mini-row .stats-mini-val { font-size: 17px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); }
-        .stats-mini-row .stats-mini-lbl { font-size: 9px; font-weight: 700; color: #d8d8d8; text-transform: uppercase; letter-spacing: 0.6px; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-times { display: flex; justify-content: space-between; margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15); }
-        .stats-mini-times span { font-size: 10px; font-weight: 600; color: #cccccc; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-times span b { color: #e0b878; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+        /* Стилістика великого спортивного тексту всередині рядків */
+        .stats-header { 
+            font-size: 11px; 
+            font-weight: 900; 
+            color: #e0b878; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase; 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+            text-align: center; 
+            border-left: none !important; /* Для шапки прибираємо кант */
+            background: rgba(15, 15, 15, 0.85);
+        }
+        .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; }
+        .stats-mini-team { font-size: 15px; font-weight: 900; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,0.8); text-align: center; color: #fff; }
+        .stats-mini-vs { font-size: 10px; color: var(--accent); font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        
+        /* Збільшені текстові мітки на рівні з цифрами */
+        .stats-mini-row { display: grid; grid-template-columns: 50px 1fr 50px; align-items: center; text-align: center; }
+        .stats-mini-row .stats-mini-val { font-size: 20px; font-weight: 900; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .stats-mini-row .stats-mini-lbl { font-size: 15px; font-weight: 800; color: #e0e0e0; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        
+        .stats-mini-times { display: flex; justify-content: space-between; align-items: center; border-top: none; }
+        .stats-mini-times span { font-size: 13px; font-weight: 800; color: #dddddd; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .stats-mini-times span b { color: var(--accent); font-size: 15px; font-weight: 900; }
 
-        /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ) ===== */
+        /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -297,9 +311,9 @@
         html.theme-courtgreen .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-courtgreen .match-finished-board, html.theme-courtgreen .stats-row-animate, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
         html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-mini-times span b, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-mini-row .stats-mini-vals, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
+        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .sm-val, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
         html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(74, 222, 128, 0.25); }
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
 
@@ -311,16 +325,16 @@
         html.theme-graydark .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-graydark .match-finished-board, html.theme-graydark .stats-row-animate, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
         html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-mini-times span b, html.theme-graydark .sm-val.gold { color: var(--accent); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-mini-row .stats-mini-vals, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
+        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .sm-val, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
         html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td { border-bottom-color: rgba(209, 213, 219, 0.25); }
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
+    <!-- ПОВНОЕКРАННА ЗАСТАВКА -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
@@ -380,7 +394,7 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
-    <!-- АВТО СТАТИСТИКА З КАСКАДНОЮ АНІМАЦІЄЮ РЯДКІВ -->
+    <!-- АВТО СТАТИСТИКА З ПОДІЛЕНИМ ФОНОМ ТА ЗБІЛЬШЕНИМ ТЕКСТОМ -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-header stats-row-animate" id="stats-main-header">Статистика гейму</div>
         <div class="stats-mini-teams stats-row-animate">
@@ -604,7 +618,6 @@
             if (state) {
                 lastKnownState = state;
 
-                // Скидаємо прапорець активності автостатистики при зміні рахунку
                 const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
                 if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
                     clearTimeout(statsAutoTimer);
@@ -856,7 +869,7 @@
                     if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
                     document.getElementById('statistics-panel-manual').classList.remove('fading-out');
 
-                    // ===== ЛОГІКА АНІМОВАНОЇ АВТО СТАТИСТИКИ МІЖ ГЕЙМАМИ =====
+                    // ===== МОДЕРНІЗОВАНА ЛОГІКА АНІМАЦІЇ АВТО СТАТИСТИКИ =====
                     if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
                         statsAutoActive = true;
@@ -870,19 +883,19 @@
                         
                         updateStatsPanelVisibility();
                         
-                        // Послідовний вивід рядків зверху донизу через 1.5 секунди справа наліво
+                        // Послідовна каскадна поява кожного окремого блоку кожні 1.5 сек
                         animRows.forEach((row, idx) => {
                             setTimeout(() => {
                                 if (statsAutoActive) row.classList.add('reveal');
                             }, idx * 1500);
                         });
                         
-                        // Загальний час розраховується: (6 рядків * 1.5с) + 2с затримки = 11000 мс
+                        // Загальний час утримання: (6 рядків * 1.5с) + 2с затримки = 11000 мс
                         const totalTimeToShow = (animRows.length * 1500) + 2000;
                         
                         statsAutoTimer = setTimeout(() => {
                             if (spNode && statsAutoActive) {
-                                spNode.classList.add('fade-out-all'); // затухання всього табло одночасно
+                                spNode.classList.add('fade-out-all'); // Одночасне затухання всього табло
                                 setTimeout(() => {
                                     statsAutoActive = false;
                                     updateStatsPanelVisibility();
@@ -911,7 +924,6 @@
                         }
                         document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
                     }
-                    // Якщо працює автоматичний тригер, функцію updateStatsPanelVisibility викликано вище
                     if (!state.statsAutoTrigger) updateStatsPanelVisibility();
                 }
 
