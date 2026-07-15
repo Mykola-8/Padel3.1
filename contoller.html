@@ -274,8 +274,8 @@
 
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(v)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(v)">
+                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
+                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
             </div>
@@ -626,7 +626,6 @@
             if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
             state.completedGamesCount = (state.completedGamesCount || 0) + 1;
             
-            // Записуємо позначку часу для тригера автоматичної міжгеймової статистики
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
             }
