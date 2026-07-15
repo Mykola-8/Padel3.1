@@ -208,7 +208,7 @@
                     </div>
                     
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл безпосередньо з пристрою (стискати):</span>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл:</span>
                         <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
                             📁 Вибрати Фото чи короткий Відеоролик
                             <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
@@ -222,8 +222,8 @@
                     </div>
 
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
-                        <textarea id="promo-text-input" placeholder="Введіть текст, який зʼявиться на весь екран..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані:</span>
+                        <textarea id="promo-text-input" placeholder="Введіть текст..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
                         <div class="row" style="margin-top:8px;">
                             <span style="font-size:11px; color:#ccc;">Колір тексту:</span>
                             <input type="color" id="promo-text-color-input" value="#ffffff" style="flex:0 0 60px; height:34px; padding:2px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updatePromoTextColor(this.value)">
@@ -274,8 +274,8 @@
 
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(v)">
+                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(v)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
             </div>
@@ -311,8 +311,6 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
-        // Адмін (?admin=1 в адресі) завжди має повний доступ і може розблокувати корт.
         let mySessionId = localStorage.getItem('padel_session_id');
         if (!mySessionId) {
             mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
@@ -407,17 +405,14 @@
             }
         }
 
-        // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
         window.uploadAndCompressPromoFile = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const statusEl = document.getElementById('promo-file-status');
             const isVideo = file.type.startsWith('video/');
             
             if (isVideo) {
-                // Стискати відео прямо в браузері без сторонніх важких бібліотек неможливо, 
-                // тому ставимо ліміт на розмір файлу, щоб не перевантажувати пам'ять GitHub/Firebase.
                 if (file.size > 2.5 * 1024 * 1024) {
-                    alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
+                    alert("⚠️ Відео занадто важке! Завантажуйте ролики розміром до 2.5 MB.");
                     statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
                     return;
                 }
@@ -431,7 +426,6 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Стиснення фотографій через HTML5 Canvas (зменшення роздільної здатності до 1280px та оптимізація якості)
                 statusEl.innerText = "⏳ Стиснення фото...";
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -439,7 +433,7 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width; let height = img.height;
-                        const max_size = 1280; // Оптимальний розмір для трансляцій
+                        const max_size = 1280;
                         
                         if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
                         else { if (height > max_size) { width *= max_size / height; height = max_size; } }
@@ -448,12 +442,11 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Стискаємо в якість 0.7 (JPEG), зменшуючи вагу файлу на 80-90%
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         state.promoSrc = compressedBase64; state.promoUrl = ""; 
                         state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
                         document.getElementById('promo-url-input').value = "";
-                        statusEl.innerText = "✅ Фото стиснуто та збережено"; set(matchRef, state);
+                        statusEl.innerText = "✅ Фото стиснуто"; set(matchRef, state);
                     };
                     img.src = evt.target.result;
                 };
@@ -566,7 +559,6 @@
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
 
-            // ── Блокування корту ──
             const lockedOut = isControllerLocked();
             document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
             document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
@@ -576,8 +568,7 @@
         function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
         window.scorePoint = function(team) {
             if (state.isMatchFinished) return;
-            if (isControllerLocked()) return; // заблоковано іншим оператором — ігноруємо натискання
-            // Перший, хто натискає рахунок — автоматично "займає" цей корт за собою
+            if (isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
                 state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
             }
@@ -596,8 +587,6 @@
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isMexicano) {
-                // Мексикано: кожен гравець подає по 4 очка поспіль (на відміну від Американо,
-                // де перша подача — 1 очко, далі по 2). Рахунок ведеться простими числами 1,2,3...
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
@@ -636,6 +625,8 @@
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
             if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
             state.completedGamesCount = (state.completedGamesCount || 0) + 1;
+            
+            // Записуємо позначку часу для тригера автоматичної міжгеймової статистики
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
             }
