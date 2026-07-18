@@ -188,35 +188,36 @@
             width: 230px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            background: rgba(8, 8, 8, 0.6);
-            border: 1px solid rgba(198, 159, 102, 0.45);
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            color: white;
+            gap: 6px;
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            overflow: hidden;
             transition: opacity 0.5s ease, visibility 0.5s;
-            padding: 9px 12px;
-            box-sizing: border-box;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
         .statistics-overlay.fading-out { opacity: 0; visibility: visible; pointer-events: none; transition: opacity 0.8s ease, visibility 0.8s; }
-        .stats-anim-row { opacity: 0; transform: translateX(90px); transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .stats-anim-row {
+            opacity: 0;
+            transform: translateX(90px);
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(8, 8, 8, 0.65);
+            border: 1px solid rgba(198, 159, 102, 0.4);
+            border-radius: 6px;
+            padding: 6px 10px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            box-sizing: border-box;
+        }
         .stats-anim-row.row-in { opacity: 1; transform: translateX(0); }
         .stats-header { font-size: 10px; font-weight: 900; color: #e0b878; letter-spacing: 1.3px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
         .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; margin-top: 2px; }
         .stats-mini-team { font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
         .stats-mini-vs { font-size: 9px; color: #aaa; font-weight: 800; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; background: rgba(255,255,255,0.06); border-radius: 5px; padding: 3px 6px; }
+        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; }
         .stats-mini-row .stats-mini-val { font-size: 16px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); }
         .stats-mini-row .stats-mini-lbl { font-size: 12px; font-weight: 800; color: #eaeaea; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.9); }
-        .stats-mini-times { display: flex; justify-content: space-between; margin-top: 2px; padding: 5px 6px; border-top: none; background: rgba(255,255,255,0.06); border-radius: 5px; }
+        .stats-mini-times { display: flex; justify-content: space-between; }
         .stats-mini-times span { font-size: 10px; font-weight: 600; color: #cccccc; text-shadow: 0 1px 3px rgba(0,0,0,1); }
         .stats-mini-times span b { color: #e0b878; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,1); }
 
@@ -571,7 +572,7 @@
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
-        const STATS_HOLD_AFTER_LAST_MS = 2000; // тримаємо все табло після останнього рядка
+        const STATS_HOLD_AFTER_LAST_MS = 3000; // тримаємо все табло після останнього рядка
         const STATS_FADE_MS = 800;             // тривалість одночасного затухання
         let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
