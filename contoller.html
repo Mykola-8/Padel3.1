@@ -61,25 +61,10 @@
         .player-info { display: flex; flex-direction: column; gap: 2px; }
         .player-name { font-weight: 700; font-size: 14px; }
         .player-stats-mini { font-size: 11px; color: #aaa; }
-        .controls-locked { filter: grayscale(0.8) brightness(0.55); transition: filter 0.3s ease; }
-        .controls-locked button, .controls-locked input, .controls-locked select, .controls-locked textarea, .controls-locked label {
-            pointer-events: none !important;
-            opacity: 0.55;
-        }
-        .controls-locked #court-selector, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
-            pointer-events: auto !important;
-            opacity: 1 !important;
-            filter: none !important;
-        }
-        .lock-status-badge { background: #7c2d12; color: #ffddc2; padding: 8px; font-size: 11px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: none; }
-        .lock-status-badge.visible { display: block; }
-        .admin-badge { position: fixed; top: 12px; left: 15px; background: #7c3aed; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; z-index: 101; display: none; }
-        .admin-badge.visible { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="admin-badge" id="admin-badge">👑 ADMIN</div>
 
     <nav class="nav-tabs">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
@@ -98,8 +83,6 @@
         </div>
 
         <h2>Пульт Padel Pro (Master)</h2>
-
-        <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
 
         <div class="preview-scoreboard">
             <div class="preview-row">
@@ -195,81 +178,6 @@
         </div>
         <div style="display:flex; flex-direction:column; gap:14px;">
             
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
-                <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Зелена)</option><option value="graydark">Сіро-темна</option>
-                </select>
-            </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
-                <div class="row"><input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)"></div>
-            </div>
-
-            <div class="card">
-                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
-                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
-                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
-                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
-                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
-                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
-                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
-                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
-            </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
-                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
-                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
-                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
-                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-            </div>
-
-            <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
-                <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#e0b878;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="logo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleLogoVisibility(this.checked)">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання на зображення (URL):</span>
-                        <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл (автоматично стискається і підганяється точно під розмір панелі лого 120×96):</span>
-                        <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
-                            📁 Вибрати зображення лого
-                            <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
-                        </label>
-                        <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого (якщо зображення не задано):</span>
-                        <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
-                    </div>
-                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
-                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
-                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
-                <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
-                <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
-            </div>
-
-            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-
             <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
                 <div class="switch-row" style="background: rgba(124, 58, 237, 0.2); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
@@ -316,6 +224,53 @@
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
                 </div>
             </div>
+
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
+                <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
+                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
+                <div class="row"><input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)"></div>
+            </div>
+
+            <div class="card">
+                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
+                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
+                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
+                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
+                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
+                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
+                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
+                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
+            </div>
+
+            <div class="card">
+                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
+                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
+                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
+                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
+                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
+                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
+            </div>
+
+            <div class="card">
+                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
+                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
+                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
+                <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
+                <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
+            </div>
+
+            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
         </div>
     </div>
 
@@ -337,25 +292,6 @@
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
-
-        // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
-        // Адмін (?admin=1 в адресі) завжди має повний доступ і може розблокувати корт.
-        let mySessionId = localStorage.getItem('padel_session_id');
-        if (!mySessionId) {
-            mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-            localStorage.setItem('padel_session_id', mySessionId);
-        }
-        const isAdmin = new URLSearchParams(window.location.search).get('admin') === '1';
-
-        function isControllerLocked() {
-            if (isAdmin) return false;
-            return !!(state.controllerLock && state.controllerLock.sessionId && state.controllerLock.sessionId !== mySessionId);
-        }
-
-        window.adminUnlockCourt = function() {
-            state.controllerLock = null;
-            set(matchRef, state);
-        };
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -520,56 +456,6 @@
             set(matchRef, state);
         };
 
-        // ── Лого спонсора (панель зліва від табло, розмір 120×96) ──
-        window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
-        window.updateLogoUrl = function(url) {
-            state.logoUrl = url; state.logoSrc = "";
-            document.getElementById('logo-file-status').innerText = url ? "Використовується URL" : "Файл не вибрано";
-            set(matchRef, state);
-        };
-        window.updateLogoText = function(v) { state.customLogoText = v; set(matchRef, state); };
-
-        window.uploadAndCompressLogoFile = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const statusEl = document.getElementById('logo-file-status');
-            statusEl.innerText = "⏳ Стиснення лого...";
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    // Панель лого на трансляції має розмір 120×96px — стискаємо точно під
-                    // цей розмір (x2 для чіткості на HiDPI), заповнюючи всю площу (як "cover")
-                    const targetW = 240, targetH = 192;
-                    const canvas = document.createElement('canvas');
-                    canvas.width = targetW; canvas.height = targetH;
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, targetW, targetH);
-                    const scale = Math.max(targetW / img.width, targetH / img.height);
-                    const drawW = img.width * scale, drawH = img.height * scale;
-                    const dx = (targetW - drawW) / 2, dy = (targetH - drawH) / 2;
-                    ctx.drawImage(img, dx, dy, drawW, drawH);
-
-                    const compressedBase64 = canvas.toDataURL('image/png');
-                    state.logoSrc = compressedBase64; state.logoUrl = "";
-                    document.getElementById('logo-url-input').value = "";
-                    statusEl.innerText = "✅ Лого стиснуто та збережено (120×96)";
-                    set(matchRef, state);
-                };
-                img.onerror = function() { statusEl.innerText = "❌ Не вдалось завантажити зображення"; };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.clearLogoData = function() {
-            state.logoUrl = ""; state.logoSrc = ""; state.showLogo = false; state.customLogoText = "";
-            document.getElementById('logo-url-input').value = ""; document.getElementById('logo-text-input').value = "";
-            document.getElementById('logo-visibility-checkbox').checked = false;
-            document.getElementById('logo-file-status').innerText = "Файл не вибрано";
-            set(matchRef, state);
-        };
-
         window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
 
         function resetMatchWithoutConfirm() {
@@ -583,8 +469,7 @@
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
-                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
-                logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, 
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
@@ -617,13 +502,6 @@
                 document.getElementById('promo-text-size-input').value = state.promoTextSize || 60;
             }
 
-            if(document.getElementById('logo-visibility-checkbox')) {
-                document.getElementById('logo-visibility-checkbox').checked = !!state.showLogo;
-                if (!state.logoSrc) document.getElementById('logo-url-input').value = state.logoUrl || "";
-                if (document.activeElement !== document.getElementById('logo-text-input')) document.getElementById('logo-text-input').value = state.customLogoText || "";
-                document.getElementById('logo-file-status').innerText = state.logoSrc ? "✅ Лого стиснуто та збережено (120×96)" : (state.logoUrl ? "Використовується URL" : "Файл не вибрано");
-            }
-
             const badge = document.getElementById('mode-status');
             let isGolden = !state.isAmericano && !state.isMexicano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3 && (state.deuceStyle === "one-golden" || (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2));
             if (state.isMatchFinished) badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
@@ -650,24 +528,10 @@
             document.getElementById('mexicano-limit-row').style.display = state.isMexicano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
-
-            // ── Блокування корту ──
-            const lockedOut = isControllerLocked();
-            document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
-            document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
-            document.getElementById('lock-status-badge').classList.toggle('visible', lockedOut);
         }
 
         function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
-        window.scorePoint = function(team) {
-            if (state.isMatchFinished) return;
-            if (isControllerLocked()) return; // заблоковано іншим оператором — ігноруємо натискання
-            // Перший, хто натискає рахунок — автоматично "займає" цей корт за собою
-            if (!state.controllerLock || !state.controllerLock.sessionId) {
-                state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
-            }
-            saveToHistory(state); if (state.showSetOverlayTrigger) state.showSetOverlayTrigger = false; window.scorePointWithoutHistorySave(team);
-        }
+        window.scorePoint = function(team) { if (state.isMatchFinished) return; saveToHistory(state); if (state.showSetOverlayTrigger) state.showSetOverlayTrigger = false; window.scorePointWithoutHistorySave(team); }
 
         window.scorePointWithoutHistorySave = function(tIndex) {
             if (state.isSuperTiebreak) {
@@ -779,10 +643,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
             if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
-            if (isAdmin) {
-                document.getElementById('admin-badge').classList.add('visible');
-                document.getElementById('admin-unlock-btn').style.display = 'block';
-            }
         });
         initCourtConnection();
     </script>
