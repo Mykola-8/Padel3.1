@@ -576,7 +576,7 @@
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, 
-                scale: state.scale || 1, posX: state.posX || 0, posY: state.posY || 0,
+                scale: state.scale || 1, posX: 30, posY: 30,
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
                 isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
@@ -599,6 +599,9 @@
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
             document.getElementById('mode-stats-between-games-checkbox').checked = !!state.showStatsBetweenGames;
+            if (document.activeElement !== document.getElementById('scale-slider')) document.getElementById('scale-slider').value = state.scale || 1;
+            if (document.activeElement !== document.getElementById('pos-x-slider')) document.getElementById('pos-x-slider').value = state.posX || 0;
+            if (document.activeElement !== document.getElementById('pos-y-slider')) document.getElementById('pos-y-slider').value = state.posY || 0;
             
             const btnStats = document.getElementById('btn-toggle-stats');
             if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
