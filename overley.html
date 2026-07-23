@@ -40,33 +40,33 @@
         }
 
         html.theme-courtgreen {
-            --accent: #4ade80;
-            --accent-soft: rgba(74, 222, 128, 0.45);
-            --team-bg-top: rgba(15, 46, 30, 0.82);
-            --team-bg-bottom: rgba(8, 26, 17, 0.82);
-            --team-text: #eafff1;
-            --score-set-past-bg: rgba(234, 255, 241, 0.92);
-            --score-set-past-text: #0b2e1c;
-            --score-set-current-bg: rgba(34, 102, 64, 0.85);
-            --score-set-current-text: #eafff1;
-            --points-team1-top: #22c55e;
-            --points-team1-bottom: #15803d;
-            --points-team2-top: #15803d;
-            --points-team2-bottom: #0c4a28;
+            --accent: #a3e635;
+            --accent-soft: rgba(163, 230, 53, 0.45);
+            --team-bg-top: rgba(35, 46, 15, 0.82);
+            --team-bg-bottom: rgba(20, 26, 8, 0.82);
+            --team-text: #f7ffe0;
+            --score-set-past-bg: rgba(247, 255, 224, 0.92);
+            --score-set-past-text: #1a2e0b;
+            --score-set-current-bg: rgba(101, 163, 13, 0.85);
+            --score-set-current-text: #f7ffe0;
+            --points-team1-top: #a3e635;
+            --points-team1-bottom: #65a30d;
+            --points-team2-top: #65a30d;
+            --points-team2-bottom: #3f6212;
             --points-text: #ffffff;
-            --points-ad-top: #d9ffe6;
-            --points-ad-bottom: #7fe3a3;
-            --points-ad-text: #06281a;
-            --panel-bg: rgba(4, 14, 9, 0.62);
-            --panel-border: rgba(74, 222, 128, 0.4);
-            --panel-text: #eafff1;
-            --slide-gamepoint: rgba(15, 46, 30, 0.6);
-            --slide-breakpoint: rgba(74, 222, 128, 0.55);
-            --slide-setpoint: rgba(13, 110, 90, 0.6);
+            --points-ad-top: #f7ffb0;
+            --points-ad-bottom: #bef264;
+            --points-ad-text: #1a2e0b;
+            --panel-bg: rgba(10, 14, 3, 0.62);
+            --panel-border: rgba(163, 230, 53, 0.4);
+            --panel-text: #f7ffe0;
+            --slide-gamepoint: rgba(35, 46, 15, 0.6);
+            --slide-breakpoint: rgba(163, 230, 53, 0.55);
+            --slide-setpoint: rgba(77, 124, 15, 0.6);
             --slide-matchpoint: rgba(185, 28, 28, 0.55);
             --slide-goldenpoint: rgba(217, 119, 6, 0.6);
-            --slide-tiebreak: rgba(20, 83, 60, 0.7);
-            --slide-deuce: rgba(8, 92, 74, 0.6);
+            --slide-tiebreak: rgba(54, 83, 20, 0.7);
+            --slide-deuce: rgba(63, 98, 18, 0.6);
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
@@ -98,6 +98,37 @@
             --slide-goldenpoint: rgba(202, 138, 4, 0.6);
             --slide-tiebreak: rgba(31, 41, 55, 0.75);
             --slide-deuce: rgba(88, 28, 135, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
+        html.theme-lightgray {
+            --accent: #4b5563;
+            --accent-soft: rgba(75, 85, 99, 0.35);
+            --team-bg-top: rgba(229, 231, 235, 0.92);
+            --team-bg-bottom: rgba(203, 209, 214, 0.92);
+            --team-text: #000000;
+            --score-set-past-bg: rgba(255, 255, 255, 0.95);
+            --score-set-past-text: #000000;
+            --score-set-current-bg: rgba(156, 163, 175, 0.9);
+            --score-set-current-text: #000000;
+            --points-team1-top: #e5e7eb;
+            --points-team1-bottom: #cbd1d6;
+            --points-team2-top: #d1d5db;
+            --points-team2-bottom: #9ca3af;
+            --points-text: #000000;
+            --points-ad-top: #f3f4f6;
+            --points-ad-bottom: #d1d5db;
+            --points-ad-text: #000000;
+            --panel-bg: rgba(229, 231, 235, 0.9);
+            --panel-border: rgba(107, 114, 128, 0.4);
+            --panel-text: #000000;
+            --slide-gamepoint: rgba(209, 213, 219, 0.75);
+            --slide-breakpoint: rgba(156, 163, 175, 0.75);
+            --slide-setpoint: rgba(107, 114, 128, 0.7);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(202, 138, 4, 0.5);
+            --slide-tiebreak: rgba(107, 114, 128, 0.65);
+            --slide-deuce: rgba(156, 163, 175, 0.6);
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
@@ -168,7 +199,6 @@
         /* ПАНЕЛЬ МАТЧ ЗАВЕРШЕНО */
         .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.85) translateY(-40px); width: 620px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 28px 32px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
         .match-finished-board.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1) translateY(0); pointer-events: auto; }
-        .match-finished-board.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.92) translateY(-10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
         .mfb-header { text-align: center; font-size: 13px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 18px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
         .mfb-winner { text-align: center; font-size: 26px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: #ffe9c2; text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 0 18px rgba(198,159,102,0.5); margin-bottom: 20px; }
         .mfb-winner .trophy { margin-right: 8px; }
@@ -181,50 +211,20 @@
         .mfb-table td.mfb-set-win { color: #c69f66; }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
-        .statistics-overlay {
-            position: fixed;
-            top: 15px;
-            right: 28px;
-            width: 230px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        .statistics-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
-        .statistics-overlay.fading-out { opacity: 0; visibility: visible; pointer-events: none; transition: opacity 0.8s ease, visibility 0.8s; }
-        .stats-anim-row {
-            opacity: 0;
-            transform: translateX(90px);
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(8, 8, 8, 0.65);
-            border: 1px solid rgba(198, 159, 102, 0.4);
-            border-radius: 6px;
-            padding: 6px 10px;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-            box-sizing: border-box;
-        }
-        .stats-anim-row.row-in { opacity: 1; transform: translateX(0); }
-        .stats-header { font-size: 10px; font-weight: 900; color: #e0b878; letter-spacing: 1.3px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; margin-top: 2px; }
-        .stats-mini-team { font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-vs { font-size: 9px; color: #aaa; font-weight: 800; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; }
-        .stats-mini-row .stats-mini-val { font-size: 16px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); }
-        .stats-mini-row .stats-mini-lbl { font-size: 12px; font-weight: 800; color: #eaeaea; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.9); }
-        .stats-mini-times { display: flex; justify-content: space-between; }
-        .stats-mini-times span { font-size: 10px; font-weight: 600; color: #cccccc; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-times span b { color: #e0b878; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+        .statistics-overlay { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: rgba(8, 8, 8, 0.85); border-top: 1px solid rgba(198, 159, 102, 0.4); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.4s; transform: translateY(100%); padding: 10px 30px; box-sizing: border-box; backdrop-filter: blur(10px); }
+        .statistics-overlay.visible { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+        .stats-header { font-size: 10px; font-weight: 800; color: #c69f66; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.9); flex-shrink: 0; }
+        .stats-ticker-side { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .stats-ticker-side.right { justify-content: flex-end; }
+        .stats-ticker-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .stats-ticker-center { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+        .stats-ticker-score { font-size: 16px; font-weight: 800; color: #ffffff; background: rgba(198, 159, 102, 0.25); border-radius: 4px; padding: 2px 12px; }
+        .stats-ticker-time { font-size: 11px; color: #999; letter-spacing: 0.3px; white-space: nowrap; }
+        .stats-ticker-time span { color: #c69f66; font-weight: 700; }
 
         /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ, АНІМОВАНА) ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
-        .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
         .sm-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
         .sm-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
         .sm-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
@@ -319,14 +319,14 @@
         html.theme-courtgreen .server-indicator { color: var(--accent); }
         html.theme-courtgreen .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-courtgreen .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-courtgreen .r-proset-style { color: var(--accent); border-color: rgba(74,222,128,0.35); }
+        html.theme-courtgreen .r-proset-style { color: var(--accent); border-color: rgba(163,230,53,0.35); }
         html.theme-courtgreen .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
         html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-mini-times span b, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-mini-row .stats-mini-vals, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(74, 222, 128, 0.25); }
+        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-ticker-time span, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
+        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-ticker-score, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
+        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(163, 230, 53, 0.25); }
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
 
         html.theme-graydark .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
@@ -338,10 +338,24 @@
         html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
         html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-mini-times span b, html.theme-graydark .sm-val.gold { color: var(--accent); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-mini-row .stats-mini-vals, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
+        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-ticker-time span, html.theme-graydark .sm-val.gold { color: var(--accent); }
+        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-ticker-score, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
         html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td { border-bottom-color: rgba(209, 213, 219, 0.25); }
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
+
+        html.theme-lightgray .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
+        html.theme-lightgray .server-indicator { color: var(--accent); }
+        html.theme-lightgray .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-lightgray .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-lightgray .r-proset-style { color: var(--accent); border-color: rgba(107,114,128,0.35); }
+        html.theme-lightgray .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-lightgray .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-lightgray .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-lightgray .match-finished-board, html.theme-lightgray .statistics-overlay, html.theme-lightgray .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-lightgray .mfb-header, html.theme-lightgray .mfb-winner, html.theme-lightgray .sr-set-label, html.theme-lightgray .stats-header, html.theme-lightgray .sm-header, html.theme-lightgray .h-set-time, html.theme-lightgray .mfb-table td.mfb-set-win, html.theme-lightgray .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-lightgray .stats-ticker-time span, html.theme-lightgray .sm-val.gold { color: var(--accent); }
+        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td, html.theme-lightgray .stats-ticker-score, html.theme-lightgray .sm-val, html.theme-lightgray .h-set-score, html.theme-lightgray .sr-score, html.theme-lightgray .sr-team { color: var(--panel-text); }
+        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td { border-bottom-color: rgba(107, 114, 128, 0.25); }
+        html.theme-lightgray .break-label, html.theme-lightgray .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -407,32 +421,17 @@
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
     <div class="statistics-overlay" id="statistics-panel">
-        <div class="stats-anim-row">
-            <div class="stats-header" id="stats-main-header">Статистика гейму</div>
-            <div class="stats-mini-teams">
-                <span class="stats-mini-team" id="st-name1">Команда A</span>
-                <span class="stats-mini-vs">VS</span>
-                <span class="stats-mini-team" id="st-name2">Команда B</span>
-            </div>
+        <div class="stats-ticker-side">
+            <span class="stats-ticker-name" id="st-name1">Команда A</span>
         </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-sets1">0</span>
-            <span class="stats-mini-lbl" id="lbl-sets-mini">Сет</span>
-            <span class="stats-mini-val" id="st-sets2">0</span>
+        <div class="stats-ticker-center">
+            <span class="stats-header" id="stats-main-header">Статистика гейму</span>
+            <span class="stats-ticker-score"><span id="st-g1">0</span> : <span id="st-g2">0</span></span>
+            <span class="stats-ticker-time" id="lbl-set-time-footer">Сет: <span id="st-time-set">00:00</span></span>
+            <span class="stats-ticker-time" id="lbl-match-time-footer">Матч: <span id="st-time-match">00:00</span></span>
         </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-g1">0</span>
-            <span class="stats-mini-lbl" id="lbl-games-mini">Гейми</span>
-            <span class="stats-mini-val" id="st-g2">0</span>
-        </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-df1">0</span>
-            <span class="stats-mini-lbl" id="lbl-df-mini">Дабл фол</span>
-            <span class="stats-mini-val" id="st-df2">0</span>
-        </div>
-        <div class="stats-mini-times stats-anim-row">
-            <span id="lbl-set-time-footer">Сет: <b><span id="st-time-set">00:00</span></b></span>
-            <span id="lbl-game-time-footer">Гейм: <b><span id="st-time-game">00:00</span></b></span>
+        <div class="stats-ticker-side right">
+            <span class="stats-ticker-name" id="st-name2">Команда B</span>
         </div>
     </div>
 
@@ -440,9 +439,8 @@
         <div class="sm-header" id="stm-header">Матч-Статистика</div>
         <div class="sm-table">
             <div class="sm-row"><div class="sm-team-left" id="stm-name1">Команда A</div><div class="sm-label" id="stm-lbl-teams">Команди</div><div class="sm-team-right" id="stm-name2">Команда B</div></div>
-            <div class="sm-row"><div class="sm-val" id="stm-g1">0</div><div class="sm-label" id="stm-lbl-games-set">Гейми (всього)</div><div class="sm-val" id="stm-g2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-g1">0</div><div class="sm-label" id="stm-lbl-games-set">Гейми (сет)</div><div class="sm-val" id="stm-g2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
-            <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Голден-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-df1">0</div><div class="sm-label" id="stm-lbl-doublefaults">Дабл фоли</div><div class="sm-val" id="stm-df2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
             <div class="sm-row">
@@ -451,7 +449,6 @@
                 <div style="text-align:center;"><div class="sm-val gold" id="stm-time-match">00:00</div><div class="sm-label" id="stm-lbl-match-time">Загальний час матчу</div></div>
             </div>
             <div class="sm-row"><div class="sm-val gold" id="stm-game-history" style="grid-column: 1 / span 3;">-</div><div class="sm-label" id="stm-lbl-history" style="grid-column: 1 / span 3;">Хронологія геймів</div></div>
-            <div class="sm-row"><div class="sm-val gold" id="stm-sets-result" style="grid-column: 1 / span 3; font-size: 20px;">-</div><div class="sm-label" id="stm-lbl-sets-result" style="grid-column: 1 / span 3;">Результат зіграних сетів</div></div>
         </div>
     </div>
 
@@ -533,15 +530,13 @@
         const STATS_LABELS = {
             header: { en: `GAME STATS • COURT`, ua: `Статистика гейму • Корт` },
             teams: { en: 'Teams', ua: 'Команди' },
-            gamesSet: { en: 'Games (total)', ua: 'Гейми (всього)' },
+            gamesSet: { en: 'Games (set)', ua: 'Гейми (сет)' },
             breakpoints: { en: 'Break Points', ua: 'Брейк-поінти' },
-            goldenpoints: { en: 'Golden Points', ua: 'Голден-поінти' },
             doublefaults: { en: 'Double Faults', ua: 'Дабл фоли' },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
             history: { en: 'Game history (total)', ua: 'Хронологія геймів (в сумі)' },
-            setsResult: { en: 'Sets result', ua: 'Результат зіграних сетів' },
             setsSummary: { en: 'Sets & time results:', ua: 'Результати по сетам та час:' },
             setFinished: { en: 'SET FINISHED', ua: 'ЗАВЕРШЕНО СЕТ' },
             court: { en: 'COURT', ua: 'КОРТ' },
@@ -569,78 +564,28 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "";
-        let statsAutoActive = false, lastStatsAutoTrigger = 0;
-        let statsRowTimers = [], statsFadeTimer = null;
-        const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
-        const STATS_HOLD_AFTER_LAST_MS = 3000; // тримаємо все табло після останнього рядка
-        const STATS_FADE_MS = 800;             // тривалість одночасного затухання
-        let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
-        let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
-        let statsRevealTimer = null, statsRevealAllowed = false;
-        let statsAfterFinishDismissTimer = null, statsAfterFinishLocallyDismissed = false;
-
-        function resetStatsRows() {
-            document.querySelectorAll('#statistics-panel .stats-anim-row').forEach(el => el.classList.remove('row-in'));
-        }
-        function clearStatsTimers() {
-            statsRowTimers.forEach(t => clearTimeout(t));
-            statsRowTimers = [];
-            if (statsFadeTimer) { clearTimeout(statsFadeTimer); statsFadeTimer = null; }
-        }
-        // Показує табло статистики між геймами: рядки виїжджають справа наліво по черзі
-        // (зверху донизу) з затримкою 1.5с, тримаються 2с після останнього, потім усі
-        // рядки одночасно затухають разом з усім табло.
-        function runStatsRevealSequence() {
-            clearStatsTimers();
-            resetStatsRows();
-            const panel = document.getElementById('statistics-panel');
-            if (!panel) return;
-            panel.classList.remove('fading-out');
-            panel.classList.add('visible');
-            const rows = document.querySelectorAll('#statistics-panel .stats-anim-row');
-            rows.forEach((row, idx) => {
-                const t = setTimeout(() => { row.classList.add('row-in'); }, idx * STATS_ROW_DELAY_MS);
-                statsRowTimers.push(t);
-            });
-            const lastRowRevealTime = (rows.length - 1) * STATS_ROW_DELAY_MS + 500;
-            const fadeStartTimer = setTimeout(() => {
-                panel.classList.add('fading-out');
-                statsFadeTimer = setTimeout(() => {
-                    panel.classList.remove('visible', 'fading-out');
-                    resetStatsRows();
-                    statsAutoActive = false;
-                    refreshBoardVisibility();
-                }, STATS_FADE_MS);
-            }, lastRowRevealTime + STATS_HOLD_AFTER_LAST_MS);
-            statsRowTimers.push(fadeStartTimer);
-        }
-        // Примусово ховає табло статистики між геймами негайно (напр. при натисканні рахунку)
-        function forceCloseStatsPanel() {
-            clearStatsTimers();
-            const panel = document.getElementById('statistics-panel');
-            if (panel) { panel.classList.remove('visible', 'fading-out'); }
-            resetStatsRows();
-            statsAutoActive = false;
+        let statsAutoTimer = null, statsAutoActive = false, lastStatsAutoTrigger = 0;
+        function updateStatsPanelVisibility() {
+            const sp = document.getElementById('statistics-panel');
+            if (!sp || !lastKnownState) return;
+            const show = statsAutoActive && !lastKnownState.isMatchFinished;
+            sp.classList.toggle('visible', show);
         }
         function updateManualStatsPanelVisibility() {
             const spm = document.getElementById('statistics-panel-manual');
             if (!spm || !lastKnownState) return;
-            // Якщо матч щойно завершено — статистика матчу чекає, поки повністю
-            // закриється табло "МАТЧ ЗАВЕРШЕНО" (15с показу + плавне згасання), а потім
-            // сама теж ховається через 15с (statsAfterFinishLocallyDismissed)
-            const show = !!lastKnownState.showStatsOverlay && (!lastKnownState.isMatchFinished || statsRevealAllowed) && !statsAfterFinishLocallyDismissed;
+            const show = !!lastKnownState.showStatsOverlay && !lastKnownState.isMatchFinished;
             spm.classList.toggle('visible', show);
         }
         let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
         function refreshBoardVisibility() {
             const bw = document.getElementById('main-scoreboard');
             if (!bw || !lastKnownState) return;
-            const statsHidingBoard = lastKnownState.showStatsOverlay === true && !statsAfterFinishLocallyDismissed;
-            if (lastKnownState.showMainBoard === false || statsHidingBoard || setOverlayLocalActive || isBreakActive) {
+            if (lastKnownState.showMainBoard === false || lastKnownState.showStatsOverlay === true || setOverlayLocalActive || isBreakActive) {
                 bw.classList.add('hidden');
             } else { bw.classList.remove('hidden'); }
         }
-        let totalSeconds = 0, setSeconds = 0, gameSeconds = 0, lastGamesCountTracked = 0, lastSetTracked = 1, isMatchFinishedCurrently = false, isBreakActive = false;
+        let totalSeconds = 0, setSeconds = 0, lastSetTracked = 1, isMatchFinishedCurrently = false, isBreakActive = false;
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -662,9 +607,8 @@
 
         setInterval(() => {
             if (isMatchFinishedCurrently || !matchTimerStarted || isBreakActive) return;
-            totalSeconds++; setSeconds++; gameSeconds++; setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
+            totalSeconds++; setSeconds++; setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
             if(document.getElementById('st-time-set')) document.getElementById('st-time-set').innerText = formatTime(setSeconds);
-            if(document.getElementById('st-time-game')) document.getElementById('st-time-game').innerText = formatTime(gameSeconds);
             if(document.getElementById('st-time-match')) document.getElementById('st-time-match').innerText = formatTime(totalSeconds);
             if(document.getElementById('stm-time-set')) document.getElementById('stm-time-set').innerText = formatTime(setSeconds);
             if(document.getElementById('stm-time-match')) document.getElementById('stm-time-match').innerText = formatTime(totalSeconds);
@@ -674,15 +618,6 @@
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
-
-                // Примусово ховаємо статистику між геймами, щойно хтось натиснув рахунок
-                // (зміна p1Index/p2Index), не чекаючи завершення показу всіх рядків
-                const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
-                if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
-                    forceCloseStatsPanel();
-                }
-                lastP1IndexTracked = curP1Idx; lastP2IndexTracked = curP2Idx; statsTrackerInitialized = true;
-
                 // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
@@ -717,6 +652,7 @@
 
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
                 document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
+                document.documentElement.classList.toggle('theme-lightgray', state.boardTheme === 'lightgray');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || state.currentServer>0) && !matchTimerStarted && !state.isMatchFinished) {
@@ -826,15 +762,11 @@
                 document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
 
                 const activeSet = state.currentSet || 1;
-                if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
-
-                // Скидаємо секундомір гейму, щойно змінюється кількість зіграних геймів у поточному сеті
-                const gamesPlayedInSet = (state[`t1_s${activeSet}`]||0) + (state[`t2_s${activeSet}`]||0);
-                if (gamesPlayedInSet !== lastGamesCountTracked) { gameSeconds = 0; lastGamesCountTracked = gamesPlayedInSet; if(document.getElementById('st-time-game')) document.getElementById('st-time-game').innerText = formatTime(gameSeconds); }
+                if (activeSet !== lastSetTracked) { setSeconds = 0; lastSetTracked = activeSet; }
 
                 const row1El = document.getElementById('row-team-1'), row2El = document.getElementById('row-team-2');
                 let setsToRender = 0;
-                const showCurrentSet = (!state.isAmericano && !state.isMexicano) && ((state[`t1_s${activeSet}`]||0)>0 || (state[`t2_s${activeSet}`]||0)>0 || state.isProSet || (state.isSuperTiebreak && (p1>0||p2>0)));
+                const showCurrentSet = (state[`t1_s${activeSet}`]||0)>0 || (state[`t2_s${activeSet}`]||0)>0 || p1>0 || p2>0 || state.isProSet || (state.isSuperTiebreak && (p1>0||p2>0));
                 for (let s = activeSet; s >= 1; s--) {
                     if (s === activeSet) { if (showCurrentSet) { setsToRender = s; break; } continue; }
                     if ((state[`t1_s${s}`]||0)>0 || (state[`t2_s${s}`]||0)>0) { setsToRender = s; break; }
@@ -862,149 +794,72 @@
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
                 else if (state.isProSet) { ribbonProset.innerText = `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
-                else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
-                else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
                 else ribbonProset.classList.remove('visible');
 
                 const mfb = document.getElementById('match-finished-board');
                 if (state.isMatchFinished) {
                     stPanel.classList.remove('visible');
-
-                    // mfb (табло переможця) завжди показується одразу при завершенні матчу
-                    // і автоматично гасне через 15с — більше НЕ залежить від showStatsOverlay
-                    document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
-                    let playedSets = [];
-                    for (let i = 1; i <= (state.currentSet||1); i++) {
-                        let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
-                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2});
-                    }
-                    let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                    document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||"Команда A") : (setsWon2 > setsWon1 ? (state.p2name||"Команда B") : "Нічия");
-
-                    let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = '<th>Команда</th>';
-                    playedSets.forEach(s => { headRow.innerHTML += `<th>Сет ${s.set}</th>`; });
-
-                    let body = document.getElementById('mfb-body'); body.innerHTML = '';
-                    let r1 = document.createElement('tr'), r2 = document.createElement('tr');
-                    r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
-
-                    let h1 = `<td class="mfb-team-name">${state.p1name||"Команда A"}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||"Команда B"}</td>`;
-                    playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
-                    r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
-
-                    // Показуємо табло і плануємо автозгасання через 15с (лише один раз на кожен показ)
-                    mfb.classList.remove('fading-out');
-                    mfb.classList.add('visible');
-                    if (!matchFinishedWasVisible) {
-                        matchFinishedWasVisible = true;
-                        statsRevealAllowed = false;
-                        if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
-                        matchFinishedFadeTimer = setTimeout(() => {
-                            mfb.classList.add('fading-out');
-                        }, 15000);
-                        // Статистика всього матчу з'являється лише ПІСЛЯ того, як табло
-                        // "МАТЧ ЗАВЕРШЕНО" повністю закриється (15с показу + 1.2с згасання)
-                        statsAfterFinishLocallyDismissed = false;
-                        if (statsRevealTimer) clearTimeout(statsRevealTimer);
-                        statsRevealTimer = setTimeout(() => {
-                            statsRevealAllowed = true;
-                            updateManualStatsPanelVisibility();
-
-                            // Показуємо статистику матчу 15с, потім плавно ховаємо —
-                            // на екрані залишається лише основне табло рахунку
-                            const spm = document.getElementById('statistics-panel-manual');
-                            if (statsAfterFinishDismissTimer) clearTimeout(statsAfterFinishDismissTimer);
-                            statsAfterFinishDismissTimer = setTimeout(() => {
-                                if (spm) spm.classList.add('fading-out');
-                                setTimeout(() => {
-                                    statsAfterFinishLocallyDismissed = true;
-                                    if (spm) spm.classList.remove('visible', 'fading-out');
-                                    refreshBoardVisibility();
-                                }, 1200);
-                            }, 15000);
-                        }, 16300);
-                    }
-                    if (statsAutoActive) { forceCloseStatsPanel(); }
+                    document.getElementById('statistics-panel-manual').classList.remove('visible');
+                    if (state.showStatsOverlay !== false) {
+                        document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
+                        let playedSets = [];
+                        for (let i = 1; i <= (state.currentSet||1); i++) {
+                            let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
+                            if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2, unfinished: i===state.currentSet && !state.isMatchFinished});
+                        }
+                        let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                        document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||"Команда A") : (setsWon2 > setsWon1 ? (state.p2name||"Команда B") : "Нічия");
+                        
+                        let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = '<th>Команда</th>';
+                        playedSets.forEach(s => { headRow.innerHTML += `<th>Сет ${s.set}</th>`; });
+                        
+                        let body = document.getElementById('mfb-body'); body.innerHTML = '';
+                        let r1 = document.createElement('tr'), r2 = document.createElement('tr');
+                        r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
+                        
+                        let h1 = `<td class="mfb-team-name">${state.p1name||"Команда A"}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||"Команда B"}</td>`;
+                        playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
+                        r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
+                        mfb.classList.add('visible');
+                    } else mfb.classList.remove('visible');
+                    if (statsAutoActive) { clearTimeout(statsAutoTimer); statsAutoActive = false; }
                 } else {
-                    mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
-                    matchFinishedWasVisible = false;
-                    statsRevealAllowed = false;
-                    statsAfterFinishLocallyDismissed = false;
-                    if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
-                    if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
-                    if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
-                    document.getElementById('statistics-panel-manual').classList.remove('fading-out');
+                    mfb.classList.remove('visible');
 
-                    const isNewStatsTrigger = !!(state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger);
-                    if (isNewStatsTrigger) {
+                    if (state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger) {
                         lastStatsAutoTrigger = state.statsAutoTrigger;
                         statsAutoActive = true;
+                        clearTimeout(statsAutoTimer);
+                        statsAutoTimer = setTimeout(() => { statsAutoActive = false; updateStatsPanelVisibility(); refreshBoardVisibility(); }, 4000);
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
                         document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        if (document.getElementById('lbl-set-time-footer').firstChild) document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
-                        if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
-                        document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сет' : 'Set';
-                        document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
-                        document.getElementById('lbl-df-mini').innerText = state.cornerSlideLang === 'ua' ? 'Дабл фол' : 'Double fault';
-
+                        document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
+                        document.getElementById('lbl-match-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Матч' : 'Match') + ': ';
                         document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
-                        document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
-
-                        let miniSetsWon1 = 0, miniSetsWon2 = 0;
-                        for (let i = 1; i <= (state.currentSet||1); i++) {
-                            let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
-                            if (i < activeSet) { if (sg1 > sg2) miniSetsWon1++; else if (sg2 > sg1) miniSetsWon2++; }
-                        }
-                        document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
                     }
+                    updateStatsPanelVisibility();
 
-                    // Запускаємо покрокову анімацію показу лише на СВІЖИЙ тригер —
-                    // вміст уже оновлено вище перед стартом послідовності рядків
-                    if (isNewStatsTrigger) {
-                        runStatsRevealSequence();
+                    if (state.showStatsOverlay) {
+                        document.getElementById('stm-name1').innerText = state.p1name || "Команда A"; document.getElementById('stm-name2').innerText = state.p2name || "Команда B";
+                        document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
+                        document.getElementById('stm-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('stm-df2').innerText = state.p2DoubleFaults || 0;
+                        let lg1 = 0, lg2 = 0; for(let i=1;i<=5;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
+                        document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
+
+                        document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                        document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
+                        document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state); document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
+                        document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
+                        document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
+
+                        document.getElementById('stm-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('stm-g2').innerText = state[`t2_s${activeSet}`] || 0;
+                        document.getElementById('stm-game-history').innerText = (state.gamesTimeHistory || []).length > 0 ? state.gamesTimeHistory.join(' ') : "-";
                     }
+                    updateManualStatsPanelVisibility();
                 }
-
-                // Детальна ручна статистика (statistics-panel-manual) — працює однаково і під
-                // час матчу, і ПІСЛЯ його завершення (натискання "Показати статистику" показує
-                // повну статистику матчу разом з результатом усіх зіграних сетів)
-                if (state.showStatsOverlay) {
-                    document.getElementById('stm-name1').innerText = state.p1name || "Команда A"; document.getElementById('stm-name2').innerText = state.p2name || "Команда B";
-
-                    document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
-                    document.getElementById('stm-gp1').innerText = state.p1GoldenPoints || 0; document.getElementById('stm-gp2').innerText = state.p2GoldenPoints || 0;
-                    document.getElementById('stm-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('stm-df2').innerText = state.p2DoubleFaults || 0;
-
-                    let totalGames1 = 0, totalGames2 = 0;
-                    for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
-                    document.getElementById('stm-g1').innerText = totalGames1; document.getElementById('stm-g2').innerText = totalGames2;
-
-                    let lg1 = 0, lg2 = 0; for(let i=1;i<=9;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
-                    document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
-
-                    document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                    document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
-                    document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
-                    document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
-                    document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
-                    document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
-                    document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
-
-                    document.getElementById('stm-game-history').innerText = (state.gamesTimeHistory || []).length > 0 ? state.gamesTimeHistory.join(' ') : "-";
-
-                    // Результат усіх зіграних сетів, напр. "6:4   3:6   10:8"
-                    let setsResultParts = [];
-                    for (let i = 1; i <= (state.currentSet||1); i++) {
-                        let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
-                        if (sg1 > 0 || sg2 > 0) setsResultParts.push(`${sg1}:${sg2}`);
-                    }
-                    document.getElementById('stm-sets-result').innerText = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
-                    document.getElementById('stm-lbl-sets-result').innerText = getStatsLabel('setsResult', state);
-                }
-                updateManualStatsPanelVisibility();
 
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts; const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
