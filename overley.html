@@ -132,6 +132,37 @@
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
+        html.theme-transparent {
+            --accent: #ffffff;
+            --accent-soft: rgba(255, 255, 255, 0.3);
+            --team-bg-top: rgba(0, 0, 0, 0.1);
+            --team-bg-bottom: rgba(0, 0, 0, 0.1);
+            --team-text: #ffffff;
+            --score-set-past-bg: rgba(255, 255, 255, 0.08);
+            --score-set-past-text: #ffffff;
+            --score-set-current-bg: rgba(255, 255, 255, 0.18);
+            --score-set-current-text: #ffffff;
+            --points-team1-top: rgba(255, 255, 255, 0.06);
+            --points-team1-bottom: rgba(255, 255, 255, 0.06);
+            --points-team2-top: rgba(255, 255, 255, 0.06);
+            --points-team2-bottom: rgba(255, 255, 255, 0.06);
+            --points-text: #ffffff;
+            --points-ad-top: rgba(255, 255, 255, 0.28);
+            --points-ad-bottom: rgba(255, 255, 255, 0.28);
+            --points-ad-text: #ffffff;
+            --panel-bg: rgba(0, 0, 0, 0.15);
+            --panel-border: rgba(255, 255, 255, 0.5);
+            --panel-text: #ffffff;
+            --slide-gamepoint: rgba(255, 255, 255, 0.15);
+            --slide-breakpoint: rgba(255, 255, 255, 0.22);
+            --slide-setpoint: rgba(255, 255, 255, 0.3);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
+            --slide-tiebreak: rgba(255, 255, 255, 0.22);
+            --slide-deuce: rgba(255, 255, 255, 0.18);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -387,6 +418,20 @@
         html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td, html.theme-lightgray .stats-mini-row .stats-mini-vals, html.theme-lightgray .sm-val, html.theme-lightgray .h-set-score, html.theme-lightgray .sr-score, html.theme-lightgray .sr-team { color: var(--panel-text); }
         html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td { border-bottom-color: rgba(107, 114, 128, 0.25); }
         html.theme-lightgray .break-label, html.theme-lightgray .break-score-sep { color: var(--accent); }
+
+        html.theme-transparent .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); border: 1.5px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .server-indicator { color: var(--accent); }
+        html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .r-proset-style { color: var(--accent); border-color: rgba(255,255,255,0.4); }
+        html.theme-transparent .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .match-finished-board, html.theme-transparent .statistics-overlay, html.theme-transparent .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-transparent .mfb-header, html.theme-transparent .mfb-winner, html.theme-transparent .sr-set-label, html.theme-transparent .stats-header, html.theme-transparent .sm-header, html.theme-transparent .h-set-time, html.theme-transparent .mfb-table td.mfb-set-win, html.theme-transparent .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-transparent .stats-mini-times span b, html.theme-transparent .sm-val.gold { color: var(--accent); }
+        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .stats-mini-row .stats-mini-vals, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
+        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td { border-bottom-color: rgba(255, 255, 255, 0.2); }
+        html.theme-transparent .break-label, html.theme-transparent .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -766,6 +811,7 @@
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
                 document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
                 document.documentElement.classList.toggle('theme-lightgray', state.boardTheme === 'lightgray');
+                document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || state.currentServer>0) && !matchTimerStarted && !state.isMatchFinished) {
