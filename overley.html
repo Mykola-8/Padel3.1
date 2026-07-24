@@ -613,7 +613,7 @@
 
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
-        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "";
+        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
@@ -736,7 +736,7 @@
 
                 if (!!state.showFullscreenPromo) {
                     if (!!state.promoTypeIsText) {
-                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = "";
+                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null;
                         promoTextEl.innerText = state.promoText || "";
                         promoTextEl.style.color = state.promoTextColor || "#ffffff";
                         promoTextEl.style.fontSize = (state.promoTextSize || 60) + "px";
@@ -745,10 +745,13 @@
                         promoTextEl.classList.remove('active');
                         let mediaUrl = state.promoUrl || state.promoSrc || "";
                         let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
-                        if (mediaUrl && mediaUrl !== lastPromoSource) {
-                            lastPromoSource = mediaUrl;
+                        if (mediaUrl && (mediaUrl !== lastPromoSource || isVideo !== lastPromoIsVideoFlag)) {
+                            lastPromoSource = mediaUrl; lastPromoIsVideoFlag = isVideo;
                             if (isVideo) {
-                                promoImg.classList.remove('active'); promoVideo.src = mediaUrl; promoVideo.classList.add('active');
+                                promoImg.classList.remove('active');
+                                promoVideo.loop = true; promoVideo.muted = true;
+                                promoVideo.src = mediaUrl; promoVideo.load();
+                                promoVideo.classList.add('active');
                                 promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
                             } else {
                                 promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
@@ -757,7 +760,7 @@
                     }
                     promoOverlay.classList.add('visible');
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; promoTextEl.classList.remove('active');
+                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
                 }
 
                 document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
