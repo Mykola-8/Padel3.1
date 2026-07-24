@@ -635,6 +635,12 @@
             setsSummary: { en: 'Sets & time results:', ua: 'Результати по сетам та час:' },
             setFinished: { en: 'SET FINISHED', ua: 'ЗАВЕРШЕНО СЕТ' },
             court: { en: 'COURT', ua: 'КОРТ' },
+            matchFinished: { en: 'MATCH FINISHED', ua: 'МАТЧ ЗАВЕРШЕНО' },
+            tie: { en: 'Tie', ua: 'Нічия' },
+            teamColumn: { en: 'Team', ua: 'Команда' },
+            setColumn: { en: 'Set', ua: 'Сет' },
+            team1Fallback: { en: 'Team A', ua: 'Команда A' },
+            team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
 
         function getStatsLabel(key, state, extra) {
@@ -831,8 +837,8 @@
 
                 if (newBreakActive) {
                     document.getElementById('brk-label').innerText = state.cornerSlideLang === 'ua' ? 'ПЕРЕРВА' : 'BREAK';
-                    document.getElementById('brk-t1').innerText = state.p1name || 'Команда 1';
-                    document.getElementById('brk-t2').innerText = state.p2name || 'Команда 2';
+                    document.getElementById('brk-t1').innerText = state.p1name || getStatsLabel('team1Fallback', state);
+                    document.getElementById('brk-t2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
                     let setsLine = '';
                     for (let si = 1; si < (state.currentSet || 1); si++) {
                         let sg1 = state[`t1_s${si}`] || 0, sg2 = state[`t2_s${si}`] || 0;
@@ -864,8 +870,8 @@
                     document.getElementById('qr-code-panel').classList.add('visible');
                 } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
 
-                document.getElementById('name-display-t1').innerText = state.p1name || "Команда 1";
-                document.getElementById('name-display-t2').innerText = state.p2name || "Команда 2";
+                document.getElementById('name-display-t1').innerText = state.p1name || getStatsLabel('team1Fallback', state);
+                document.getElementById('name-display-t2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
@@ -967,23 +973,23 @@
 
                     // mfb (табло переможця) завжди показується одразу при завершенні матчу
                     // і автоматично гасне через 15с — більше НЕ залежить від showStatsOverlay
-                    document.getElementById('mfb-header').innerText = `КОРТ ${courtId} • МАТЧ ЗАВЕРШЕНО`;
+                    document.getElementById('mfb-header').innerText = `${getStatsLabel('court', state)} ${courtId} • ${getStatsLabel('matchFinished', state)}`;
                     let playedSets = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
                         let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
                         if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2});
                     }
                     let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                    document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||"Команда A") : (setsWon2 > setsWon1 ? (state.p2name||"Команда B") : "Нічия");
+                    document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||getStatsLabel('team1Fallback', state)) : (setsWon2 > setsWon1 ? (state.p2name||getStatsLabel('team2Fallback', state)) : getStatsLabel('tie', state));
 
-                    let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = '<th>Команда</th>';
-                    playedSets.forEach(s => { headRow.innerHTML += `<th>Сет ${s.set}</th>`; });
+                    let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = `<th>${getStatsLabel('teamColumn', state)}</th>`;
+                    playedSets.forEach(s => { headRow.innerHTML += `<th>${getStatsLabel('setColumn', state)} ${s.set}</th>`; });
 
                     let body = document.getElementById('mfb-body'); body.innerHTML = '';
                     let r1 = document.createElement('tr'), r2 = document.createElement('tr');
                     r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
 
-                    let h1 = `<td class="mfb-team-name">${state.p1name||"Команда A"}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||"Команда B"}</td>`;
+                    let h1 = `<td class="mfb-team-name">${state.p1name||getStatsLabel('team1Fallback', state)}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||getStatsLabel('team2Fallback', state)}</td>`;
                     playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
                     r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
 
@@ -1037,7 +1043,7 @@
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
-                        document.getElementById('st-name1').innerText = state.p1name || "Команда A"; document.getElementById('st-name2').innerText = state.p2name || "Команда B";
+                        document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                         if (document.getElementById('lbl-set-time-footer').firstChild) document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
                         if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
@@ -1067,7 +1073,7 @@
                 // час матчу, і ПІСЛЯ його завершення (натискання "Показати статистику" показує
                 // повну статистику матчу разом з результатом усіх зіграних сетів)
                 if (state.showStatsOverlay) {
-                    document.getElementById('stm-name1').innerText = state.p1name || "Команда A"; document.getElementById('stm-name2').innerText = state.p2name || "Команда B";
+                    document.getElementById('stm-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('stm-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
 
                     document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
                     document.getElementById('stm-gp1').innerText = state.p1GoldenPoints || 0; document.getElementById('stm-gp2').innerText = state.p2GoldenPoints || 0;
