@@ -13,7 +13,7 @@
         .nav-btn span { font-size: 18px; }
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
-        .settings-gear-btn { position: absolute; top: 10px; right: 15px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #2a2a2a; border: 1px solid #c69f66; color: #c69f66; cursor: pointer; padding: 8px 14px; border-radius: 6px; transition: transform 0.15s, background 0.15s; z-index: 100; }
+        .settings-gear-btn { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #2a2a2a; border: 1px solid #c69f66; color: #c69f66; cursor: pointer; padding: 8px 14px; border-radius: 6px; transition: transform 0.15s, background 0.15s; z-index: 100; flex-shrink: 0; white-space: nowrap; }
         .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
@@ -89,12 +89,12 @@
     </nav>
 
     <div id="tab-remote" class="tab-content active">
-        <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
         <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px;">
             <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
                 <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
                 <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
             </select>
+            <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
             <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
                 <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
                 <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
