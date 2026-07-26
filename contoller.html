@@ -237,6 +237,17 @@
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
             </div>
 
+            <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+                <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
+                <div style="font-size:10px; color:#999; line-height:1.4;">Кнопки надсилають команду допоміжній програмі на ноутбуці — вона натискає гарячу клавішу в Prisma Live Studio.</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
+                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
+                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
+                </div>
+                <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
+            </div>
+
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
                 <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
@@ -359,6 +370,16 @@
         window.adminUnlockCourt = function() {
             state.controllerLock = null;
             set(matchRef, state);
+        };
+
+        window.sendCameraCommand = function(camNumber) {
+            state.cameraCommand = { key: camNumber, ts: Date.now() };
+            set(matchRef, state);
+            const statusEl = document.getElementById('admin-camera-status');
+            if (statusEl) {
+                statusEl.innerText = "✅ Надіслано: Камера " + camNumber;
+                setTimeout(() => { if (statusEl.innerText.includes(camNumber)) statusEl.innerText = ""; }, 2500);
+            }
         };
 
         window.switchTab = function(tabId) {
@@ -587,6 +608,7 @@
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: state.cornerSlideLang || "ua", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
+                cameraCommand: state.cameraCommand || { key: "", ts: 0 },
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showMainBoard: true, showBreak: false, showQrCode: state.showQrCode || false, 
@@ -795,6 +817,7 @@
             if (isAdmin) {
                 document.getElementById('admin-badge').classList.add('visible');
                 document.getElementById('admin-unlock-btn').style.display = 'block';
+                document.getElementById('admin-camera-panel').style.display = 'flex';
             }
         });
         initCourtConnection();
