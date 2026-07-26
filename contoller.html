@@ -130,6 +130,17 @@
 
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
+
+        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
+            </div>
+            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
+        </div>
+
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <div style="display:flex; gap:8px;">
@@ -235,17 +246,6 @@
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-            </div>
-
-            <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
-                <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
-                <div style="font-size:10px; color:#999; line-height:1.4;">Кнопки надсилають команду допоміжній програмі на ноутбуці — вона натискає гарячу клавішу в Prisma Live Studio.</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
-                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
-                    <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
-                </div>
-                <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
             </div>
 
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
