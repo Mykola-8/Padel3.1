@@ -378,6 +378,7 @@
 
         window.sendCameraCommand = function(camNumber) {
             state.cameraCommand = { key: camNumber, ts: Date.now() };
+            if (camNumber === 'replay') { state.replayLabelTrigger = Date.now(); }
             set(matchRef, state);
             const labels = { '1': 'Камера 1', '2': 'Камера 2', '3': 'Камера 3', 'rec': '⏺ REC', 'replay': '▶️ REPLAY' };
             const statusEl = document.getElementById('admin-camera-status');
@@ -613,7 +614,7 @@
                 isSuperTiebreak: false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
-                cameraCommand: state.cameraCommand || { key: "", ts: 0 },
+                cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showMainBoard: true, showBreak: false, showQrCode: false, 
