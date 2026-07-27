@@ -138,6 +138,10 @@
                 <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
                 <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
             </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
+            </div>
             <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
 
@@ -375,10 +379,11 @@
         window.sendCameraCommand = function(camNumber) {
             state.cameraCommand = { key: camNumber, ts: Date.now() };
             set(matchRef, state);
+            const labels = { '1': 'Камера 1', '2': 'Камера 2', '3': 'Камера 3', 'rec': '⏺ REC', 'replay': '▶️ REPLAY' };
             const statusEl = document.getElementById('admin-camera-status');
             if (statusEl) {
-                statusEl.innerText = "✅ Надіслано: Камера " + camNumber;
-                setTimeout(() => { if (statusEl.innerText.includes(camNumber)) statusEl.innerText = ""; }, 2500);
+                statusEl.innerText = "✅ Надіслано: " + (labels[camNumber] || camNumber);
+                setTimeout(() => { statusEl.innerText = ""; }, 2500);
             }
         };
 
