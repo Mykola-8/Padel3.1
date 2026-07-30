@@ -331,6 +331,26 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
+        /* ===== ЛОГОТИПИ СПОНСОРІВ (карусель, зверху над табло) ===== */
+        .sponsor-logo-frame {
+            position: fixed; top: 20px; left: 30px; z-index: 9500;
+            width: 220px; height: 90px;
+            transform-origin: top left;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 8px; box-sizing: border-box;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+        .sponsor-logo-frame.visible { opacity: 1; visibility: visible; }
+        .sponsor-logo-frame img {
+            max-width: 100%; max-height: 100%;
+            width: auto; height: auto;
+            object-fit: contain;
+            transition: opacity 0.4s ease;
+        }
+
         /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (РЕКЛАМА / СПОНСОР) ===== */
         .fullscreen-media-overlay {
             position: fixed;
@@ -454,6 +474,11 @@
     <div class="replay-label" id="replay-label">
         <span class="replay-label-dot"></span>
         <span>REPLAY</span>
+    </div>
+
+    <!-- ЛОГОТИПИ СПОНСОРІВ (карусель) -->
+    <div class="sponsor-logo-frame" id="sponsor-logo-frame">
+        <img id="sponsor-logo-img" src="" alt="">
     </div>
 
     <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
@@ -686,6 +711,28 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
+        let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
+
+        function startSponsorLogoCarousel(urls, intervalSec) {
+            clearInterval(sponsorLogoTimer);
+            sponsorLogoActiveUrls = urls;
+            sponsorLogoIndex = 0;
+            const imgEl = document.getElementById('sponsor-logo-img');
+            if (!imgEl) return;
+            if (urls.length === 0) { imgEl.src = ""; return; }
+            imgEl.style.opacity = 1;
+            imgEl.src = urls[0];
+            if (urls.length > 1) {
+                sponsorLogoTimer = setInterval(() => {
+                    sponsorLogoIndex = (sponsorLogoIndex + 1) % sponsorLogoActiveUrls.length;
+                    imgEl.style.opacity = 0;
+                    setTimeout(() => {
+                        imgEl.src = sponsorLogoActiveUrls[sponsorLogoIndex];
+                        imgEl.style.opacity = 1;
+                    }, 350);
+                }, Math.max(1, intervalSec || 4) * 1000);
+            }
+        }
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
@@ -1069,6 +1116,18 @@
                         replayEl.classList.add('visible');
                         clearTimeout(replayLabelTimer);
                         replayLabelTimer = setTimeout(() => { replayEl.classList.remove('visible'); }, 15000);
+                    }
+
+                    const sponsorFrame = document.getElementById('sponsor-logo-frame');
+                    if (sponsorFrame) {
+                        sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos);
+                        sponsorFrame.style.transform = 'scale(' + (state.sponsorLogoScale || 1) + ')';
+                        const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
+                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4);
+                        if (signature !== lastSponsorLogosSignature) {
+                            lastSponsorLogosSignature = signature;
+                            startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
+                        }
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
