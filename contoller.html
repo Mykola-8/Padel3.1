@@ -286,6 +286,7 @@
                     <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
                 </div>
                 <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
+                <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
                 <div class="row"><span>Режим показу:</span>
                     <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
                         <option value="carousel">Карусель (по черзі)</option>
@@ -614,6 +615,7 @@
         // ===== ЛОГОТИПИ СПОНСОРІВ (карусель 1-10, зверху над табло) =====
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
         window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
+        window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
         window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
@@ -714,7 +716,7 @@
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
-                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel",
+                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0,
                 showMainBoard: true, showBreak: false, showQrCode: false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
@@ -733,6 +735,7 @@
             if (document.getElementById('sponsor-logos-visibility-checkbox')) {
                 document.getElementById('sponsor-logos-visibility-checkbox').checked = !!state.showSponsorLogos;
                 if (document.activeElement !== document.getElementById('sponsor-logo-scale-slider')) document.getElementById('sponsor-logo-scale-slider').value = state.sponsorLogoScale || 1;
+                if (document.activeElement !== document.getElementById('sponsor-logo-posx-slider')) document.getElementById('sponsor-logo-posx-slider').value = state.sponsorLogoPosX || 0;
                 if (document.activeElement !== document.getElementById('sponsor-logo-interval-input')) document.getElementById('sponsor-logo-interval-input').value = state.sponsorLogoIntervalSec || 4;
                 const currentMode = state.sponsorLogoDisplayMode === 'all' ? 'all' : 'carousel';
                 if (document.activeElement !== document.getElementById('sponsor-logo-mode-select')) document.getElementById('sponsor-logo-mode-select').value = currentMode;
