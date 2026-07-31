@@ -331,11 +331,11 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== ЛОГОТИПИ СПОНСОРІВ (карусель, зверху над табло) ===== */
+        /* ===== ЛОГОТИПИ СПОНСОРІВ (по центру зверху, над табло) ===== */
         .sponsor-logo-frame {
-            position: fixed; top: 20px; left: 30px; z-index: 9500;
+            position: fixed; top: 20px; left: 50%; z-index: 9500;
             width: 220px; height: 90px;
-            transform-origin: top left;
+            transform-origin: top center;
             background: rgba(255,255,255,0.04);
             border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
@@ -349,6 +349,25 @@
             width: auto; height: auto;
             object-fit: contain;
             transition: opacity 0.4s ease;
+        }
+
+        /* Режим "показати всі одразу" — ряд усіх завантажених логотипів */
+        .sponsor-logo-all-frame {
+            position: fixed; top: 20px; left: 50%; z-index: 9500;
+            transform-origin: top center;
+            display: flex; align-items: center; justify-content: center; gap: 16px;
+            max-width: 90vw; flex-wrap: nowrap;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
+            padding: 10px 18px; box-sizing: border-box;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+        .sponsor-logo-all-frame.visible { opacity: 1; visibility: visible; }
+        .sponsor-logo-all-frame img {
+            max-height: 70px; max-width: 130px;
+            width: auto; height: auto;
+            object-fit: contain;
         }
 
         /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (РЕКЛАМА / СПОНСОР) ===== */
@@ -480,6 +499,9 @@
     <div class="sponsor-logo-frame" id="sponsor-logo-frame">
         <img id="sponsor-logo-img" src="" alt="">
     </div>
+
+    <!-- ЛОГОТИПИ СПОНСОРІВ (всі одразу) -->
+    <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
 
     <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
@@ -1119,14 +1141,26 @@
                     }
 
                     const sponsorFrame = document.getElementById('sponsor-logo-frame');
-                    if (sponsorFrame) {
-                        sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos);
-                        sponsorFrame.style.transform = 'scale(' + (state.sponsorLogoScale || 1) + ')';
+                    const sponsorAllFrame = document.getElementById('sponsor-logo-all-frame');
+                    if (sponsorFrame && sponsorAllFrame) {
                         const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
-                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4);
+                        const showAllMode = state.sponsorLogoDisplayMode === 'all';
+                        const scaleTransform = 'translateX(-50%) scale(' + (state.sponsorLogoScale || 1) + ')';
+
+                        sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos && !showAllMode);
+                        sponsorFrame.style.transform = scaleTransform;
+                        sponsorAllFrame.classList.toggle('visible', !!state.showSponsorLogos && showAllMode);
+                        sponsorAllFrame.style.transform = scaleTransform;
+
+                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode;
                         if (signature !== lastSponsorLogosSignature) {
                             lastSponsorLogosSignature = signature;
-                            startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
+                            if (showAllMode) {
+                                clearInterval(sponsorLogoTimer);
+                                sponsorAllFrame.innerHTML = validLogos.map(u => '<img src="' + u + '">').join('');
+                            } else {
+                                startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
+                            }
                         }
                     }
 
