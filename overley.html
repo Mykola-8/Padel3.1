@@ -1145,7 +1145,7 @@
                     if (sponsorFrame && sponsorAllFrame) {
                         const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
                         const showAllMode = state.sponsorLogoDisplayMode === 'all';
-                        const scaleTransform = 'translateX(-50%) scale(' + (state.sponsorLogoScale || 1) + ')';
+                        const scaleTransform = 'translateX(calc(-50% + ' + (state.sponsorLogoPosX || 0) + 'px)) scale(' + (state.sponsorLogoScale || 1) + ')';
 
                         sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos && !showAllMode);
                         sponsorFrame.style.transform = scaleTransform;
