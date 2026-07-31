@@ -286,8 +286,14 @@
                     <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
                 </div>
                 <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
-                <div class="row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
-                <div style="font-size:10px; color:#888; margin:6px 0;">Зображення вписуються в рамку цілком, без обрізання й спотворення (як "contain"). Порожні слоти пропускаються.</div>
+                <div class="row"><span>Режим показу:</span>
+                    <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
+                        <option value="carousel">Карусель (по черзі)</option>
+                        <option value="all">Всі одразу (в ряд)</option>
+                    </select>
+                </div>
+                <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
+                <div style="font-size:10px; color:#888; margin:6px 0;">Розташовується по центру зверху екрана, окремо від табла рахунку — щоб не перекривати його, тримайте табло в звичному кутку (не по центру зверху).</div>
                 <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
@@ -609,6 +615,7 @@
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
         window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
+        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
         function ensureSponsorLogosArray() {
             if (!Array.isArray(state.sponsorLogos) || state.sponsorLogos.length < 10) {
@@ -707,6 +714,7 @@
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
+                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel",
                 showMainBoard: true, showBreak: false, showQrCode: false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
@@ -726,6 +734,9 @@
                 document.getElementById('sponsor-logos-visibility-checkbox').checked = !!state.showSponsorLogos;
                 if (document.activeElement !== document.getElementById('sponsor-logo-scale-slider')) document.getElementById('sponsor-logo-scale-slider').value = state.sponsorLogoScale || 1;
                 if (document.activeElement !== document.getElementById('sponsor-logo-interval-input')) document.getElementById('sponsor-logo-interval-input').value = state.sponsorLogoIntervalSec || 4;
+                const currentMode = state.sponsorLogoDisplayMode === 'all' ? 'all' : 'carousel';
+                if (document.activeElement !== document.getElementById('sponsor-logo-mode-select')) document.getElementById('sponsor-logo-mode-select').value = currentMode;
+                document.getElementById('sponsor-logo-interval-row').style.display = (currentMode === 'all') ? 'none' : 'flex';
                 const logos = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : [];
                 for (let i = 1; i <= 10; i++) {
                     const urlInput = document.getElementById('sponsor-logo-url-' + i);
