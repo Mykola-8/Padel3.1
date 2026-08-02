@@ -201,6 +201,10 @@
         </div>
 
         <h2>🚨 Глобальне керування базою даних</h2>
+        <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
+            <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану: назви команд, рахунки, логотипи, зображення-заставки та анімації. Структура бази (самі корти) лишається — просто весь вміст очищається.</p>
+            <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
+        </div>
         <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
             <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
             <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
@@ -482,6 +486,44 @@
             if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
                 remove(ref(db, 'padel')).then(() => window.location.reload());
             }
+        }
+
+        window.resetAllCourts = function() {
+            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
+            if (!confirm("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
+
+            const freshCourtState = {
+                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
+                scale: 1, posX: 30, posY: 30,
+                isTiebreak: false, isAmericano: false, americanoLimit: 21,
+                isMexicano: false, mexicanoLimit: 24,
+                isProSet: false, proSetLimit: 8,
+                isSuperTiebreak: false, superTiebreakLimit: 10,
+                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
+                showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
+                cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
+                logoUrl: "", logoSrc: "", customLogoText: "",
+                showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4,
+                sponsorLogos: new Array(10).fill(""), sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
+                showMainBoard: true, showBreak: false, showQrCode: false,
+                qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60,
+                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+            };
+
+            const writes = [];
+            for (let i = 1; i <= 10; i++) {
+                writes.push(set(ref(db, 'padel/courts/court_' + i), freshCourtState));
+            }
+            Promise.all(writes).then(() => {
+                alert("✅ Усі 10 кортів скинуто до чистого стану.");
+                window.location.reload();
+            }).catch((err) => {
+                alert("❌ Помилка під час скидання: " + err.message);
+            });
         }
 
         // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
