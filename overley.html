@@ -608,7 +608,7 @@
                 <div style="text-align:center;"><div class="sm-val gold" id="stm-time-match">00:00</div><div class="sm-label" id="stm-lbl-match-time">Загальний час матчу</div></div>
             </div>
             <div class="sm-row"><div class="sm-val gold" id="stm-game-history" style="grid-column: 1 / span 3;">-</div><div class="sm-label" id="stm-lbl-history" style="grid-column: 1 / span 3;">Хронологія геймів</div></div>
-            <div class="sm-row"><div class="sm-val gold" id="stm-sets-result" style="grid-column: 1 / span 3; font-size: 20px;">-</div><div class="sm-label" id="stm-lbl-sets-result" style="grid-column: 1 / span 3;">Результат зіграних сетів</div></div>
+            <div class="sm-row"><div class="sm-val gold" id="stm-sets-result" style="grid-column: 1 / span 3; font-size: 32px; font-weight: 900; letter-spacing: 3px;">-</div><div class="sm-label" id="stm-lbl-sets-result" style="grid-column: 1 / span 3;">Результат зіграних сетів</div></div>
         </div>
     </div>
 
@@ -1197,9 +1197,17 @@
                 if (state.showStatsOverlay) {
                     document.getElementById('stm-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('stm-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
 
-                    document.getElementById('stm-bp1').innerText = state.p1BreakPoints || 0; document.getElementById('stm-bp2').innerText = state.p2BreakPoints || 0;
-                    document.getElementById('stm-gp1').innerText = state.p1GoldenPoints || 0; document.getElementById('stm-gp2').innerText = state.p2GoldenPoints || 0;
-                    document.getElementById('stm-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('stm-df2').innerText = state.p2DoubleFaults || 0;
+                    const bp1 = state.p1BreakPoints || 0, bp2 = state.p2BreakPoints || 0;
+                    document.getElementById('stm-bp1').innerText = bp1; document.getElementById('stm-bp2').innerText = bp2;
+                    document.getElementById('stm-bp1').closest('.sm-row').style.display = (bp1 === 0 && bp2 === 0) ? 'none' : 'grid';
+
+                    const gp1 = state.p1GoldenPoints || 0, gp2 = state.p2GoldenPoints || 0;
+                    document.getElementById('stm-gp1').innerText = gp1; document.getElementById('stm-gp2').innerText = gp2;
+                    document.getElementById('stm-gp1').closest('.sm-row').style.display = (gp1 === 0 && gp2 === 0) ? 'none' : 'grid';
+
+                    const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
+                    document.getElementById('stm-df1').innerText = df1; document.getElementById('stm-df2').innerText = df2;
+                    document.getElementById('stm-df1').closest('.sm-row').style.display = (df1 === 0 && df2 === 0) ? 'none' : 'grid';
 
                     let totalGames1 = 0, totalGames2 = 0;
                     for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
@@ -1207,6 +1215,7 @@
 
                     let lg1 = 0, lg2 = 0; for(let i=1;i<=9;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
                     document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
+                    document.getElementById('stm-lg1').closest('.sm-row').style.display = (lg1 === 0 && lg2 === 0) ? 'none' : 'grid';
 
                     document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                     document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
@@ -1216,7 +1225,9 @@
                     document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
                     document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
 
-                    document.getElementById('stm-game-history').innerText = (state.gamesTimeHistory || []).length > 0 ? state.gamesTimeHistory.join(' ') : "-";
+                    const hasHistory = (state.gamesTimeHistory || []).length > 0;
+                    document.getElementById('stm-game-history').innerText = hasHistory ? state.gamesTimeHistory.join(' ') : "-";
+                    document.getElementById('stm-game-history').closest('.sm-row').style.display = hasHistory ? 'grid' : 'none';
 
                     // Результат усіх зіграних сетів, напр. "6:4   3:6   10:8"
                     let setsResultParts = [];
@@ -1226,6 +1237,7 @@
                     }
                     document.getElementById('stm-sets-result').innerText = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
                     document.getElementById('stm-lbl-sets-result').innerText = getStatsLabel('setsResult', state);
+                    document.getElementById('stm-sets-result').closest('.sm-row').style.display = (setsResultParts.length > 0) ? 'grid' : 'none';
                 }
                 updateManualStatsPanelVisibility();
 
