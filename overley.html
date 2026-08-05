@@ -245,12 +245,9 @@
         
         .statistics-overlay {
             position: fixed;
-            top: 15px;
-            right: 28px;
-            width: 230px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
@@ -259,29 +256,45 @@
         }
         .statistics-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
         .statistics-overlay.fading-out { opacity: 0; visibility: visible; pointer-events: none; transition: opacity 0.8s ease, visibility 0.8s; }
-        .stats-anim-row {
+        .stats-broadcast-row-anim {
             opacity: 0;
-            transform: translateX(90px);
+            transform: translateY(30px);
             transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(8, 8, 8, 0.65);
-            border: 1px solid rgba(198, 159, 102, 0.4);
-            border-radius: 6px;
-            padding: 6px 10px;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-            box-sizing: border-box;
         }
-        .stats-anim-row.row-in { opacity: 1; transform: translateX(0); }
-        .stats-header { font-size: 10px; font-weight: 900; color: #e0b878; letter-spacing: 1.3px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; margin-top: 2px; }
-        .stats-mini-team { font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); text-align: center; }
-        .stats-mini-vs { font-size: 9px; color: #aaa; font-weight: 800; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; font-size: 10px; color: #ccc; text-align: center; }
-        .stats-mini-row .stats-mini-val { font-size: 16px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.9); }
-        .stats-mini-row .stats-mini-lbl { font-size: 12px; font-weight: 800; color: #eaeaea; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.9); }
-        .stats-mini-times { display: flex; justify-content: space-between; }
-        .stats-mini-times span { font-size: 10px; font-weight: 600; color: #cccccc; text-shadow: 0 1px 3px rgba(0,0,0,1); }
-        .stats-mini-times span b { color: #e0b878; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+        .stats-broadcast-row-anim.row-in { opacity: 1; transform: translateY(0); }
+        .stats-broadcast-card {
+            display: flex; align-items: stretch;
+            background: rgba(10, 10, 10, 0.78);
+            border: 1px solid rgba(198, 159, 102, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            font-family: 'Montserrat', sans-serif;
+        }
+        .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
+        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #e0b878; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        .stats-broadcast-header span:last-child { color: #ccc; font-weight: 700; letter-spacing: 0.5px; }
+        .stats-broadcast-header span:last-child b { color: #fff; }
+        .stats-broadcast-collbls { display: grid; grid-template-columns: 1fr 46px 46px 56px; padding: 0 10px; margin-bottom: 3px; }
+        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .stats-broadcast-collbls span:first-child { text-align: left; }
+        .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
+        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 46px 46px 56px; align-items: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 7px 10px; }
+        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #fff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+        .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #fff; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,1); }
+        .stats-broadcast-logo-box {
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            width: 96px; flex-shrink: 0;
+            background: rgba(255,255,255,0.04);
+            border-left: 1px solid rgba(198,159,102,0.3);
+            padding: 8px; box-sizing: border-box;
+        }
+        .stats-broadcast-logo-box.visible { display: flex; }
+        .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
+        .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #e0b878; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
+        .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ, АНІМОВАНА) ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
@@ -439,8 +452,8 @@
         html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
         html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-header, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-mini-times span b, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-mini-row .stats-mini-vals, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
+        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .stats-broadcast-header span:last-child b, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .stats-broadcast-cell, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
+        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .stats-broadcast-name, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
         html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(163, 230, 53, 0.25); }
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
 
@@ -453,8 +466,8 @@
         html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
         html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-header, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-mini-times span b, html.theme-graydark .sm-val.gold { color: var(--accent); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-mini-row .stats-mini-vals, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
+        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .stats-broadcast-header span:last-child b, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .stats-broadcast-cell, html.theme-graydark .sm-val.gold { color: var(--accent); }
+        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .stats-broadcast-name, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
         html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td { border-bottom-color: rgba(209, 213, 219, 0.25); }
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
 
@@ -467,8 +480,8 @@
         html.theme-lightgray .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-lightgray .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
         html.theme-lightgray .match-finished-board, html.theme-lightgray .statistics-overlay, html.theme-lightgray .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-lightgray .mfb-header, html.theme-lightgray .mfb-winner, html.theme-lightgray .sr-set-label, html.theme-lightgray .stats-header, html.theme-lightgray .sm-header, html.theme-lightgray .h-set-time, html.theme-lightgray .mfb-table td.mfb-set-win, html.theme-lightgray .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-lightgray .stats-mini-times span b, html.theme-lightgray .sm-val.gold { color: var(--accent); }
-        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td, html.theme-lightgray .stats-mini-row .stats-mini-vals, html.theme-lightgray .sm-val, html.theme-lightgray .h-set-score, html.theme-lightgray .sr-score, html.theme-lightgray .sr-team { color: var(--panel-text); }
+        html.theme-lightgray .mfb-header, html.theme-lightgray .mfb-winner, html.theme-lightgray .sr-set-label, html.theme-lightgray .stats-broadcast-header span:last-child b, html.theme-lightgray .sm-header, html.theme-lightgray .h-set-time, html.theme-lightgray .mfb-table td.mfb-set-win, html.theme-lightgray .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-lightgray .stats-broadcast-cell, html.theme-lightgray .sm-val.gold { color: var(--accent); }
+        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td, html.theme-lightgray .stats-broadcast-name, html.theme-lightgray .sm-val, html.theme-lightgray .h-set-score, html.theme-lightgray .sr-score, html.theme-lightgray .sr-team { color: var(--panel-text); }
         html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td { border-bottom-color: rgba(107, 114, 128, 0.25); }
         html.theme-lightgray .break-label, html.theme-lightgray .break-score-sep { color: var(--accent); }
 
@@ -481,8 +494,8 @@
         html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .match-finished-board, html.theme-transparent .statistics-overlay, html.theme-transparent .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-transparent .mfb-header, html.theme-transparent .mfb-winner, html.theme-transparent .sr-set-label, html.theme-transparent .stats-header, html.theme-transparent .sm-header, html.theme-transparent .h-set-time, html.theme-transparent .mfb-table td.mfb-set-win, html.theme-transparent .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-transparent .stats-mini-times span b, html.theme-transparent .sm-val.gold { color: var(--accent); }
-        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .stats-mini-row .stats-mini-vals, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
+        html.theme-transparent .mfb-header, html.theme-transparent .mfb-winner, html.theme-transparent .sr-set-label, html.theme-transparent .stats-broadcast-header span:last-child b, html.theme-transparent .sm-header, html.theme-transparent .h-set-time, html.theme-transparent .mfb-table td.mfb-set-win, html.theme-transparent .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-transparent .stats-broadcast-cell, html.theme-transparent .sm-val.gold { color: var(--accent); }
+        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .stats-broadcast-name, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
         html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td { border-bottom-color: rgba(255, 255, 255, 0.2); }
         html.theme-transparent .break-label, html.theme-transparent .break-score-sep { color: var(--accent); }
     </style>
@@ -564,32 +577,34 @@
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
     <div class="statistics-overlay" id="statistics-panel">
-        <div class="stats-anim-row">
-            <div class="stats-header" id="stats-main-header">Статистика гейму</div>
-            <div class="stats-mini-teams">
-                <span class="stats-mini-team" id="st-name1">Команда A</span>
-                <span class="stats-mini-vs">VS</span>
-                <span class="stats-mini-team" id="st-name2">Команда B</span>
+        <div class="stats-broadcast-card stats-broadcast-row-anim">
+            <div class="stats-broadcast-main">
+                <div class="stats-broadcast-header">
+                    <span id="stats-main-header">Статистика гейму</span>
+                    <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
+                </div>
+                <div class="stats-broadcast-collbls">
+                    <span></span><span id="lbl-sets-mini">СЕТ</span><span id="lbl-games-mini">ГЕЙМИ</span><span id="lbl-df-mini">ДАБЛ ФОЛ</span>
+                </div>
+                <div class="stats-broadcast-table">
+                    <div class="stats-broadcast-row">
+                        <span class="stats-broadcast-name" id="st-name1">Команда A</span>
+                        <span class="stats-broadcast-cell" id="st-sets1">0</span>
+                        <span class="stats-broadcast-cell" id="st-g1">0</span>
+                        <span class="stats-broadcast-cell" id="st-df1">0</span>
+                    </div>
+                    <div class="stats-broadcast-row">
+                        <span class="stats-broadcast-name" id="st-name2">Команда B</span>
+                        <span class="stats-broadcast-cell" id="st-sets2">0</span>
+                        <span class="stats-broadcast-cell" id="st-g2">0</span>
+                        <span class="stats-broadcast-cell" id="st-df2">0</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-sets1">0</span>
-            <span class="stats-mini-lbl" id="lbl-sets-mini">Сет</span>
-            <span class="stats-mini-val" id="st-sets2">0</span>
-        </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-g1">0</span>
-            <span class="stats-mini-lbl" id="lbl-games-mini">Гейми</span>
-            <span class="stats-mini-val" id="st-g2">0</span>
-        </div>
-        <div class="stats-mini-row stats-anim-row">
-            <span class="stats-mini-val" id="st-df1">0</span>
-            <span class="stats-mini-lbl" id="lbl-df-mini">Дабл фол</span>
-            <span class="stats-mini-val" id="st-df2">0</span>
-        </div>
-        <div class="stats-mini-times stats-anim-row">
-            <span id="lbl-set-time-footer">Сет: <b><span id="st-time-set">00:00</span></b></span>
-            <span id="lbl-game-time-footer">Гейм: <b><span id="st-time-game">00:00</span></b></span>
+            <div class="stats-broadcast-logo-box" id="stats-broadcast-logo-box">
+                <img id="stats-broadcast-logo-img" src="" style="display:none;">
+                <div class="stats-broadcast-logo-text" id="stats-broadcast-logo-text" style="display:none;"></div>
+            </div>
         </div>
     </div>
 
@@ -766,7 +781,7 @@
         let statsAfterFinishDismissTimer = null, statsAfterFinishLocallyDismissed = false;
 
         function resetStatsRows() {
-            document.querySelectorAll('#statistics-panel .stats-anim-row').forEach(el => el.classList.remove('row-in'));
+            document.querySelectorAll('#statistics-panel .stats-broadcast-row-anim').forEach(el => el.classList.remove('row-in'));
         }
         function clearStatsTimers() {
             statsRowTimers.forEach(t => clearTimeout(t));
@@ -783,7 +798,7 @@
             if (!panel) return;
             panel.classList.remove('fading-out');
             panel.classList.add('visible');
-            const rows = document.querySelectorAll('#statistics-panel .stats-anim-row');
+            const rows = document.querySelectorAll('#statistics-panel .stats-broadcast-row-anim');
             rows.forEach((row, idx) => {
                 const t = setTimeout(() => { row.classList.add('row-in'); }, idx * STATS_ROW_DELAY_MS);
                 statsRowTimers.push(t);
@@ -1167,7 +1182,6 @@
                     if (state.showStatsOverlay || statsAutoActive) {
                         document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        if (document.getElementById('lbl-set-time-footer').firstChild) document.getElementById('lbl-set-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Сет' : 'Set') + ': ';
                         if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
                         document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сет' : 'Set';
                         document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
@@ -1182,6 +1196,25 @@
                             if (i < activeSet) { if (sg1 > sg2) miniSetsWon1++; else if (sg2 > sg1) miniSetsWon2++; }
                         }
                         document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
+
+                        // Лого табла праворуч — показуємо, тільки якщо увімкнено і є що показати
+                        // (те саме зображення/текст, що й лого зліва на головному табло)
+                        const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
+                        const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
+                        const statsLogoTxt = document.getElementById('stats-broadcast-logo-text');
+                        const hasLogoContent = !!(state.logoUrl || state.logoSrc || state.customLogoText);
+                        if (state.showLogo && hasLogoContent) {
+                            statsLogoBox.classList.add('visible');
+                            if (state.logoUrl || state.logoSrc) {
+                                statsLogoTxt.style.display = 'none';
+                                statsLogoImg.src = state.logoUrl || state.logoSrc; statsLogoImg.style.display = 'block';
+                            } else {
+                                statsLogoImg.style.display = 'none';
+                                statsLogoTxt.innerText = state.customLogoText || ""; statsLogoTxt.style.display = 'block';
+                            }
+                        } else {
+                            statsLogoBox.classList.remove('visible');
+                        }
                     }
 
                     // Запускаємо покрокову анімацію показу лише на СВІЖИЙ тригер —
