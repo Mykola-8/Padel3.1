@@ -267,24 +267,23 @@
             position: fixed;
             bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-150%);
             z-index: 9999;
-            opacity: 0;
+            opacity: 1;
             visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
         }
-        .statistics-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
-        .statistics-overlay.fading-out { opacity: 0; visibility: visible; pointer-events: none; transition: opacity 0.8s ease, visibility 0.8s; }
+        .statistics-overlay.visible { transform: translateX(-50%); visibility: visible; pointer-events: auto; }
+        .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
         .stats-broadcast-row-anim {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s ease;
         }
-        .stats-broadcast-row-anim.row-in { opacity: 1; transform: translateY(0); }
+        .stats-broadcast-row-anim.row-in { opacity: 1; }
         .stats-broadcast-card {
             display: flex; align-items: stretch;
-            background: rgba(10, 10, 10, 0.78);
+            background: rgba(52, 52, 56, 0.88);
             border: 1px solid rgba(198, 159, 102, 0.4);
             border-radius: 8px;
             overflow: hidden;
@@ -294,13 +293,13 @@
         }
         .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
         .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #e0b878; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
-        .stats-broadcast-header span:last-child { color: #ccc; font-weight: 700; letter-spacing: 0.5px; }
+        .stats-broadcast-header span:last-child { color: #ddd; font-weight: 700; letter-spacing: 0.5px; }
         .stats-broadcast-header span:last-child b { color: #fff; }
         .stats-broadcast-collbls { display: grid; grid-template-columns: 1fr 46px 46px 56px; padding: 0 10px; margin-bottom: 3px; }
-        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #ccc; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
         .stats-broadcast-collbls span:first-child { text-align: left; }
         .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
-        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 46px 46px 56px; align-items: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 7px 10px; }
+        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 46px 46px 56px; align-items: center; background: rgba(0,0,0,0.18); border-radius: 4px; padding: 7px 10px; }
         .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #fff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,1); }
         .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #fff; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,1); }
         .stats-broadcast-logo-box {
@@ -816,9 +815,18 @@
             statsRowTimers = [];
             if (statsFadeTimer) { clearTimeout(statsFadeTimer); statsFadeTimer = null; }
         }
-        // Показує табло статистики між геймами: рядки виїжджають справа наліво по черзі
-        // (зверху донизу) з затримкою 1.5с, тримаються 2с після останнього, потім усі
-        // рядки одночасно затухають разом з усім табло.
+        // Показує табло статистики між геймами: висувається зліва направо, тримається
+        // певний час, після чого зʼїжджає далі управо (той самий напрям руху).
+        // Миттєво (без анімації) повертає панель у вихідну позицію зліва —
+        // використовується після завершення виїзду праворуч, щоб не було
+        // видимого "стрибка" назад через весь екран перед наступним показом.
+        function snapResetStatsPanel(panel) {
+            panel.style.transition = 'none';
+            panel.classList.remove('visible', 'fading-out');
+            void panel.offsetWidth;
+            panel.style.transition = '';
+        }
+
         function runStatsRevealSequence() {
             clearStatsTimers();
             resetStatsRows();
@@ -835,7 +843,7 @@
             const fadeStartTimer = setTimeout(() => {
                 panel.classList.add('fading-out');
                 statsFadeTimer = setTimeout(() => {
-                    panel.classList.remove('visible', 'fading-out');
+                    snapResetStatsPanel(panel);
                     resetStatsRows();
                     statsAutoActive = false;
                     refreshBoardVisibility();
@@ -847,7 +855,7 @@
         function forceCloseStatsPanel() {
             clearStatsTimers();
             const panel = document.getElementById('statistics-panel');
-            if (panel) { panel.classList.remove('visible', 'fading-out'); }
+            if (panel) { snapResetStatsPanel(panel); }
             resetStatsRows();
             statsAutoActive = false;
         }
@@ -1230,7 +1238,9 @@
                         document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
                         document.getElementById('lbl-df-mini').innerText = state.cornerSlideLang === 'ua' ? 'Дабл фол' : 'Double fault';
 
-                        document.getElementById('st-g1').innerText = state[`t1_s${activeSet}`] || 0; document.getElementById('st-g2').innerText = state[`t2_s${activeSet}`] || 0;
+                        let totalGamesAuto1 = 0, totalGamesAuto2 = 0;
+                        for (let i = 1; i <= activeSet; i++) { totalGamesAuto1 += state[`t1_s${i}`] || 0; totalGamesAuto2 += state[`t2_s${i}`] || 0; }
+                        document.getElementById('st-g1').innerText = totalGamesAuto1; document.getElementById('st-g2').innerText = totalGamesAuto2;
                         document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
 
                         let miniSetsWon1 = 0, miniSetsWon2 = 0;
