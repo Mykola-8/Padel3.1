@@ -800,8 +800,8 @@
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
-        const STATS_HOLD_AFTER_LAST_MS = 3000; // тримаємо все табло після останнього рядка
-        const STATS_FADE_MS = 800;             // тривалість одночасного затухання
+        const STATS_HOLD_AFTER_LAST_MS = 11500; // тримаємо табло ~12с всього перед виїздом
+        const STATS_FADE_MS = 800;             // тривалість виїзду
         let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
         let statsRevealTimer = null, statsRevealAllowed = false;
