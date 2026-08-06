@@ -283,6 +283,16 @@
                 </div>
             </div>
 
+            <div class="card" style="border: 2px solid #f472b6; background: #241019;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло (анонс/реклама)</div>
+                <div class="switch-row" style="background: rgba(244,114,182,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
+                </div>
+                <div style="font-size:10px; color:#888; margin-bottom:8px;">Виїжджає прямо під табло рахунку, рухається й масштабується разом з ним. До 5 рядків тексту, кожен з власним розміром, кольором і фоном (для виділення, як плашка "QATAR AIRWAYS" на прикладі).</div>
+                <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
             <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель, зверху над табло)</div>
                 <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
@@ -507,6 +517,7 @@
                 logoUrl: "", logoSrc: "", customLogoText: "",
                 showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4,
                 sponsorLogos: new Array(10).fill(""), sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
+                showBoardPromoPanel: false, boardPromoLines: new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false,
                 qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
@@ -656,6 +667,60 @@
 
         // ===== ЛОГОТИПИ СПОНСОРІВ (карусель 1-10, зверху над табло) =====
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
+
+        // ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (5 рядків тексту) =====
+        window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
+
+        function ensureBoardPromoLinesArray() {
+            if (!Array.isArray(state.boardPromoLines) || state.boardPromoLines.length < 5) {
+                const arr = Array.isArray(state.boardPromoLines) ? state.boardPromoLines.slice() : [];
+                while (arr.length < 5) arr.push({ text: "", size: 16, color: "#ffffff", bg: "" });
+                state.boardPromoLines = arr;
+            }
+        }
+
+        function renderBoardPromoLineRows() {
+            const container = document.getElementById('board-promo-lines-list');
+            if (!container) return;
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += '<div style="display:flex; flex-direction:column; gap:4px; border-bottom:1px dashed #444; padding-bottom:8px;">' +
+                    '<div style="display:flex; gap:6px; align-items:center;">' +
+                        '<span style="font-size:10px; color:#999; width:14px; flex-shrink:0;">' + i + '.</span>' +
+                        '<input type="text" id="board-promo-text-' + i + '" placeholder="Текст рядка ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                    '</div>' +
+                    '<div style="display:flex; gap:8px; align-items:center; padding-left:20px;">' +
+                        '<span style="font-size:9px; color:#888;">Розмір:</span>' +
+                        '<input type="number" id="board-promo-size-' + i + '" value="16" min="8" max="60" style="width:50px; background:#2a2a2a; border:1px solid #444; color:white; padding:4px; border-radius:4px; font-size:10px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                        '<span style="font-size:9px; color:#888;">Колір:</span>' +
+                        '<input type="color" id="board-promo-color-' + i + '" value="#ffffff" style="width:34px; height:26px; padding:1px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                        '<span style="font-size:9px; color:#888;">Фон:</span>' +
+                        '<input type="color" id="board-promo-bg-' + i + '" value="#000000" style="width:34px; height:26px; padding:1px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="this.dataset.active=\'1\'; updateBoardPromoLine(' + i + ')">' +
+                        '<button type="button" class="btn" style="padding:4px 8px; font-size:9px; background:#444;" onclick="clearBoardPromoBg(' + i + ')">Без фону</button>' +
+                    '</div>' +
+                '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        window.updateBoardPromoLine = function(i) {
+            ensureBoardPromoLinesArray();
+            const text = document.getElementById('board-promo-text-' + i).value || "";
+            const size = parseInt(document.getElementById('board-promo-size-' + i).value) || 16;
+            const color = document.getElementById('board-promo-color-' + i).value || "#ffffff";
+            const bgActive = document.getElementById('board-promo-bg-' + i).dataset.active === "1";
+            const bg = bgActive ? document.getElementById('board-promo-bg-' + i).value : "";
+            state.boardPromoLines[i - 1] = { text, size, color, bg };
+            set(matchRef, state);
+        };
+
+        window.clearBoardPromoBg = function(i) {
+            const bgInput = document.getElementById('board-promo-bg-' + i);
+            bgInput.dataset.active = "0";
+            ensureBoardPromoLinesArray();
+            state.boardPromoLines[i - 1].bg = "";
+            set(matchRef, state);
+        };
         window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
         window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
@@ -759,6 +824,8 @@
                 showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
                 sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0,
+                showBoardPromoPanel: state.showBoardPromoPanel || false,
+                boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
@@ -789,6 +856,25 @@
                     if (urlInput && document.activeElement !== urlInput && !val.startsWith('data:')) { urlInput.value = val; }
                     const statusEl = document.getElementById('sponsor-logo-status-' + i);
                     if (statusEl && val.startsWith('data:')) { statusEl.innerText = "✅"; }
+                }
+            }
+
+            if (document.getElementById('board-promo-visibility-checkbox')) {
+                document.getElementById('board-promo-visibility-checkbox').checked = !!state.showBoardPromoPanel;
+                const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
+                for (let i = 1; i <= 5; i++) {
+                    const cfg = promoLines[i - 1] || {};
+                    const textEl = document.getElementById('board-promo-text-' + i);
+                    if (textEl && document.activeElement !== textEl) textEl.value = cfg.text || "";
+                    const sizeEl = document.getElementById('board-promo-size-' + i);
+                    if (sizeEl && document.activeElement !== sizeEl) sizeEl.value = cfg.size || 16;
+                    const colorEl = document.getElementById('board-promo-color-' + i);
+                    if (colorEl && document.activeElement !== colorEl) colorEl.value = cfg.color || "#ffffff";
+                    const bgEl = document.getElementById('board-promo-bg-' + i);
+                    if (bgEl && document.activeElement !== bgEl) {
+                        if (cfg.bg) { bgEl.value = cfg.bg; bgEl.dataset.active = "1"; }
+                        else { bgEl.dataset.active = "0"; }
+                    }
                 }
             }
             const isUaLang = state.cornerSlideLang !== 'en';
@@ -979,6 +1065,7 @@
         }
         document.addEventListener("DOMContentLoaded", () => {
             renderSponsorLogoRows();
+            renderBoardPromoLineRows();
             if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
             if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
             if (isAdmin) {
