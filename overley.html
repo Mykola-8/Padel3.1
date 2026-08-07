@@ -505,7 +505,7 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
-        let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
+        let sponsorLogoInterval = null, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;
@@ -515,6 +515,24 @@
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
         let statsRevealTimer = null, statsRevealAllowed = false;
         let statsAfterFinishDismissTimer = null, statsAfterFinishLocallyDismissed = false;
+
+        function startSponsorLogoCarousel(logos, intervalSec) {
+            if (sponsorLogoInterval) clearInterval(sponsorLogoInterval);
+            const validLogos = logos.filter(url => !!url);
+            if (validLogos.length === 0) return;
+
+            const sponsorImg = document.getElementById('sponsor-logo-img');
+            const sponsorFrame = document.getElementById('sponsor-logo-frame');
+            if (!sponsorImg || !sponsorFrame) return;
+
+            let index = 0;
+            sponsorImg.src = validLogos[index];
+
+            sponsorLogoInterval = setInterval(() => {
+                index = (index + 1) % validLogos.length;
+                sponsorImg.src = validLogos[index];
+            }, (intervalSec || 4) * 1000);
+        }
 
         function resetStatsRows() {
             document.querySelectorAll('#statistics-panel .stats-broadcast-row-anim').forEach(el => el.classList.remove('row-in'));
@@ -939,7 +957,7 @@
                         if (signature !== lastSponsorLogosSignature) {
                             lastSponsorLogosSignature = signature;
                             if (showAllMode) {
-                                clearInterval(sponsorLogoTimer);
+                                if (sponsorLogoInterval) { clearInterval(sponsorLogoInterval); sponsorLogoInterval = null; }
                                 sponsorAllFrame.innerHTML = validLogos.map(u => '<img src="' + u + '">').join('');
                             } else {
                                 startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
