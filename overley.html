@@ -198,6 +198,20 @@
         .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
+
+        /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ (як на референсі) ===== */
+        .advantage-callout {
+            position: absolute; top: 100%; left: 0; margin-top: -6px;
+            background: #ffffff; color: #111;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            padding: 6px 14px; border-radius: 0 0 4px 4px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+            opacity: 0; visibility: hidden; transform: translateY(-6px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 400;
+        }
+        .advantage-callout.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         .logo-panel.visible { transform: translateX(0); opacity: 1; }
         .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
@@ -245,7 +259,7 @@
         .points-cell { flex: 1; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 1px; white-space: nowrap; }
         .points-cell.team1 { background: linear-gradient(to bottom, #c69f66, #a07c42); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.15); }
         .points-cell.team2 { background: linear-gradient(to bottom, #a07c42, #7a5c28); color: #fff; }
-        .points-cell.ad-active { background: linear-gradient(to bottom, #fff0c0, #e8c96a); color: #3a2a00; }
+        .points-cell.ad-active { background: linear-gradient(to bottom, #fff0c0, #e8c96a); color: #3a2a00; font-size: 19px; letter-spacing: 0; }
         
         /* ПАНЕЛЬ МАТЧ ЗАВЕРШЕНО */
         .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.85) translateY(-40px); width: 620px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 28px 32px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
@@ -555,6 +569,8 @@
             <div class="board-promo-line" id="board-promo-line-4"></div>
             <div class="board-promo-line" id="board-promo-line-5"></div>
         </div>
+
+        <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
 
         <div class="scoreboard-container">
             <div class="ribbons-top-container">
@@ -1067,15 +1083,34 @@
 
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
-                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); }
+                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); }
                 else {
                     pb.classList.add('visible');
                     if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
+                        document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
-                        pbT1.innerText = p1 === 4 ? "AD" : (p2 === 4 ? "" : pointSequence[p1]);
-                        pbT2.innerText = p2 === 4 ? "AD" : (p1 === 4 ? "" : pointSequence[p2]);
-                        pbT1.classList.toggle('ad-active', p1 === 4); pbT2.classList.toggle('ad-active', p2 === 4);
+                        // Голден-поінт (режим "2 переваги", 3-й розіграш при 40:40) — вирішальне очко без
+                        // "утриманої" переваги технічно, але показуємо AD команди, що зараз подає (як орієнтир глядачу)
+                        const isDoubleGoldenPoint = (state.deuceStyle === 'double') && p1 === 3 && p2 === 3 && (state.deuceCounter || 0) >= 2;
+                        const adTeam = p1 === 4 ? 1 : (p2 === 4 ? 2 : (isDoubleGoldenPoint ? (state.currentServer || 1) : 0));
+
+                        if (p1 === 4 || (isDoubleGoldenPoint && adTeam === 1)) { pbT1.innerText = "AD1"; }
+                        else { pbT1.innerText = (p2 === 4) ? "" : pointSequence[p1]; }
+
+                        if (p2 === 4 || (isDoubleGoldenPoint && adTeam === 2)) { pbT2.innerText = "AD2"; }
+                        else { pbT2.innerText = (p1 === 4) ? "" : pointSequence[p2]; }
+
+                        pbT1.classList.toggle('ad-active', p1 === 4 || (isDoubleGoldenPoint && adTeam === 1));
+                        pbT2.classList.toggle('ad-active', p2 === 4 || (isDoubleGoldenPoint && adTeam === 2));
+
+                        const advCallout = document.getElementById('advantage-callout');
+                        if (adTeam === 1 || adTeam === 2) {
+                            advCallout.innerText = "ADVANTAGE " + adTeam;
+                            advCallout.classList.add('visible');
+                        } else {
+                            advCallout.classList.remove('visible');
+                        }
                     }
                 }
 
