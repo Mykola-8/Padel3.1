@@ -1090,24 +1090,32 @@
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                         document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
-                        // Голден-поінт (режим "2 переваги", 3-й розіграш при 40:40) — вирішальне очко без
-                        // "утриманої" переваги технічно, але показуємо AD команди, що зараз подає (як орієнтир глядачу)
-                        const isDoubleGoldenPoint = (state.deuceStyle === 'double') && p1 === 3 && p2 === 3 && (state.deuceCounter || 0) >= 2;
-                        const adTeam = p1 === 4 ? 1 : (p2 === 4 ? 2 : (isDoubleGoldenPoint ? (state.currentServer || 1) : 0));
+                        // AD1/AD2 у самих комірках рахунку — завжди показує, ЯКА команда зараз тримає перевагу
+                        pbT1.innerText = (p1 === 4) ? "AD1" : ((p2 === 4) ? "" : pointSequence[p1]);
+                        pbT2.innerText = (p2 === 4) ? "AD2" : ((p1 === 4) ? "" : pointSequence[p2]);
+                        pbT1.classList.toggle('ad-active', p1 === 4);
+                        pbT2.classList.toggle('ad-active', p2 === 4);
 
-                        if (p1 === 4 || (isDoubleGoldenPoint && adTeam === 1)) { pbT1.innerText = "AD1"; }
-                        else { pbT1.innerText = (p2 === 4) ? "" : pointSequence[p1]; }
-
-                        if (p2 === 4 || (isDoubleGoldenPoint && adTeam === 2)) { pbT2.innerText = "AD2"; }
-                        else { pbT2.innerText = (p1 === 4) ? "" : pointSequence[p2]; }
-
-                        pbT1.classList.toggle('ad-active', p1 === 4 || (isDoubleGoldenPoint && adTeam === 1));
-                        pbT2.classList.toggle('ad-active', p2 === 4 || (isDoubleGoldenPoint && adTeam === 2));
-
+                        // Підпис "ADVANTAGE N" під таблом — тільки в режимі "2 переваги" (double).
+                        // N тут = НОМЕР РОЗІГРАШУ (1-й чи 2-й more/less), а не команда — щоб глядач
+                        // розумів, на якому саме етапі перед золотим очком зараз матч.
                         const advCallout = document.getElementById('advantage-callout');
-                        if (adTeam === 1 || adTeam === 2) {
-                            advCallout.innerText = "ADVANTAGE " + adTeam;
-                            advCallout.classList.add('visible');
+                        const isDoubleStyle = state.deuceStyle === 'double';
+                        const atDeuce = p1 === 3 && p2 === 3;
+                        const isAdvantageHeld = p1 === 4 || p2 === 4;
+
+                        if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
+                            const round = (state.deuceCounter || 0) + 1; // 1 = перший розіграш, 2 = другий, 3+ = золоте очко
+                            if (round <= 2) {
+                                advCallout.innerText = "ADVANTAGE " + round;
+                                advCallout.classList.add('visible');
+                                // На золотому очку (3-й розіграш) команди AD1/AD2 в комірках рахунку не буде,
+                                // бо перевагу технічно ще ніхто не тримає (p1Index/p2Index лишаються 3:3) —
+                                // це коректно, вирішальне очко без "утриманої" переваги.
+                            } else {
+                                advCallout.innerText = "GOLDEN POINT";
+                                advCallout.classList.add('visible');
+                            }
                         } else {
                             advCallout.classList.remove('visible');
                         }
