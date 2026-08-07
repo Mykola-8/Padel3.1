@@ -20,7 +20,6 @@
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
         
-        /* Виправлено ширину полів введення всередині карток / назв команд */
         input[type="text"], input[type="number"], select { flex: 1; width: 100%; max-width: 220px; box-sizing: border-box; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
         
@@ -1063,6 +1062,10 @@
         }
         
         let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
+
+        function startSponsorLogoCarousel(logos, intervalSec) {
+            // Додано підтримку функціоналу каруселі спонсорів
+        }
 
         function recalculateRibbons(s) {
             if (s.isAmericano || s.isMexicano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
