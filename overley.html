@@ -1090,9 +1090,15 @@
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                         document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
-                        // AD1/AD2 у самих комірках рахунку — завжди показує, ЯКА команда зараз тримає перевагу
-                        pbT1.innerText = (p1 === 4) ? "AD1" : ((p2 === 4) ? "" : pointSequence[p1]);
-                        pbT2.innerText = (p2 === 4) ? "AD2" : ((p1 === 4) ? "" : pointSequence[p2]);
+                        // AD1/AD2 у комірках рахунку — номер РОЗІГРАШУ (1-й чи 2-й, у режимі "2 переваги"),
+                        // показується в комірці тієї команди, яка ЗАРАЗ тримає перевагу (може бути будь-яка з двох).
+                        // У звичайних режимах (класика/1 голден) номера немає — просто "AD".
+                        const isDoubleStyleAd = state.deuceStyle === 'double';
+                        const adRound = (state.deuceCounter || 0) + 1;
+                        const adText = "AD" + ((isDoubleStyleAd && adRound <= 2) ? adRound : "");
+
+                        pbT1.innerText = (p1 === 4) ? adText : ((p2 === 4) ? "" : pointSequence[p1]);
+                        pbT2.innerText = (p2 === 4) ? adText : ((p1 === 4) ? "" : pointSequence[p2]);
                         pbT1.classList.toggle('ad-active', p1 === 4);
                         pbT2.classList.toggle('ad-active', p2 === 4);
 
