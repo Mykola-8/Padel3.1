@@ -298,6 +298,7 @@
                         <input type="text" id="board-promo-logo-url" placeholder="URL логотипу" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateBoardPromoLogoUrl(this.value)">
                         <button type="button" class="btn" style="padding:6px 10px; font-size:10px; background:#444;" onclick="document.getElementById('board-promo-logo-file').click()">📁 Файл</button>
                         <input type="file" id="board-promo-logo-file" accept="image/*" style="display:none" onchange="uploadBoardPromoLogoFile(event)">
+                        <button type="button" class="btn btn-red" style="padding:6px 10px; font-size:10px;" onclick="clearBoardPromoLogoData()">✕ Скинути</button>
                     </div>
                     <div id="board-promo-logo-status" style="font-size:10px; color:#f9a8d4;">Лого не вибрано</div>
                 </div>
@@ -661,6 +662,7 @@
 
         window.updateBoardPromoLogoUrl = function(url) {
             state.boardPromoLogoUrl = url; state.boardPromoLogoSrc = "";
+            document.getElementById('board-promo-logo-status').innerText = url ? "Використовується URL" : "Лого не вибрано";
             set(matchRef, state);
         };
 
@@ -688,6 +690,18 @@
                 img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
+        };
+
+        window.clearBoardPromoLogoData = function() {
+            state.boardPromoLogoUrl = "";
+            state.boardPromoLogoSrc = "";
+            const urlInput = document.getElementById('board-promo-logo-url');
+            if (urlInput) urlInput.value = "";
+            const fileInput = document.getElementById('board-promo-logo-file');
+            if (fileInput) fileInput.value = "";
+            const statusEl = document.getElementById('board-promo-logo-status');
+            if (statusEl) statusEl.innerText = "Лого не вибрано";
+            set(matchRef, state);
         };
 
         function ensureBoardPromoLinesArray() {
@@ -877,6 +891,13 @@
 
             if (document.getElementById('board-promo-visibility-checkbox')) {
                 document.getElementById('board-promo-visibility-checkbox').checked = !!state.showBoardPromoPanel;
+                if (!state.boardPromoLogoSrc && document.activeElement !== document.getElementById('board-promo-logo-url')) {
+                    document.getElementById('board-promo-logo-url').value = state.boardPromoLogoUrl || "";
+                }
+                const promoLogoStatus = document.getElementById('board-promo-logo-status');
+                if (promoLogoStatus) {
+                    promoLogoStatus.innerText = state.boardPromoLogoSrc ? "✅ Лого додано" : (state.boardPromoLogoUrl ? "Використовується URL" : "Лого не вибрано");
+                }
                 const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
                 for (let i = 1; i <= 5; i++) {
                     const cfg = promoLines[i - 1] || {};
@@ -1064,7 +1085,7 @@
         let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
 
         function startSponsorLogoCarousel(logos, intervalSec) {
-            // Додано підтримку функціоналу каруселі спонсорів
+            // Підтримка функціоналу каруселі спонсорів
         }
 
         function recalculateRibbons(s) {
