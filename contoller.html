@@ -19,8 +19,11 @@
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
-        input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
+        
+        /* Виправлено ширину полів введення всередині карток / назв команд */
+        input[type="text"], input[type="number"], select { flex: 1; width: 100%; max-width: 220px; box-sizing: border-box; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
+        
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
@@ -847,6 +850,9 @@
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            if (document.activeElement !== document.getElementById('p1-name-input')) document.getElementById('p1-name-input').value = state.p1name || "";
+            if (document.activeElement !== document.getElementById('p2-name-input')) document.getElementById('p2-name-input').value = state.p2name || "";
+
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
