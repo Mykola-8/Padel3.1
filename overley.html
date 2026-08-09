@@ -86,7 +86,7 @@
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
         /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
-     .board-promo-panel {
+        .board-promo-panel {
             position: absolute; top: 100%; left: 90px; margin-top: 34px;
             min-width: 260px; max-width: 420px;
             background: rgba(255, 255, 255, 0.22);
@@ -200,7 +200,18 @@
         .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
         .stats-broadcast-row-anim { opacity: 0; transition: opacity 0.4s ease; }
         .stats-broadcast-row-anim.row-in { opacity: 1; }
-        .stats-broadcast-card { display: flex; align-items: stretch; background: rgba(240, 240, 243, 0.96); border: 1px solid rgba(198, 159, 102, 0.55); border-radius: 8px; overflow: hidden; box-shadow: 0 14px 34px rgba(0,0,0,0.55); backdrop-filter: blur(8px); font-family: 'Montserrat', sans-serif; }
+        .stats-broadcast-card { 
+            display: flex; 
+            align-items: stretch; 
+            background: rgba(240, 240, 243, 0.78); 
+            border: 1px solid rgba(198, 159, 102, 0.55); 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 14px 34px rgba(0,0,0,0.55); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            font-family: 'Montserrat', sans-serif; 
+        }
         .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
         .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #a1731f; margin-bottom: 8px; text-shadow: none; }
         .stats-broadcast-header span:last-child { color: #555; font-weight: 700; letter-spacing: 0.5px; }
