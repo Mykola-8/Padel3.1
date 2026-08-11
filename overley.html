@@ -204,7 +204,7 @@
         .stats-broadcast-card { 
             display: flex; 
             align-items: stretch; 
-            background: rgba(18, 18, 22, 0.80); 
+            background: rgba(40, 40, 45, 0.78); 
             border: 1px solid rgba(198, 159, 102, 0.55); 
             border-radius: 8px; 
             overflow: hidden; 
@@ -218,18 +218,17 @@
         .stats-broadcast-logo-box.visible { display: flex; }
         .stats-broadcast-logo-box img { max-width: 100%; max-height: 60px; object-fit: contain; }
 
-        .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; flex: 1; }
+        .stats-broadcast-main { padding: 12px 20px; min-width: 420px; box-sizing: border-box; flex: 1; }
         .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; margin-bottom: 8px; text-shadow: none; }
         .stats-broadcast-header span:last-child { color: #aaa; font-weight: 700; letter-spacing: 0.5px; }
         .stats-broadcast-header span:last-child b { color: #fff; }
         .stats-broadcast-collbls { display: grid; padding: 0 10px; margin-bottom: 3px; }
-        .stats-broadcast-collbls span { font-size: 9px; font-weight: 800; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .stats-broadcast-collbls span { font-size: 9px; font-weight: 800; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; white-space: nowrap; }
         .stats-broadcast-collbls span:first-child { text-align: left; }
         .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
         .stats-broadcast-row { display: grid; align-items: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 7px 10px; }
-        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #ffffff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
+        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #ffffff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; padding-right: 15px; }
         .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #ffe9c2; text-align: center; text-shadow: none; }
-
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
