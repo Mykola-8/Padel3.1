@@ -12,7 +12,7 @@
             --team-bg-top: rgba(42,42,42,0.75);
             --team-bg-bottom: rgba(26,26,26,0.75);
             --team-text: #ffffff;
-            --score-set-past-bg: rgba(255,255,255,0.9); от
+            --score-set-past-bg: rgba(255,255,255,0.9);
             --score-set-past-text: #1a1a1a;
             --score-set-current-bg: rgba(122,122,122,0.75);
             --score-set-current-text: #ffffff;
@@ -195,6 +195,7 @@
         .mfb-table td.mfb-set-win { color: var(--accent); }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
+        /* ===== АВТО-СТАТИСТИКА МІЖ ГЕЙМАМИ (НАПІВПРОЗОРИЙ ФОН + ЛОГО ЗЛІВА) ===== */
         .statistics-overlay { position: fixed; bottom: 30px; left: 50%; transform: translateX(-150%); z-index: 9999; opacity: 1; visibility: hidden; pointer-events: none; transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s; }
         .statistics-overlay.visible { transform: translateX(-50%); visibility: visible; pointer-events: auto; }
         .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
@@ -203,30 +204,31 @@
         .stats-broadcast-card { 
             display: flex; 
             align-items: stretch; 
-            background: rgba(240, 240, 243, 0.78); 
+            background: rgba(18, 18, 22, 0.80); 
             border: 1px solid rgba(198, 159, 102, 0.55); 
             border-radius: 8px; 
             overflow: hidden; 
-            box-shadow: 0 14px 34px rgba(0,0,0,0.55); 
+            box-shadow: 0 14px 34px rgba(0,0,0,0.65); 
             backdrop-filter: blur(12px); 
             -webkit-backdrop-filter: blur(12px);
             font-family: 'Montserrat', sans-serif; 
+            color: #ffffff;
         }
-        .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
-        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #a1731f; margin-bottom: 8px; text-shadow: none; }
-        .stats-broadcast-header span:last-child { color: #555; font-weight: 700; letter-spacing: 0.5px; }
-        .stats-broadcast-header span:last-child b { color: #111; }
-        .stats-broadcast-collbls { display: grid; grid-template-columns: 1fr 46px 46px 56px; padding: 0 10px; margin-bottom: 3px; }
-        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #777; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .stats-broadcast-logo-box { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100px; flex-shrink: 0; background: rgba(255,255,255,0.04); border-right: 1px solid rgba(198,159,102,0.4); padding: 10px; box-sizing: border-box; }
+        .stats-broadcast-logo-box.visible { display: flex; }
+        .stats-broadcast-logo-box img { max-width: 100%; max-height: 60px; object-fit: contain; }
+
+        .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; flex: 1; }
+        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; margin-bottom: 8px; text-shadow: none; }
+        .stats-broadcast-header span:last-child { color: #aaa; font-weight: 700; letter-spacing: 0.5px; }
+        .stats-broadcast-header span:last-child b { color: #fff; }
+        .stats-broadcast-collbls { display: grid; padding: 0 10px; margin-bottom: 3px; }
+        .stats-broadcast-collbls span { font-size: 9px; font-weight: 800; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
         .stats-broadcast-collbls span:first-child { text-align: left; }
         .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
-        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 46px 46px 56px; align-items: center; background: rgba(0,0,0,0.06); border-radius: 4px; padding: 7px 10px; }
-        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #111; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
-        .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #111; text-align: center; text-shadow: none; }
-        .stats-broadcast-logo-box { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 96px; flex-shrink: 0; background: rgba(0,0,0,0.04); border-left: 1px solid rgba(198,159,102,0.4); padding: 8px; box-sizing: border-box; }
-        .stats-broadcast-logo-box.visible { display: flex; }
-        .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
-        .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #a1731f; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
+        .stats-broadcast-row { display: grid; align-items: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 7px 10px; }
+        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #ffffff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
+        .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #ffe9c2; text-align: center; text-shadow: none; }
 
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
@@ -360,34 +362,20 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
+    <!-- АВТО-СТАТИСТИКА МІЖ ГЕЙМАМИ (ЛОГО ЗЛІВА ПРИ НАЯВНОСТІ + ДИНАМІЧНІ СТОВПЧИКИ) -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-broadcast-card stats-broadcast-row-anim">
+            <div class="stats-broadcast-logo-box" id="stats-broadcast-logo-box">
+                <img id="stats-broadcast-logo-img" src="" style="display:none;">
+            </div>
+
             <div class="stats-broadcast-main">
                 <div class="stats-broadcast-header">
                     <span id="stats-main-header">Статистика гейму</span>
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
-                <div class="stats-broadcast-collbls">
-                    <span></span><span id="lbl-sets-mini">СЕТ</span><span id="lbl-games-mini">ГЕЙМИ</span><span id="lbl-df-mini">ДАБЛ ФОЛ</span>
-                </div>
-                <div class="stats-broadcast-table">
-                    <div class="stats-broadcast-row">
-                        <span class="stats-broadcast-name" id="st-name1">Команда A</span>
-                        <span class="stats-broadcast-cell" id="st-sets1">0</span>
-                        <span class="stats-broadcast-cell" id="st-g1">0</span>
-                        <span class="stats-broadcast-cell" id="st-df1">0</span>
-                    </div>
-                    <div class="stats-broadcast-row">
-                        <span class="stats-broadcast-name" id="st-name2">Команда B</span>
-                        <span class="stats-broadcast-cell" id="st-sets2">0</span>
-                        <span class="stats-broadcast-cell" id="st-g2">0</span>
-                        <span class="stats-broadcast-cell" id="st-df2">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="stats-broadcast-logo-box" id="stats-broadcast-logo-box">
-                <img id="stats-broadcast-logo-img" src="" style="display:none;">
-                <div class="stats-broadcast-logo-text" id="stats-broadcast-logo-text" style="display:none;"></div>
+                <div class="stats-broadcast-collbls" id="stats-broadcast-collbls"></div>
+                <div class="stats-broadcast-table" id="stats-broadcast-table"></div>
             </div>
         </div>
     </div>
@@ -985,42 +973,82 @@
                         }
                     }
 
+                    // ===== ОБРОБКА АВТО-СТАТИСТИКИ ТА ДИНАМІЧНИХ СТОВПЧИКІВ =====
                     if (state.showStatsOverlay || statsAutoActive) {
-                        document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
+                        const isUa = state.cornerSlideLang === 'ua';
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
-                        if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
-                        document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сет' : 'Set';
-                        document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
-                        document.getElementById('lbl-df-mini').innerText = state.cornerSlideLang === 'ua' ? 'Дабл фол' : 'Double fault';
+                        if (document.getElementById('lbl-game-time-footer').firstChild) {
+                            document.getElementById('lbl-game-time-footer').firstChild.textContent = (isUa ? 'Гейм' : 'Game') + ': ';
+                        }
 
+                        // Перевірка та показ логотипу турніру зліва
+                        const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
+                        const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
+                        const tourneyLogo = state.tournamentLogoUrl || state.tournamentLogoSrc || (state.showLogo ? (state.logoUrl || state.logoSrc) : null);
+
+                        if (tourneyLogo) {
+                            statsLogoImg.src = tourneyLogo;
+                            statsLogoImg.style.display = 'block';
+                            statsLogoBox.classList.add('visible');
+                        } else {
+                            statsLogoImg.style.display = 'none';
+                            statsLogoBox.classList.remove('visible');
+                        }
+
+                        // Розрахунок статистики
                         let totalGamesAuto1 = 0, totalGamesAuto2 = 0;
-                        for (let i = 1; i <= activeSet; i++) { totalGamesAuto1 += state[`t1_s${i}`] || 0; totalGamesAuto2 += state[`t2_s${i}`] || 0; }
-                        document.getElementById('st-g1').innerText = totalGamesAuto1; document.getElementById('st-g2').innerText = totalGamesAuto2;
-                        document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+                        for (let i = 1; i <= activeSet; i++) { 
+                            totalGamesAuto1 += state[`t1_s${i}`] || 0; 
+                            totalGamesAuto2 += state[`t2_s${i}`] || 0; 
+                        }
 
                         let miniSetsWon1 = 0, miniSetsWon2 = 0;
                         for (let i = 1; i <= (state.currentSet||1); i++) {
                             let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
                             if (i < activeSet) { if (sg1 > sg2) miniSetsWon1++; else if (sg2 > sg1) miniSetsWon2++; }
                         }
-                        document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
 
-                        const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
-                        const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
-                        const statsLogoTxt = document.getElementById('stats-broadcast-logo-text');
-                        const hasLogoContent = !!(state.logoUrl || state.logoSrc || state.customLogoText);
-                        if (state.showLogo && hasLogoContent) {
-                            statsLogoBox.classList.add('visible');
-                            if (state.logoUrl || state.logoSrc) {
-                                statsLogoTxt.style.display = 'none';
-                                statsLogoImg.src = state.logoUrl || state.logoSrc; statsLogoImg.style.display = 'block';
-                            } else {
-                                statsLogoImg.style.display = 'none';
-                                statsLogoTxt.innerText = state.customLogoText || ""; statsLogoTxt.style.display = 'block';
-                            }
-                        } else {
-                            statsLogoBox.classList.remove('visible');
+                        const bp1 = state.p1BreakPoints || 0, bp2 = state.p2BreakPoints || 0;
+                        const gp1 = state.p1GoldenPoints || 0, gp2 = state.p2GoldenPoints || 0;
+                        const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
+
+                        // Динамічне формування тільки тих стовпчиків, де значення > 0
+                        const cols = [];
+                        if (miniSetsWon1 > 0 || miniSetsWon2 > 0 || activeSet > 1) {
+                            cols.push({ title: isUa ? 'СЕТ' : 'SET', v1: miniSetsWon1, v2: miniSetsWon2 });
                         }
+                        cols.push({ title: isUa ? 'ГЕЙМИ' : 'GAMES', v1: totalGamesAuto1, v2: totalGamesAuto2 });
+
+                        if (bp1 > 0 || bp2 > 0) {
+                            cols.push({ title: isUa ? 'БРЕЙК' : 'BP', v1: bp1, v2: bp2 });
+                        }
+                        if (gp1 > 0 || gp2 > 0) {
+                            cols.push({ title: isUa ? 'ГОЛДЕН' : 'GP', v1: gp1, v2: gp2 });
+                        }
+                        if (df1 > 0 || df2 > 0) {
+                            cols.push({ title: isUa ? 'ДАБЛФОЛ' : 'DF', v1: df1, v2: df2 });
+                        }
+
+                        const gridCss = `1fr ${cols.map(() => '56px').join(' ')}`;
+
+                        const collblsEl = document.getElementById('stats-broadcast-collbls');
+                        collblsEl.style.gridTemplateColumns = gridCss;
+                        collblsEl.innerHTML = `<span></span>` + cols.map(c => `<span>${c.title}</span>`).join('');
+
+                        const name1 = state.p1name || getStatsLabel('team1Fallback', state);
+                        const name2 = state.p2name || getStatsLabel('team2Fallback', state);
+
+                        const tableEl = document.getElementById('stats-broadcast-table');
+                        tableEl.innerHTML = `
+                            <div class="stats-broadcast-row" style="grid-template-columns: ${gridCss}">
+                                <span class="stats-broadcast-name">${name1}</span>
+                                ${cols.map(c => `<span class="stats-broadcast-cell">${c.v1}</span>`).join('')}
+                            </div>
+                            <div class="stats-broadcast-row" style="grid-template-columns: ${gridCss}">
+                                <span class="stats-broadcast-name">${name2}</span>
+                                ${cols.map(c => `<span class="stats-broadcast-cell">${c.v2}</span>`).join('')}
+                            </div>
+                        `;
                     }
 
                     if (isNewStatsTrigger) {
