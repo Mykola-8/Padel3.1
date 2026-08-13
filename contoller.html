@@ -17,9 +17,13 @@
         .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; box-sizing: border-box; width: 100%; max-width: 100%; overflow: hidden; }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
+        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; }
         .row:last-child { margin-bottom: 0; }
-        input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+        
+        /* ВИПРАВЛЕНО: Поля вводу всередині .row тепер мають обмеження min-width: 0 і не вилазять за межі */
+        .row input[type="text"], .row input[type="number"], .row select { flex: 1; min-width: 0; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+        
+        input[type="text"], input[type="number"], select { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; box-sizing: border-box; width: 100%; max-width: 100%; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; box-sizing: border-box; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
@@ -39,7 +43,6 @@
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; gap: 10px; }
         
-        /* ВИПРАВЛЕНО: Прев'ю-табло з контролем меж та overflow: hidden */
         .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; width: 100%; box-sizing: border-box; overflow: hidden; }
         .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); width: 100%; box-sizing: border-box; }
         .preview-row:last-child { border-bottom: none; }
@@ -371,7 +374,7 @@
                         <span style="font-size:11px; color:#fff; font-weight:700;">Напівпрозорий фон (для фото-таблиць):</span>
                         <input type="checkbox" id="promo-transparent-bg-checkbox" style="width:18px; height:18px;" onchange="togglePromoTransparentBg(this.checked)">
                     </div>
-                    <div style="font-size:9px; color:#aaa; margin-top:-4px;">Знімає чорний непрозорий фон (робить напівпрозорим з розмиттям) і вписує фото-таблицю цілком без обрізання[cite: 3].</div>
+                    <div style="font-size:9px; color:#aaa; margin-top:-4px;">Знімає чорний непрозорий фон (робить напівпрозорим з розмиттям) і вписує фото-таблицю цілком без обрізання.</div>
 
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
                         <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
@@ -895,6 +898,10 @@
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            
+            if (document.activeElement !== document.getElementById('p1-name-input')) document.getElementById('p1-name-input').value = state.p1name || "";
+            if (document.activeElement !== document.getElementById('p2-name-input')) document.getElementById('p2-name-input').value = state.p2name || "";
+
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
