@@ -26,46 +26,6 @@
             --points-ad-text: #3a2a00;
         }
 
-        html.theme-courtgreen {
-            --accent: #a3e635;
-            --accent-soft: rgba(163, 230, 53, 0.45);
-            --team-bg-top: rgba(35, 46, 15, 0.90);
-            --team-bg-bottom: rgba(20, 26, 8, 0.90);
-            --team-text: #f7ffe0;
-            --points-team1-top: #65a30d;
-            --points-team1-bottom: #4d7c0f;
-            --points-team2-top: #4d7c0f;
-            --points-team2-bottom: #3f6212;
-        }
-
-        html.theme-graydark {
-            --accent: #d1d5db;
-            --accent-soft: rgba(209, 213, 219, 0.45);
-            --team-bg-top: rgba(55, 65, 81, 0.90);
-            --team-bg-bottom: rgba(17, 24, 39, 0.92);
-            --team-text: #f3f4f6;
-            --points-team1-top: #4b5563;
-            --points-team1-bottom: #374151;
-            --points-team2-top: #374151;
-            --points-team2-bottom: #1f2937;
-        }
-
-        html.theme-lightgray {
-            --accent: #4b5563;
-            --accent-soft: rgba(75, 85, 99, 0.35);
-            --team-bg-top: rgba(229, 231, 235, 0.95);
-            --team-bg-bottom: rgba(203, 209, 214, 0.95);
-            --team-text: #000000;
-            --score-set-past-bg: rgba(30,30,30,0.9);
-            --score-set-past-text: #ffffff;
-            --score-set-current-bg: rgba(150,150,150,0.85);
-            --score-set-current-text: #000000;
-            --points-team1-top: #6b7280;
-            --points-team1-bottom: #4b5563;
-            --points-team2-top: #4b5563;
-            --points-team2-bottom: #374151;
-        }
-
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -85,7 +45,6 @@
         .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
         .board-promo-panel {
             position: absolute; top: 100%; left: 90px; margin-top: 34px;
             min-width: 260px; max-width: 420px;
@@ -99,29 +58,17 @@
             opacity: 0; visibility: hidden; 
             transform: translateY(-30px);
             transform-origin: top center;
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
-                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
-                        visibility 0.8s ease;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s ease;
             font-family: 'Montserrat', sans-serif;
             z-index: 1;
         }
         .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .board-promo-logo { 
-            max-height: 120px; 
-            max-width: 280px; 
-            width: auto; 
-            height: auto; 
-            object-fit: contain; 
-            margin-bottom: 6px; 
-            display: none; 
-            border-radius: 4px;
-        }
+        .board-promo-logo { max-height: 120px; max-width: 280px; width: auto; height: auto; object-fit: contain; margin-bottom: 6px; display: none; border-radius: 4px; }
         .board-promo-logo.visible { display: block; }
         .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
-        /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
         .advantage-callout {
             position: absolute; top: calc(100% + 4px); left: 320px; margin-top: 0px;
             background: #ffffff; color: #111;
@@ -195,24 +142,19 @@
         .mfb-table td.mfb-set-win { color: var(--accent); }
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
-        /* ===== АВТО-СТАТИСТИКА МІЖ ГЕЙМАМИ (НАПІВПРОЗОРИЙ ФОН + ЛОГО ЗЛІВА) ===== */
         .statistics-overlay { position: fixed; bottom: 30px; left: 50%; transform: translateX(-150%); z-index: 9999; opacity: 1; visibility: hidden; pointer-events: none; transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s; }
         .statistics-overlay.visible { transform: translateX(-50%); visibility: visible; pointer-events: auto; }
         .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
         .stats-broadcast-row-anim { opacity: 0; transition: opacity 0.4s ease; }
         .stats-broadcast-row-anim.row-in { opacity: 1; }
         .stats-broadcast-card { 
-            display: flex; 
-            align-items: stretch; 
+            display: flex; align-items: stretch; 
             background: rgba(40, 40, 45, 0.78); 
             border: 1px solid rgba(198, 159, 102, 0.55); 
-            border-radius: 8px; 
-            overflow: hidden; 
+            border-radius: 8px; overflow: hidden; 
             box-shadow: 0 14px 34px rgba(0,0,0,0.65); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
-            font-family: 'Montserrat', sans-serif; 
-            color: #ffffff;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            font-family: 'Montserrat', sans-serif; color: #ffffff;
         }
         .stats-broadcast-logo-box { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100px; flex-shrink: 0; background: rgba(255,255,255,0.04); border-right: 1px solid rgba(198,159,102,0.4); padding: 10px; box-sizing: border-box; }
         .stats-broadcast-logo-box.visible { display: flex; }
@@ -229,6 +171,7 @@
         .stats-broadcast-row { display: grid; align-items: center; background: rgba(255,255,255,0.07); border-radius: 4px; padding: 7px 10px; }
         .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #ffffff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; padding-right: 15px; }
         .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #ffe9c2; text-align: center; text-shadow: none; }
+
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -265,11 +208,36 @@
         .sponsor-logo-all-frame.visible { opacity: 1; visibility: visible; }
         .sponsor-logo-all-frame img { max-height: 70px; max-width: 130px; object-fit: contain; }
 
-        .fullscreen-media-overlay { position: fixed; inset: 0; background-color: #000000; z-index: 100000; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s ease, visibility 0.6s ease; }
+        /* ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (ЗІ ЗМІННИМ ФОНОМ ДЛЯ ФОТО-ТАБЛИЦЬ) */
+        .fullscreen-media-overlay {
+            position: fixed; inset: 0;
+            background-color: #000000;
+            z-index: 100000; opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.6s ease, visibility 0.6s ease, background-color 0.4s ease;
+        }
+        .fullscreen-media-overlay.transparent-bg {
+            background-color: rgba(10, 10, 15, 0.42);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
         .fullscreen-media-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
-        .fullscreen-media-content { width: 100%; height: 100%; object-fit: cover; display: none; }
+        
+        .fullscreen-media-content {
+            width: 100%; height: 100%;
+            object-fit: cover; /* За замовчуванням відео/фото на весь екран */
+            display: none;
+        }
+        /* Якщо увімкнено напівпрозорий фон для фото-таблиць — вписуємо зображення повністю без обрізання (contain) */
+        .fullscreen-media-overlay.transparent-bg .fullscreen-media-content {
+            object-fit: contain;
+            padding: 40px;
+            box-sizing: border-box;
+        }
         .fullscreen-media-content.active { display: block; }
-        .fullscreen-text-content { display: none; width: 100%; height: 100%; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 60px; font-family: 'Montserrat', sans-serif; font-weight: 900; line-height: 1.25; word-break: break-word; white-space: pre-wrap; text-shadow: 0 4px 18px rgba(0,0,0,0.85); }
+        
+        .fullscreen-text-content {
+            display: none; width: 100%; height: 100%; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 60px; font-family: 'Montserrat', sans-serif; font-weight: 900; line-height: 1.25; word-break: break-word; white-space: pre-wrap; text-shadow: 0 4px 18px rgba(0,0,0,0.85);
+        }
         .fullscreen-text-content.active { display: flex; }
 
         .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
@@ -361,7 +329,6 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
-    <!-- АВТО-СТАТИСТИКА МІЖ ГЕЙМАМИ (ЛОГО ЗЛІВА ПРИ НАЯВНОСТІ + ДИНАМІЧНІ СТОВПЧИКИ) -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-broadcast-card stats-broadcast-row-anim">
             <div class="stats-broadcast-logo-box" id="stats-broadcast-logo-box">
@@ -512,7 +479,7 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
-        let sponsorLogoInterval = null, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
+        let sponsorLogoInterval = null, lastSponsorLogosSignature = "";
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
         const STATS_ROW_DELAY_MS = 1500;
@@ -648,6 +615,7 @@
                 const promoTextEl = document.getElementById('promo-text');
 
                 if (!!state.showFullscreenPromo) {
+                    promoOverlay.classList.toggle('transparent-bg', !!state.promoTransparentBg);
                     if (!!state.promoTypeIsText) {
                         promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null;
                         promoTextEl.innerText = state.promoText || "";
@@ -673,7 +641,7 @@
                     }
                     promoOverlay.classList.add('visible');
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
+                    promoOverlay.classList.remove('visible'); promoOverlay.classList.remove('transparent-bg'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
                 }
 
                 document.documentElement.className = '';
@@ -747,7 +715,6 @@
                     txtNode.style.color = state.logoFontColor || '#ffffff'; txtNode.style.display = 'block';
                 }
 
-                // ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ
                 const boardPromoPanel = document.getElementById('board-promo-panel');
                 if (boardPromoPanel) {
                     boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
@@ -972,7 +939,6 @@
                         }
                     }
 
-                    // ===== ОБРОБКА АВТО-СТАТИСТИКИ ТА ДИНАМІЧНИХ СТОВПЧИКІВ =====
                     if (state.showStatsOverlay || statsAutoActive) {
                         const isUa = state.cornerSlideLang === 'ua';
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
@@ -980,7 +946,6 @@
                             document.getElementById('lbl-game-time-footer').firstChild.textContent = (isUa ? 'Гейм' : 'Game') + ': ';
                         }
 
-                        // Перевірка та показ логотипу турніру зліва
                         const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
                         const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
                         const tourneyLogo = state.tournamentLogoUrl || state.tournamentLogoSrc || (state.showLogo ? (state.logoUrl || state.logoSrc) : null);
@@ -994,7 +959,6 @@
                             statsLogoBox.classList.remove('visible');
                         }
 
-                        // Розрахунок статистики
                         let totalGamesAuto1 = 0, totalGamesAuto2 = 0;
                         for (let i = 1; i <= activeSet; i++) { 
                             totalGamesAuto1 += state[`t1_s${i}`] || 0; 
@@ -1011,24 +975,23 @@
                         const gp1 = state.p1GoldenPoints || 0, gp2 = state.p2GoldenPoints || 0;
                         const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
 
-                        // Динамічне формування тільки тих стовпчиків, де значення > 0
                         const cols = [];
                         if (miniSetsWon1 > 0 || miniSetsWon2 > 0 || activeSet > 1) {
-                            cols.push({ title: isUa ? 'СЕТ' : 'SET', v1: miniSetsWon1, v2: miniSetsWon2 });
+                            cols.push({ title: isUa ? 'СЕТ' : 'SET', v1: miniSetsWon1, v2: miniSetsWon2, width: '60px' });
                         }
-                        cols.push({ title: isUa ? 'ГЕЙМИ' : 'GAMES', v1: totalGamesAuto1, v2: totalGamesAuto2 });
+                        cols.push({ title: isUa ? 'ГЕЙМИ' : 'GAMES', v1: totalGamesAuto1, v2: totalGamesAuto2, width: '65px' });
 
                         if (bp1 > 0 || bp2 > 0) {
-                            cols.push({ title: isUa ? 'БРЕЙК' : 'BP', v1: bp1, v2: bp2 });
+                            cols.push({ title: isUa ? 'БРЕЙК-ПОІНТ' : 'BREAK POINT', v1: bp1, v2: bp2, width: '130px' });
                         }
                         if (gp1 > 0 || gp2 > 0) {
-                            cols.push({ title: isUa ? 'ГОЛДЕН' : 'GP', v1: gp1, v2: gp2 });
+                            cols.push({ title: isUa ? 'ГОЛДЕН-ПОІНТ' : 'GOLDEN POINT', v1: gp1, v2: gp2, width: '130px' });
                         }
                         if (df1 > 0 || df2 > 0) {
-                            cols.push({ title: isUa ? 'ДАБЛФОЛ' : 'DF', v1: df1, v2: df2 });
+                            cols.push({ title: isUa ? 'ДАБЛ ФОЛ' : 'DOUBLE FAULT', v1: df1, v2: df2, width: '110px' });
                         }
 
-                        const gridCss = `1fr ${cols.map(() => '56px').join(' ')}`;
+                        const gridCss = `1fr ${cols.map(c => c.width).join(' ')}`;
 
                         const collblsEl = document.getElementById('stats-broadcast-collbls');
                         collblsEl.style.gridTemplateColumns = gridCss;
