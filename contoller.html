@@ -19,10 +19,8 @@
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
-        
-        input[type="text"], input[type="number"], select { flex: 1; width: 100%; max-width: 220px; box-sizing: border-box; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
+        input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
-        
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
         .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
         .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
@@ -160,6 +158,21 @@
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
+                <div class="switch-row">
+                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
+                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
+                </div>
+                <div class="row" style="margin-top:6px;">
+                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
+                </div>
+                <div class="row" style="margin-top:6px; align-items:center;">
+                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
+                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
+                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -223,7 +236,7 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option>
+                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option>
                 </select>
             </div>
 
@@ -270,7 +283,7 @@
                         <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
                     </div>
                     <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл:</span>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл (автоматично стискається і підганяється точно під розмір панелі лого 120×96):</span>
                         <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
                             📁 Вибрати зображення лого
                             <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
@@ -278,7 +291,7 @@
                         <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
                     </div>
                     <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого:</span>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого (якщо зображення не задано):</span>
                         <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
                     </div>
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
@@ -291,18 +304,7 @@
                     <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
                     <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
                 </div>
-                
-                <div style="margin-bottom:12px; border-bottom:1px dashed #444; padding-bottom:10px;">
-                    <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Маленький логотип у панелі:</span>
-                    <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
-                        <input type="text" id="board-promo-logo-url" placeholder="URL логотипу" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateBoardPromoLogoUrl(this.value)">
-                        <button type="button" class="btn" style="padding:6px 10px; font-size:10px; background:#444;" onclick="document.getElementById('board-promo-logo-file').click()">📁 Файл</button>
-                        <input type="file" id="board-promo-logo-file" accept="image/*" style="display:none" onchange="uploadBoardPromoLogoFile(event)">
-                        <button type="button" class="btn btn-red" style="padding:6px 10px; font-size:10px;" onclick="clearBoardPromoLogoData()">✕ Скинути</button>
-                    </div>
-                    <div id="board-promo-logo-status" style="font-size:10px; color:#f9a8d4;">Лого не вибрано</div>
-                </div>
-
+                <div style="font-size:10px; color:#888; margin-bottom:8px;">Виїжджає прямо під табло рахунку, рухається й масштабується разом з ним. До 5 рядків тексту, кожен з власним розміром, кольором і фоном (для виділення, як плашка "QATAR AIRWAYS" на прикладі).</div>
                 <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
             </div>
 
@@ -321,6 +323,7 @@
                     </select>
                 </div>
                 <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
+                <div style="font-size:10px; color:#888; margin:6px 0;">Розташовується по центру зверху екрана, окремо від табла рахунку — щоб не перекривати його, тримайте табло в звичному кутку (не по центру зверху).</div>
                 <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
@@ -347,7 +350,7 @@
                     </div>
                     
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл:</span>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл безпосередньо з пристрою (стискати):</span>
                         <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
                             📁 Вибрати Фото чи короткий Відеоролик
                             <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
@@ -360,9 +363,15 @@
                         <input type="checkbox" id="promo-type-video-checkbox" style="width:18px; height:18px;" onchange="togglePromoTypeVideo(this.checked)">
                     </div>
 
+                    <div class="switch-row" style="background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px;">
+                        <span style="font-size:11px; color:#fff; font-weight:700;">Напівпрозорий фон (для фото-таблиць):</span>
+                        <input type="checkbox" id="promo-transparent-bg-checkbox" style="width:18px; height:18px;" onchange="togglePromoTransparentBg(this.checked)">
+                    </div>
+                    <div style="font-size:9px; color:#aaa; margin-top:-4px;">Знімає чорний непрозорий фон (робить напівпрозорим з розмиттям) і вписує фото-таблицю цілком без обрізання[cite: 3].</div>
+
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані:</span>
-                        <textarea id="promo-text-input" placeholder="Введіть текст..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
+                        <textarea id="promo-text-input" placeholder="Введіть текст, який зʼявиться на весь екран..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
                         <div class="row" style="margin-top:8px;">
                             <span style="font-size:11px; color:#ccc;">Колір тексту:</span>
                             <input type="color" id="promo-text-color-input" value="#ffffff" style="flex:0 0 60px; height:34px; padding:2px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updatePromoTextColor(this.value)">
@@ -378,6 +387,13 @@
                     </div>
 
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
+
+                    <div id="admin-promo-broadcast-row" style="display:none; border-top:1px dashed #7c3aed; padding-top:10px; margin-top:4px; flex-direction:column; gap:6px;">
+                        <div style="font-size:10px; color:#a78bfa; font-weight:800; text-transform:uppercase;">👑 ADMIN — Глобальна трансляція заставки</div>
+                        <button class="btn" style="padding:10px; font-weight:800; background:#7c3aed; color:#fff;" onclick="broadcastPromoToAllCourts(true)">🌐 Показати цю заставку на ВСІХ кортах</button>
+                        <button class="btn" style="padding:8px; font-size:11px; background:#444;" onclick="broadcastPromoToAllCourts(false)">Вимкнути заставку на ВСІХ кортах</button>
+                        <div id="admin-promo-broadcast-status" style="font-size:10px; color:#a78bfa; text-align:center;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,7 +401,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -509,7 +525,9 @@
         }
 
         window.resetAllCourts = function() {
-            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?")) return;
+            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
+            if (!confirm("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
+
             const freshCourtState = {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
                 scale: 1, posX: 30, posY: 30,
@@ -526,11 +544,10 @@
                 showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4,
                 sponsorLogos: new Array(10).fill(""), sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
                 showBoardPromoPanel: false, boardPromoLines: new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
-                boardPromoLogoUrl: "", boardPromoLogoSrc: "",
                 showMainBoard: true, showBreak: false, showQrCode: false,
                 qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
-                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60,
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
                 t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
             };
 
@@ -541,6 +558,8 @@
             Promise.all(writes).then(() => {
                 alert("✅ Усі 10 кортів скинуто до чистого стану.");
                 window.location.reload();
+            }).catch((err) => {
+                alert("❌ Помилка під час скидання: " + err.message);
             });
         }
 
@@ -548,10 +567,11 @@
             const file = e.target.files[0]; if (!file) return;
             const statusEl = document.getElementById('promo-file-status');
             const isVideo = file.type.startsWith('video/');
+            
             if (isVideo) {
                 if (file.size > 2.5 * 1024 * 1024) {
-                    alert("⚠️ Відео занадто важке! До 2.5 MB.");
-                    statusEl.innerText = "❌ Завелике відео";
+                    alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
+                    statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
                     return;
                 }
                 statusEl.innerText = "⏳ Обробка відео...";
@@ -572,16 +592,19 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width; let height = img.height;
                         const max_size = 1280;
+                        
                         if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
                         else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+                        
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
                         state.promoSrc = compressedBase64; state.promoUrl = ""; 
                         state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
                         document.getElementById('promo-url-input').value = "";
-                        statusEl.innerText = "✅ Фото стиснуто"; set(matchRef, state);
+                        statusEl.innerText = "✅ Фото оптимізовано та збережено"; set(matchRef, state);
                     };
                     img.src = evt.target.result;
                 };
@@ -597,6 +620,7 @@
             document.getElementById('promo-file-status').innerText = "Використовується URL"; set(matchRef, state);
         };
         window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
+        window.togglePromoTransparentBg = function(c) { state.promoTransparentBg = c; set(matchRef, state); };
 
         let pTextTimeout = null;
         window.updatePromoText = function(v) {
@@ -614,10 +638,52 @@
         window.clearPromoData = function() {
             state.promoUrl = ""; state.promoSrc = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
             state.promoText = ""; state.promoTypeIsText = false; state.promoTextColor = "#ffffff"; state.promoTextSize = 60;
+            state.promoTransparentBg = false;
             document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
             document.getElementById('promo-type-video-checkbox').checked = false; document.getElementById('promo-file-status').innerText = "Файл не вибрано";
             document.getElementById('promo-text-input').value = ""; document.getElementById('promo-type-text-checkbox').checked = false;
+            document.getElementById('promo-text-color-input').value = "#ffffff"; document.getElementById('promo-text-size-input').value = 60;
+            document.getElementById('promo-transparent-bg-checkbox').checked = false;
             set(matchRef, state);
+        };
+
+        // ── ГЛОБАЛЬНА ТРАНСЛЯЦІЯ ЗАСТАВКИ НА ВСІ КОРИТИ ДЛЯ АДМІНА ──
+        window.broadcastPromoToAllCourts = function(enable) {
+            const statusEl = document.getElementById('admin-promo-broadcast-status');
+            if (enable && !state.promoUrl && !state.promoSrc && !(state.promoTypeIsText && state.promoText)) {
+                statusEl.style.color = "#ef4444";
+                statusEl.innerText = "⚠️ Спочатку завантажте фото/відео/текст заставки на цьому корті";
+                return;
+            }
+            if (!confirm(enable ? "Показати цю заставку на ВСІХ 10 кортах одразу?" : "Вимкнути заставку на ВСІХ 10 кортах?")) return;
+
+            const promoFields = {
+                showFullscreenPromo: enable,
+                promoUrl: state.promoUrl || "", promoSrc: state.promoSrc || "", promoTypeIsVideo: !!state.promoTypeIsVideo,
+                promoText: state.promoText || "", promoTypeIsText: !!state.promoTypeIsText,
+                promoTextColor: state.promoTextColor || "#ffffff", promoTextSize: state.promoTextSize || 60,
+                promoTransparentBg: !!state.promoTransparentBg
+            };
+
+            const writes = [];
+            for (let i = 1; i <= 10; i++) {
+                const courtRef = ref(db, 'padel/courts/court_' + i);
+                writes.push(
+                    get(courtRef).then((snap) => {
+                        const courtState = snap.val() || {};
+                        Object.assign(courtState, promoFields);
+                        return set(courtRef, courtState);
+                    })
+                );
+            }
+            statusEl.style.color = "#a78bfa"; statusEl.innerText = "⏳ Розсилаю на всі корти...";
+            Promise.all(writes).then(() => {
+                statusEl.style.color = "#4ade80";
+                statusEl.innerText = enable ? "✅ Увімкнено на всіх 10 кортах" : "✅ Вимкнено на всіх 10 кортах";
+            }).catch((err) => {
+                statusEl.style.color = "#ef4444";
+                statusEl.innerText = "❌ Помилка: " + err.message;
+            });
         };
 
         window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
@@ -629,7 +695,8 @@
         window.updateLogoText = function(v) { state.customLogoText = v; set(matchRef, state); };
 
         window.uploadAndCompressLogoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
+            const file = e.target.files[0];
+            if (!file) return;
             const statusEl = document.getElementById('logo-file-status');
             statusEl.innerText = "⏳ Стиснення лого...";
             const reader = new FileReader();
@@ -645,64 +712,21 @@
                     const drawW = img.width * scale, drawH = img.height * scale;
                     const dx = (targetW - drawW) / 2, dy = (targetH - drawH) / 2;
                     ctx.drawImage(img, dx, dy, drawW, drawH);
-                    state.logoSrc = canvas.toDataURL('image/png'); state.logoUrl = "";
+
+                    const compressedBase64 = canvas.toDataURL('image/png');
+                    state.logoSrc = compressedBase64; state.logoUrl = "";
                     document.getElementById('logo-url-input').value = "";
-                    statusEl.innerText = "✅ Лого збережено";
+                    statusEl.innerText = "✅ Лого стиснуто та збережено (120×96)";
                     set(matchRef, state);
                 };
+                img.onerror = function() { statusEl.innerText = "❌ Не вдалось завантажити зображення"; };
                 img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
         };
 
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
-
-        // ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ =====
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
-
-        window.updateBoardPromoLogoUrl = function(url) {
-            state.boardPromoLogoUrl = url; state.boardPromoLogoSrc = "";
-            document.getElementById('board-promo-logo-status').innerText = url ? "Використовується URL" : "Лого не вибрано";
-            set(matchRef, state);
-        };
-
-        window.uploadBoardPromoLogoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const statusEl = document.getElementById('board-promo-logo-status');
-            statusEl.innerText = "⏳ Стиснення...";
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const maxW = 300, maxH = 100;
-                    const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-                    canvas.width = Math.round(img.width * scale);
-                    canvas.height = Math.round(img.height * scale);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    state.boardPromoLogoSrc = canvas.toDataURL('image/png');
-                    state.boardPromoLogoUrl = "";
-                    document.getElementById('board-promo-logo-url').value = "";
-                    statusEl.innerText = "✅ Лого додано";
-                    set(matchRef, state);
-                };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.clearBoardPromoLogoData = function() {
-            state.boardPromoLogoUrl = "";
-            state.boardPromoLogoSrc = "";
-            const urlInput = document.getElementById('board-promo-logo-url');
-            if (urlInput) urlInput.value = "";
-            const fileInput = document.getElementById('board-promo-logo-file');
-            if (fileInput) fileInput.value = "";
-            const statusEl = document.getElementById('board-promo-logo-status');
-            if (statusEl) statusEl.innerText = "Лого не вибрано";
-            set(matchRef, state);
-        };
 
         function ensureBoardPromoLinesArray() {
             if (!Array.isArray(state.boardPromoLines) || state.boardPromoLines.length < 5) {
@@ -754,7 +778,6 @@
             state.boardPromoLines[i - 1].bg = "";
             set(matchRef, state);
         };
-
         window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
         window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
@@ -800,7 +823,8 @@
         };
 
         window.uploadSponsorLogoFile = function(i, e) {
-            const file = e.target.files[0]; if (!file) return;
+            const file = e.target.files[0];
+            if (!file) return;
             const statusEl = document.getElementById('sponsor-logo-status-' + i);
             if (statusEl) statusEl.innerText = "⏳";
             const reader = new FileReader();
@@ -814,11 +838,15 @@
                     canvas.height = Math.round(img.height * scale);
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const compressedBase64 = canvas.toDataURL('image/png');
                     ensureSponsorLogosArray();
-                    state.sponsorLogos[i - 1] = canvas.toDataURL('image/png');
+                    state.sponsorLogos[i - 1] = compressedBase64;
+                    const urlInput = document.getElementById('sponsor-logo-url-' + i);
+                    if (urlInput) urlInput.value = "";
                     if (statusEl) statusEl.innerText = "✅";
                     set(matchRef, state);
                 };
+                img.onerror = function() { if (statusEl) statusEl.innerText = "❌"; };
                 img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
@@ -828,6 +856,7 @@
             state.logoUrl = ""; state.logoSrc = ""; state.showLogo = false; state.customLogoText = "";
             document.getElementById('logo-url-input').value = ""; document.getElementById('logo-text-input').value = "";
             document.getElementById('logo-visibility-checkbox').checked = false;
+            document.getElementById('logo-file-status').innerText = "Файл не вибрано";
             set(matchRef, state);
         };
 
@@ -851,25 +880,28 @@
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
                 sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0,
                 showBoardPromoPanel: state.showBoardPromoPanel || false,
+                showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
                 boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
-                boardPromoLogoUrl: "", boardPromoLogoSrc: "",
                 showMainBoard: true, showBreak: false, showQrCode: false, 
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
-                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60,
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
                 t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
-            if (document.activeElement !== document.getElementById('p1-name-input')) document.getElementById('p1-name-input').value = state.p1name || "";
-            if (document.activeElement !== document.getElementById('p2-name-input')) document.getElementById('p2-name-input').value = state.p2name || "";
-
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
             document.getElementById('mode-stats-between-games-checkbox').checked = !!state.showStatsBetweenGames;
+            if (document.getElementById('stats-left-logo-visibility-checkbox')) {
+                document.getElementById('stats-left-logo-visibility-checkbox').checked = !!state.showStatsLeftLogo;
+                if (!state.statsLeftLogoSrc && document.activeElement !== document.getElementById('stats-left-logo-url-input')) {
+                    document.getElementById('stats-left-logo-url-input').value = state.statsLeftLogoUrl || "";
+                }
+            }
 
             if (document.getElementById('sponsor-logos-visibility-checkbox')) {
                 document.getElementById('sponsor-logos-visibility-checkbox').checked = !!state.showSponsorLogos;
@@ -891,13 +923,6 @@
 
             if (document.getElementById('board-promo-visibility-checkbox')) {
                 document.getElementById('board-promo-visibility-checkbox').checked = !!state.showBoardPromoPanel;
-                if (!state.boardPromoLogoSrc && document.activeElement !== document.getElementById('board-promo-logo-url')) {
-                    document.getElementById('board-promo-logo-url').value = state.boardPromoLogoUrl || "";
-                }
-                const promoLogoStatus = document.getElementById('board-promo-logo-status');
-                if (promoLogoStatus) {
-                    promoLogoStatus.innerText = state.boardPromoLogoSrc ? "✅ Лого додано" : (state.boardPromoLogoUrl ? "Використовується URL" : "Лого не вибрано");
-                }
                 const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
                 for (let i = 1; i <= 5; i++) {
                     const cfg = promoLines[i - 1] || {};
@@ -934,6 +959,7 @@
                 document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
                 if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
+                document.getElementById('promo-transparent-bg-checkbox').checked = !!state.promoTransparentBg;
                 if (document.activeElement !== document.getElementById('promo-text-input')) document.getElementById('promo-text-input').value = state.promoText || "";
                 document.getElementById('promo-type-text-checkbox').checked = !!state.promoTypeIsText;
                 document.getElementById('promo-text-color-input').value = state.promoTextColor || "#ffffff";
@@ -944,7 +970,7 @@
                 document.getElementById('logo-visibility-checkbox').checked = !!state.showLogo;
                 if (!state.logoSrc) document.getElementById('logo-url-input').value = state.logoUrl || "";
                 if (document.activeElement !== document.getElementById('logo-text-input')) document.getElementById('logo-text-input').value = state.customLogoText || "";
-                document.getElementById('logo-file-status').innerText = state.logoSrc ? "✅ Лого збережено" : (state.logoUrl ? "Використовується URL" : "Файл не вибрано");
+                document.getElementById('logo-file-status').innerText = state.logoSrc ? "✅ Лого стиснуто та збережено (120×96)" : (state.logoUrl ? "Використовується URL" : "Файл не вибрано");
             }
 
             const badge = document.getElementById('mode-status');
@@ -1054,6 +1080,39 @@
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); }
         window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
+
+        window.toggleStatsLeftLogo = function(c) { state.showStatsLeftLogo = c; set(matchRef, state); }
+        window.updateStatsLeftLogoUrl = function(url) {
+            state.statsLeftLogoUrl = url; state.statsLeftLogoSrc = "";
+            document.getElementById('stats-left-logo-status').innerText = "";
+            set(matchRef, state);
+        }
+        window.uploadStatsLeftLogoFile = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('stats-left-logo-status');
+            statusEl.innerText = "⏳ Стиснення...";
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const maxW = 200, maxH = 110;
+                    const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    state.statsLeftLogoSrc = canvas.toDataURL('image/png'); state.statsLeftLogoUrl = "";
+                    document.getElementById('stats-left-logo-url-input').value = "";
+                    statusEl.innerText = "✅ Завантажено";
+                    set(matchRef, state);
+                };
+                img.onerror = function() { statusEl.innerText = "❌ Помилка"; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
         window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
@@ -1084,10 +1143,6 @@
         
         let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
 
-        function startSponsorLogoCarousel(logos, intervalSec) {
-            // Підтримка функціоналу каруселі спонсорів
-        }
-
         function recalculateRibbons(s) {
             if (s.isAmericano || s.isMexicano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
             if (!!s.isTiebreak) { s.activeMatchRibbon = (s.p1Index >= 6 && s.p1Index>s.p2Index) || (s.p2Index >= 6 && s.p2Index>s.p1Index) ? ((s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT") : "TIEBREAK_POINT"; return; }
@@ -1100,7 +1155,6 @@
             if(isG) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
             s.activeMatchRibbon = (p1G && s.currentServer===2) || (p2G && s.currentServer===1) ? "BREAK_POINT" : "GAME_POINT";
         }
-
         document.addEventListener("DOMContentLoaded", () => {
             renderSponsorLogoRows();
             renderBoardPromoLineRows();
@@ -1110,6 +1164,7 @@
                 document.getElementById('admin-badge').classList.add('visible');
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
+                document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
             }
         });
         initCourtConnection();
