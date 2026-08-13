@@ -19,10 +19,7 @@
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; box-sizing: border-box; width: 100%; max-width: 100%; overflow: hidden; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; }
         .row:last-child { margin-bottom: 0; }
-        
-        /* ВИПРАВЛЕНО: Поля вводу всередині .row тепер мають обмеження min-width: 0 і не вилазять за межі */
         .row input[type="text"], .row input[type="number"], .row select { flex: 1; min-width: 0; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
-        
         input[type="text"], input[type="number"], select { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; box-sizing: border-box; width: 100%; max-width: 100%; }
         input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
         .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; box-sizing: border-box; }
@@ -967,13 +964,19 @@
             
             if(document.getElementById('promo-visibility-checkbox')) {
                 document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
-                if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
+                if (!state.promoSrc && document.activeElement !== document.getElementById('promo-url-input')) {
+                    document.getElementById('promo-url-input').value = state.promoUrl || "";
+                }
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
                 document.getElementById('promo-transparent-bg-checkbox').checked = !!state.promoTransparentBg;
                 if (document.activeElement !== document.getElementById('promo-text-input')) document.getElementById('promo-text-input').value = state.promoText || "";
                 document.getElementById('promo-type-text-checkbox').checked = !!state.promoTypeIsText;
                 document.getElementById('promo-text-color-input').value = state.promoTextColor || "#ffffff";
                 document.getElementById('promo-text-size-input').value = state.promoTextSize || 60;
+                
+                if (!state.promoUrl && !state.promoSrc && !state.promoText) {
+                    document.getElementById('promo-file-status').innerText = "Файл не вибрано";
+                }
             }
 
             if(document.getElementById('logo-visibility-checkbox')) {
