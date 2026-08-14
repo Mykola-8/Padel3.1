@@ -79,16 +79,17 @@
         .lock-status-badge.visible { display: block; }
         .admin-badge { position: fixed; top: 12px; left: 15px; background: #7c3aed; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; z-index: 101; display: none; }
         .admin-badge.visible { display: block; }
+        .admin-only { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="admin-badge" id="admin-badge">👑 ADMIN</div>
 
-    <nav class="nav-tabs">
+    <nav class="nav-tabs" id="nav-tabs-container">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
-        <button class="nav-btn" onclick="switchTab('tab-history')"><span>📜</span>Історія</button>
-        <button class="nav-btn" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
+        <button class="nav-btn admin-only" id="nav-btn-history" onclick="switchTab('tab-history')"><span>📜</span>Історія</button>
+        <button class="nav-btn admin-only" id="nav-btn-players" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
         <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
     </nav>
 
@@ -135,7 +136,7 @@
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
-        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+        <div class="card admin-only" id="admin-camera-panel" style="border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                 <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
@@ -180,14 +181,16 @@
         </div>
     </div>
 
-    <div id="tab-history" class="tab-content">
+    <!-- ВКЛАДКА ІСТОРІЯ (ТІЛЬКИ ДЛЯ АДМІНА) -->
+    <div id="tab-history" class="tab-content admin-only">
         <h2>📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
             <div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія матчів завантажується...</div>
         </div>
     </div>
 
-    <div id="tab-players" class="tab-content">
+    <!-- ВКЛАДКА ГРАВЦІ (ТІЛЬКИ ДЛЯ АДМІНА) -->
+    <div id="tab-players" class="tab-content admin-only">
         <h2>📊 База та статистика гравців</h2>
         <div class="card">
             <input type="text" id="player-search-input" placeholder="🔍 Пошук гравця за ім'ям..." oninput="filterPlayers(this.value)">
@@ -209,24 +212,26 @@
             <button class="btn btn-gold" onclick="saveProfileData()">Зберегти профіль</button>
         </div>
 
-        <h2>➕ Створити нового гравця в базі</h2>
-        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
-            <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я гравця">
-            <select id="new-player-hand">
-                <option value="Права">Права рука</option>
-                <option value="Ліва">Ліва рука</option>
-            </select>
-            <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця до бази</button>
-        </div>
+        <div class="admin-only" style="display:flex; flex-direction:column; gap:12px;">
+            <h2>➕ Створити нового гравця в базі</h2>
+            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+                <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я гравця">
+                <select id="new-player-hand">
+                    <option value="Права">Права рука</option>
+                    <option value="Ліва">Ліва рука</option>
+                </select>
+                <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця до бази</button>
+            </div>
 
-        <h2>🚨 Глобальне керування базою даних</h2>
-        <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
-            <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану: назви команд, рахунки, логотипи, зображення-заставки та анімації. Структура бази (самі корти) лишається — просто весь вміст очищається.</p>
-            <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
-        </div>
-        <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
-            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
-            <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
+            <h2>🚨 Глобальне керування базою даних</h2>
+            <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
+                <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану: назви команд, рахунки, логотипи, зображення-заставки та анімації. Структура бази (самі корти) лишається — просто весь вміст очищається.</p>
+                <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
+            </div>
+            <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
+                <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
+                <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
+            </div>
         </div>
     </div>
 
@@ -272,7 +277,7 @@
                 <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+                <button class="btn btn-red admin-only" id="admin-unlock-btn" style="padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
             </div>
 
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
@@ -392,7 +397,7 @@
 
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
 
-                    <div id="admin-promo-broadcast-row" style="display:none; border-top:1px dashed #7c3aed; padding-top:10px; margin-top:4px; flex-direction:column; gap:6px;">
+                    <div id="admin-promo-broadcast-row" class="admin-only" style="border-top:1px dashed #7c3aed; padding-top:10px; margin-top:4px; flex-direction:column; gap:6px;">
                         <div style="font-size:10px; color:#a78bfa; font-weight:800; text-transform:uppercase;">👑 ADMIN — Глобальна трансляція заставки</div>
                         <button class="btn" style="padding:10px; font-weight:800; background:#7c3aed; color:#fff;" onclick="broadcastPromoToAllCourts(true)">🌐 Показати цю заставку на ВСІХ кортах</button>
                         <button class="btn" style="padding:8px; font-size:11px; background:#444;" onclick="broadcastPromoToAllCourts(false)">Вимкнути заставку на ВСІХ кортах</button>
@@ -440,6 +445,7 @@
         };
 
         window.sendCameraCommand = function(camNumber) {
+            if (!isAdmin) return;
             state.cameraCommand = { key: camNumber, ts: Date.now() };
             if (camNumber === 'replay') { state.replayLabelTrigger = Date.now(); }
             set(matchRef, state);
@@ -476,6 +482,7 @@
         }
 
         onValue(ref(db, 'padel/history'), (snapshot) => {
+            if (!isAdmin) return;
             const historyData = snapshot.val(); const container = document.getElementById('history-container');
             if (!historyData) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>'; return; }
             container.innerHTML = '';
@@ -486,10 +493,15 @@
             });
         });
 
-        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
+        onValue(ref(db, 'padel/players'), (snapshot) => { 
+            allPlayersData = snapshot.val() || {}; 
+            if (isAdmin) renderPlayersList(allPlayersData); 
+        });
 
         function renderPlayersList(playersObj) {
+            if (!isAdmin) return;
             const container = document.getElementById('players-container');
+            if (!container) return;
             if (Object.keys(playersObj).length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено.</div>'; return; }
             container.innerHTML = '';
             Object.keys(playersObj).forEach(key => {
@@ -500,16 +512,18 @@
         }
 
         window.filterPlayers = function(query) {
+            if (!isAdmin) return;
             if (!query) { renderPlayersList(allPlayersData); return; }
             const filtered = {};
             Object.keys(allPlayersData).forEach(k => { if (allPlayersData[k].name && allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) filtered[k] = allPlayersData[k]; });
             renderPlayersList(filtered);
         }
 
-        window.deleteMatchHistory = function(key) { if (confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); }
-        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
+        window.deleteMatchHistory = function(key) { if (isAdmin && confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); }
+        window.deletePlayer = function(key) { if (isAdmin && confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
 
         window.createNewPlayer = function() {
+            if (!isAdmin) return;
             const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
             if (!name) { alert("Введіть ім'я."); return; }
             push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
@@ -523,12 +537,14 @@
         }
 
         window.hardResetAllFirebase = function() {
+            if (!isAdmin) return;
             if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
                 remove(ref(db, 'padel')).then(() => window.location.reload());
             }
         }
 
         window.resetAllCourts = function() {
+            if (!isAdmin) return;
             if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
             if (!confirm("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
 
@@ -652,6 +668,7 @@
         };
 
         window.broadcastPromoToAllCourts = function(enable) {
+            if (!isAdmin) return;
             const statusEl = document.getElementById('admin-promo-broadcast-status');
             if (enable && !state.promoUrl && !state.promoSrc && !(state.promoTypeIsText && state.promoText)) {
                 statusEl.style.color = "#ef4444";
@@ -1178,6 +1195,9 @@
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
                 document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.style.display = (el.tagName === 'DIV') ? 'flex' : 'block';
+                });
             }
         });
         initCourtConnection();
