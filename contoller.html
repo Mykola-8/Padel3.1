@@ -61,18 +61,6 @@
         .player-info { display: flex; flex-direction: column; gap: 2px; }
         .player-name { font-weight: 700; font-size: 14px; }
         .player-stats-mini { font-size: 11px; color: #aaa; }
-        .controls-locked { filter: grayscale(0.8) brightness(0.55); transition: filter 0.3s ease; }
-        .controls-locked button, .controls-locked input, .controls-locked select, .controls-locked textarea, .controls-locked label {
-            pointer-events: none !important;
-            opacity: 0.55;
-        }
-        .controls-locked #court-selector, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
-            pointer-events: auto !important;
-            opacity: 1 !important;
-            filter: none !important;
-        }
-        .lock-status-badge { background: #7c2d12; color: #ffddc2; padding: 8px; font-size: 11px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: none; }
-        .lock-status-badge.visible { display: block; }
         .admin-badge { position: fixed; top: 12px; left: 15px; background: #7c3aed; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; z-index: 101; display: none; }
         .admin-badge.visible { display: block; }
         .admin-only { display: none !important; }
@@ -82,6 +70,7 @@
 
     <div class="admin-badge" id="admin-badge">👑 ADMIN</div>
 
+    <!-- Навігація: для звичайного користувача тільки Пульт та Профіль -->
     <nav class="nav-tabs" id="nav-tabs-container">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
         <button class="nav-btn admin-only" id="nav-btn-groups" onclick="switchTab('tab-groups')"><span>🏆</span>Групи</button>
@@ -89,6 +78,7 @@
         <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
     </nav>
 
+    <!-- ВКЛАДКА ПУЛЬТ -->
     <div id="tab-remote" class="tab-content active">
         <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px;">
             <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
@@ -102,9 +92,7 @@
             </div>
         </div>
 
-        <h2>Пульт Padel Pro (Master)</h2>
-
-        <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
+        <h2>Пульт Padel Pro</h2>
 
         <div class="preview-scoreboard">
             <div class="preview-row">
@@ -132,6 +120,7 @@
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
+        <!-- Адмінський блок керування камерами -->
         <div class="card admin-only" id="admin-camera-panel" style="border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
@@ -143,7 +132,6 @@
                 <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
                 <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
             </div>
-            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
 
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
@@ -159,26 +147,11 @@
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
-                <div class="switch-row">
-                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
-                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
-                </div>
-                <div class="row" style="margin-top:6px;">
-                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
-                </div>
-                <div class="row" style="margin-top:6px; align-items:center;">
-                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
-                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
-                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- ВКЛАДКА ГРУПИ (ТІЛЬКИ АДМІН) -->
-    <div id="tab-groups" class="tab-content">
+    <!-- ВКЛАДКА ГРУПИ (ТІЛЬКИ ДЛЯ АДМІНА) -->
+    <div id="tab-groups" class="tab-content admin-only">
         <h2>🏆 Групи та Турнірні таблиці</h2>
         <div class="card" style="display:flex; flex-direction:column; gap:10px;">
             <div style="font-size:11px; font-weight:700; color:#c69f66; text-transform:uppercase;">Відображення на трансляції (в OBS):</div>
@@ -206,24 +179,13 @@
                     <option value="3">3</option><option value="4" selected>4</option>
                 </select>
             </div>
-            <div class="row">
-                <span style="font-size:12px;">Вигляд таблиці:</span>
-                <select id="groups-table-style" onchange="updateGroupsConfig()">
-                    <option value="classic">Класична (Статистика)</option>
-                    <option value="matrix">Шахова (Сітка матчів)</option>
-                </select>
-            </div>
-            <div class="switch-row">
-                <span style="font-size:12px;">Показати тільки назви команд (шахова):</span>
-                <input type="checkbox" id="groups-matrix-short-checkbox" style="width:20px; height:20px;" onchange="updateGroupsConfig()">
-            </div>
         </div>
 
         <div id="groups-editor-container" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
 
-    <!-- ВКЛАДКА ГРАВЦІ (ТІЛЬКИ АДМІН) -->
-    <div id="tab-players" class="tab-content">
+    <!-- ВКЛАДКА ГРАВЦІ (ТІЛЬКИ ДЛЯ АДМІНА) -->
+    <div id="tab-players" class="tab-content admin-only">
         <h2>📊 База та статистика гравців</h2>
         <div class="card">
             <input type="text" id="player-search-input" placeholder="🔍 Пошук гравця за ім'ям..." oninput="filterPlayers(this.value)">
@@ -231,160 +193,52 @@
         <div id="players-container" style="display:flex; flex-direction:column; gap:10px; margin-top:5px;"></div>
     </div>
 
+    <!-- ВКЛАДКА ПРОФІЛЬ -->
     <div id="tab-profile" class="tab-content">
-        <h2>👤 Налаштування профілю користувача</h2>
+        <h2>👤 Налаштування профілю</h2>
         <div class="card" style="display:flex; flex-direction:column; gap:10px;">
             <div>
-                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Ім'я та Прізвище організатора:</span>
-                <input type="text" id="profile-name" value="Коля" placeholder="Введіть ваше ім'я">
+                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Ім'я та Прізвище:</span>
+                <input type="text" id="profile-name" value="Коля" placeholder="Ваше ім'я">
             </div>
             <div>
                 <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Клуб / Організація:</span>
-                <input type="text" id="profile-club" value="Padel Khmelnytskyi" placeholder="Назва клубу">
+                <input type="text" id="profile-club" value="Padel Khmelnytskyi" placeholder="Клуб">
             </div>
             <button class="btn btn-gold" onclick="saveProfileData()">Зберегти профіль</button>
         </div>
 
-        <div class="admin-only" style="display:flex; flex-direction:column; gap:12px;">
-            <h2>➕ Створити нового гравця в базі</h2>
+        <!-- Додаткові інструменти скидання лише для Адміна -->
+        <div class="admin-only" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+            <h2>➕ Створити нового гравця</h2>
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
-                <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я гравця">
+                <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я">
                 <select id="new-player-hand">
                     <option value="Права">Права рука</option>
                     <option value="Ліва">Ліва рука</option>
                 </select>
-                <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця до бази</button>
+                <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця</button>
             </div>
 
-            <h2>🚨 Глобальне керування базою даних</h2>
-            <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
-                <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану.</p>
-                <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
-            </div>
+            <h2>🚨 База даних</h2>
             <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
-                <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Повністю очистити усю базу даних Firebase.</p>
-                <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
+                <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ БАЗИ (FIREBASE)</button>
             </div>
         </div>
     </div>
 
+    <!-- МОДАЛЬНЕ ВІКНО НАЛАШТУВАНЬ КОРТУ -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
             <div class="modal-title">⚙️ Налаштування корту</div>
             <button class="modal-close-btn" onclick="closeModalSettings()">Закрити</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:14px;">
-            
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
-                <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option>
-                </select>
-            </div>
-
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)"></div>
             </div>
-
-            <div class="card">
-                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
-                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
-                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
-                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
-                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
-                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
-                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
-                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
-            </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
-                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
-                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
-                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
-                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red admin-only" id="admin-unlock-btn" style="padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-            </div>
-
-            <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
-                <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#e0b878;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="logo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleLogoVisibility(this.checked)">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання на зображення (URL):</span>
-                        <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл:</span>
-                        <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
-                            📁 Вибрати зображення лого
-                            <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
-                        </label>
-                        <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого:</span>
-                        <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
-                    </div>
-                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
-                </div>
-            </div>
-
-            <div class="card" style="border: 2px solid #f472b6; background: #241019;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло (анонс/реклама)</div>
-                <div class="switch-row" style="background: rgba(244,114,182,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
-                </div>
-                <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-            </div>
-
-            <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель)</div>
-                <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
-                </div>
-                <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
-                <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
-                <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
-            </div>
-
-            <div class="card">
-                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
-                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
-                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
-                <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
-                <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
-            </div>
-
-            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-
-            <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
-                <div class="switch-row" style="background: rgba(124, 58, 237, 0.2); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
-                    <span style="font-size:13px; font-weight:800; color: #a78bfa;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleFullscreenPromo(this.checked)">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
-                    <div id="admin-promo-broadcast-row" class="admin-only" style="border-top:1px dashed #7c3aed; padding-top:10px; margin-top:4px; flex-direction:column; gap:6px;">
-                        <div style="font-size:10px; color:#a78bfa; font-weight:800; text-transform:uppercase;">👑 ADMIN — Глобальна трансляція заставки</div>
-                        <button class="btn" style="padding:10px; font-weight:800; background:#7c3aed; color:#fff;" onclick="broadcastPromoToAllCourts(true)">🌐 Показати цю заставку на ВСІХ кортах</button>
-                        <button class="btn" style="padding:8px; font-size:11px; background:#444;" onclick="broadcastPromoToAllCourts(false)">Вимкнути заставку на ВСІХ кортах</button>
-                    </div>
-                </div>
-            </div>
+            <button class="btn btn-orange" style="padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Скинути поточний корт</button>
         </div>
     </div>
 
@@ -404,27 +258,13 @@
 
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
-        let state = {}, stateHistory = [], allPlayersData = {};
-        let globalTournamentData = { groupsCount: 2, teamsPerGroup: 4, tableStyle: 'classic', matrixShortNames: false, obsView: 'all', showGroupsOverlay: false, groups: {} };
+        let state = {}, allPlayersData = {};
+        let globalTournamentData = { groupsCount: 2, teamsPerGroup: 4, obsView: 'all', showGroupsOverlay: false, groups: {} };
 
-        let mySessionId = localStorage.getItem('padel_session_id');
-        if (!mySessionId) {
-            mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-            localStorage.setItem('padel_session_id', mySessionId);
-        }
         const isAdmin = new URLSearchParams(window.location.search).get('admin') === '1';
 
-        function isControllerLocked() {
-            if (isAdmin) return false;
-            return !!(state.controllerLock && state.controllerLock.sessionId && state.controllerLock.sessionId !== mySessionId);
-        }
-
-        window.adminUnlockCourt = function() {
-            state.controllerLock = null;
-            set(matchRef, state);
-        };
-
         window.sendCameraCommand = function(camNumber) {
+            if (!isAdmin) return;
             state.cameraCommand = { key: camNumber, ts: Date.now() };
             if (camNumber === 'replay') { state.replayLabelTrigger = Date.now(); }
             set(matchRef, state);
@@ -443,7 +283,7 @@
         function initCourtConnection() {
             const urlParams = new URLSearchParams(window.location.search); courtId = urlParams.get('court') || "1";
             document.getElementById('court-selector').value = courtId; databasePath = `padel/courts/court_${courtId}`;
-            matchRef = ref(db, databasePath); stateHistory = [];
+            matchRef = ref(db, databasePath);
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
                 const data = snapshot.val(); if (data) { state = data; renderUI(); } else { resetMatchWithoutConfirm(); }
@@ -472,7 +312,7 @@
             container.innerHTML = '';
             Object.keys(playersObj).forEach(key => {
                 const p = playersObj[key]; const item = document.createElement('div'); item.className = 'player-list-item';
-                item.innerHTML = `<div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div></div><button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>`;
+                item.innerHTML = `<div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0}</div></div><button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>`;
                 container.appendChild(item);
             });
         }
@@ -487,6 +327,7 @@
         window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
 
         window.createNewPlayer = function() {
+            if (!isAdmin) return;
             const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
             if (!name) { alert("Введіть ім'я."); return; }
             push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
@@ -500,39 +341,16 @@
         }
 
         window.hardResetAllFirebase = function() {
+            if (!isAdmin) return;
             if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
                 remove(ref(db, 'padel')).then(() => window.location.reload());
             }
-        }
-
-        window.resetAllCourts = function() {
-            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?")) return;
-            const freshCourtState = {
-                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
-                scale: 1, posX: 30, posY: 30, isTiebreak: false, isAmericano: false, americanoLimit: 21,
-                isMexicano: false, mexicanoLimit: 24, isProSet: false, proSetLimit: 8, isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0,
-                cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0, showStatsOverlay: false, showSetOverlayTrigger: false,
-                gamesTimeHistory: [], showLogo: false, logoUrl: "", logoSrc: "", customLogoText: "", showSponsorLogos: false,
-                sponsorLogoScale: 1, sponsorLogoIntervalSec: 4, sponsorLogos: [], sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
-                showBoardPromoPanel: false, showStatsLeftLogo: false, statsLeftLogoUrl: "", statsLeftLogoSrc: "",
-                showMainBoard: true, showBreak: false, showQrCode: false, qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
-                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
-                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
-                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
-            };
-            const writes = [];
-            for (let i = 1; i <= 10; i++) writes.push(set(ref(db, 'padel/courts/court_' + i), freshCourtState));
-            Promise.all(writes).then(() => { alert("✅ Усі 10 кортів скинуто."); window.location.reload(); });
         }
 
         window.updateGroupsConfig = function() {
             if (!isAdmin) return;
             globalTournamentData.groupsCount = parseInt(document.getElementById('groups-count-select').value) || 2;
             globalTournamentData.teamsPerGroup = parseInt(document.getElementById('teams-per-group-select').value) || 4;
-            globalTournamentData.tableStyle = document.getElementById('groups-table-style').value;
-            globalTournamentData.matrixShortNames = document.getElementById('groups-matrix-short-checkbox').checked;
             set(ref(db, 'padel/tournament'), globalTournamentData);
         };
 
@@ -553,8 +371,6 @@
             if (!globalTournamentData.groups) globalTournamentData.groups = {};
             document.getElementById('groups-count-select').value = globalTournamentData.groupsCount || 2;
             document.getElementById('teams-per-group-select').value = globalTournamentData.teamsPerGroup || 4;
-            document.getElementById('groups-table-style').value = globalTournamentData.tableStyle || 'classic';
-            document.getElementById('groups-matrix-short-checkbox').checked = !!globalTournamentData.matrixShortNames;
             document.getElementById('group-obs-view-select').value = globalTournamentData.obsView || 'all';
 
             const toggleBtn = document.getElementById('btn-toggle-groups-overlay');
@@ -575,7 +391,7 @@
             for (let g = 0; g < count; g++) {
                 const gLetter = groupNames[g];
                 if (!globalTournamentData.groups[gLetter]) {
-                    globalTournamentData.groups[gLetter] = { teams: new Array(tCount).fill(""), stats: {}, matrix: {} };
+                    globalTournamentData.groups[gLetter] = { teams: new Array(tCount).fill(""), stats: {} };
                 }
                 const gData = globalTournamentData.groups[gLetter];
                 if (!gData.teams || gData.teams.length !== tCount) {
@@ -583,8 +399,7 @@
                 }
 
                 let cardHtml = `<div class="card" style="border:1px solid #c69f66; background:#181818;">
-                    <div style="font-size:14px; font-weight:800; color:#c69f66; margin-bottom:10px; text-transform:uppercase;">Група ${gLetter}</div>
-                    <div style="font-size:11px; font-weight:700; color:#aaa; margin-bottom:4px;">Команди у групі:</div>`;
+                    <div style="font-size:14px; font-weight:800; color:#c69f66; margin-bottom:10px; text-transform:uppercase;">Група ${gLetter}</div>`;
 
                 for (let t = 0; t < tCount; t++) {
                     const tName = gData.teams[t] || "";
@@ -593,7 +408,7 @@
 
                     cardHtml += `<div class="row" style="margin-bottom:6px;">
                         <span style="width:24px; font-size:11px; font-weight:700; color:#c69f66;">${gLetter}${t+1}</span>
-                        <input type="text" value="${tName}" placeholder="Назва команди ${t+1}" onchange="updateGroupTeamName('${gLetter}', ${t}, this.value)" style="flex:1;">
+                        <input type="text" value="${tName}" placeholder="Команда ${t+1}" onchange="updateGroupTeamName('${gLetter}', ${t}, this.value)" style="flex:1;">
                         <input type="number" value="${st.played}" placeholder="І" onchange="updateGroupTeamStat('${gLetter}','${tName}','played',this.value)" style="width:40px; text-align:center;">
                         <input type="number" value="${st.wins}" placeholder="В" onchange="updateGroupTeamStat('${gLetter}','${tName}','wins',this.value)" style="width:40px; text-align:center;">
                         <input type="number" value="${st.losses}" placeholder="П" onchange="updateGroupTeamStat('${gLetter}','${tName}','losses',this.value)" style="width:40px; text-align:center;">
@@ -627,91 +442,27 @@
             set(ref(db, 'padel/tournament'), globalTournamentData);
         };
 
-        window.toggleFullscreenPromo = function(c) { state.showFullscreenPromo = c; set(matchRef, state); };
-        window.updatePromoUrl = function(url) { state.promoUrl = url; state.promoSrc = ""; set(matchRef, state); };
-        window.broadcastPromoToAllCourts = function(enable) {
-            if (!isAdmin) return;
-            const promoFields = { showFullscreenPromo: enable, promoUrl: state.promoUrl || "", promoSrc: state.promoSrc || "" };
-            const writes = [];
-            for (let i = 1; i <= 10; i++) {
-                const courtRef = ref(db, 'padel/courts/court_' + i);
-                writes.push(get(courtRef).then(snap => { const s = snap.val() || {}; Object.assign(s, promoFields); return set(courtRef, s); }));
-            }
-            Promise.all(writes).then(() => alert("✅ Заставку розіслано на всі корти."));
-        };
-
-        window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
-        window.updateLogoUrl = function(url) { state.logoUrl = url; state.logoSrc = ""; set(matchRef, state); };
-        window.updateLogoText = function(v) { state.customLogoText = v; set(matchRef, state); };
-        window.uploadAndCompressLogoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 240; canvas.height = 192;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 240, 192);
-                    state.logoSrc = canvas.toDataURL('image/png'); state.logoUrl = "";
-                    set(matchRef, state);
-                };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
-        window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
         window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); };
-        window.toggleStatsLeftLogo = function(c) { state.showStatsLeftLogo = c; set(matchRef, state); };
-        window.updateStatsLeftLogoUrl = function(url) { state.statsLeftLogoUrl = url; state.statsLeftLogoSrc = ""; set(matchRef, state); };
-        window.uploadStatsLeftLogoFile = function(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 200; canvas.height = 110;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    state.statsLeftLogoSrc = canvas.toDataURL('image/png'); state.statsLeftLogoUrl = "";
-                    set(matchRef, state);
-                };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); };
         window.toggleMainBoard = function() { state.showMainBoard = !state.showMainBoard; set(matchRef, state); };
         window.toggleBreak = function() { state.showBreak = !state.showBreak; set(matchRef, state); };
-        window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); };
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); };
         window.setServer = function(s) { state.currentServer = s; set(matchRef, state); };
-        window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); };
-        window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); };
-        window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); };
-        window.updatePosition = function() {
-            state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
-            state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0;
-            set(matchRef, state);
-        };
 
         window.resetMatch = function() { if (confirm("Скинути корт?")) resetMatchWithoutConfirm(); };
         function resetMatchWithoutConfirm() {
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
-                scale: state.scale || 1, posX: 30, posY: 30, isTiebreak: false, isAmericano: false, americanoLimit: 21,
-                isMexicano: false, mexicanoLimit: 24, isProSet: false, proSetLimit: 8, isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0,
-                cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0, showStatsOverlay: false, showSetOverlayTrigger: false,
-                gamesTimeHistory: [], showLogo: false, logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: "",
-                showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4, sponsorLogos: [], sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
-                showBoardPromoPanel: false, showStatsLeftLogo: false, statsLeftLogoUrl: "", statsLeftLogoSrc: "",
-                showMainBoard: true, showBreak: false, showQrCode: false, isMatchFinished: false, showFullscreenPromo: false,
+                scale: 1, posX: 30, posY: 30, isTiebreak: false, activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en",
+                showStatsBetweenGames: false, showStatsOverlay: false, showMainBoard: true, showBreak: false, isMatchFinished: false,
                 t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
+
+        window.liveUpdateName = function(teamNum, val) {
+            if (teamNum === 1) state.p1name = val; else state.p2name = val;
+            set(matchRef, state);
+        };
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда 1"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда 2";
