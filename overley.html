@@ -161,19 +161,19 @@
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
-    width: 130px; /* Збільшена ширина для горизонтального заповнення */
+    width: 140px; /* Ширина панелі для адаптації під оригінальні пропорції */
     flex-shrink: 0; 
     background: rgba(255,255,255,0.04); 
     border-right: 1px solid rgba(198,159,102,0.4); 
-    padding: 8px; /* Маленький відступ з усіх боків */
+    padding: 8px; /* Невеликий акуратний відступ з усіх боків */
     box-sizing: border-box; 
     overflow: hidden; 
 }
-        .stats-broadcast-logo-box.visible { display: flex; }
-        .stats-broadcast-logo-box img { 
+.stats-broadcast-logo-box.visible { display: flex; }
+.stats-broadcast-logo-box img { 
     width: 100%; 
     height: 100%; 
-    object-fit: fill; /* Повністю розтягує логотип по горизонталі та вертикалі за формою блоку */
+    object-fit: contain; /* Зберігає оригінальні пропорції логотипу без спотворень та вписує його у блок */
     display: block; 
 }
 
