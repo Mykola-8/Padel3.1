@@ -208,7 +208,6 @@
         .sponsor-logo-all-frame.visible { opacity: 1; visibility: visible; }
         .sponsor-logo-all-frame img { max-height: 70px; max-width: 130px; object-fit: contain; }
 
-        /* ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (ЗІ ЗМІННИМ ФОНОМ ДЛЯ ФОТО-ТАБЛИЦЬ) */
         .fullscreen-media-overlay {
             position: fixed; inset: 0;
             background-color: #000000;
@@ -224,10 +223,9 @@
         
         .fullscreen-media-content {
             width: 100%; height: 100%;
-            object-fit: cover; /* За замовчуванням відео/фото на весь екран */
+            object-fit: cover;
             display: none;
         }
-        /* Якщо увімкнено напівпрозорий фон для фото-таблиць — вписуємо зображення повністю без обрізання (contain) */
         .fullscreen-media-overlay.transparent-bg .fullscreen-media-content {
             object-fit: contain;
             padding: 40px;
@@ -946,12 +944,12 @@
                             document.getElementById('lbl-game-time-footer').firstChild.textContent = (isUa ? 'Гейм' : 'Game') + ': ';
                         }
 
+                        // ПЕРЕВІРКА ТА ВИВЕДЕННЯ ЛОГОТИПУ ЗЛІВА НА ТАБЛО СТАТИСТИКИ
                         const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
                         const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
-                        const tourneyLogo = state.tournamentLogoUrl || state.tournamentLogoSrc || (state.showLogo ? (state.logoUrl || state.logoSrc) : null);
-
-                        if (tourneyLogo) {
-                            statsLogoImg.src = tourneyLogo;
+                        
+                        if (state.showStatsLeftLogo && (state.statsLeftLogoSrc || state.statsLeftLogoUrl)) {
+                            statsLogoImg.src = state.statsLeftLogoSrc || state.statsLeftLogoUrl;
                             statsLogoImg.style.display = 'block';
                             statsLogoBox.classList.add('visible');
                         } else {
