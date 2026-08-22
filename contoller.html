@@ -2,577 +2,406 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Padel Overlay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Padel Controller Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --accent: #c69f66;
-            --accent-soft: rgba(198, 159, 102, 0.45);
-            --team-bg-top: rgba(42,42,42,0.75);
-            --team-bg-bottom: rgba(26,26,26,0.75);
-            --team-text: #ffffff;
-            --score-set-past-bg: rgba(255,255,255,0.9);
-            --score-set-past-text: #1a1a1a;
-            --score-set-current-bg: rgba(122,122,122,0.75);
-            --score-set-current-text: #ffffff;
-            --points-team1-top: #c69f66;
-            --points-team1-bottom: #a07c42;
-            --points-team2-top: #a07c42;
-            --points-team2-bottom: #7a5c28;
-            --points-text: #ffffff;
-            --points-ad-top: #fff0c0;
-            --points-ad-bottom: #e8c96a;
-            --points-ad-text: #3a2a00;
-            --panel-bg: rgba(8, 8, 8, 0.55);
-            --panel-border: rgba(198, 159, 102, 0.4);
-            --panel-text: #ffffff;
-            --slide-gamepoint: rgba(42, 42, 42, 0.55);
-            --slide-breakpoint: rgba(198, 159, 102, 0.55);
-            --slide-setpoint: rgba(29, 78, 216, 0.55);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(245, 158, 11, 0.55);
-            --slide-tiebreak: rgba(75, 85, 99, 0.55);
-            --slide-deuce: rgba(91, 33, 182, 0.55);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 95px; -webkit-tap-highlight-color: transparent; position: relative; }
+        .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); }
+        .nav-btn { flex: 1; background: transparent; border: none; color: #888; padding: 12px 5px; font-weight: 700; font-size: 10px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.2s; }
+        .nav-btn.active { color: #c69f66; }
+        .nav-btn span { font-size: 18px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+        .settings-gear-btn { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #2a2a2a; border: 1px solid #c69f66; color: #c69f66; cursor: pointer; padding: 8px 14px; border-radius: 6px; transition: transform 0.15s, background 0.15s; z-index: 100; flex-shrink: 0; white-space: nowrap; }
+        .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
+        h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
+        .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
+        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
+        .row:last-child { margin-bottom: 0; }
+        input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #c69f66; outline: none; }
+        .btn { background: #333; color: white; border: none; padding: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: transform 0.05s ease, filter 0.05s ease; }
+        .btn:active { transform: scale(0.93) !important; filter: brightness(0.8) !important; }
+        .btn-gold { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: white; }
+        .btn-green { background: #15803d; }
+        .btn-blue { background: #1d4ed8; }
+        .btn-red { background: #b91c1c; }
+        .btn-orange { background: linear-gradient(to bottom, #f97316, #ea580c); color: white; }
+        .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
+        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
+        .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
+        .score-btn span { font-size: 56px; font-weight: 900; }
+        .serve-box { display: flex; gap: 10px; width: 100%; }
+        .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+        .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
+        .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+        .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
+        .preview-row { display: flex; height: 34px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .preview-row:last-child { border-bottom: none; }
+        .preview-name-block { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 13px; font-weight: 700; background: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .preview-srv { color: #b28a55; font-size: 12px; visibility: hidden; }
+        .preview-srv.active { visibility: visible; }
+        .preview-box { width: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border-left: 1px solid rgba(255,255,255,0.1); }
+        .p-past { background: #fff; color: #000; }
+        .p-curr { background: #666; color: #fff; }
+        .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 1100; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
+        .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .match-card { background: #222; border-left: 4px solid #c69f66; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
+        .match-card-header { display: flex; justify-content: space-between; font-size: 11px; color: #888; font-weight: 700; align-items: center; }
+        .match-card-teams { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; padding: 4px 0; }
+        .match-card-scores { font-size: 13px; color: #c69f66; font-weight: 700; }
+        .player-list-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #333; }
+        .player-info { display: flex; flex-direction: column; gap: 2px; }
+        .player-name { font-weight: 700; font-size: 14px; }
+        .player-stats-mini { font-size: 11px; color: #aaa; }
+        .controls-locked { filter: grayscale(0.8) brightness(0.55); transition: filter 0.3s ease; }
+        .controls-locked button, .controls-locked input, .controls-locked select, .controls-locked textarea, .controls-locked label {
+            pointer-events: none !important;
+            opacity: 0.55;
         }
-
-        html.theme-courtgreen {
-            --accent: #a3e635;
-            --accent-soft: rgba(163, 230, 53, 0.45);
-            --team-bg-top: rgba(35, 46, 15, 0.82);
-            --team-bg-bottom: rgba(20, 26, 8, 0.82);
-            --team-text: #f7ffe0;
-            --score-set-past-bg: rgba(247, 255, 224, 0.92);
-            --score-set-past-text: #1a2e0b;
-            --score-set-current-bg: rgba(101, 163, 13, 0.85);
-            --score-set-current-text: #f7ffe0;
-            --points-team1-top: #a3e635;
-            --points-team1-bottom: #65a30d;
-            --points-team2-top: #65a30d;
-            --points-team2-bottom: #3f6212;
-            --points-text: #ffffff;
-            --points-ad-top: #f7ffb0;
-            --points-ad-bottom: #bef264;
-            --points-ad-text: #1a2e0b;
-            --panel-bg: rgba(10, 14, 3, 0.62);
-            --panel-border: rgba(163, 230, 53, 0.4);
-            --panel-text: #f7ffe0;
-            --slide-gamepoint: rgba(35, 46, 15, 0.6);
-            --slide-breakpoint: rgba(163, 230, 53, 0.55);
-            --slide-setpoint: rgba(77, 124, 15, 0.6);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
-            --slide-tiebreak: rgba(54, 83, 20, 0.7);
-            --slide-deuce: rgba(63, 98, 18, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        .controls-locked #court-selector, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            filter: none !important;
         }
-
-        html.theme-graydark {
-            --accent: #d1d5db;
-            --accent-soft: rgba(209, 213, 219, 0.45);
-            --team-bg-top: rgba(55, 65, 81, 0.82);
-            --team-bg-bottom: rgba(17, 24, 39, 0.85);
-            --team-text: #f3f4f6;
-            --score-set-past-bg: rgba(243, 244, 246, 0.92);
-            --score-set-past-text: #111827;
-            --score-set-current-bg: rgba(107, 114, 128, 0.8);
-            --score-set-current-text: #f9fafb;
-            --points-team1-top: #6b7280;
-            --points-team1-bottom: #374151;
-            --points-team2-top: #4b5563;
-            --points-team2-bottom: #1f2937;
-            --points-text: #f9fafb;
-            --points-ad-top: #e5e7eb;
-            --points-ad-bottom: #9ca3af;
-            --points-ad-text: #111827;
-            --panel-bg: rgba(10, 12, 16, 0.62);
-            --panel-border: rgba(209, 213, 219, 0.35);
-            --panel-text: #f3f4f6;
-            --slide-gamepoint: rgba(55, 65, 81, 0.6);
-            --slide-breakpoint: rgba(156, 163, 175, 0.55);
-            --slide-setpoint: rgba(75, 85, 99, 0.65);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.6);
-            --slide-tiebreak: rgba(31, 41, 55, 0.75);
-            --slide-deuce: rgba(88, 28, 135, 0.5);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
-        }
-
-        html.theme-lightgray {
-            --accent: #4b5563;
-            --accent-soft: rgba(75, 85, 99, 0.35);
-            --team-bg-top: rgba(229, 231, 235, 0.92);
-            --team-bg-bottom: rgba(203, 209, 214, 0.92);
-            --team-text: #000000;
-            --score-set-past-bg: rgba(255, 255, 255, 0.95);
-            --score-set-past-text: #000000;
-            --score-set-current-bg: rgba(156, 163, 175, 0.9);
-            --score-set-current-text: #000000;
-            --points-team1-top: #e5e7eb;
-            --points-team1-bottom: #cbd1d6;
-            --points-team2-top: #d1d5db;
-            --points-team2-bottom: #9ca3af;
-            --points-text: #000000;
-            --points-ad-top: #f3f4f6;
-            --points-ad-bottom: #d1d5db;
-            --points-ad-text: #000000;
-            --panel-bg: rgba(229, 231, 235, 0.9);
-            --panel-border: rgba(107, 114, 128, 0.4);
-            --panel-text: #000000;
-            --slide-gamepoint: rgba(209, 213, 219, 0.75);
-            --slide-breakpoint: rgba(156, 163, 175, 0.75);
-            --slide-setpoint: rgba(107, 114, 128, 0.7);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.5);
-            --slide-tiebreak: rgba(107, 114, 128, 0.65);
-            --slide-deuce: rgba(156, 163, 175, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
-        }
-
-        html.theme-transparent {
-            --accent: #ffffff;
-            --accent-soft: rgba(255, 255, 255, 0.3);
-            --team-bg-top: rgba(0, 0, 0, 0.1);
-            --team-bg-bottom: rgba(0, 0, 0, 0.1);
-            --team-text: #ffffff;
-            --score-set-past-bg: rgba(255, 255, 255, 0.08);
-            --score-set-past-text: #ffffff;
-            --score-set-current-bg: rgba(255, 255, 255, 0.18);
-            --score-set-current-text: #ffffff;
-            --points-team1-top: rgba(255, 255, 255, 0.06);
-            --points-team1-bottom: rgba(255, 255, 255, 0.06);
-            --points-team2-top: rgba(255, 255, 255, 0.06);
-            --points-team2-bottom: rgba(255, 255, 255, 0.06);
-            --points-text: #ffffff;
-            --points-ad-top: rgba(255, 255, 255, 0.28);
-            --points-ad-bottom: rgba(255, 255, 255, 0.28);
-            --points-ad-text: #ffffff;
-            --panel-bg: rgba(0, 0, 0, 0.15);
-            --panel-border: rgba(255, 255, 255, 0.5);
-            --panel-text: #ffffff;
-            --slide-gamepoint: rgba(255, 255, 255, 0.15);
-            --slide-breakpoint: rgba(255, 255, 255, 0.22);
-            --slide-setpoint: rgba(255, 255, 255, 0.3);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
-            --slide-tiebreak: rgba(255, 255, 255, 0.22);
-            --slide-deuce: rgba(255, 255, 255, 0.18);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
-        }
-
-        html, body {
-            background: transparent !important;
-            background-color: transparent !important;
-            margin: 0; padding: 0; overflow: hidden;
-            font-family: 'Montserrat', sans-serif; color: white;
-        }
-
-        .scoreboard-wrapper {
-            display: flex; flex-direction: row; align-items: flex-start; width: max-content;
-            transform-origin: top left; transition: transform 0.2s ease, opacity 0.4s ease, visibility 0.4s;
-            filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: 1; visibility: visible; will-change: transform;
-        }
-        .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
-
-        .logo-panel { transform: translateX(100%); opacity: 0; height: 96px; width: 120px; background: rgba(0, 0, 0, 0.55); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-sizing: border-box; order: 1; padding: 0 !important; margin: 0 !important; }
-
-        .board-promo-panel {
-            position: absolute; top: 100%; left: 0; margin-top: 10px;
-            min-width: 260px; max-width: 420px;
-            background: rgba(0,0,0,0.72);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 6px;
-            padding: 14px 18px;
-            box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 6px; align-items: center;
-            opacity: 0; visibility: hidden; transform: translateY(-8px);
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
-            font-family: 'Montserrat', sans-serif;
-            z-index: 500;
-        }
-        .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
-        .board-promo-line:empty { display: none; }
-
-        .advantage-callout {
-            position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); margin-top: -6px;
-            background: #ffffff; color: #111;
-            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px;
-            letter-spacing: 0.5px; text-transform: uppercase;
-            padding: 6px 14px; border-radius: 0 0 4px 4px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-            opacity: 0; visibility: hidden; transform: translateY(-6px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            z-index: 400;
-        }
-        .advantage-callout.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .logo-panel.visible { transform: translateX(0); opacity: 1; }
-        .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
-        .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
-
-        .scoreboard-container { display: flex; flex-direction: column; width: max-content; order: 2; position: relative; }
-        .main-board { display: inline-flex; flex-direction: column; background-color: transparent; border-radius: 4px; z-index: 2; position: relative; overflow: hidden; transform-origin: left center; }
-        .team-row { display: flex; height: 48px; }
-        .team-names { width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
-        .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
-        .server-indicator.active { visibility: visible; }
-        .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
-        .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
-        .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
-
-        .ribbons-top-container { position: absolute; bottom: 100%; left: 0; width: 100%; display: flex; flex-direction: column-reverse; gap: 2px; margin-bottom: 2px; z-index: 1; }
-        .ribbon-top-item { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; background: rgba(30, 30, 30, 0.95); color: #ffffff; border-radius: 4px 4px 0 0; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease, padding 0.3s; box-sizing: border-box; white-space: nowrap; }
-        .ribbon-top-item.visible { height: 22px; opacity: 1; padding: 0 14px; }
-        .r-proset-style { color: #c69f66; border: 2px solid #5a4528; border-bottom: none; align-self: center; }
-        .r-tiebreak-style { background: rgba(75, 85, 99, 0.85); color: #fff; font-size: 11px; letter-spacing: 2px; align-self: flex-end; border-radius: 4px 4px 4px 4px; margin-right: 2px; }
-
-        .info-ribbons-container { position: absolute; top: 100%; left: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; z-index: 1; margin-top: 2px; }
-        .ribbon { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; border-radius: 0 0 4px 4px; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease; box-sizing: border-box; white-space: nowrap; }
-        .ribbon.visible { height: 28px; opacity: 1; padding: 0 15px; }
-        .ribbon-matchpoint { background: rgba(185, 28, 28, 0.65); color: #fff; }
-        .ribbon-setpoint { background: rgba(29, 78, 216, 0.65); color: #fff; }
-        .ribbon-breakpoint { background: rgba(198, 159, 102, 0.65); color: #fff; }
-        .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
-        .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
-
-        .corner-slide-wrapper { position: fixed; bottom: 30px; left: 0; overflow: hidden; border-radius: 0 6px 6px 0; z-index: 9997; width: 0; height: 54px; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
-        .corner-slide-wrapper.visible { width: 320px; }
-        .corner-slide-plate { width: 320px; height: 54px; display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; box-sizing: border-box; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; color: #fff; text-align: right; text-shadow: 0 1px 5px rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
-
-        .points-board-outer { overflow: hidden; height: 96px; width: 0; transition: width 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2); flex-shrink: 0; border-radius: 0 4px 4px 0; }
-        .points-board-outer.visible { width: 100px; }
-        .points-board { display: flex; flex-direction: column; align-items: stretch; width: 100px; height: 96px; }
-        .points-cell { flex: 1; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 1px; white-space: nowrap; }
-        .points-cell.team1 { background: linear-gradient(to bottom, #c69f66, #a07c42); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.15); }
-        .points-cell.team2 { background: linear-gradient(to bottom, #a07c42, #7a5c28); color: #fff; }
-        .points-cell.ad-active { background: linear-gradient(to bottom, #fff0c0, #e8c96a); color: #3a2a00; font-size: 19px; letter-spacing: 0; }
-        
-        .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.85) translateY(-40px); width: 620px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 28px 32px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
-        .match-finished-board.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1) translateY(0); pointer-events: auto; }
-        .match-finished-board.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.92) translateY(-10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
-        .mfb-header { text-align: center; font-size: 13px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 18px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
-        .mfb-winner { text-align: center; font-size: 26px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: #ffe9c2; text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 0 18px rgba(198,159,102,0.5); margin-bottom: 20px; }
-        .mfb-winner .trophy { margin-right: 8px; }
-        .mfb-table { width: 100%; border-collapse: collapse; }
-        .mfb-table th { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; padding: 6px 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.9); border-bottom: 1px solid rgba(198, 159, 102, 0.3); }
-        .mfb-table th:first-child { text-align: left; }
-        .mfb-table td { font-size: 18px; font-weight: 800; color: #fff; padding: 10px 8px; text-align: center; text-shadow: 0 1px 5px rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .mfb-table td.mfb-team-name { text-align: left; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
-        .mfb-table tr:last-child td { border-bottom: none; }
-        .mfb-table td.mfb-set-win { color: #c69f66; }
-        .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
-        
-        .statistics-overlay {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-150%);
-            z-index: 9999;
-            opacity: 1;
-            visibility: hidden;
-            pointer-events: none;
-            transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
-        }
-        .statistics-overlay.visible { transform: translateX(-50%); visibility: visible; pointer-events: auto; }
-        .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
-        .stats-broadcast-row-anim {
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .stats-broadcast-row-anim.row-in { opacity: 1; }
-        .stats-broadcast-card {
-            display: flex; align-items: stretch;
-            background: rgba(240, 240, 243, 0.96);
-            border: 1px solid rgba(198, 159, 102, 0.55);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 14px 34px rgba(0,0,0,0.55);
-            backdrop-filter: blur(8px);
-            font-family: 'Montserrat', sans-serif;
-        }
-        .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
-        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #a1731f; margin-bottom: 8px; text-shadow: none; }
-        .stats-broadcast-header span:last-child { color: #555; font-weight: 700; letter-spacing: 0.5px; }
-        .stats-broadcast-header span:last-child b { color: #111; }
-        .stats-broadcast-collbls { display: grid; grid-template-columns: 1fr 46px 46px 56px; padding: 0 10px; margin-bottom: 3px; }
-        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #777; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
-        .stats-broadcast-collbls span:first-child { text-align: left; }
-        .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
-        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 46px 46px 56px; align-items: center; background: rgba(0,0,0,0.06); border-radius: 4px; padding: 7px 10px; }
-        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #111; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
-        .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #111; text-align: center; text-shadow: none; }
-        .stats-broadcast-logo-box {
-            display: none;
-            flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            width: 96px; flex-shrink: 0;
-            background: rgba(0,0,0,0.04);
-            border-left: 1px solid rgba(198,159,102,0.4);
-            padding: 8px; box-sizing: border-box;
-        }
-        .stats-broadcast-logo-box.visible { display: flex; }
-        .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
-        .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #a1731f; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
-        .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
-
-        .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
-        .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
-        .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
-        .sm-header { text-align: center; font-size: 15px; font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
-        .sm-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
-        .sm-row { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; text-align: center; }
-        .sm-team-left { text-align: left; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .sm-team-right { text-align: right; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .sm-label { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .sm-val { font-size: 18px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        .sm-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        
-        .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
-        .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
-
-        .break-overlay { position: fixed; inset: 0; transform: scale(0.96); background: rgba(6, 6, 10, 0.42); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s; }
-        .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
-        .break-label { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #c69f66; margin-bottom: 12px; line-height: 1; }
-        .break-clock-wrap { position: relative; width: 240px; height: 240px; margin-bottom: 24px; }
-        .break-clock-wrap svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.45)); }
-        .break-timer-digital { font-family: 'Teko', sans-serif; font-size: 30px; font-weight: 600; color: #c69f66; letter-spacing: 2px; text-shadow: 0 0 12px rgba(198,159,102,0.5); white-space: nowrap; line-height: 1; text-align: center; margin: 2px 0 12px; }
-        .break-teams-row { display: flex; align-items: center; gap: 24px; justify-content: center; margin-bottom: 6px; }
-        .break-team-name { font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #fff; max-width: 320px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .break-score-sep { font-family: 'Teko', sans-serif; font-size: 34px; font-weight: 700; color: #c69f66; line-height: 1; }
-        .break-sets-line { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 3px; }
-
-        .replay-label {
-            position: fixed; bottom: 20px; left: 50%; z-index: 99000;
-            display: flex; align-items: center; gap: 8px;
-            background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.35); border-radius: 6px;
-            padding: 8px 16px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px;
-            color: #fff; letter-spacing: 2px; text-transform: uppercase;
-            opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(10px);
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
-        }
-        .replay-label.visible { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
-        @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-
-        .sponsor-logo-frame {
-            position: fixed; top: 20px; left: 50%; z-index: 9500;
-            width: 220px; height: 90px;
-            transform-origin: top center;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            padding: 8px; box-sizing: border-box;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s;
-        }
-        .sponsor-logo-frame.visible { opacity: 1; visibility: visible; }
-        .sponsor-logo-frame img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: opacity 0.4s ease; }
-
-        .sponsor-logo-all-frame {
-            position: fixed; top: 20px; left: 50%; z-index: 9500;
-            transform-origin: top center;
-            display: flex; align-items: center; justify-content: center; gap: 16px;
-            max-width: 90vw; flex-wrap: nowrap;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
-            padding: 10px 18px; box-sizing: border-box;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s;
-        }
-        .sponsor-logo-all-frame.visible { opacity: 1; visibility: visible; }
-        .sponsor-logo-all-frame img { max-height: 70px; max-width: 130px; width: auto; height: auto; object-fit: contain; }
-
-        .fullscreen-media-overlay {
-            position: fixed; inset: 0; background-color: #000000; z-index: 100000;
-            opacity: 0; visibility: hidden; pointer-events: none;
-            transition: opacity 0.6s ease, visibility 0.6s ease, background-color 0.3s ease;
-        }
-        .fullscreen-media-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
-        .fullscreen-media-overlay.transparent-bg-mode { background-color: rgba(0, 0, 0, 0.45); }
-        .fullscreen-media-content { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .fullscreen-media-content.active { display: block; }
-        .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content { object-fit: contain; }
-        .fullscreen-text-content {
-            display: none; width: 100%; height: 100%; align-items: center; justify-content: center;
-            text-align: center; box-sizing: border-box; padding: 60px; font-family: 'Montserrat', sans-serif;
-            font-weight: 900; line-height: 1.25; word-break: break-word; white-space: pre-wrap;
-            text-shadow: 0 4px 18px rgba(0,0,0,0.85);
-        }
-        .fullscreen-text-content.active { display: flex; }
-
-        .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
-        .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
-        .qr-code-wrapper { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; padding: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s; }
-        .qr-code-wrapper.visible { opacity: 1; visibility: visible; }
-        .qr-code-wrapper img { width: 130px; height: 130px; display: block; border-radius: 0; }
-        .qr-code-text { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; text-align: center; background: transparent; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+        .lock-status-badge { background: #7c2d12; color: #ffddc2; padding: 8px; font-size: 11px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: none; }
+        .lock-status-badge.visible { display: block; }
+        .admin-badge { position: fixed; top: 12px; left: 15px; background: #7c3aed; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; z-index: 101; display: none; }
+        .admin-badge.visible { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- Canvas для пунктирної анімації траєкторії м'яча -->
-    <canvas id="trajectoryOverlayCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9998;"></canvas>
+    <div class="admin-badge" id="admin-badge">👑 ADMIN</div>
 
-    <div class="replay-label" id="replay-label">
-        <span class="replay-label-dot"></span>
-        <span>REPLAY</span>
-    </div>
+    <nav class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
+        <button class="nav-btn" onclick="switchTab('tab-history')"><span>📜</span>Історія</button>
+        <button class="nav-btn" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
+        <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
+    </nav>
 
-    <div class="sponsor-logo-frame" id="sponsor-logo-frame">
-        <img id="sponsor-logo-img" src="" alt="">
-    </div>
-
-    <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
-
-    <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
-        <img id="promo-img" class="fullscreen-media-content" src="">
-        <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
-        <div id="promo-text" class="fullscreen-text-content"></div>
-    </div>
-
-    <div class="scoreboard-wrapper" id="main-scoreboard">
-        <div class="logo-panel" id="logo-panel">
-            <div class="logo-panel-text" id="logo-text-node">QATAR AIRWAYS</div>
-            <img id="logo-img-node" src="" style="display:none;">
+    <div id="tab-remote" class="tab-content active">
+        <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px;">
+            <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
+                <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
+                <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
+            </select>
+            <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
+            <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
+                <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
+                <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
+            </div>
         </div>
 
-        <div class="board-promo-panel" id="board-promo-panel">
-            <div class="board-promo-line" id="board-promo-line-1"></div>
-            <div class="board-promo-line" id="board-promo-line-2"></div>
-            <div class="board-promo-line" id="board-promo-line-3"></div>
-            <div class="board-promo-line" id="board-promo-line-4"></div>
-            <div class="board-promo-line" id="board-promo-line-5"></div>
+        <h2>Пульт Padel Pro (Master)</h2>
+
+        <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
+
+        <div class="preview-scoreboard">
+            <div class="preview-row">
+                <div class="preview-name-block"><span id="pr-name1">Команда A</span><span class="preview-srv" id="pr-srv1">🎾</span></div>
+                <div class="preview-box" id="pr-t1-s1">0</div><div class="preview-box" id="pr-t1-s2">0</div><div class="preview-box" id="pr-t1-s3">0</div><div class="preview-box" id="pr-t1-s4">0</div><div class="preview-box" id="pr-t1-s5">0</div><div class="preview-box p-past p-pts" id="pr-t1-pts">0</div>
+            </div>
+            <div class="preview-row">
+                <div class="preview-name-block"><span id="pr-name2">Команда B</span><span class="preview-srv" id="pr-srv2">🎾</span></div>
+                <div class="preview-box" id="pr-t2-s1">0</div><div class="preview-box" id="pr-t2-s2">0</div><div class="preview-box" id="pr-t2-s3">0</div><div class="preview-box" id="pr-t2-s4">0</div><div class="preview-box" id="pr-t2-s5">0</div><div class="preview-box p-past p-pts" id="pr-t2-pts">0</div>
+            </div>
         </div>
 
-        <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
+        <div class="score-grid">
+            <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)"><small id="lbl-p1">Команда 1</small><span id="view-p1-pts">0</span></button>
+            <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
+        </div>
 
-        <div class="scoreboard-container">
-            <div class="ribbons-top-container">
-                <div class="ribbon-top-item r-proset-style" id="ribbon-proset">PRO-SET 8</div>
-                <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="serve-box">
+                <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+            </div>
+        </div>
+
+        <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
+        <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
+
+        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
+            </div>
+            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
+        </div>
+
+        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+
+        <div style="display:flex; gap:8px;">
+            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
+            <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
+        </div>
+
+        <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
+            <div class="switch-row">
+                <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
+                <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
+            </div>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
+                <div class="switch-row">
+                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
+                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
+                </div>
+                <div class="row" style="margin-top:6px;">
+                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
+                </div>
+                <div class="row" style="margin-top:6px; align-items:center;">
+                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
+                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
+                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-history" class="tab-content">
+        <h2>📜 Історія матчів</h2>
+        <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія матчів завантажується...</div>
+        </div>
+    </div>
+
+    <div id="tab-players" class="tab-content">
+        <h2>📊 База та статистика гравців</h2>
+        <div class="card">
+            <input type="text" id="player-search-input" placeholder="🔍 Пошук гравця за ім'ям..." oninput="filterPlayers(this.value)">
+        </div>
+        <div id="players-container" style="display:flex; flex-direction:column; gap:10px; margin-top:5px;"></div>
+    </div>
+
+    <div id="tab-profile" class="tab-content">
+        <h2>👤 Налаштування профілю користувача</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Ім'я та Прізвище організатора:</span>
+                <input type="text" id="profile-name" value="Коля" placeholder="Введіть ваше ім'я">
+            </div>
+            <div>
+                <span style="font-size:12px; color:#ccc; display:block; margin-bottom:4px;">Клуб / Організація:</span>
+                <input type="text" id="profile-club" value="Padel Khmelnytskyi" placeholder="Назва клубу">
+            </div>
+            <button class="btn btn-gold" onclick="saveProfileData()">Зберегти профіль</button>
+        </div>
+
+        <h2>➕ Створити нового гравця в базі</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="new-player-name" placeholder="Прізвище та Ім'я гравця">
+            <select id="new-player-hand">
+                <option value="Права">Права рука</option>
+                <option value="Ліва">Ліва рука</option>
+            </select>
+            <button class="btn btn-green" onclick="createNewPlayer()">Додати гравця до бази</button>
+        </div>
+
+        <h2>🚨 Глобальне керування базою даних</h2>
+        <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
+            <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану: назви команд, рахунки, логотипи, зображення-заставки та анімації. Структура бази (самі корти) лишається — просто весь вміст очищається.</p>
+            <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
+        </div>
+        <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
+            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
+            <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-header">
+            <div class="modal-title">⚙️ Налаштування корту</div>
+            <button class="modal-close-btn" onclick="closeModalSettings()">Закрити</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+            
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
+                <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
+                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option>
+                </select>
             </div>
 
-            <div style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
-                <div class="main-board" style="position:relative; z-index:2;">
-                    <div class="team-row" id="row-team-1">
-                        <div class="team-names" id="block-anim-1">
-                            <span id="name-display-t1">TELLO / ARCE</span>
-                            <span class="server-indicator" id="srv1">🎾</span>
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
+                <div class="row"><input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)"></div>
+            </div>
+
+            <div class="card">
+                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
+                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
+                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
+                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
+                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
+                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
+                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
+                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
+            </div>
+
+            <div class="card">
+                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
+                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
+                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
+                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
+                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
+                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
+                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+            </div>
+
+            <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
+                <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#e0b878;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="logo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleLogoVisibility(this.checked)">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання на зображення (URL):</span>
+                        <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
+                    </div>
+                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл (автоматично стискається і підганяється точно під розмір панелі лого 120×96):</span>
+                        <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
+                            📁 Вибрати зображення лого
+                            <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
+                        </label>
+                        <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
+                    </div>
+                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого (якщо зображення не задано):</span>
+                        <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
+                    </div>
+                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
+                </div>
+            </div>
+
+            <div class="card" style="border: 2px solid #f472b6; background: #241019;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло (анонс/реклама)</div>
+                <div class="switch-row" style="background: rgba(244,114,182,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
+                </div>
+                <div style="font-size:10px; color:#888; margin-bottom:8px;">Виїжджає прямо під табло рахунку, рухається й масштабується разом з ним. До 5 рядків тексту, кожен з власним розміром, кольором і фоном (для виділення, як плашка "QATAR AIRWAYS" на прикладі).</div>
+                <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель, зверху над табло)</div>
+                <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
+                </div>
+                <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
+                <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
+                <div class="row"><span>Режим показу:</span>
+                    <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
+                        <option value="carousel">Карусель (по черзі)</option>
+                        <option value="all">Всі одразу (в ряд)</option>
+                    </select>
+                </div>
+                <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
+                <div style="font-size:10px; color:#888; margin:6px 0;">Розташовується по центру зверху екрана, окремо від табла рахунку — щоб не перекривати його, тримайте табло в звичному кутку (не по центру зверху).</div>
+                <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
+            </div>
+
+            <div class="card">
+                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
+                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
+                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
+                <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
+                <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
+            </div>
+
+            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+
+            <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
+                <div class="switch-row" style="background: rgba(124, 58, 237, 0.2); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+                    <span style="font-size:13px; font-weight:800; color: #a78bfa;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleFullscreenPromo(this.checked)">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання Інтернет (URL):</span>
+                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
+                    </div>
+                    
+                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл безпосередньо з пристрою (стискати):</span>
+                        <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
+                            📁 Вибрати Фото чи короткий Відеоролик
+                            <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
+                        </label>
+                        <div id="promo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
+                    </div>
+
+                    <div class="switch-row">
+                        <span style="font-size:11px; color:#ccc;">Медіа є Відеороликом:</span>
+                        <input type="checkbox" id="promo-type-video-checkbox" style="width:18px; height:18px;" onchange="togglePromoTypeVideo(this.checked)">
+                    </div>
+
+                    <div class="switch-row">
+                        <span style="font-size:11px; color:#ccc;">Напівпрозорий фон (для фото-таблиць):</span>
+                        <input type="checkbox" id="promo-transparent-bg-checkbox" style="width:18px; height:18px;" onchange="togglePromoTransparentBg(this.checked)">
+                    </div>
+                    <div style="font-size:9px; color:#777; margin-top:-6px;">Замість суцільного чорного фону — напівпрозорий, і фото вписується цілком без обрізання. Добре для таблиць сітки/розкладу.</div>
+
+                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
+                        <textarea id="promo-text-input" placeholder="Введіть текст, який зʼявиться на весь екран..." oninput="updatePromoText(this.value)" style="width:100%; box-sizing:border-box; min-height:60px; background:#2a2a2a; border:1px solid #444; color:white; padding:10px; border-radius:4px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+                        <div class="row" style="margin-top:8px;">
+                            <span style="font-size:11px; color:#ccc;">Колір тексту:</span>
+                            <input type="color" id="promo-text-color-input" value="#ffffff" style="flex:0 0 60px; height:34px; padding:2px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updatePromoTextColor(this.value)">
+                        </div>
+                        <div class="row">
+                            <span style="font-size:11px; color:#ccc;">Розмір тексту:</span>
+                            <input type="range" id="promo-text-size-input" min="20" max="150" step="2" value="60" oninput="updatePromoTextSize(this.value)">
+                        </div>
+                        <div class="switch-row" style="background: rgba(124, 58, 237, 0.15); padding: 8px; border-radius: 6px;">
+                            <span style="font-size:12px; font-weight:800; color: #a78bfa;">ПОКАЗУВАТИ ТЕКСТ (ЗАМІСТЬ МЕДІА):</span>
+                            <input type="checkbox" id="promo-type-text-checkbox" style="width:22px; height:22px;" onchange="togglePromoTypeText(this.checked)">
                         </div>
                     </div>
-                    <div class="team-row" id="row-team-2">
-                        <div class="team-names" id="block-anim-2">
-                            <span id="name-display-t2">GALAN / CHINGOTTO</span>
-                            <span class="server-indicator" id="srv2">🎾</span>
-                        </div>
+
+                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
+
+                    <div id="admin-promo-broadcast-row" style="display:none; border-top:1px dashed #7c3aed; padding-top:10px; margin-top:4px; flex-direction:column; gap:6px;">
+                        <div style="font-size:10px; color:#a78bfa; font-weight:800; text-transform:uppercase;">👑 ADMIN — Глобальна трансляція заставки</div>
+                        <button class="btn" style="padding:10px; font-weight:800; background:#7c3aed; color:#fff;" onclick="broadcastPromoToAllCourts(true)">🌐 Показати цю заставку на ВСІХ кортах</button>
+                        <button class="btn" style="padding:8px; font-size:11px; background:#444;" onclick="broadcastPromoToAllCourts(false)">Вимкнути заставку на ВСІХ кортах</button>
+                        <div id="admin-promo-broadcast-status" style="font-size:10px; color:#a78bfa; text-align:center;"></div>
                     </div>
                 </div>
-
-                <div class="points-board-outer" id="points-board-outer">
-                    <div class="points-board" id="points-board">
-                        <div class="points-cell team1" id="pb-t1-pts">0</div>
-                        <div class="points-cell team2" id="pb-t2-pts">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-ribbons-container">
-                <div class="ribbon" id="ribbon-match">MATCH POINT</div>
             </div>
         </div>
     </div>
-
-    <div class="match-finished-board" id="match-finished-board">
-        <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
-        <div class="mfb-winner" id="mfb-winner"><span class="trophy">🏆</span><span id="mfb-winner-name">Команда A</span></div>
-        <table class="mfb-table">
-            <thead><tr id="mfb-head-row"><th>Команда</th></tr></thead>
-            <tbody id="mfb-body"></tbody>
-        </table>
-    </div>
-
-    <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
-
-    <div class="statistics-overlay" id="statistics-panel">
-        <div class="stats-broadcast-card stats-broadcast-row-anim">
-            <div class="stats-broadcast-logo-box stats-broadcast-logo-box-left" id="stats-broadcast-logo-box-left">
-                <img id="stats-broadcast-logo-left-img" src="">
-            </div>
-            <div class="stats-broadcast-main">
-                <div class="stats-broadcast-header">
-                    <span id="stats-main-header">Статистика гейму</span>
-                    <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
-                </div>
-                <div class="stats-broadcast-collbls">
-                    <span></span><span id="lbl-sets-mini">СЕТ</span><span id="lbl-games-mini">ГЕЙМИ</span><span id="lbl-df-mini">ДАБЛ ФОЛ</span>
-                </div>
-                <div class="stats-broadcast-table">
-                    <div class="stats-broadcast-row">
-                        <span class="stats-broadcast-name" id="st-name1">Команда A</span>
-                        <span class="stats-broadcast-cell" id="st-sets1">0</span>
-                        <span class="stats-broadcast-cell" id="st-g1">0</span>
-                        <span class="stats-broadcast-cell" id="st-df1">0</span>
-                    </div>
-                    <div class="stats-broadcast-row">
-                        <span class="stats-broadcast-name" id="st-name2">Команда B</span>
-                        <span class="stats-broadcast-cell" id="st-sets2">0</span>
-                        <span class="stats-broadcast-cell" id="st-g2">0</span>
-                        <span class="stats-broadcast-cell" id="st-df2">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="stats-broadcast-logo-box" id="stats-broadcast-logo-box">
-                <img id="stats-broadcast-logo-img" src="" style="display:none;">
-                <div class="stats-broadcast-logo-text" id="stats-broadcast-logo-text" style="display:none;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="break-overlay" id="break-panel">
-        <div class="break-label" id="brk-label">ПЕРЕРВА</div>
-        <div class="break-clock-wrap">
-            <svg id="brk-clock-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <radialGradient id="bezelGrad" cx="35%" cy="28%" r="80%">
-                        <stop offset="0%" stop-color="#f2f2f4"/>
-                        <stop offset="45%" stop-color="#9a9aa2"/>
-                        <stop offset="100%" stop-color="#48484c"/>
-                    </radialGradient>
-                    <radialGradient id="clockFace" cx="38%" cy="30%" r="80%">
-                        <stop offset="0%" stop-color="#eaff7a"/>
-                        <stop offset="45%" stop-color="#cdec1f"/>
-                        <stop offset="100%" stop-color="#96bc00"/>
-                    </radialGradient>
-                </defs>
-                <circle cx="100" cy="100" r="98" fill="url(#bezelGrad)"/>
-                <circle cx="100" cy="100" r="86" fill="url(#clockFace)" stroke="#7ea600" stroke-width="1.5"/>
-                <g fill="rgba(251,253,217,0.9)">
-                    <circle cx="136" cy="38" r="4"/><circle cx="162" cy="64" r="4"/><circle cx="162" cy="136" r="4"/><circle cx="136" cy="162" r="4"/>
-                    <circle cx="64" cy="162" r="4"/><circle cx="38" cy="136" r="4"/><circle cx="38" cy="64" r="4"/><circle cx="64" cy="38" r="4"/>
-                </g>
-                <g fill="#fbfdd9" font-family="'Montserrat', sans-serif" font-weight="800" font-size="22" text-anchor="middle">
-                    <text x="100" y="48">12</text>
-                    <text x="160" y="108">3</text>
-                    <text x="100" y="177">6</text>
-                    <text x="40" y="108">9</text>
-                </g>
-                <g id="brk-hand-h"><line x1="100" y1="100" x2="100" y2="55" stroke="#181818" stroke-width="5" stroke-linecap="round"/></g>
-                <g id="brk-hand-m"><line x1="100" y1="100" x2="100" y2="34" stroke="#181818" stroke-width="3" stroke-linecap="round"/></g>
-                <g id="brk-hand-s"><line x1="100" y1="112" x2="100" y2="24" stroke="#7a1620" stroke-width="1" stroke-linecap="round"/></g>
-                <circle cx="100" cy="100" r="5" fill="#181818"/>
-            </svg>
-        </div>
-        <div class="break-teams-row"><div class="break-team-name" id="brk-t1">Команда 1</div><div class="break-score-sep">VS</div><div class="break-team-name" id="brk-t2">Команда 2</div></div>
-        <div class="break-timer-digital" id="brk-timer">00:00</div>
-        <div class="break-sets-line" id="brk-sets"></div>
-    </div>
-
-    <div class="qr-code-wrapper" id="qr-code-panel"><img id="qr-code-image" src=""><div class="qr-code-text" id="qr-code-description-node">SCAN ME</div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -584,639 +413,781 @@
             appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const CORNER_SLIDE_LABELS = {
-            tiebreak: { en: '⚡ TIEBREAK', ua: '⚡ ТАЙБРЕЙК' },
-            deuce: { en: 'DEUCE', ua: 'РІВНО' },
-            matchpoint: { en: 'MATCH POINT', ua: 'МАТЧ ПОІНТ' },
-            setpoint: { en: 'SET POINT', ua: 'СЕТ ПОІНТ' },
-            breakpoint: { en: 'BREAK POINT', ua: 'БРЕЙК ПОІНТ' },
-            goldenpoint: { en: 'GOLDEN POINT', ua: 'ГОЛДЕН ПОІНТ' },
-            gamepoint: { en: 'GAME POINT', ua: 'ГЕЙМ ПОІНТ' },
-            doublefault: { en: 'DOUBLE FAULT', ua: 'ДАБЛ ФОЛ' }
-        };
-
-        const STATS_LABELS = {
-            header: { en: `GAME STATS • COURT`, ua: `Статистика гейму • Корт` },
-            teams: { en: 'Teams', ua: 'Команди' },
-            gamesSet: { en: 'Games (total)', ua: 'Гейми (всього)' },
-            breakpoints: { en: 'Break Points', ua: 'Брейк-поінти' },
-            goldenpoints: { en: 'Golden Points', ua: 'Голден-поінти' },
-            doublefaults: { en: 'Double Faults', ua: 'Дабл фоли' },
-            lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
-            setTime: { en: 'Set time', ua: 'Час сету' },
-            matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
-            history: { en: 'Game history (total)', ua: 'Хронологія геймів (в сумі)' },
-            setsResult: { en: 'Sets result', ua: 'Результат зіграних сетів' },
-            matchFinished: { en: 'MATCH FINISHED', ua: 'МАТЧ ЗАВЕРШЕНО' },
-            tie: { en: 'Tie', ua: 'Нічия' },
-            teamColumn: { en: 'Team', ua: 'Команда' },
-            setColumn: { en: 'Set', ua: 'Сет' },
-            team1Fallback: { en: 'Team A', ua: 'Команда A' },
-            team2Fallback: { en: 'Team B', ua: 'Команда B' },
-        };
-
-        function getStatsLabel(key, state, extra) {
-            const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
-            return extra !== undefined ? STATS_LABELS[key][lang] + extra : STATS_LABELS[key][lang];
-        }
-        function getCornerSlideText(key, state) {
-            const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
-            return CORNER_SLIDE_LABELS[key][lang];
-        }
-
-        function showCornerSlide(text, cssClass) {
-            const wrapper = document.getElementById('corner-slide-wrapper');
-            const plate = document.getElementById('corner-slide-plate');
-            if (cornerSlideTimeout) clearTimeout(cornerSlideTimeout);
-            plate.innerText = text; plate.className = 'corner-slide-plate ' + cssClass;
-            wrapper.classList.remove('visible');
-            requestAnimationFrame(() => requestAnimationFrame(() => { wrapper.classList.add('visible'); }));
-            cornerSlideTimeout = setTimeout(() => { wrapper.classList.remove('visible'); }, 5000);
-        }
-
+        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
-        let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
-        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
-        let replayLabelTimer = null, lastReplayLabelTrigger = 0;
-        let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
-        let lastTrajectoryTrigger = 0;
+        let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        function startSponsorLogoCarousel(urls, intervalSec) {
-            clearInterval(sponsorLogoTimer);
-            sponsorLogoActiveUrls = urls;
-            sponsorLogoIndex = 0;
-            const imgEl = document.getElementById('sponsor-logo-img');
-            if (!imgEl) return;
-            if (urls.length === 0) { imgEl.src = ""; return; }
-            imgEl.style.opacity = 1;
-            imgEl.src = urls[0];
-            if (urls.length > 1) {
-                sponsorLogoTimer = setInterval(() => {
-                    sponsorLogoIndex = (sponsorLogoIndex + 1) % sponsorLogoActiveUrls.length;
-                    imgEl.style.opacity = 0;
-                    setTimeout(() => {
-                        imgEl.src = sponsorLogoActiveUrls[sponsorLogoIndex];
-                        imgEl.style.opacity = 1;
-                    }, 350);
-                }, Math.max(1, intervalSec || 4) * 1000);
+        // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
+        // Адмін (?admin=1 в адресі) завжди має повний доступ і може розблокувати корт.
+        let mySessionId = localStorage.getItem('padel_session_id');
+        if (!mySessionId) {
+            mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('padel_session_id', mySessionId);
+        }
+        const isAdmin = new URLSearchParams(window.location.search).get('admin') === '1';
+
+        function isControllerLocked() {
+            if (isAdmin) return false;
+            return !!(state.controllerLock && state.controllerLock.sessionId && state.controllerLock.sessionId !== mySessionId);
+        }
+
+        window.adminUnlockCourt = function() {
+            state.controllerLock = null;
+            set(matchRef, state);
+        };
+
+        window.sendCameraCommand = function(camNumber) {
+            state.cameraCommand = { key: camNumber, ts: Date.now() };
+            if (camNumber === 'replay') { state.replayLabelTrigger = Date.now(); }
+            set(matchRef, state);
+            const labels = { '1': 'Камера 1', '2': 'Камера 2', '3': 'Камера 3', 'rec': '⏺ REC', 'replay': '▶️ REPLAY' };
+            const statusEl = document.getElementById('admin-camera-status');
+            if (statusEl) {
+                statusEl.innerText = "✅ Надіслано: " + (labels[camNumber] || camNumber);
+                setTimeout(() => { statusEl.innerText = ""; }, 2500);
             }
+        };
+
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // Функція анімації пунктирної траєкторії польоту м'яча (триває 1.5 секунди і зникає)
-        function runTrajectoryAnimation() {
-            const canvas = document.getElementById('trajectoryOverlayCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 1920; canvas.height = 1080;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
+        window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
 
-            const startX = 350, startY = 900;
-            const controlX = 960, controlY = 180;
-            const endX = 1570, endY = 750;
-
-            let progress = 0;
-            const durationMs = 1500; // 1.5 секунди політ
-            const startTime = performance.now();
-
-            function frame(currentTime) {
-                let elapsed = currentTime - startTime;
-                progress = elapsed / durationMs;
-                if (progress > 1) progress = 1;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                ctx.beginPath();
-                // Малюємо плавну дугу Безьє
-                for (let t = 0; t <= progress; t += 0.01) {
-                    let curX = Math.pow(1 - t, 2) * startX + 2 * (1 - t) * t * controlX + Math.pow(t, 2) * endX;
-                    let curY = Math.pow(1 - t, 2) * startY + 2 * (1 - t) * t * controlY + Math.pow(t, 2) * endY;
-                    if (t === 0) ctx.moveTo(curX, curY);
-                    else ctx.lineTo(curX, curY);
-                }
-
-                ctx.strokeStyle = "#ccff00"; // Салатовий колір м'яча
-                ctx.lineWidth = 6;
-                ctx.setLineDash([15, 12]); // Пунктирна лінія
-                ctx.stroke();
-
-                // Голова пунктиру (сам м'ячик)
-                let ballX = Math.pow(1 - progress, 2) * startX + 2 * (1 - progress) * progress * controlX + Math.pow(progress, 2) * endX;
-                let ballY = Math.pow(1 - progress, 2) * startY + 2 * (1 - progress) * progress * controlY + Math.pow(progress, 2) * endY;
-                
-                ctx.beginPath();
-                ctx.arc(ballX, ballY, 12, 0, Math.PI * 2);
-                ctx.fillStyle = "#ccff00";
-                ctx.shadowColor = "#ccff00";
-                ctx.shadowBlur = 15;
-                ctx.fill();
-                ctx.shadowBlur = 0; // скидаємо тінь
-
-                if (progress < 1) {
-                    requestAnimationFrame(frame);
-                } else {
-                    // Коли м'яч долетів, плавно стираємо лінію (імітація: м'яч зупинився / в руках)
-                    setTimeout(() => {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }, 400);
-                }
-            }
-
-            requestAnimationFrame(frame);
-        }
-
-        let statsAutoActive = false, lastStatsAutoTrigger = 0;
-        let statsRowTimers = [], statsFadeTimer = null;
-        const STATS_ROW_DELAY_MS = 1500;
-        const STATS_HOLD_AFTER_LAST_MS = 11500;
-        const STATS_FADE_MS = 800;
-        let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
-        let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
-        let statsRevealTimer = null, statsRevealAllowed = false;
-        let statsAfterFinishDismissTimer = null, statsAfterFinishLocallyDismissed = false;
-
-        function resetStatsRows() {
-            document.querySelectorAll('#statistics-panel .stats-broadcast-row-anim').forEach(el => el.classList.remove('row-in'));
-        }
-        function clearStatsTimers() {
-            statsRowTimers.forEach(t => clearTimeout(t));
-            statsRowTimers = [];
-            if (statsFadeTimer) { clearTimeout(statsFadeTimer); statsFadeTimer = null; }
-        }
-        function snapResetStatsPanel(panel) {
-            panel.style.transition = 'none';
-            panel.classList.remove('visible', 'fading-out');
-            void panel.offsetWidth;
-            panel.style.transition = '';
-        }
-
-        function runStatsRevealSequence() {
-            clearStatsTimers();
-            resetStatsRows();
-            const panel = document.getElementById('statistics-panel');
-            if (!panel) return;
-            panel.classList.remove('fading-out');
-            panel.classList.add('visible');
-            const rows = document.querySelectorAll('#statistics-panel .stats-broadcast-row-anim');
-            rows.forEach((row, idx) => {
-                const t = setTimeout(() => { row.classList.add('row-in'); }, idx * STATS_ROW_DELAY_MS);
-                statsRowTimers.push(t);
+        function initCourtConnection() {
+            const urlParams = new URLSearchParams(window.location.search); courtId = urlParams.get('court') || "1";
+            document.getElementById('court-selector').value = courtId; databasePath = `padel/courts/court_${courtId}`;
+            matchRef = ref(db, databasePath); stateHistory = [];
+            if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
+            unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
+                const data = snapshot.val(); if (data) { state = data; renderUI(); } else { resetMatchWithoutConfirm(); }
             });
-            const lastRowRevealTime = (rows.length - 1) * STATS_ROW_DELAY_MS + 500;
-            const fadeStartTimer = setTimeout(() => {
-                panel.classList.add('fading-out');
-                statsFadeTimer = setTimeout(() => {
-                    snapResetStatsPanel(panel);
-                    resetStatsRows();
-                    statsAutoActive = false;
-                    refreshBoardVisibility();
-                }, STATS_FADE_MS);
-            }, lastRowRevealTime + STATS_HOLD_AFTER_LAST_MS);
-            statsRowTimers.push(fadeStartTimer);
         }
-        function forceCloseStatsPanel() {
-            clearStatsTimers();
-            const panel = document.getElementById('statistics-panel');
-            if (panel) { snapResetStatsPanel(panel); }
-            resetStatsRows();
-            statsAutoActive = false;
+        window.switchCourt = function(v) {
+            const nUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?court=' + v;
+            window.history.pushState({ path: nUrl }, '', nUrl); initCourtConnection();
         }
-        let setOverlayTimer = null, setOverlayLocalActive = false, lastKnownState = null;
-        function refreshBoardVisibility() {
-            const bw = document.getElementById('main-scoreboard');
-            if (!bw || !lastKnownState) return;
-            const statsHidingBoard = lastKnownState.showStatsOverlay === true && !statsAfterFinishLocallyDismissed;
-            if (lastKnownState.showMainBoard === false || statsHidingBoard || setOverlayLocalActive || isBreakActive) {
-                bw.classList.add('hidden');
-            } else { bw.classList.remove('hidden'); }
+
+        onValue(ref(db, 'padel/history'), (snapshot) => {
+            const historyData = snapshot.val(); const container = document.getElementById('history-container');
+            if (!historyData) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>'; return; }
+            container.innerHTML = '';
+            Object.keys(historyData).reverse().forEach(key => {
+                const m = historyData[key]; const card = document.createElement('div'); card.className = 'match-card';
+                card.innerHTML = `<div class="match-card-header"><span>Корт №${m.courtId || 1} • ${m.date || ''}</span><button class="btn btn-red" style="padding:4px 8px; font-size:9px;" onclick="deleteMatchHistory('${key}')">Видалити 🗑</button></div><div class="match-card-teams"><span>${m.p1name}</span><span>vs</span><span>${m.p2name}</span></div><div class="match-card-scores">Рахунок по сетам: ${m.scoreLine || '0:0'}</div>`;
+                container.appendChild(card);
+            });
+        });
+
+        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
+
+        function renderPlayersList(playersObj) {
+            const container = document.getElementById('players-container');
+            if (Object.keys(playersObj).length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено.</div>'; return; }
+            container.innerHTML = '';
+            Object.keys(playersObj).forEach(key => {
+                const p = playersObj[key]; const item = document.createElement('div'); item.className = 'player-list-item';
+                item.innerHTML = `<div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div></div><button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>`;
+                container.appendChild(item);
+            });
         }
-        let totalSeconds = 0, setSeconds = 0, gameSeconds = 0, lastGamesCountTracked = 0, lastSetTracked = 1, isMatchFinishedCurrently = false, isBreakActive = false;
-        let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const courtId = urlParams.get('court') || "1"; 
-        const databasePath = `padel/courts/court_${courtId}`;
-        const formatTime = (sec) => { return Math.floor(sec / 60).toString().padStart(2, '0') + ":" + (sec % 60).toString().padStart(2, '0'); };
-
-        function updateAnalogClockHands() {
-            const now = new Date(); const ms = now.getMilliseconds();
-            const sDeg = (now.getSeconds() * 6) + (ms * 0.006);
-            const mDeg = (now.getMinutes() * 6) + (now.getSeconds() * 0.1);
-            const hDeg = ((now.getHours() % 12) * 30) + (now.getMinutes() * 0.5);
-            if(document.getElementById('brk-hand-h')) document.getElementById('brk-hand-h').setAttribute('transform', `rotate(${hDeg}, 100, 100)`);
-            if(document.getElementById('brk-hand-m')) document.getElementById('brk-hand-m').setAttribute('transform', `rotate(${mDeg}, 100, 100)`);
-            if(document.getElementById('brk-hand-s')) document.getElementById('brk-hand-s').setAttribute('transform', `rotate(${sDeg}, 100, 100)`);
+        window.filterPlayers = function(query) {
+            if (!query) { renderPlayersList(allPlayersData); return; }
+            const filtered = {};
+            Object.keys(allPlayersData).forEach(k => { if (allPlayersData[k].name && allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) filtered[k] = allPlayersData[k]; });
+            renderPlayersList(filtered);
         }
-        function clockRenderLoop() { if (isBreakActive) updateAnalogClockHands(); requestAnimationFrame(clockRenderLoop); }
-        requestAnimationFrame(clockRenderLoop);
 
-        setInterval(() => {
-            if (isMatchFinishedCurrently || !matchTimerStarted || isBreakActive) return;
-            totalSeconds++; setSeconds++; gameSeconds++; setsTimeDurationsHistory[lastSetTracked - 1] = formatTime(setSeconds);
-            if(document.getElementById('st-time-set')) document.getElementById('st-time-set').innerText = formatTime(setSeconds);
-            if(document.getElementById('st-time-game')) document.getElementById('st-time-game').innerText = formatTime(gameSeconds);
-            if(document.getElementById('st-time-match')) document.getElementById('st-time-match').innerText = formatTime(totalSeconds);
-        }, 1000);
+        window.deleteMatchHistory = function(key) { if (confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); }
+        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
 
-        onValue(ref(db, databasePath), (snapshot) => {
-            const state = snapshot.val();
-            if (state) {
-                lastKnownState = state;
+        window.createNewPlayer = function() {
+            const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
+            if (!name) { alert("Введіть ім'я."); return; }
+            push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
+            document.getElementById('new-player-name').value = '';
+        }
 
-                // Слухаємо кнопку траєкторії
-                if (state.trajectoryTrigger && state.trajectoryTrigger !== lastTrajectoryTrigger) {
-                    lastTrajectoryTrigger = state.trajectoryTrigger;
-                    runTrajectoryAnimation();
+        window.saveProfileData = function() {
+            localStorage.setItem('padel_org_name', document.getElementById('profile-name').value);
+            localStorage.setItem('padel_org_club', document.getElementById('profile-club').value);
+            alert("Збережено!");
+        }
+
+        window.hardResetAllFirebase = function() {
+            if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
+                remove(ref(db, 'padel')).then(() => window.location.reload());
+            }
+        }
+
+        window.resetAllCourts = function() {
+            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
+            if (!confirm("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
+
+            const freshCourtState = {
+                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
+                scale: 1, posX: 30, posY: 30,
+                isTiebreak: false, isAmericano: false, americanoLimit: 21,
+                isMexicano: false, mexicanoLimit: 24,
+                isProSet: false, proSetLimit: 8,
+                isSuperTiebreak: false, superTiebreakLimit: 10,
+                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
+                showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
+                cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
+                logoUrl: "", logoSrc: "", customLogoText: "",
+                showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4,
+                sponsorLogos: new Array(10).fill(""), sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0,
+                showBoardPromoPanel: false, boardPromoLines: new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
+                showMainBoard: true, showBreak: false, showQrCode: false,
+                qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
+                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+            };
+
+            const writes = [];
+            for (let i = 1; i <= 10; i++) {
+                writes.push(set(ref(db, 'padel/courts/court_' + i), freshCourtState));
+            }
+            Promise.all(writes).then(() => {
+                alert("✅ Усі 10 кортів скинуто до чистого стану.");
+                window.location.reload();
+            }).catch((err) => {
+                alert("❌ Помилка під час скидання: " + err.message);
+            });
+        }
+
+        // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
+        window.uploadAndCompressPromoFile = function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const statusEl = document.getElementById('promo-file-status');
+            const isVideo = file.type.startsWith('video/');
+            
+            if (isVideo) {
+                // Стискати відео прямо в браузері без сторонніх важких бібліотек неможливо, 
+                // тому ставимо ліміт на розмір файлу, щоб не перевантажувати пам'ять GitHub/Firebase.
+                if (file.size > 2.5 * 1024 * 1024) {
+                    alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
+                    statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
+                    return;
                 }
+                statusEl.innerText = "⏳ Обробка відео...";
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    state.promoSrc = evt.target.result; state.promoUrl = ""; 
+                    state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true;
+                    document.getElementById('promo-url-input').value = "";
+                    statusEl.innerText = "✅ Відео додано"; set(matchRef, state);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Стиснення фотографій через HTML5 Canvas (зменшення роздільної здатності до 1280px та оптимізація якості)
+                statusEl.innerText = "⏳ Стиснення фото...";
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        const max_size = 1280; // Оптимальний розмір для трансляцій
+                        
+                        if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
+                        else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+                        
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Стискаємо в якість 0.7 (JPEG), зменшуючи вагу файлу на 80-90%
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        state.promoSrc = compressedBase64; state.promoUrl = ""; 
+                        state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
+                        document.getElementById('promo-url-input').value = "";
+                        statusEl.innerText = "✅ Фото стиснуто та збережено"; set(matchRef, state);
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
 
-                const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
-                if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
-                    forceCloseStatsPanel();
+        window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
+        window.updatePromoUrl = function(url) {
+            state.promoUrl = url; state.promoSrc = ""; state.promoTypeIsText = false;
+            document.getElementById('promo-type-text-checkbox').checked = false;
+            if (url.match(/\.(mp4|webm|mov|avi)/i)) { state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true; }
+            document.getElementById('promo-file-status').innerText = "Використовується URL"; set(matchRef, state);
+        };
+        window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
+        window.togglePromoTransparentBg = function(c) { state.promoTransparentBg = c; set(matchRef, state); };
+
+        let pTextTimeout = null;
+        window.updatePromoText = function(v) {
+            clearTimeout(pTextTimeout);
+            pTextTimeout = setTimeout(() => { state.promoText = v; set(matchRef, state); }, 400);
+        };
+        window.updatePromoTextColor = function(v) { state.promoTextColor = v; set(matchRef, state); };
+        window.updatePromoTextSize = function(v) { state.promoTextSize = parseInt(v) || 60; set(matchRef, state); };
+        window.togglePromoTypeText = function(c) {
+            state.promoTypeIsText = c;
+            if (c) { state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false; }
+            set(matchRef, state);
+        };
+
+        window.clearPromoData = function() {
+            state.promoUrl = ""; state.promoSrc = ""; state.showFullscreenPromo = false; state.promoTypeIsVideo = false;
+            state.promoText = ""; state.promoTypeIsText = false; state.promoTextColor = "#ffffff"; state.promoTextSize = 60;
+            state.promoTransparentBg = false;
+            document.getElementById('promo-url-input').value = ""; document.getElementById('promo-visibility-checkbox').checked = false;
+            document.getElementById('promo-type-video-checkbox').checked = false; document.getElementById('promo-file-status').innerText = "Файл не вибрано";
+            document.getElementById('promo-text-input').value = ""; document.getElementById('promo-type-text-checkbox').checked = false;
+            document.getElementById('promo-text-color-input').value = "#ffffff"; document.getElementById('promo-text-size-input').value = 60;
+            document.getElementById('promo-transparent-bg-checkbox').checked = false;
+            set(matchRef, state);
+        };
+
+        // ── ADMIN: показати/вимкнути повноекранну заставку одразу на ВСІХ 10 кортах ──
+        window.broadcastPromoToAllCourts = function(enable) {
+            const statusEl = document.getElementById('admin-promo-broadcast-status');
+            if (enable && !state.promoUrl && !state.promoSrc && !(state.promoTypeIsText && state.promoText)) {
+                statusEl.style.color = "#ef4444";
+                statusEl.innerText = "⚠️ Спочатку завантажте фото/відео/текст заставки на цьому корті";
+                return;
+            }
+            if (!confirm(enable ? "Показати цю заставку на ВСІХ 10 кортах одразу?" : "Вимкнути заставку на ВСІХ 10 кортах?")) return;
+
+            const promoFields = {
+                showFullscreenPromo: enable,
+                promoUrl: state.promoUrl || "", promoSrc: state.promoSrc || "", promoTypeIsVideo: !!state.promoTypeIsVideo,
+                promoText: state.promoText || "", promoTypeIsText: !!state.promoTypeIsText,
+                promoTextColor: state.promoTextColor || "#ffffff", promoTextSize: state.promoTextSize || 60,
+                promoTransparentBg: !!state.promoTransparentBg
+            };
+
+            const writes = [];
+            for (let i = 1; i <= 10; i++) {
+                const courtRef = ref(db, 'padel/courts/court_' + i);
+                writes.push(
+                    get(courtRef).then((snap) => {
+                        const courtState = snap.val() || {};
+                        Object.assign(courtState, promoFields);
+                        return set(courtRef, courtState);
+                    })
+                );
+            }
+            statusEl.style.color = "#a78bfa"; statusEl.innerText = "⏳ Розсилаю на всі корти...";
+            Promise.all(writes).then(() => {
+                statusEl.style.color = "#4ade80";
+                statusEl.innerText = enable ? "✅ Увімкнено на всіх 10 кортах" : "✅ Вимкнено на всіх 10 кортах";
+            }).catch((err) => {
+                statusEl.style.color = "#ef4444";
+                statusEl.innerText = "❌ Помилка: " + err.message;
+            });
+        };
+
+        // ── Лого спонсора (панель зліва від табло, розмір 120×96) ──
+        window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
+        window.updateLogoUrl = function(url) {
+            state.logoUrl = url; state.logoSrc = "";
+            document.getElementById('logo-file-status').innerText = url ? "Використовується URL" : "Файл не вибрано";
+            set(matchRef, state);
+        };
+        window.updateLogoText = function(v) { state.customLogoText = v; set(matchRef, state); };
+
+        window.uploadAndCompressLogoFile = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('logo-file-status');
+            statusEl.innerText = "⏳ Стиснення лого...";
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    // Панель лого на трансляції має розмір 120×96px — стискаємо точно під
+                    // цей розмір (x2 для чіткості на HiDPI), заповнюючи всю площу (як "cover")
+                    const targetW = 240, targetH = 192;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = targetW; canvas.height = targetH;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, targetW, targetH);
+                    const scale = Math.max(targetW / img.width, targetH / img.height);
+                    const drawW = img.width * scale, drawH = img.height * scale;
+                    const dx = (targetW - drawW) / 2, dy = (targetH - drawH) / 2;
+                    ctx.drawImage(img, dx, dy, drawW, drawH);
+
+                    const compressedBase64 = canvas.toDataURL('image/png');
+                    state.logoSrc = compressedBase64; state.logoUrl = "";
+                    document.getElementById('logo-url-input').value = "";
+                    statusEl.innerText = "✅ Лого стиснуто та збережено (120×96)";
+                    set(matchRef, state);
+                };
+                img.onerror = function() { statusEl.innerText = "❌ Не вдалось завантажити зображення"; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ===== ЛОГОТИПИ СПОНСОРІВ (карусель 1-10, зверху над табло) =====
+        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
+
+        // ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (5 рядків тексту) =====
+        window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
+
+        function ensureBoardPromoLinesArray() {
+            if (!Array.isArray(state.boardPromoLines) || state.boardPromoLines.length < 5) {
+                const arr = Array.isArray(state.boardPromoLines) ? state.boardPromoLines.slice() : [];
+                while (arr.length < 5) arr.push({ text: "", size: 16, color: "#ffffff", bg: "" });
+                state.boardPromoLines = arr;
+            }
+        }
+
+        function renderBoardPromoLineRows() {
+            const container = document.getElementById('board-promo-lines-list');
+            if (!container) return;
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += '<div style="display:flex; flex-direction:column; gap:4px; border-bottom:1px dashed #444; padding-bottom:8px;">' +
+                    '<div style="display:flex; gap:6px; align-items:center;">' +
+                        '<span style="font-size:10px; color:#999; width:14px; flex-shrink:0;">' + i + '.</span>' +
+                        '<input type="text" id="board-promo-text-' + i + '" placeholder="Текст рядка ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                    '</div>' +
+                    '<div style="display:flex; gap:8px; align-items:center; padding-left:20px;">' +
+                        '<span style="font-size:9px; color:#888;">Розмір:</span>' +
+                        '<input type="number" id="board-promo-size-' + i + '" value="16" min="8" max="60" style="width:50px; background:#2a2a2a; border:1px solid #444; color:white; padding:4px; border-radius:4px; font-size:10px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                        '<span style="font-size:9px; color:#888;">Колір:</span>' +
+                        '<input type="color" id="board-promo-color-' + i + '" value="#ffffff" style="width:34px; height:26px; padding:1px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="updateBoardPromoLine(' + i + ')">' +
+                        '<span style="font-size:9px; color:#888;">Фон:</span>' +
+                        '<input type="color" id="board-promo-bg-' + i + '" value="#000000" style="width:34px; height:26px; padding:1px; background:#2a2a2a; border:1px solid #444; border-radius:4px;" onchange="this.dataset.active=\'1\'; updateBoardPromoLine(' + i + ')">' +
+                        '<button type="button" class="btn" style="padding:4px 8px; font-size:9px; background:#444;" onclick="clearBoardPromoBg(' + i + ')">Без фону</button>' +
+                    '</div>' +
+                '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        window.updateBoardPromoLine = function(i) {
+            ensureBoardPromoLinesArray();
+            const text = document.getElementById('board-promo-text-' + i).value || "";
+            const size = parseInt(document.getElementById('board-promo-size-' + i).value) || 16;
+            const color = document.getElementById('board-promo-color-' + i).value || "#ffffff";
+            const bgActive = document.getElementById('board-promo-bg-' + i).dataset.active === "1";
+            const bg = bgActive ? document.getElementById('board-promo-bg-' + i).value : "";
+            state.boardPromoLines[i - 1] = { text, size, color, bg };
+            set(matchRef, state);
+        };
+
+        window.clearBoardPromoBg = function(i) {
+            const bgInput = document.getElementById('board-promo-bg-' + i);
+            bgInput.dataset.active = "0";
+            ensureBoardPromoLinesArray();
+            state.boardPromoLines[i - 1].bg = "";
+            set(matchRef, state);
+        };
+        window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
+        window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
+        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
+        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
+
+        function ensureSponsorLogosArray() {
+            if (!Array.isArray(state.sponsorLogos) || state.sponsorLogos.length < 10) {
+                const arr = Array.isArray(state.sponsorLogos) ? state.sponsorLogos.slice() : [];
+                while (arr.length < 10) arr.push("");
+                state.sponsorLogos = arr;
+            }
+        }
+
+        function renderSponsorLogoRows() {
+            const container = document.getElementById('sponsor-logos-list');
+            if (!container) return;
+            let html = '';
+            for (let i = 1; i <= 10; i++) {
+                html += '<div style="display:flex; gap:6px; align-items:center;">' +
+                    '<span style="font-size:10px; color:#999; width:16px; flex-shrink:0;">' + i + '.</span>' +
+                    '<input type="text" id="sponsor-logo-url-' + i + '" placeholder="URL логотипу ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateSponsorLogoUrl(' + i + ', this.value)">' +
+                    '<button type="button" class="btn" style="padding:6px 8px; font-size:10px; background:#444; flex-shrink:0;" onclick="document.getElementById(\'sponsor-logo-file-' + i + '\').click()">📁</button>' +
+                    '<input type="file" id="sponsor-logo-file-' + i + '" accept="image/*" style="display:none" onchange="uploadSponsorLogoFile(' + i + ', event)">' +
+                    '<span id="sponsor-logo-status-' + i + '" style="width:16px; flex-shrink:0; font-size:11px;"></span>' +
+                    '<button type="button" class="btn btn-red" style="padding:6px 8px; font-size:10px; flex-shrink:0;" onclick="clearSponsorLogo(' + i + ')">✕</button>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        window.updateSponsorLogoUrl = function(i, url) {
+            ensureSponsorLogosArray();
+            state.sponsorLogos[i - 1] = url;
+            set(matchRef, state);
+        };
+
+        window.clearSponsorLogo = function(i) {
+            ensureSponsorLogosArray();
+            state.sponsorLogos[i - 1] = "";
+            const urlInput = document.getElementById('sponsor-logo-url-' + i);
+            if (urlInput) urlInput.value = "";
+            set(matchRef, state);
+        };
+
+        window.uploadSponsorLogoFile = function(i, e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('sponsor-logo-status-' + i);
+            if (statusEl) statusEl.innerText = "⏳";
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    // Без обрізання (contain) — вписуємо ціле фото в рамку максимум 320x160,
+                    // зберігаючи пропорції, щоб на трансляції нічого не спотворювалось і не різалось.
+                    const maxW = 320, maxH = 160;
+                    const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const compressedBase64 = canvas.toDataURL('image/png');
+                    ensureSponsorLogosArray();
+                    state.sponsorLogos[i - 1] = compressedBase64;
+                    const urlInput = document.getElementById('sponsor-logo-url-' + i);
+                    if (urlInput) urlInput.value = "";
+                    if (statusEl) statusEl.innerText = "✅";
+                    set(matchRef, state);
+                };
+                img.onerror = function() { if (statusEl) statusEl.innerText = "❌"; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.clearLogoData = function() {
+            state.logoUrl = ""; state.logoSrc = ""; state.showLogo = false; state.customLogoText = "";
+            document.getElementById('logo-url-input').value = ""; document.getElementById('logo-text-input').value = "";
+            document.getElementById('logo-visibility-checkbox').checked = false;
+            document.getElementById('logo-file-status').innerText = "Файл не вибрано";
+            set(matchRef, state);
+        };
+
+        window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
+
+        function resetMatchWithoutConfirm() {
+            if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
+            set(matchRef, {
+                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, 
+                scale: state.scale || 1, posX: 30, posY: 30,
+                isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, 
+                isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
+                isProSet: false, proSetLimit: state.proSetLimit || 8, 
+                isSuperTiebreak: false, superTiebreakLimit: state.superTiebreakLimit || 10, 
+                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
+                cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
+                logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
+                showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
+                sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
+                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0,
+                showBoardPromoPanel: state.showBoardPromoPanel || false,
+                showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
+                boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
+                showMainBoard: true, showBreak: false, showQrCode: false, 
+                qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
+                isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
+                promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
+                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+            }).then(() => closeModalSettings());
+        }
+
+        function renderUI() {
+            document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
+            document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
+            document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
+            document.getElementById('mode-stats-between-games-checkbox').checked = !!state.showStatsBetweenGames;
+            if (document.getElementById('stats-left-logo-visibility-checkbox')) {
+                document.getElementById('stats-left-logo-visibility-checkbox').checked = !!state.showStatsLeftLogo;
+                if (!state.statsLeftLogoSrc && document.activeElement !== document.getElementById('stats-left-logo-url-input')) {
+                    document.getElementById('stats-left-logo-url-input').value = state.statsLeftLogoUrl || "";
                 }
-                lastP1IndexTracked = curP1Idx; lastP2IndexTracked = curP2Idx; statsTrackerInitialized = true;
+            }
 
-                const promoOverlay = document.getElementById('fullscreen-promo-overlay');
-                const promoImg = document.getElementById('promo-img');
-                const promoVideo = document.getElementById('promo-video');
-                const promoTextEl = document.getElementById('promo-text');
+            if (document.getElementById('sponsor-logos-visibility-checkbox')) {
+                document.getElementById('sponsor-logos-visibility-checkbox').checked = !!state.showSponsorLogos;
+                if (document.activeElement !== document.getElementById('sponsor-logo-scale-slider')) document.getElementById('sponsor-logo-scale-slider').value = state.sponsorLogoScale || 1;
+                if (document.activeElement !== document.getElementById('sponsor-logo-posx-slider')) document.getElementById('sponsor-logo-posx-slider').value = state.sponsorLogoPosX || 0;
+                if (document.activeElement !== document.getElementById('sponsor-logo-interval-input')) document.getElementById('sponsor-logo-interval-input').value = state.sponsorLogoIntervalSec || 4;
+                const currentMode = state.sponsorLogoDisplayMode === 'all' ? 'all' : 'carousel';
+                if (document.activeElement !== document.getElementById('sponsor-logo-mode-select')) document.getElementById('sponsor-logo-mode-select').value = currentMode;
+                document.getElementById('sponsor-logo-interval-row').style.display = (currentMode === 'all') ? 'none' : 'flex';
+                const logos = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : [];
+                for (let i = 1; i <= 10; i++) {
+                    const urlInput = document.getElementById('sponsor-logo-url-' + i);
+                    const val = logos[i - 1] || "";
+                    if (urlInput && document.activeElement !== urlInput && !val.startsWith('data:')) { urlInput.value = val; }
+                    const statusEl = document.getElementById('sponsor-logo-status-' + i);
+                    if (statusEl && val.startsWith('data:')) { statusEl.innerText = "✅"; }
+                }
+            }
 
-                if (!!state.showFullscreenPromo) {
-                    promoOverlay.classList.toggle('transparent-bg-mode', !!state.promoTransparentBg);
-                    if (!!state.promoTypeIsText) {
-                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null;
-                        promoTextEl.innerText = state.promoText || "";
-                        promoTextEl.style.color = state.promoTextColor || "#ffffff";
-                        promoTextEl.style.fontSize = (state.promoTextSize || 60) + "px";
-                        promoTextEl.classList.add('active');
-                    } else {
-                        promoTextEl.classList.remove('active');
-                        let mediaUrl = state.promoUrl || state.promoSrc || "";
-                        let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
-                        if (mediaUrl && (mediaUrl !== lastPromoSource || isVideo !== lastPromoIsVideoFlag)) {
-                            lastPromoSource = mediaUrl; lastPromoIsVideoFlag = isVideo;
-                            if (isVideo) {
-                                promoImg.classList.remove('active');
-                                promoVideo.loop = true; promoVideo.muted = true;
-                                promoVideo.src = mediaUrl; promoVideo.load();
-                                promoVideo.classList.add('active');
-                                promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
-                            } else {
-                                promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
-                            }
-                        }
+            if (document.getElementById('board-promo-visibility-checkbox')) {
+                document.getElementById('board-promo-visibility-checkbox').checked = !!state.showBoardPromoPanel;
+                const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
+                for (let i = 1; i <= 5; i++) {
+                    const cfg = promoLines[i - 1] || {};
+                    const textEl = document.getElementById('board-promo-text-' + i);
+                    if (textEl && document.activeElement !== textEl) textEl.value = cfg.text || "";
+                    const sizeEl = document.getElementById('board-promo-size-' + i);
+                    if (sizeEl && document.activeElement !== sizeEl) sizeEl.value = cfg.size || 16;
+                    const colorEl = document.getElementById('board-promo-color-' + i);
+                    if (colorEl && document.activeElement !== colorEl) colorEl.value = cfg.color || "#ffffff";
+                    const bgEl = document.getElementById('board-promo-bg-' + i);
+                    if (bgEl && document.activeElement !== bgEl) {
+                        if (cfg.bg) { bgEl.value = cfg.bg; bgEl.dataset.active = "1"; }
+                        else { bgEl.dataset.active = "0"; }
                     }
-                    promoOverlay.classList.add('visible');
+                }
+            }
+            const isUaLang = state.cornerSlideLang !== 'en';
+            document.getElementById('lang-btn-ua').style.background = isUaLang ? '#c69f66' : '#2a2a2a';
+            document.getElementById('lang-btn-ua').style.color = isUaLang ? '#1c1c1c' : '#ccc';
+            document.getElementById('lang-btn-en').style.background = !isUaLang ? '#c69f66' : '#2a2a2a';
+            document.getElementById('lang-btn-en').style.color = !isUaLang ? '#1c1c1c' : '#ccc';
+            if (document.activeElement !== document.getElementById('scale-slider')) document.getElementById('scale-slider').value = state.scale || 1;
+            if (document.activeElement !== document.getElementById('pos-x-slider')) document.getElementById('pos-x-slider').value = state.posX || 0;
+            if (document.activeElement !== document.getElementById('pos-y-slider')) document.getElementById('pos-y-slider').value = state.posY || 0;
+            
+            const btnStats = document.getElementById('btn-toggle-stats');
+            if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
+            else { btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)"; btnStats.style.background = "#15803d"; }
+
+            document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode; document.getElementById('qr-code-url-input').value = state.qrCodeUrl || ""; document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
+            if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
+            
+            if(document.getElementById('promo-visibility-checkbox')) {
+                document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
+                if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
+                document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
+                document.getElementById('promo-transparent-bg-checkbox').checked = !!state.promoTransparentBg;
+                if (document.activeElement !== document.getElementById('promo-text-input')) document.getElementById('promo-text-input').value = state.promoText || "";
+                document.getElementById('promo-type-text-checkbox').checked = !!state.promoTypeIsText;
+                document.getElementById('promo-text-color-input').value = state.promoTextColor || "#ffffff";
+                document.getElementById('promo-text-size-input').value = state.promoTextSize || 60;
+            }
+
+            if(document.getElementById('logo-visibility-checkbox')) {
+                document.getElementById('logo-visibility-checkbox').checked = !!state.showLogo;
+                if (!state.logoSrc) document.getElementById('logo-url-input').value = state.logoUrl || "";
+                if (document.activeElement !== document.getElementById('logo-text-input')) document.getElementById('logo-text-input').value = state.customLogoText || "";
+                document.getElementById('logo-file-status').innerText = state.logoSrc ? "✅ Лого стиснуто та збережено (120×96)" : (state.logoUrl ? "Використовується URL" : "Файл не вибрано");
+            }
+
+            const badge = document.getElementById('mode-status');
+            let isGolden = !state.isAmericano && !state.isMexicano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3 && (state.deuceStyle === "one-golden" || (state.deuceStyle === "double" && (state.deuceCounter || 0) >= 2));
+            if (state.isMatchFinished) badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
+            else if (isGolden) badge.innerText = "🔥 GOLDEN POINT! 🔥";
+            else badge.innerText = state.isSuperTiebreak ? `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit||10})` : (state.isAmericano ? `АМЕРИКАНО (${state.americanoLimit||21})` : (state.isMexicano ? `МЕКСИКАНО (${state.mexicanoLimit||24})` : (state.isTiebreak ? "TIEBREAK" : `Сет ${state.currentSet||1}`)));
+
+            if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
+                document.getElementById('view-p1-pts').innerText = state.p1Index; document.getElementById('view-p2-pts').innerText = state.p2Index;
+            } else {
+                document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
+                document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
+            }
+
+            document.getElementById('pr-name1').innerText = state.p1name || "Команда A"; document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
+            document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1); document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
+
+            for (let s = 1; s <= 5; s++) {
+                document.getElementById('pr-t1-s' + s).innerText = state['t1_s' + s] || 0; document.getElementById('pr-t2-s' + s).innerText = state['t2_s' + s] || 0;
+            }
+
+            document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁 ПОКАЗАТИ ТАБЛО' : '👁 СХОВАТИ ТАБЛО';
+            document.getElementById('btn-break').innerText = state.showBreak ? '▶ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
+            document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
+            document.getElementById('mexicano-limit-row').style.display = state.isMexicano ? 'flex' : 'none';
+            document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
+            document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
+
+            // ── Блокування корту ──
+            const lockedOut = isControllerLocked();
+            document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
+            document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
+            document.getElementById('lock-status-badge').classList.toggle('visible', lockedOut);
+        }
+
+        function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
+        window.scorePoint = function(team) {
+            if (state.isMatchFinished) return;
+            if (isControllerLocked()) return; // заблоковано іншим оператором — ігноруємо натискання
+            // Перший, хто натискає рахунок — автоматично "займає" цей корт за собою
+            if (!state.controllerLock || !state.controllerLock.sessionId) {
+                state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
+            }
+            saveToHistory(state); if (state.showSetOverlayTrigger) state.showSetOverlayTrigger = false; window.scorePointWithoutHistorySave(team);
+        }
+
+        window.scorePointWithoutHistorySave = function(tIndex) {
+            if (state.isSuperTiebreak) {
+                if (tIndex === 1) state.p1Index++; else state.p2Index++;
+                if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                let lim = parseInt(state.superTiebreakLimit) || 10;
+                if (state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+                else if (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+            } else if (state.isAmericano) {
+                if (tIndex === 1) state.p1Index++; else state.p2Index++;
+                if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+            } else if (state.isMexicano) {
+                // Мексикано: кожен гравець подає по 4 очка поспіль (на відміну від Американо,
+                // де перша подача — 1 очко, далі по 2). Рахунок ведеться простими числами 1,2,3...
+                if (tIndex === 1) state.p1Index++; else state.p2Index++;
+                if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
+                if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+            } else if (state.isTiebreak) {
+                if (tIndex === 1) state.p1Index++; else state.p2Index++;
+                if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
+                else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) winGame(2);
+            } else {
+                let style = state.deuceStyle || "one-golden";
+                if (tIndex === 1) {
+                    if (state.p1Index === 3 && state.p2Index === 3) { if (style === "one-golden" || (style === "double" && (state.deuceCounter||0) >= 2)) winGame(1); else state.p1Index = 4; }
+                    else if (state.p1Index === 3 && state.p2Index === 4) { state.p2Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
+                    else if (state.p1Index === 4 || (state.p1Index === 3 && state.p2Index < 3)) winGame(1);
+                    else state.p1Index++;
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
+                    if (state.p2Index === 3 && state.p1Index === 3) { if (style === "one-golden" || (style === "double" && (state.deuceCounter||0) >= 2)) winGame(2); else state.p2Index = 4; }
+                    else if (state.p2Index === 3 && state.p1Index === 4) { state.p1Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
+                    else if (state.p2Index === 4 || (state.p2Index === 3 && state.p1Index < 3)) winGame(2);
+                    else state.p2Index++;
                 }
+            }
+            recalculateRibbons(state); set(matchRef, state);
+        }
 
-                document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
-                document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
-                document.documentElement.classList.toggle('theme-lightgray', state.boardTheme === 'lightgray');
-                document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
-                isMatchFinishedCurrently = !!state.isMatchFinished;
+        function winGame(winTeam) {
+            const wasTB = !!state.isTiebreak; if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; }
+            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
+            if (winTeam !== state.currentServer) { if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; }
+            state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
+            state['t2_s' + state.currentSet] = (state['t2_s' + state.currentSet] || 0) + (winTeam === 2 ? 1 : 0);
+            if(!state.gamesTimeHistory) state.gamesTimeHistory = [];
+            state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); gameStartTimestamp = Date.now();
+            let g1 = state['t1_s' + state.currentSet], g2 = state['t2_s' + state.currentSet], isOver = false, lim = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
+            if (state.isProSet) { if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; else if (g1 === lim && g2 === lim) state.isTiebreak = true; }
+            else { if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; else if (g1 === 6 && g2 === 6) state.isTiebreak = true; }
+            state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
+            if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
+            state.completedGamesCount = (state.completedGamesCount || 0) + 1;
+            if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
+                state.statsAutoTrigger = Date.now();
+            }
+            state.currentServer = state.currentServer === 1 ? 2 : 1;
+        }
 
-                if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || state.currentServer>0) && !matchTimerStarted && !state.isMatchFinished) {
-                    matchTimerStarted = true;
-                }
-                if (state.isMatchFinished) matchTimerStarted = false;
+        window.triggerServerDoubleFault = function() { if (state.isMatchFinished) return; saveToHistory(state); const s = state.currentServer || 1; if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1; else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1; state.animation = { team: s, type: 'double_fault', ts: Date.now() }; window.scorePointWithoutHistorySave(s === 1 ? 2 : 1); }
+        window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
+        window.toggleMainBoard = function() { saveToHistory(state); state.showMainBoard = !state.showMainBoard; set(matchRef, state); }
+        window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); }
+        window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
+        window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
+        window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); }
+        window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
 
-                const breakPanel = document.getElementById('break-panel');
-                const newBreakActive = !!state.showBreak;
-                if (newBreakActive && !isBreakActive) {
-                    breakSeconds = 0; document.getElementById('brk-timer').innerText = '00:00';
-                    if (breakInterval) clearInterval(breakInterval);
-                    updateAnalogClockHands();
-                    breakInterval = setInterval(() => { breakSeconds++; if(document.getElementById('brk-timer')) document.getElementById('brk-timer').innerText = formatTime(breakSeconds); }, 1000);
-                } else if (!newBreakActive && isBreakActive) { if (breakInterval) { clearInterval(breakInterval); breakInterval = null; } }
-                isBreakActive = newBreakActive;
+        window.toggleStatsLeftLogo = function(c) { state.showStatsLeftLogo = c; set(matchRef, state); }
+        window.updateStatsLeftLogoUrl = function(url) {
+            state.statsLeftLogoUrl = url; state.statsLeftLogoSrc = "";
+            document.getElementById('stats-left-logo-status').innerText = "";
+            set(matchRef, state);
+        }
+        window.uploadStatsLeftLogoFile = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('stats-left-logo-status');
+            statusEl.innerText = "⏳ Стиснення...";
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    // Без обрізання (contain), вписуємо в максимум 200x110, зберігаючи пропорції
+                    const maxW = 200, maxH = 110;
+                    const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    state.statsLeftLogoSrc = canvas.toDataURL('image/png'); state.statsLeftLogoUrl = "";
+                    document.getElementById('stats-left-logo-url-input').value = "";
+                    statusEl.innerText = "✅ Завантажено";
+                    set(matchRef, state);
+                };
+                img.onerror = function() { statusEl.innerText = "❌ Помилка"; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
+        window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); }
+        window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleSuperTiebreakMode = function(c) { state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
+        window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
+        window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v)||10; set(matchRef, state); }
+        window.changeDeuceStyle = function(s) { state.deuceStyle = s; set(matchRef, state); }
+        window.toggleQrCodeVisibility = function(c) { state.showQrCode = c; set(matchRef, state); }
+        window.updateQrCodeUrl = function(v) { state.qrCodeUrl = v; set(matchRef, state); }
+        window.updateQrDescription = function(v) { state.qrCodeDescription = v; set(matchRef, state); }
+        window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); }
+        window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); }
+        window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); }
+        window.updatePosition = function() { state.posX = parseInt(document.getElementById('pos-x-slider').value)||0; state.posY = parseInt(document.getElementById('pos-y-slider').value)||0; set(matchRef, state); }
+        
+        window.finishMatchPro = function() {
+            if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
+            if(confirm("Завершити матч та зберегти в історію?")){
+                state.isMatchFinished = true; state.showStatsOverlay = true; let scoreLines = [];
+                for(let i = 1; i <= 5; i++) { let s1 = state[`t1_s${i}`] || 0; let s2 = state[`t2_s${i}`] || 0; if(s1 > 0 || s2 > 0) scoreLines.push(`${s1}:${s2}`); }
+                push(ref(db, 'padel/history'), { courtId: courtId, p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B", scoreLine: scoreLines.join(', '), date: new Date().toLocaleString('uk-UA') });
+                set(matchRef, state); closeModalSettings();
+            }
+        }
+        
+        let lNameTimeout = null; window.liveUpdateName = function(t, v) { clearTimeout(lNameTimeout); lNameTimeout = setTimeout(() => { if(t===1) state.p1name=v; else state.p2name=v; set(matchRef, state); }, 400); }
 
-                if (newBreakActive) {
-                    document.getElementById('brk-label').innerText = state.cornerSlideLang === 'ua' ? 'ПЕРЕРВА' : 'BREAK';
-                    document.getElementById('brk-t1').innerText = state.p1name || getStatsLabel('team1Fallback', state);
-                    document.getElementById('brk-t2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
-                    let setsLine = '';
-                    for (let si = 1; si < (state.currentSet || 1); si++) {
-                        let sg1 = state[`t1_s${si}`] || 0, sg2 = state[`t2_s${si}`] || 0;
-                        if (sg1 > 0 || sg2 > 0) setsLine += (setsLine ? '  |  ' : '') + `${sg1}:${sg2}`;
-                    }
-                    document.getElementById('brk-sets').innerText = setsLine; breakPanel.classList.add('visible');
-                } else { breakPanel.classList.remove('visible'); }
-
-                const boardWrapper = document.getElementById('main-scoreboard');
-                const setResultPanel = document.getElementById('set-result-panel');
-                const stPanel = document.getElementById('statistics-panel');
-
-                if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
-                    document.getElementById('ribbon-top-tiebreak').classList.add('visible');
-                } else { document.getElementById('ribbon-top-tiebreak').classList.remove('visible'); }
-
-                if (setResultPanel) setResultPanel.classList.remove('visible');
-                if (setOverlayLocalActive) { clearTimeout(setOverlayTimer); setOverlayLocalActive = false; }
-
-                refreshBoardVisibility();
-
-                if (state.showQrCode) {
-                    if ((state.qrCodeUrl || "https://google.com") !== currentQrUrl) {
-                        currentQrUrl = state.qrCodeUrl || "https://google.com";
-                        document.getElementById('qr-code-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentQrUrl)}`;
-                    }
-                    document.getElementById('qr-code-description-node').innerText = state.qrCodeDescription || "SCAN ME";
-                    document.getElementById('qr-code-panel').classList.add('visible');
-                } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
-
-                document.getElementById('name-display-t1').innerText = state.p1name || getStatsLabel('team1Fallback', state);
-                document.getElementById('name-display-t2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
-
-                boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
-                if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
-
-                document.documentElement.style.setProperty('--team-name-width', (state.teamNameWidth || 320) + 'px');
-                document.documentElement.style.setProperty('--team-name-font', (state.teamNameFontSize || 22) + 'px');
-                document.getElementById('logo-panel').classList.toggle('visible', !!state.showLogo);
-
-                const txtNode = document.getElementById('logo-text-node'), imgNode = document.getElementById('logo-img-node');
-                if (state.logoUrl || state.logoSrc) {
-                    txtNode.style.display = 'none'; imgNode.src = state.logoUrl || state.logoSrc; imgNode.style.display = 'block';
-                } else {
-                    imgNode.style.display = 'none'; txtNode.innerText = state.customLogoText || "QATAR AIRWAYS";
-                    txtNode.style.fontFamily = state.logoFontFamily || 'Montserrat'; txtNode.style.fontSize = (state.logoFontSize || 13) + 'px';
-                    txtNode.style.color = state.logoFontColor || '#ffffff'; txtNode.style.display = 'block';
-                }
-
-                const boardPromoPanel = document.getElementById('board-promo-panel');
-                if (boardPromoPanel) {
-                    boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
-                    const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
-                    for (let i = 1; i <= 5; i++) {
-                        const lineEl = document.getElementById('board-promo-line-' + i);
-                        const cfg = promoLines[i - 1] || {};
-                        lineEl.innerText = cfg.text || "";
-                        lineEl.style.fontSize = (cfg.size || 16) + "px";
-                        lineEl.style.color = cfg.color || "#ffffff";
-                        if (cfg.bg) { lineEl.style.background = cfg.bg; lineEl.classList.add('has-bg'); }
-                        else { lineEl.style.background = "transparent"; lineEl.classList.remove('has-bg'); }
-                    }
-                }
-
-                const ribbonMatch = document.getElementById('ribbon-match');
-                if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !state.isMexicano && !state.isSuperTiebreak && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
-                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' '); ribbonMatch.className = "ribbon visible";
-                    if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
-                    else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
-                    else if (state.activeMatchRibbon === "BREAK_POINT") ribbonMatch.classList.add('ribbon-breakpoint');
-                    else if (state.activeMatchRibbon === "GOLDEN_POINT") ribbonMatch.classList.add('ribbon-goldenpoint');
-                    else if (state.activeMatchRibbon === "GAME_POINT") ribbonMatch.classList.add('ribbon-gamepoint');
-                } else { ribbonMatch.classList.remove('visible'); }
-
-                if (!state.isMatchFinished && !state.showStatsOverlay && !state.showSetOverlayTrigger) {
-                    const curRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
-                    if (!!state.isTiebreak && !lastCornerTiebreak) showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
-                    else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano && !state.isMexicano) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
-                    else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
-                        showCornerSlide(getCornerSlideText(curRibbon.toLowerCase().replace('_',''), state), 'csp-' + curRibbon.toLowerCase().replace('_',''));
-                    }
-                    lastCornerRibbon = curRibbon; lastCornerDeuce = state.deuceCounter || 0; lastCornerTiebreak = !!state.isTiebreak;
-                }
-
-                const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
-                let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
-                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); }
-                else {
-                    pb.classList.add('visible');
-                    if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
-                        pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
-                        document.getElementById('advantage-callout').classList.remove('visible');
-                    } else {
-                        const isDoubleStyleAd = state.deuceStyle === 'double';
-                        const adRound = (state.deuceCounter || 0) + 1;
-                        const adText = "AD" + ((isDoubleStyleAd && adRound <= 2) ? adRound : "");
-
-                        pbT1.innerText = (p1 === 4) ? adText : ((p2 === 4) ? "" : pointSequence[p1]);
-                        pbT2.innerText = (p2 === 4) ? adText : ((p1 === 4) ? "" : pointSequence[p2]);
-                        pbT1.classList.toggle('ad-active', p1 === 4);
-                        pbT2.classList.toggle('ad-active', p2 === 4);
-
-                        const advCallout = document.getElementById('advantage-callout');
-                        const isDoubleStyle = state.deuceStyle === 'double';
-                        const atDeuce = p1 === 3 && p2 === 3;
-                        const isAdvantageHeld = p1 === 4 || p2 === 4;
-
-                        if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
-                            const round = (state.deuceCounter || 0) + 1;
-                            if (round <= 2) {
-                                advCallout.innerText = "ADVANTAGE " + round;
-                                advCallout.classList.add('visible');
-                            } else {
-                                advCallout.innerText = "GOLDEN POINT";
-                                advCallout.classList.add('visible');
-                            }
-                        } else {
-                            advCallout.classList.remove('visible');
-                        }
-                    }
-                }
-
-                document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
-                document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
-
-                const activeSet = state.currentSet || 1;
-                if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
-
-                const gamesPlayedInSet = (state[`t1_s${activeSet}`]||0) + (state[`t2_s${activeSet}`]||0);
-                if (gamesPlayedInSet !== lastGamesCountTracked) { gameSeconds = 0; lastGamesCountTracked = gamesPlayedInSet; if(document.getElementById('st-time-game')) document.getElementById('st-time-game').innerText = formatTime(gameSeconds); }
-
-                const row1El = document.getElementById('row-team-1'), row2El = document.getElementById('row-team-2');
-                let setsToRender = 0;
-                const showCurrentSet = (!state.isAmericano && !state.isMexicano) && ((state[`t1_s${activeSet}`]||0)>0 || (state[`t2_s${activeSet}`]||0)>0 || state.isProSet || (state.isSuperTiebreak && (p1>0||p2>0)));
-                for (let s = activeSet; s >= 1; s--) {
-                    if (s === activeSet) { if (showCurrentSet) { setsToRender = s; break; } continue; }
-                    if ((state[`t1_s${s}`]||0)>0 || (state[`t2_s${s}`]||0)>0) { setsToRender = s; break; }
-                }
-
-                for (let s = 1; s <= setsToRender; s++) {
-                    if (!document.getElementById(`t1-s${s}`)) {
-                        let b1 = document.createElement('div'); b1.className = 'score-box'; b1.id = `t1-s${s}`; b1.innerText = '0'; row1El.appendChild(b1);
-                        let b2 = document.createElement('div'); b2.className = 'score-box'; b2.id = `t2-s${s}`; b2.innerText = '0'; row2El.appendChild(b2);
-                    }
-                }
-
-                let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
-                for (let s = 1; s <= sMax; s++) {
-                    let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
-                    if (!box1 || !box2) continue;
-                    if (s > setsToRender) { box1.style.display = 'none'; box2.style.display = 'none'; continue; }
-                    let isCurSuperTB = state.isSuperTiebreak && s === activeSet;
-                    let g1 = isCurSuperTB ? p1 : (state[`t1_s${s}`] || 0), g2 = isCurSuperTB ? p2 : (state[`t2_s${s}`] || 0);
-                    box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
-                    box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
-                    box1.innerText = g1; box2.innerText = g2;
-                }
-
-                const ribbonProset = document.getElementById('ribbon-proset');
-                if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
-                else if (state.isProSet) { ribbonProset.innerText = `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
-                else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
-                else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
-                else ribbonProset.classList.remove('visible');
-
-                const mfb = document.getElementById('match-finished-board');
-                if (state.isMatchFinished) {
-                    stPanel.classList.remove('visible');
-
-                    document.getElementById('mfb-header').innerText = `${getStatsLabel('court', state, ' ' + courtId)} • ${getStatsLabel('matchFinished', state)}`;
-                    let playedSets = [];
-                    for (let i = 1; i <= (state.currentSet||1); i++) {
-                        let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
-                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2});
-                    }
-                    let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
-                    document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||getStatsLabel('team1Fallback', state)) : (setsWon2 > setsWon1 ? (state.p2name||getStatsLabel('team2Fallback', state)) : getStatsLabel('tie', state));
-
-                    let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = `<th>${getStatsLabel('teamColumn', state)}</th>`;
-                    playedSets.forEach(s => { headRow.innerHTML += `<th>${getStatsLabel('setColumn', state)} ${s.set}</th>`; });
-
-                    let body = document.getElementById('mfb-body'); body.innerHTML = '';
-                    let r1 = document.createElement('tr'), r2 = document.createElement('tr');
-                    r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
-
-                    let h1 = `<td class="mfb-team-name">${state.p1name||getStatsLabel('team1Fallback', state)}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||getStatsLabel('team2Fallback', state)}</td>`;
-                    playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
-                    r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
-
-                    mfb.classList.remove('fading-out');
-                    mfb.classList.add('visible');
-                    if (!matchFinishedWasVisible) {
-                        matchFinishedWasVisible = true;
-                        statsRevealAllowed = false;
-                        if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
-                        matchFinishedFadeTimer = setTimeout(() => {
-                            mfb.classList.add('fading-out');
-                        }, 15000);
-                        statsAfterFinishLocallyDismissed = false;
-                        if (statsRevealTimer) clearTimeout(statsRevealTimer);
-                        statsRevealTimer = setTimeout(() => {
-                            statsRevealAllowed = true;
-                            const spm = document.getElementById('statistics-panel-manual');
-                            spm.classList.toggle('visible', !!state.showStatsOverlay && !statsAfterFinishLocallyDismissed);
-                            if (statsAfterFinishDismissTimer) clearTimeout(statsAfterFinishDismissTimer);
-                            statsAfterFinishDismissTimer = setTimeout(() => {
-                                if (spm) spm.classList.add('fading-out');
-                                setTimeout(() => {
-                                    statsAfterFinishLocallyDismissed = true;
-                                    if (spm) spm.classList.remove('visible', 'fading-out');
-                                    refreshBoardVisibility();
-                                }, 1200);
-                            }, 15000);
-                        }, 16300);
-                    }
-                    if (statsAutoActive) { forceCloseStatsPanel(); }
-                } else {
-                    mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
-                    matchFinishedWasVisible = false;
-                    statsRevealAllowed = false;
-                    statsAfterFinishLocallyDismissed = false;
-                    if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
-                    if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
-                    if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
-
-                    const isNewStatsTrigger = !!(state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger);
-                    if (isNewStatsTrigger) {
-                        lastStatsAutoTrigger = state.statsAutoTrigger;
-                        statsAutoActive = true;
-                    }
-
-                    if (state.replayLabelTrigger && state.replayLabelTrigger !== lastReplayLabelTrigger) {
-                        lastReplayLabelTrigger = state.replayLabelTrigger;
-                        const replayEl = document.getElementById('replay-label');
-                        replayEl.classList.add('visible');
-                        clearTimeout(replayLabelTimer);
-                        replayLabelTimer = setTimeout(() => { replayEl.classList.remove('visible'); }, 15000);
-                    }
-
-                    const sponsorFrame = document.getElementById('sponsor-logo-frame');
-                    const sponsorAllFrame = document.getElementById('sponsor-logo-all-frame');
-                    if (sponsorFrame && sponsorAllFrame) {
-                        const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
-                        const showAllMode = state.sponsorLogoDisplayMode === 'all';
-                        const scaleTransform = 'translateX(calc(-50% + ' + (state.sponsorLogoPosX || 0) + 'px)) scale(' + (state.sponsorLogoScale || 1) + ')';
-
-                        sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos && !showAllMode);
-                        sponsorFrame.style.transform = scaleTransform;
-                        sponsorAllFrame.classList.toggle('visible', !!state.showSponsorLogos && showAllMode);
-                        sponsorAllFrame.style.transform = scaleTransform;
-
-                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode;
-                        if (signature !== lastSponsorLogosSignature) {
-                            lastSponsorLogosSignature = signature;
-                            if (showAllMode) {
-                                clearInterval(sponsorLogoTimer);
-                                sponsorAllFrame.innerHTML = validLogos.map(u => '<img src="' + u + '">').join('');
-                            } else {
-                                startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
-                            }
-                        }
-                    }
-
-                    if (state.showStatsOverlay || statsAutoActive) {
-                        document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
-                        document.getElementById('stats-main-header').innerText = getStatsLabel('header', state, ' ' + courtId);
-                        if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
-                        document.getElementById('lbl-sets-mini').innerText = state.cornerSlideLang === 'ua' ? 'Сет' : 'Set';
-                        document.getElementById('lbl-games-mini').innerText = state.cornerSlideLang === 'ua' ? 'Гейми' : 'Games';
-                        document.getElementById('lbl-df-mini').innerText = state.cornerSlideLang === 'ua' ? 'Дабл фол' : 'Double fault';
-
-                        let totalGamesAuto1 = 0, totalGamesAuto2 = 0;
-                        for (let i = 1; i <= activeSet; i++) { totalGamesAuto1 += state[`t1_s${i}`] || 0; totalGamesAuto2 += state[`t2_s${i}`] || 0; }
-                        document.getElementById('st-g1').innerText = totalGamesAuto1; document.getElementById('st-g2').innerText = totalGamesAuto2;
-                        document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
-
-                        let miniSetsWon1 = 0, miniSetsWon2 = 0;
-                        for (let i = 1; i <= (state.currentSet||1); i++) {
-                            let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
-                            if (i < activeSet) { if (sg1 > sg2) miniSetsWon1++; else if (sg2 > sg1) miniSetsWon2++; }
-                        }
-                        document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
-
-                        const statsLogoBox = document.getElementById('statistics-panel').querySelector('.stats-broadcast-logo-box');
-                        const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
-                        const statsLogoTxt = document.getElementById('stats-broadcast-logo-text');
-                        const hasLogoContent = !!(state.logoUrl || state.logoSrc || state.customLogoText);
-                        if (state.showLogo && hasLogoContent) {
-                            statsLogoBox.classList.add('visible');
-                            if (state.logoUrl || state.logoSrc) {
-                                statsLogoTxt.style.display = 'none';
-                                statsLogoImg.src = state.logoUrl || state.logoSrc; statsLogoImg.style.display = 'block';
-                            } else {
-                                statsLogoImg.style.display = 'none';
-                                statsLogoTxt.innerText = state.customLogoText || ""; statsLogoTxt.style.display = 'block';
-                            }
-                        } else {
-                            statsLogoBox.classList.remove('visible');
-                        }
-                    }
-
-                    if (isNewStatsTrigger) {
-                        runStatsRevealSequence();
-                    }
-                }
-
-                if (state.animation && state.animation.ts !== lastAnimationTs) {
-                    lastAnimationTs = state.animation.ts; const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
-                    if (tBlock) {
-                        if (state.animation.type === 'double_fault') {
-                            tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
-                            showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
-                        } else {
-                            tBlock.style.transition = 'none'; tBlock.style.background = state.animation.type === 'set' ? '#ffffff' : '#c69f66';
-                            if (state.animation.type === 'set') tBlock.style.color = '#1a1a1a';
-                            setTimeout(() => { tBlock.style.transition = 'background 0.8s ease, color 0.8s ease'; tBlock.style.background = 'linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75))'; tBlock.style.color = 'white'; }, 600);
-                        }
-                    }
-                }
+        function recalculateRibbons(s) {
+            if (s.isAmericano || s.isMexicano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
+            if (!!s.isTiebreak) { s.activeMatchRibbon = (s.p1Index >= 6 && s.p1Index>s.p2Index) || (s.p2Index >= 6 && s.p2Index>s.p1Index) ? ((s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT") : "TIEBREAK_POINT"; return; }
+            let isG = s.p1Index===3 && s.p2Index===3 && (s.deuceStyle==="one-golden"||(s.deuceStyle==="double" && (s.deuceCounter||0)>=2));
+            let p1G = (s.p1Index===3 && s.p2Index<3) || s.p1Index===4 || isG, p2G = (s.p2Index===3 && s.p1Index<3) || s.p2Index===4 || isG;
+            if(!p1G && !p2G) { s.activeMatchRibbon = "NONE"; return; }
+            let lim = s.isProSet ? (parseInt(s.proSetLimit)||8) : 6, g1 = s['t1_s'+s.currentSet]||0, g2 = s['t2_s'+s.currentSet]||0;
+            let p1S = (g1===lim-1 && g2<=lim-2) || g1===lim, p2S = (g2===lim-1 && g1<=lim-2) || g2===lim;
+            if((p1G && p1S) || (p2G && p2S)) { s.activeMatchRibbon = (s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT"; return; }
+            if(isG) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
+            s.activeMatchRibbon = (p1G && s.currentServer===2) || (p2G && s.currentServer===1) ? "BREAK_POINT" : "GAME_POINT";
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            renderSponsorLogoRows();
+            renderBoardPromoLineRows();
+            if(localStorage.getItem('padel_org_name')) document.getElementById('profile-name').value = localStorage.getItem('padel_org_name');
+            if(localStorage.getItem('padel_org_club')) document.getElementById('profile-club').value = localStorage.getItem('padel_org_club');
+            if (isAdmin) {
+                document.getElementById('admin-badge').classList.add('visible');
+                document.getElementById('admin-unlock-btn').style.display = 'block';
+                document.getElementById('admin-camera-panel').style.display = 'flex';
+                document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
             }
         });
+        initCourtConnection();
     </script>
 </body>
 </html>
