@@ -95,7 +95,7 @@
                 <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
             </select>
             <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
-            <button class="settings-gear-btn" style="border-color: #ccff00; color: #ccff00;" onclick="triggerBallTrajectory()">🚀 Траєкторія</button>
+            <button class="settings-gear-btn" style="border-color: #ccff00; color: #ccff00;" onclick="triggerBallTrajectory()">⚡ Траєкторія</button>
             <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
                 <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
                 <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
@@ -436,7 +436,7 @@
             set(matchRef, state);
         };
 
-        // Функція для запуску анімації траєкторії м'яча з пульта
+        // Функція для запуску пунктирної траєкторії з пульта
         window.triggerBallTrajectory = function() {
             if (!state) return;
             state.trajectoryTrigger = Date.now();
