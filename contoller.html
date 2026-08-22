@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Padel Controller Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         body { background-color: #121212; font-family: 'Montserrat', sans-serif; color: white; margin: 0; padding: 15px; padding-bottom: 95px; -webkit-tap-highlight-color: transparent; position: relative; }
         .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); }
@@ -95,6 +95,7 @@
                 <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
             </select>
             <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
+            <button class="settings-gear-btn" style="border-color: #ccff00; color: #ccff00;" onclick="triggerBallTrajectory()">🚀 Траєкторія</button>
             <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
                 <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
                 <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
@@ -418,8 +419,6 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
-        // Адмін (?admin=1 в адресі) завжди має повний доступ і може розблокувати корт.
         let mySessionId = localStorage.getItem('padel_session_id');
         if (!mySessionId) {
             mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
@@ -434,6 +433,13 @@
 
         window.adminUnlockCourt = function() {
             state.controllerLock = null;
+            set(matchRef, state);
+        };
+
+        // Функція для запуску анімації траєкторії м'яча з пульта
+        window.triggerBallTrajectory = function() {
+            if (!state) return;
+            state.trajectoryTrigger = Date.now();
             set(matchRef, state);
         };
 
@@ -563,17 +569,14 @@
             }).catch((err) => {
                 alert("❌ Помилка під час скидання: " + err.message);
             });
-        }
+        };
 
-        // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
         window.uploadAndCompressPromoFile = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const statusEl = document.getElementById('promo-file-status');
             const isVideo = file.type.startsWith('video/');
             
             if (isVideo) {
-                // Стискати відео прямо в браузері без сторонніх важких бібліотек неможливо, 
-                // тому ставимо ліміт на розмір файлу, щоб не перевантажувати пам'ять GitHub/Firebase.
                 if (file.size > 2.5 * 1024 * 1024) {
                     alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
                     statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
@@ -589,7 +592,6 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Стиснення фотографій через HTML5 Canvas (зменшення роздільної здатності до 1280px та оптимізація якості)
                 statusEl.innerText = "⏳ Стиснення фото...";
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -597,7 +599,7 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width; let height = img.height;
-                        const max_size = 1280; // Оптимальний розмір для трансляцій
+                        const max_size = 1280;
                         
                         if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
                         else { if (height > max_size) { width *= max_size / height; height = max_size; } }
@@ -606,7 +608,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Стискаємо в якість 0.7 (JPEG), зменшуючи вагу файлу на 80-90%
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         state.promoSrc = compressedBase64; state.promoUrl = ""; 
                         state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
@@ -654,7 +655,6 @@
             set(matchRef, state);
         };
 
-        // ── ADMIN: показати/вимкнути повноекранну заставку одразу на ВСІХ 10 кортах ──
         window.broadcastPromoToAllCourts = function(enable) {
             const statusEl = document.getElementById('admin-promo-broadcast-status');
             if (enable && !state.promoUrl && !state.promoSrc && !(state.promoTypeIsText && state.promoText)) {
@@ -693,7 +693,6 @@
             });
         };
 
-        // ── Лого спонсора (панель зліва від табло, розмір 120×96) ──
         window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
         window.updateLogoUrl = function(url) {
             state.logoUrl = url; state.logoSrc = "";
@@ -711,8 +710,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Панель лого на трансляції має розмір 120×96px — стискаємо точно під
-                    // цей розмір (x2 для чіткості на HiDPI), заповнюючи всю площу (як "cover")
                     const targetW = 240, targetH = 192;
                     const canvas = document.createElement('canvas');
                     canvas.width = targetW; canvas.height = targetH;
@@ -735,10 +732,7 @@
             reader.readAsDataURL(file);
         };
 
-        // ===== ЛОГОТИПИ СПОНСОРІВ (карусель 1-10, зверху над табло) =====
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
-
-        // ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (5 рядків тексту) =====
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
 
         function ensureBoardPromoLinesArray() {
@@ -844,8 +838,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Без обрізання (contain) — вписуємо ціле фото в рамку максимум 320x160,
-                    // зберігаючи пропорції, щоб на трансляції нічого не спотворювалось і не різалось.
                     const maxW = 320, maxH = 160;
                     const scale = Math.min(maxW / img.width, maxH / img.height, 1);
                     const canvas = document.createElement('canvas');
@@ -1015,7 +1007,6 @@
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
 
-            // ── Блокування корту ──
             const lockedOut = isControllerLocked();
             document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
             document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
@@ -1025,8 +1016,7 @@
         function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
         window.scorePoint = function(team) {
             if (state.isMatchFinished) return;
-            if (isControllerLocked()) return; // заблоковано іншим оператором — ігноруємо натискання
-            // Перший, хто натискає рахунок — автоматично "займає" цей корт за собою
+            if (isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
                 state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
             }
@@ -1045,8 +1035,6 @@
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isMexicano) {
-                // Мексикано: кожен гравець подає по 4 очка поспіль (на відміну від Американо,
-                // де перша подача — 1 очко, далі по 2). Рахунок ведеться простими числами 1,2,3...
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
@@ -1115,7 +1103,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Без обрізання (contain), вписуємо в максимум 200x110, зберігаючи пропорції
                     const maxW = 200, maxH = 110;
                     const scale = Math.min(maxW / img.width, maxH / img.height, 1);
                     const canvas = document.createElement('canvas');
