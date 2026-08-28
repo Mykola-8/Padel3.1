@@ -1316,8 +1316,11 @@
                         const nameEl = document.getElementById('server-change-banner-name');
                         const labelEl = document.getElementById('server-change-banner-label');
                         labelEl.innerText = (state.cornerSlideLang === 'ua') ? 'ПОДАЄ' : 'SERVING';
-                        const servingTeamName = state.currentServer === 2 ? (state.p2name || getStatsLabel('team2Fallback', state)) : (state.p1name || getStatsLabel('team1Fallback', state));
-                        nameEl.innerText = servingTeamName;
+                        const servingName = state.currentServer === 2 ? (state.p2name || getStatsLabel('team2Fallback', state)) : (state.p1name || getStatsLabel('team1Fallback', state));
+                        const servingSlot = state.currentServer === 2 ? (state.p2ServerSlot || 1) : (state.p1ServerSlot || 1);
+                        const servingParts = servingName.split('/').map(p => p.trim()).filter(p => p.length > 0);
+                        const servingPlayerName = (servingParts.length === 2) ? servingParts[servingSlot === 2 ? 1 : 0] : servingName;
+                        nameEl.innerText = servingPlayerName;
                         banner.classList.add('visible');
                         clearTimeout(serverChangeBannerTimer);
                         serverChangeBannerTimer = setTimeout(() => { banner.classList.remove('visible'); }, 5000);
