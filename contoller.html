@@ -1099,6 +1099,7 @@
             if (newServerTeam === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
             else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
             state.currentServer = newServerTeam;
+            state.serverChangeTrigger = Date.now();
         }
 
         window.triggerServerDoubleFault = function() { if (state.isMatchFinished) return; saveToHistory(state); const s = state.currentServer || 1; if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1; else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1; state.animation = { team: s, type: 'double_fault', ts: Date.now() }; window.scorePointWithoutHistorySave(s === 1 ? 2 : 1); }
