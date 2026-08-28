@@ -242,7 +242,12 @@
 
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
-                <div class="row"><input type="text" id="p1-name-input" placeholder="Команда 1" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Команда 2" oninput="liveUpdateName(2,this.value)"></div>
+                <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
+                <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
+                <div class="row" style="margin-top:6px;">
+                    <button class="btn" style="flex:1; padding:6px; font-size:10px; background:#333;" onclick="toggleServerSlotManual(1)">🔁 Хто подає в парі А</button>
+                    <button class="btn" style="flex:1; padding:6px; font-size:10px; background:#333;" onclick="toggleServerSlotManual(2)">🔁 Хто подає в парі B</button>
+                </div>
             </div>
 
             <div class="card">
@@ -531,7 +536,7 @@
             if (!confirm("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
 
             const freshCourtState = {
-                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1,
+                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 scale: 1, posX: 30, posY: 30,
                 isTiebreak: false, isAmericano: false, americanoLimit: 21,
                 isMexicano: false, mexicanoLimit: 24,
@@ -880,7 +885,7 @@
         function resetMatchWithoutConfirm() {
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
-                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, currentSet: 1, 
+                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
                 scale: state.scale || 1, posX: 30, posY: 30,
                 isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, 
                 isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
@@ -1088,7 +1093,12 @@
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
             }
-            state.currentServer = state.currentServer === 1 ? 2 : 1;
+            const newServerTeam = state.currentServer === 1 ? 2 : 1;
+            // Чергування гравця в парі: щоразу, коли подача переходить ДО команди — перемикаємо,
+            // хто саме з двох гравців тепер подає за цю команду (1-й чи 2-й, розділені "/")
+            if (newServerTeam === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
+            else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
+            state.currentServer = newServerTeam;
         }
 
         window.triggerServerDoubleFault = function() { if (state.isMatchFinished) return; saveToHistory(state); const s = state.currentServer || 1; if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1; else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1; state.animation = { team: s, type: 'double_fault', ts: Date.now() }; window.scorePointWithoutHistorySave(s === 1 ? 2 : 1); }
@@ -1097,7 +1107,13 @@
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); }
         window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
-        window.setServer = function(s) { saveToHistory(state); state.currentServer = s; set(matchRef, state); }
+        window.setServer = function(s) { saveToHistory(state); state.currentServer = s; state.serverChangeTrigger = Date.now(); set(matchRef, state); }
+        window.toggleServerSlotManual = function(team) {
+            if (team === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
+            else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
+            state.serverChangeTrigger = Date.now();
+            set(matchRef, state);
+        }
         window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
 
         window.toggleStatsLeftLogo = function(c) { state.showStatsLeftLogo = c; set(matchRef, state); }
