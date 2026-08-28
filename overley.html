@@ -221,6 +221,8 @@
         .team-row { display: flex; height: 48px; }
         .team-names { width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
+        .player-serving { color: #c69f66; text-shadow: 0 0 10px rgba(198,159,102,0.7); }
+        .player-sep { opacity: 0.5; font-weight: 400; }
         .server-indicator.active { visibility: visible; }
         .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
         .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
@@ -378,6 +380,22 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
+        /* ===== БАНЕР "ХТО ПОДАЄ" (5с, знизу-зліва) ===== */
+        .server-change-banner {
+            position: fixed; bottom: 30px; left: 30px; z-index: 99000;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(8,8,8,0.78); border: 1px solid rgba(198,159,102,0.5); border-radius: 8px;
+            padding: 10px 18px; font-family: 'Montserrat', sans-serif;
+            opacity: 0; visibility: hidden; transform: translateX(-16px);
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+        }
+        .server-change-banner.visible { opacity: 1; visibility: visible; transform: translateX(0); }
+        .server-change-banner-ball { font-size: 22px; flex-shrink: 0; }
+        .server-change-banner-text { display: flex; flex-direction: column; }
+        .server-change-banner-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; }
+        .server-change-banner-name { font-size: 16px; font-weight: 800; color: #fff; }
+
         /* ===== ЛОГОТИПИ СПОНСОРІВ (по центру зверху, над табло) ===== */
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
@@ -484,7 +502,7 @@
 
         /* ТЕМАТИЧНІ СТИЛІ */
         html.theme-courtgreen .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-courtgreen .server-indicator { color: var(--accent); }
+        html.theme-courtgreen .server-indicator, html.theme-courtgreen .player-serving { color: var(--accent); }
         html.theme-courtgreen .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-courtgreen .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
         html.theme-courtgreen .r-proset-style { color: var(--accent); border-color: rgba(163,230,53,0.35); }
@@ -498,7 +516,7 @@
         html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
 
         html.theme-graydark .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-graydark .server-indicator { color: var(--accent); }
+        html.theme-graydark .server-indicator, html.theme-graydark .player-serving { color: var(--accent); }
         html.theme-graydark .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-graydark .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
         html.theme-graydark .r-proset-style { color: var(--accent); border-color: rgba(209,213,219,0.35); }
@@ -512,7 +530,7 @@
         html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
 
         html.theme-lightgray .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-lightgray .server-indicator { color: var(--accent); }
+        html.theme-lightgray .server-indicator, html.theme-lightgray .player-serving { color: var(--accent); }
         html.theme-lightgray .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-lightgray .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
         html.theme-lightgray .r-proset-style { color: var(--accent); border-color: rgba(107,114,128,0.35); }
@@ -526,7 +544,7 @@
         html.theme-lightgray .break-label, html.theme-lightgray .break-score-sep { color: var(--accent); }
 
         html.theme-transparent .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); border: 1.5px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .server-indicator { color: var(--accent); }
+        html.theme-transparent .server-indicator, html.theme-transparent .player-serving { color: var(--accent); }
         html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .r-proset-style { color: var(--accent); border-color: rgba(255,255,255,0.4); }
@@ -546,6 +564,15 @@
     <div class="replay-label" id="replay-label">
         <span class="replay-label-dot"></span>
         <span>REPLAY</span>
+    </div>
+
+    <!-- БАНЕР "ХТО ПОДАЄ" -->
+    <div class="server-change-banner" id="server-change-banner">
+        <span class="server-change-banner-ball">🎾</span>
+        <div class="server-change-banner-text">
+            <span class="server-change-banner-label" id="server-change-banner-label">ПОДАЄ</span>
+            <span class="server-change-banner-name" id="server-change-banner-name">Команда A</span>
+        </div>
     </div>
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (карусель) -->
@@ -778,6 +805,22 @@
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
 
+        // Розбиває назву команди на гравців за "/" і підсвічує того, хто зараз подає
+        // (тільки якщо ця команда зараз на подачі; якщо "/" в назві немає — просто звичайний текст)
+        function renderTeamNamePlayers(elId, name, isServingTeam, serverSlot) {
+            const el = document.getElementById(elId);
+            const parts = name.split('/').map(p => p.trim()).filter(p => p.length > 0);
+            if (parts.length !== 2) { el.innerText = name; return; }
+            const activeIdx = (serverSlot === 2) ? 1 : 0;
+            let html = '';
+            parts.forEach((p, i) => {
+                const highlight = isServingTeam && i === activeIdx;
+                html += `<span class="${highlight ? 'player-serving' : ''}">${p}</span>`;
+                if (i === 0) html += ' <span class="player-sep">/</span> ';
+            });
+            el.innerHTML = html;
+        }
+
         function getStatsLabel(key, state, extra) {
             const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
             return extra !== undefined ? STATS_LABELS[key][lang] + extra : STATS_LABELS[key][lang];
@@ -801,6 +844,7 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
+        let serverChangeBannerTimer = null, lastServerChangeTrigger = 0;
         let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
 
         function startSponsorLogoCarousel(urls, intervalSec) {
@@ -1038,8 +1082,8 @@
                     document.getElementById('qr-code-panel').classList.add('visible');
                 } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
 
-                document.getElementById('name-display-t1').innerText = state.p1name || getStatsLabel('team1Fallback', state);
-                document.getElementById('name-display-t2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
+                renderTeamNamePlayers('name-display-t1', state.p1name || getStatsLabel('team1Fallback', state), state.currentServer === 1, state.p1ServerSlot || 1);
+                renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), state.currentServer === 2, state.p2ServerSlot || 1);
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
@@ -1264,6 +1308,19 @@
                         replayEl.classList.add('visible');
                         clearTimeout(replayLabelTimer);
                         replayLabelTimer = setTimeout(() => { replayEl.classList.remove('visible'); }, 15000);
+                    }
+
+                    if (state.serverChangeTrigger && state.serverChangeTrigger !== lastServerChangeTrigger) {
+                        lastServerChangeTrigger = state.serverChangeTrigger;
+                        const banner = document.getElementById('server-change-banner');
+                        const nameEl = document.getElementById('server-change-banner-name');
+                        const labelEl = document.getElementById('server-change-banner-label');
+                        labelEl.innerText = (state.cornerSlideLang === 'ua') ? 'ПОДАЄ' : 'SERVING';
+                        const servingTeamName = state.currentServer === 2 ? (state.p2name || getStatsLabel('team2Fallback', state)) : (state.p1name || getStatsLabel('team1Fallback', state));
+                        nameEl.innerText = servingTeamName;
+                        banner.classList.add('visible');
+                        clearTimeout(serverChangeBannerTimer);
+                        serverChangeBannerTimer = setTimeout(() => { banner.classList.remove('visible'); }, 5000);
                     }
 
                     const sponsorFrame = document.getElementById('sponsor-logo-frame');
