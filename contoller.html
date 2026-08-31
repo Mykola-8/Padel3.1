@@ -244,10 +244,12 @@
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
-                <div class="row" style="margin-top:6px;">
-                    <button class="btn" style="flex:1; padding:6px; font-size:10px; background:#333;" onclick="toggleServerSlotManual(1)">🔁 Хто подає в парі А</button>
-                    <button class="btn" style="flex:1; padding:6px; font-size:10px; background:#333;" onclick="toggleServerSlotManual(2)">🔁 Хто подає в парі B</button>
-                </div>
+
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
+                <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
+
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді B (на початку гейму):</div>
+                <div class="row" id="server-slot-picker-2" style="gap:6px;"></div>
             </div>
 
             <div class="card">
@@ -912,6 +914,7 @@
 
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            renderServerSlotPickers();
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
@@ -1109,11 +1112,30 @@
         window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; state.serverChangeTrigger = Date.now(); set(matchRef, state); }
-        window.toggleServerSlotManual = function(team) {
-            if (team === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
-            else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
+        window.setServerSlotManual = function(team, slot) {
+            if (team === 1) { state.p1ServerSlot = slot; } else { state.p2ServerSlot = slot; }
             state.serverChangeTrigger = Date.now();
             set(matchRef, state);
+        }
+
+        function renderServerSlotPickers() {
+            for (let team = 1; team <= 2; team++) {
+                const name = (team === 1 ? state.p1name : state.p2name) || "";
+                const parts = name.split('/').map(p => p.trim()).filter(p => p.length > 0);
+                const container = document.getElementById('server-slot-picker-' + team);
+                const activeSlot = (team === 1 ? state.p1ServerSlot : state.p2ServerSlot) || 1;
+                if (parts.length !== 2) {
+                    container.innerHTML = '<span style="font-size:10px; color:#666;">Вкажіть двох гравців через "/" у назві команди вище</span>';
+                    return;
+                }
+                let html = '';
+                parts.forEach((p, i) => {
+                    const slot = i + 1;
+                    const isActive = slot === activeSlot;
+                    html += `<button class="btn" style="flex:1; padding:8px 4px; font-size:11px; font-weight:800; background:${isActive ? '#c69f66' : '#333'}; color:${isActive ? '#1c1c1c' : '#ccc'};" onclick="setServerSlotManual(${team},${slot})">${isActive ? '🎾 ' : ''}${p}</button>`;
+                });
+                container.innerHTML = html;
+            }
         }
         window.toggleStatsBetweenGames = function(c) { state.showStatsBetweenGames = c; set(matchRef, state); }
 
