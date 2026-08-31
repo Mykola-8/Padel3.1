@@ -199,7 +199,7 @@
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
-        /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ (як на референсі) ===== */
+        /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
         .advantage-callout {
             position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); margin-top: -6px;
             background: #ffffff; color: #111;
@@ -332,7 +332,7 @@
         .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
         .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ, АНІМОВАНА) ===== */
+        /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -354,7 +354,7 @@
         .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ ПЕРЕРВИ — ОНОВЛЕНИЙ СПОРТИВНИЙ СТИЛЬ ===== */
+        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
         .break-overlay { position: fixed; inset: 0; transform: scale(0.96); background: rgba(6, 6, 10, 0.42); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s; }
         .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
         .break-label { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #c69f66; margin-bottom: 12px; line-height: 1; }
@@ -366,7 +366,7 @@
         .break-score-sep { font-family: 'Teko', sans-serif; font-size: 34px; font-weight: 700; color: #c69f66; line-height: 1; }
         .break-sets-line { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 3px; }
 
-        /* ===== ПОЗНАЧКА "REPLAY" (для глядачів під час показу повтору) ===== */
+        /* ===== ПОЗНАЧКА "REPLAY" ===== */
         .replay-label {
             position: fixed; bottom: 20px; left: 50%; z-index: 99000;
             display: flex; align-items: center; gap: 8px;
@@ -380,7 +380,7 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== БАНЕР "ХТО ПОДАЄ" (5с, знизу-зліва) ===== */
+        /* ===== БАНЕР "ХТО ПОДАЄ" ===== */
         .server-change-banner {
             position: fixed; bottom: 110px; left: 140px; z-index: 99000;
             display: flex; align-items: center; gap: 10px;
@@ -397,7 +397,7 @@
         .server-change-banner-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; }
         .server-change-banner-name { font-size: 16px; font-weight: 800; color: #fff; }
 
-        /* ===== ЛОГОТИПИ СПОНСОРІВ (по центру зверху, над табло) ===== */
+        /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             width: 220px; height: 90px;
@@ -417,7 +417,6 @@
             transition: opacity 0.4s ease;
         }
 
-        /* Режим "показати всі одразу" — ряд усіх завантажених логотипів */
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             transform-origin: top center;
@@ -436,12 +435,12 @@
             object-fit: contain;
         }
 
-        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (РЕКЛАМА / СПОНСОР) ===== */
+        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
         .fullscreen-media-overlay {
             position: fixed;
             inset: 0;
             background-color: #000000;
-            z-index: 100000; /* Перекриває абсолютно все */
+            z-index: 100000;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -806,8 +805,6 @@
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
 
-        // Розбиває назву команди на гравців за "/" і підсвічує того, хто зараз подає
-        // (тільки якщо ця команда зараз на подачі; якщо "/" в назві немає — просто звичайний текст)
         function renderTeamNamePlayers(elId, name, isServingTeam, serverSlot) {
             const el = document.getElementById(elId);
             const parts = name.split('/').map(p => p.trim()).filter(p => p.length > 0);
@@ -870,9 +867,9 @@
         }
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
-        const STATS_ROW_DELAY_MS = 1500;       // затримка між появою кожного рядка
-        const STATS_HOLD_AFTER_LAST_MS = 11500; // тримаємо табло ~12с всього перед виїздом
-        const STATS_FADE_MS = 800;             // тривалість виїзду
+        const STATS_ROW_DELAY_MS = 1500;
+        const STATS_HOLD_AFTER_LAST_MS = 11500;
+        const STATS_FADE_MS = 800;
         let lastP1IndexTracked = 0, lastP2IndexTracked = 0, statsTrackerInitialized = false;
         let matchFinishedFadeTimer = null, matchFinishedWasVisible = false;
         let statsRevealTimer = null, statsRevealAllowed = false;
@@ -886,11 +883,7 @@
             statsRowTimers = [];
             if (statsFadeTimer) { clearTimeout(statsFadeTimer); statsFadeTimer = null; }
         }
-        // Показує табло статистики між геймами: висувається зліва направо, тримається
-        // певний час, після чого зʼїжджає далі управо (той самий напрям руху).
-        // Миттєво (без анімації) повертає панель у вихідну позицію зліва —
-        // використовується після завершення виїзду праворуч, щоб не було
-        // видимого "стрибка" назад через весь екран перед наступним показом.
+
         function snapResetStatsPanel(panel) {
             panel.style.transition = 'none';
             panel.classList.remove('visible', 'fading-out');
@@ -922,7 +915,7 @@
             }, lastRowRevealTime + STATS_HOLD_AFTER_LAST_MS);
             statsRowTimers.push(fadeStartTimer);
         }
-        // Примусово ховає табло статистики між геймами негайно (напр. при натисканні рахунку)
+
         function forceCloseStatsPanel() {
             clearStatsTimers();
             const panel = document.getElementById('statistics-panel');
@@ -933,9 +926,6 @@
         function updateManualStatsPanelVisibility() {
             const spm = document.getElementById('statistics-panel-manual');
             if (!spm || !lastKnownState) return;
-            // Якщо матч щойно завершено — статистика матчу чекає, поки повністю
-            // закриється табло "МАТЧ ЗАВЕРШЕНО" (15с показу + плавне згасання), а потім
-            // сама теж ховається через 15с (statsAfterFinishLocallyDismissed)
             const show = !!lastKnownState.showStatsOverlay && (!lastKnownState.isMatchFinished || statsRevealAllowed) && !statsAfterFinishLocallyDismissed;
             spm.classList.toggle('visible', show);
         }
@@ -983,15 +973,12 @@
             if (state) {
                 lastKnownState = state;
 
-                // Примусово ховаємо статистику між геймами, щойно хтось натиснув рахунок
-                // (зміна p1Index/p2Index), не чекаючи завершення показу всіх рядків
                 const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
                 if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
                     forceCloseStatsPanel();
                 }
                 lastP1IndexTracked = curP1Idx; lastP2IndexTracked = curP2Idx; statsTrackerInitialized = true;
 
-                // ПОЛНОЕКРАННА ЗАСТАВКА (МЕДІА / ТЕКСТ)
                 const promoOverlay = document.getElementById('fullscreen-promo-overlay');
                 const promoImg = document.getElementById('promo-img');
                 const promoVideo = document.getElementById('promo-video');
@@ -1068,7 +1055,6 @@
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
                 } else { document.getElementById('ribbon-top-tiebreak').classList.remove('visible'); }
 
-                // Плашка "ЗАВЕРШЕНО СЕТ" (VS по центру) вимкнена на прохання — ніколи не показується.
                 if (setResultPanel) setResultPanel.classList.remove('visible');
                 if (setOverlayLocalActive) { clearTimeout(setOverlayTimer); setOverlayLocalActive = false; }
 
@@ -1146,9 +1132,6 @@
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                         document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
-                        // AD1/AD2 у комірках рахунку — номер РОЗІГРАШУ (1-й чи 2-й, у режимі "2 переваги"),
-                        // показується в комірці тієї команди, яка ЗАРАЗ тримає перевагу (може бути будь-яка з двох).
-                        // У звичайних режимах (класика/1 голден) номера немає — просто "AD".
                         const isDoubleStyleAd = state.deuceStyle === 'double';
                         const adRound = (state.deuceCounter || 0) + 1;
                         const adText = "AD" + ((isDoubleStyleAd && adRound <= 2) ? adRound : "");
@@ -1158,22 +1141,16 @@
                         pbT1.classList.toggle('ad-active', p1 === 4);
                         pbT2.classList.toggle('ad-active', p2 === 4);
 
-                        // Підпис "ADVANTAGE N" під таблом — тільки в режимі "2 переваги" (double).
-                        // N тут = НОМЕР РОЗІГРАШУ (1-й чи 2-й more/less), а не команда — щоб глядач
-                        // розумів, на якому саме етапі перед золотим очком зараз матч.
                         const advCallout = document.getElementById('advantage-callout');
                         const isDoubleStyle = state.deuceStyle === 'double';
                         const atDeuce = p1 === 3 && p2 === 3;
                         const isAdvantageHeld = p1 === 4 || p2 === 4;
 
                         if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
-                            const round = (state.deuceCounter || 0) + 1; // 1 = перший розіграш, 2 = другий, 3+ = золоте очко
+                            const round = (state.deuceCounter || 0) + 1;
                             if (round <= 2) {
                                 advCallout.innerText = "ADVANTAGE " + round;
                                 advCallout.classList.add('visible');
-                                // На золотому очку (3-й розіграш) команди AD1/AD2 в комірках рахунку не буде,
-                                // бо перевагу технічно ще ніхто не тримає (p1Index/p2Index лишаються 3:3) —
-                                // це коректно, вирішальне очко без "утриманої" переваги.
                             } else {
                                 advCallout.innerText = "GOLDEN POINT";
                                 advCallout.classList.add('visible');
@@ -1190,7 +1167,6 @@
                 const activeSet = state.currentSet || 1;
                 if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
 
-                // Скидаємо секундомір гейму, щойно змінюється кількість зіграних геймів у поточному сеті
                 const gamesPlayedInSet = (state[`t1_s${activeSet}`]||0) + (state[`t2_s${activeSet}`]||0);
                 if (gamesPlayedInSet !== lastGamesCountTracked) { gameSeconds = 0; lastGamesCountTracked = gamesPlayedInSet; if(document.getElementById('st-time-game')) document.getElementById('st-time-game').innerText = formatTime(gameSeconds); }
 
@@ -1232,8 +1208,6 @@
                 if (state.isMatchFinished) {
                     stPanel.classList.remove('visible');
 
-                    // mfb (табло переможця) завжди показується одразу при завершенні матчу
-                    // і автоматично гасне через 15с — більше НЕ залежить від showStatsOverlay
                     document.getElementById('mfb-header').innerText = `${getStatsLabel('court', state)} ${courtId} • ${getStatsLabel('matchFinished', state)}`;
                     let playedSets = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
@@ -1254,7 +1228,6 @@
                     playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
                     r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
 
-                    // Показуємо табло і плануємо автозгасання через 15с (лише один раз на кожен показ)
                     mfb.classList.remove('fading-out');
                     mfb.classList.add('visible');
                     if (!matchFinishedWasVisible) {
@@ -1264,16 +1237,12 @@
                         matchFinishedFadeTimer = setTimeout(() => {
                             mfb.classList.add('fading-out');
                         }, 15000);
-                        // Статистика всього матчу з'являється лише ПІСЛЯ того, як табло
-                        // "МАТЧ ЗАВЕРШЕНО" повністю закриється (15с показу + 1.2с згасання)
                         statsAfterFinishLocallyDismissed = false;
                         if (statsRevealTimer) clearTimeout(statsRevealTimer);
                         statsRevealTimer = setTimeout(() => {
                             statsRevealAllowed = true;
                             updateManualStatsPanelVisibility();
 
-                            // Показуємо статистику матчу 15с, потім плавно ховаємо —
-                            // на екрані залишається лише основне табло рахунку
                             const spm = document.getElementById('statistics-panel-manual');
                             if (statsAfterFinishDismissTimer) clearTimeout(statsAfterFinishDismissTimer);
                             statsAfterFinishDismissTimer = setTimeout(() => {
@@ -1376,8 +1345,6 @@
                         }
                         document.getElementById('st-sets1').innerText = miniSetsWon1; document.getElementById('st-sets2').innerText = miniSetsWon2;
 
-                        // Лого табла праворуч — показуємо, тільки якщо увімкнено і є що показати
-                        // (те саме зображення/текст, що й лого зліва на головному табло)
                         const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
                         const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
                         const statsLogoTxt = document.getElementById('stats-broadcast-logo-text');
@@ -1395,7 +1362,6 @@
                             statsLogoBox.classList.remove('visible');
                         }
 
-                        // Нове окреме лого зліва на табло статистики (своє власне, не пов'язане з лого на головному табло)
                         const statsLeftLogoBox = document.getElementById('stats-broadcast-logo-box-left');
                         const statsLeftLogoImg = document.getElementById('stats-broadcast-logo-left-img');
                         const leftLogoSrc = state.statsLeftLogoUrl || state.statsLeftLogoSrc || "";
@@ -1407,16 +1373,11 @@
                         }
                     }
 
-                    // Запускаємо покрокову анімацію показу лише на СВІЖИЙ тригер —
-                    // вміст уже оновлено вище перед стартом послідовності рядків
                     if (isNewStatsTrigger) {
                         runStatsRevealSequence();
                     }
                 }
 
-                // Детальна ручна статистика (statistics-panel-manual) — працює однаково і під
-                // час матчу, і ПІСЛЯ його завершення (натискання "Показати статистику" показує
-                // повну статистику матчу разом з результатом усіх зіграних сетів)
                 if (state.showStatsOverlay) {
                     document.getElementById('stm-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('stm-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
 
@@ -1452,7 +1413,6 @@
                     document.getElementById('stm-game-history').innerText = hasHistory ? state.gamesTimeHistory.join(' ') : "-";
                     document.getElementById('stm-game-history').closest('.sm-row').style.display = hasHistory ? 'grid' : 'none';
 
-                    // Результат усіх зіграних сетів, напр. "6:4   3:6   10:8"
                     let setsResultParts = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
                         let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
