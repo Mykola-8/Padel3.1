@@ -131,20 +131,6 @@
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
-        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
-            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
-            </div>
-            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
-        </div>
-
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <div style="display:flex; gap:8px;">
@@ -173,6 +159,21 @@
                     <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
                 </div>
             </div>
+        </div>
+
+        <!-- Перенесено сюди: Admin-камери Prisma Live безпосередньо під статистику -->
+        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
+            </div>
+            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
     </div>
 
@@ -426,7 +427,6 @@
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
         // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
-        // Адмін (?admin=1 в адресі) завжди має повний доступ і може розблокувати корт.
         let mySessionId = localStorage.getItem('padel_session_id');
         if (!mySessionId) {
             mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
@@ -572,15 +572,12 @@
             });
         }
 
-        // 🆕 НОВА ФУНКЦІЯ: Стиснення фотографій на клієнті та безпечне завантаження відео
         window.uploadAndCompressPromoFile = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const statusEl = document.getElementById('promo-file-status');
             const isVideo = file.type.startsWith('video/');
             
             if (isVideo) {
-                // Стискати відео прямо в браузері без сторонніх важких бібліотек неможливо, 
-                // тому ставимо ліміт на розмір файлу, щоб не перевантажувати пам'ять GitHub/Firebase.
                 if (file.size > 2.5 * 1024 * 1024) {
                     alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
                     statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
@@ -596,7 +593,6 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Стиснення фотографій через HTML5 Canvas (зменшення роздільної здатності до 1280px та оптимізація якості)
                 statusEl.innerText = "⏳ Стиснення фото...";
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -604,7 +600,7 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width; let height = img.height;
-                        const max_size = 1280; // Оптимальний розмір для трансляцій
+                        const max_size = 1280;
                         
                         if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
                         else { if (height > max_size) { width *= max_size / height; height = max_size; } }
@@ -613,7 +609,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Стискаємо в якість 0.7 (JPEG), зменшуючи вагу файлу на 80-90%
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         state.promoSrc = compressedBase64; state.promoUrl = ""; 
                         state.promoTypeIsVideo = false; document.getElementById('promo-type-video-checkbox').checked = false;
@@ -661,7 +656,6 @@
             set(matchRef, state);
         };
 
-        // ── ADMIN: показати/вимкнути повноекранну заставку одразу на ВСІХ 10 кортах ──
         window.broadcastPromoToAllCourts = function(enable) {
             const statusEl = document.getElementById('admin-promo-broadcast-status');
             if (enable && !state.promoUrl && !state.promoSrc && !(state.promoTypeIsText && state.promoText)) {
@@ -700,7 +694,6 @@
             });
         };
 
-        // ── Лого спонсора (панель зліва від табло, розмір 120×96) ──
         window.toggleLogoVisibility = function(c) { state.showLogo = c; set(matchRef, state); };
         window.updateLogoUrl = function(url) {
             state.logoUrl = url; state.logoSrc = "";
@@ -718,8 +711,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Панель лого на трансляції має розмір 120×96px — стискаємо точно під
-                    // цей розмір (x2 для чіткості на HiDPI), заповнюючи всю площу (як "cover")
                     const targetW = 240, targetH = 192;
                     const canvas = document.createElement('canvas');
                     canvas.width = targetW; canvas.height = targetH;
@@ -742,10 +733,7 @@
             reader.readAsDataURL(file);
         };
 
-        // ===== ЛОГОТИПИ СПОНСОРІВ (карусель 1-10, зверху над табло) =====
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
-
-        // ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (5 рядків тексту) =====
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
 
         function ensureBoardPromoLinesArray() {
@@ -851,8 +839,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Без обрізання (contain) — вписуємо ціле фото в рамку максимум 320x160,
-                    // зберігаючи пропорції, щоб на трансляції нічого не спотворювалось і не різалось.
                     const maxW = 320, maxH = 160;
                     const scale = Math.min(maxW / img.width, maxH / img.height, 1);
                     const canvas = document.createElement('canvas');
@@ -1033,8 +1019,7 @@
         function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
         window.scorePoint = function(team) {
             if (state.isMatchFinished) return;
-            if (isControllerLocked()) return; // заблоковано іншим оператором — ігноруємо натискання
-            // Перший, хто натискає рахунок — автоматично "займає" цей корт за собою
+            if (isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
                 state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
             }
@@ -1053,8 +1038,6 @@
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isMexicano) {
-                // Мексикано: кожен гравець подає по 4 очка поспіль (на відміну від Американо,
-                // де перша подача — 1 очко, далі по 2). Рахунок ведеться простими числами 1,2,3...
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
@@ -1096,12 +1079,19 @@
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
             }
-            const newServerTeam = state.currentServer === 1 ? 2 : 1;
-            // Чергування гравця в парі: щоразу, коли подача переходить ДО команди — перемикаємо,
-            // хто саме з двох гравців тепер подає за цю команду (1-й чи 2-й, розділені "/")
-            if (newServerTeam === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
-            else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
-            state.currentServer = newServerTeam;
+
+            // ── АДАПТИВНЕ ЧЕРГУВАННЯ ПОДАЧІ ──
+            const curServer = state.currentServer || 1;
+            const p1Slot = state.p1ServerSlot || 1;
+            const p2Slot = state.p2ServerSlot || 1;
+
+            if (curServer === 1) {
+                state.p1ServerSlot = (p1Slot === 1) ? 2 : 1;
+                state.currentServer = 2;
+            } else {
+                state.p2ServerSlot = (p2Slot === 1) ? 2 : 1;
+                state.currentServer = 1;
+            }
             state.serverChangeTrigger = Date.now();
         }
 
@@ -1154,7 +1144,6 @@
             reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
-                    // Без обрізання (contain), вписуємо в максимум 200x110, зберігаючи пропорції
                     const maxW = 200, maxH = 110;
                     const scale = Math.min(maxW / img.width, maxH / img.height, 1);
                     const canvas = document.createElement('canvas');
