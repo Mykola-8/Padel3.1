@@ -33,7 +33,7 @@
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn span { font-size: 56px; font-weight: 900; }
         .serve-box { display: flex; gap: 10px; width: 100%; }
-        .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+        .serve-btn { flex: 1; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 800; text-transform: uppercase; font-size: 12px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
         .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -121,13 +121,6 @@
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <div class="serve-box">
-                <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-                <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-            </div>
-        </div>
-
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
@@ -161,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Перенесено сюди: Admin-камери Prisma Live безпосередньо під статистику -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
@@ -241,10 +233,22 @@
                 </select>
             </div>
 
+            <!-- БЛОК НАЗВИ КОМАНД + КЕРУВАННЯ ПОДАЧЕЮ ТА ТУМБЛЕР ПОКАЗУ -->
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
-                <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
+                <div style="font-size:9px; color:#888; margin-top:4px; margin-bottom:10px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро".</div>
+
+                <div class="switch-row" style="background: rgba(198,159,102,0.15); padding:8px; border-radius:6px; margin-bottom:10px;">
+                    <span style="font-size:11px; font-weight:800; color:#c69f66;">Показувати гравця, що подає, на трансляції:</span>
+                    <input type="checkbox" id="show-server-name-checkbox" style="width:20px; height:20px;" onchange="toggleShowServerName(this.checked)">
+                </div>
+
+                <div style="font-size:10px; font-weight:800; color:#c69f66; margin-bottom:6px; text-transform:uppercase;">Вибір подаючої команди:</div>
+                <div class="serve-box" style="margin-bottom:10px;">
+                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+                </div>
 
                 <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
                 <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
@@ -426,7 +430,6 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        // ── Блокування корту: перший, хто натисне рахунок, "займає" корт за собою.
         let mySessionId = localStorage.getItem('padel_session_id');
         if (!mySessionId) {
             mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
@@ -539,6 +542,7 @@
 
             const freshCourtState = {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
+                showServerNameOnOverlay: true,
                 scale: 1, posX: 30, posY: 30,
                 isTiebreak: false, isAmericano: false, americanoLimit: 21,
                 isMexicano: false, mexicanoLimit: 24,
@@ -735,6 +739,7 @@
 
         window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
+        window.toggleShowServerName = function(c) { state.showServerNameOnOverlay = c; set(matchRef, state); };
 
         function ensureBoardPromoLinesArray() {
             if (!Array.isArray(state.boardPromoLines) || state.boardPromoLines.length < 5) {
@@ -874,6 +879,7 @@
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
+                showServerNameOnOverlay: (state.showServerNameOnOverlay !== undefined) ? state.showServerNameOnOverlay : true,
                 scale: state.scale || 1, posX: 30, posY: 30,
                 isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, 
                 isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
@@ -901,6 +907,13 @@
         function renderUI() {
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
+            
+            document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
+            document.getElementById('srv-btn-2').classList.toggle('active', state.currentServer === 2);
+            if (document.getElementById('show-server-name-checkbox')) {
+                document.getElementById('show-server-name-checkbox').checked = (state.showServerNameOnOverlay !== false);
+            }
+
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
             document.getElementById('mode-mexicano-checkbox').checked = !!state.isMexicano;
             document.getElementById('mode-supertb-checkbox').checked = !!state.isSuperTiebreak; 
@@ -1009,7 +1022,6 @@
             document.getElementById('proset-limit-row').style.display = state.isProSet ? 'flex' : 'none';
             document.getElementById('supertb-limit-row').style.display = state.isSuperTiebreak ? 'flex' : 'none';
 
-            // ── Блокування корту ──
             const lockedOut = isControllerLocked();
             document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
             document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
@@ -1080,7 +1092,6 @@
                 state.statsAutoTrigger = Date.now();
             }
 
-            // ── АДАПТИВНЕ ЧЕРГУВАННЯ ПОДАЧІ ──
             const curServer = state.currentServer || 1;
             const p1Slot = state.p1ServerSlot || 1;
             const p2Slot = state.p2ServerSlot || 1;
