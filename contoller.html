@@ -233,7 +233,6 @@
                 </select>
             </div>
 
-            <!-- БЛОК НАЗВИ КОМАНД + КЕРУВАННЯ ПОДАЧЕЮ ТА ТУМБЛЕР ПОКАЗУ -->
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
@@ -1173,11 +1172,30 @@
             reader.readAsDataURL(file);
         }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
-        window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+
+        /* ЗБЕРЕЖЕННЯ РАХУНКУ ПРИ ЗМІНІ РЕЖИМІВ ГРИ */
+        window.toggleAmericanoMode = function(c) { 
+            state.isAmericano = c; 
+            if(c) { state.isProSet = false; state.isSuperTiebreak = false; state.isMexicano = false; } 
+            set(matchRef, state); 
+        }
+        window.toggleMexicanoMode = function(c) { 
+            state.isMexicano = c; 
+            if(c) { state.isAmericano = false; state.isProSet = false; state.isSuperTiebreak = false; } 
+            set(matchRef, state); 
+        }
+        window.toggleProSetMode = function(c) { 
+            state.isProSet = c; 
+            if(c) { state.isAmericano = false; state.isSuperTiebreak = false; state.isMexicano = false; } 
+            set(matchRef, state); 
+        }
+        window.toggleSuperTiebreakMode = function(c) { 
+            state.isSuperTiebreak = c; 
+            if(c) { state.isAmericano = false; state.isProSet = false; state.isMexicano = false; } 
+            set(matchRef, state); 
+        }
+
         window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); }
-        window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleSuperTiebreakMode = function(c) { state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
         window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
         window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v)||10; set(matchRef, state); }
