@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
-    <!-- Підключено спортивний акцентний шрифт Teko для яскравого вигляду таймерів та написів перерви -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗМІННІ ТЕМИ ТАБЛА ===== */
@@ -60,14 +59,6 @@
             --panel-bg: rgba(10, 14, 3, 0.62);
             --panel-border: rgba(163, 230, 53, 0.4);
             --panel-text: #f7ffe0;
-            --slide-gamepoint: rgba(35, 46, 15, 0.6);
-            --slide-breakpoint: rgba(163, 230, 53, 0.55);
-            --slide-setpoint: rgba(77, 124, 15, 0.6);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
-            --slide-tiebreak: rgba(54, 83, 20, 0.7);
-            --slide-deuce: rgba(63, 98, 18, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-graydark {
@@ -91,14 +82,6 @@
             --panel-bg: rgba(10, 12, 16, 0.62);
             --panel-border: rgba(209, 213, 219, 0.35);
             --panel-text: #f3f4f6;
-            --slide-gamepoint: rgba(55, 65, 81, 0.6);
-            --slide-breakpoint: rgba(156, 163, 175, 0.55);
-            --slide-setpoint: rgba(75, 85, 99, 0.65);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.6);
-            --slide-tiebreak: rgba(31, 41, 55, 0.75);
-            --slide-deuce: rgba(88, 28, 135, 0.5);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-lightgray {
@@ -122,14 +105,6 @@
             --panel-bg: rgba(229, 231, 235, 0.9);
             --panel-border: rgba(107, 114, 128, 0.4);
             --panel-text: #000000;
-            --slide-gamepoint: rgba(209, 213, 219, 0.75);
-            --slide-breakpoint: rgba(156, 163, 175, 0.75);
-            --slide-setpoint: rgba(107, 114, 128, 0.7);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.5);
-            --slide-tiebreak: rgba(107, 114, 128, 0.65);
-            --slide-deuce: rgba(156, 163, 175, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-transparent {
@@ -153,14 +128,6 @@
             --panel-bg: rgba(0, 0, 0, 0.15);
             --panel-border: rgba(255, 255, 255, 0.5);
             --panel-text: #ffffff;
-            --slide-gamepoint: rgba(255, 255, 255, 0.15);
-            --slide-breakpoint: rgba(255, 255, 255, 0.22);
-            --slide-setpoint: rgba(255, 255, 255, 0.3);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
-            --slide-tiebreak: rgba(255, 255, 255, 0.22);
-            --slide-deuce: rgba(255, 255, 255, 0.18);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html, body {
@@ -178,8 +145,11 @@
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
 
         .logo-panel { transform: translateX(100%); opacity: 0; height: 96px; width: 120px; background: rgba(0, 0, 0, 0.55); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-sizing: border-box; order: 1; padding: 0 !important; margin: 0 !important; }
+        .logo-panel.visible { transform: translateX(0); opacity: 1; }
+        .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
+        .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (реклама/анонс) ===== */
+        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
         .board-promo-panel {
             position: absolute; top: 100%; left: 0; margin-top: 10px;
             min-width: 260px; max-width: 420px;
@@ -212,9 +182,6 @@
             z-index: 400;
         }
         .advantage-callout.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .logo-panel.visible { transform: translateX(0); opacity: 1; }
-        .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
-        .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
         .scoreboard-container { display: flex; flex-direction: column; width: max-content; order: 2; position: relative; }
         .main-board { display: inline-flex; flex-direction: column; background-color: transparent; border-radius: 4px; z-index: 2; position: relative; overflow: visible; transform-origin: left center; }
@@ -236,7 +203,6 @@
 
         .info-ribbons-container { position: absolute; top: 100%; left: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; z-index: 1; margin-top: 2px; }
         
-        /* БІЛИЙ ФОН ТА ЧОРНИЙ ТЕКСТ ДЛЯ СТРІЧОК НА ТАБЛО */
         .ribbon {
             height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; border-radius: 0 0 4px 4px; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease; box-sizing: border-box; white-space: nowrap;
             background: #ffffff !important;
@@ -245,7 +211,6 @@
         }
         .ribbon.visible { height: 28px; opacity: 1; padding: 0 15px; }
 
-        /* БІЛИЙ ФОН ТА ЧОРНИЙ ТЕКСТ ДЛЯ СЛАЙД-ПАНЕЛІ ЗЛІВА ЗНИЗУ */
         .corner-slide-wrapper { position: fixed; bottom: 30px; left: 0; overflow: hidden; border-radius: 0 6px 6px 0; z-index: 9997; width: 0; height: 54px; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
         .corner-slide-wrapper.visible { width: 320px; }
         .corner-slide-plate {
@@ -264,41 +229,7 @@
         .points-cell.team1 { background: linear-gradient(to bottom, #c69f66, #a07c42); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.15); }
         .points-cell.team2 { background: linear-gradient(to bottom, #a07c42, #7a5c28); color: #fff; }
         .points-cell.ad-active { background: linear-gradient(to bottom, #fff0c0, #e8c96a); color: #3a2a00; font-size: 19px; letter-spacing: 0; }
-
-        /* БАНЕР ПОДАЮЧОГО ГРАВЦЯ ПІД ТАБЛО (ЗБІЛЬШЕНИЙ, ЧІТКИЙ, ПРОЗОРІШИЙ ФОН) */
-        .server-banner {
-            position: absolute;
-            bottom: -38px;
-            left: 0;
-            width: 100%;
-            height: 34px;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(198, 159, 102, 0.6);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            opacity: 0;
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .server-banner.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .server-banner .icon { color: #c69f66; font-size: 14px; }
         
-        /* ПАНЕЛЬ МАТЧ ЗАВЕРШЕНО */
         .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.85) translateY(-40px); width: 620px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 28px 32px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
         .match-finished-board.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1) translateY(0); pointer-events: auto; }
         .match-finished-board.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.92) translateY(-10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -315,32 +246,18 @@
         .mfb-table tr.mfb-winner-row td.mfb-team-name { color: #ffe9c2; }
         
         .statistics-overlay {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-150%);
-            z-index: 9999;
-            opacity: 1;
-            visibility: hidden;
-            pointer-events: none;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-150%);
+            z-index: 9999; opacity: 1; visibility: hidden; pointer-events: none;
             transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
         }
         .statistics-overlay.visible { transform: translateX(-50%); visibility: visible; pointer-events: auto; }
         .statistics-overlay.fading-out { transform: translateX(50%); visibility: visible; pointer-events: none; transition: transform 0.65s cubic-bezier(0.7, 0, 0.84, 0), visibility 0.65s; }
-        .stats-broadcast-row-anim {
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
+        .stats-broadcast-row-anim { opacity: 0; transition: opacity 0.4s ease; }
         .stats-broadcast-row-anim.row-in { opacity: 1; }
         .stats-broadcast-card {
-            display: flex; align-items: stretch;
-            background: rgba(240, 240, 243, 0.96);
-            border: 1px solid rgba(198, 159, 102, 0.55);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 14px 34px rgba(0,0,0,0.55);
-            backdrop-filter: blur(8px);
-            font-family: 'Montserrat', sans-serif;
+            display: flex; align-items: stretch; background: rgba(240, 240, 243, 0.96);
+            border: 1px solid rgba(198, 159, 102, 0.55); border-radius: 8px; overflow: hidden;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.55); backdrop-filter: blur(8px); font-family: 'Montserrat', sans-serif;
         }
         .stats-broadcast-main { padding: 12px 20px; min-width: 360px; box-sizing: border-box; }
         .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #a1731f; margin-bottom: 8px; text-shadow: none; }
@@ -354,20 +271,15 @@
         .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #111; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
         .stats-broadcast-cell { font-size: 16px; font-weight: 900; color: #111; text-align: center; text-shadow: none; }
         .stats-broadcast-logo-box {
-            display: none;
-            flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            width: 96px; flex-shrink: 0;
-            background: rgba(0,0,0,0.04);
-            border-left: 1px solid rgba(198,159,102,0.4);
+            display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            width: 96px; flex-shrink: 0; background: rgba(0,0,0,0.04); border-left: 1px solid rgba(198,159,102,0.4);
             padding: 8px; box-sizing: border-box;
         }
         .stats-broadcast-logo-box.visible { display: flex; }
         .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
         .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #a1731f; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
         .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
-        .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 550px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -379,17 +291,10 @@
         .sm-label { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .sm-val { font-size: 18px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
         .sm-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
-        .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
-        .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .h-set-title { font-weight: 700; color: #eeeeee; text-transform: uppercase; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         
         .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
         .break-overlay { position: fixed; inset: 0; transform: scale(0.96); background: rgba(6, 6, 10, 0.42); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s; }
         .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
         .break-label { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #c69f66; margin-bottom: 12px; line-height: 1; }
@@ -401,7 +306,6 @@
         .break-score-sep { font-family: 'Teko', sans-serif; font-size: 34px; font-weight: 700; color: #c69f66; line-height: 1; }
         .break-sets-line { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 3px; }
 
-        /* ===== ПОЗНАЧКА "REPLAY" ===== */
         .replay-label {
             position: fixed; bottom: 20px; left: 50%; z-index: 99000;
             display: flex; align-items: center; gap: 8px;
@@ -415,24 +319,26 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== БАНЕР "ХТО ПОДАЄ" ===== */
+        /* ===== ЗБІЛЬШЕНИЙ СЛАЙДЕР "ПОДАЄ" (ВИЇЖДЖАЄ ЗЛІВА НАПРАВО ЗНИЗУ) ===== */
         .server-change-banner {
-            position: fixed; bottom: 110px; left: 140px; z-index: 99000;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(8,8,8,0.42); border: 1px solid rgba(198,159,102,0.5); border-radius: 8px;
-            backdrop-filter: blur(4px);
-            padding: 10px 18px; font-family: 'Montserrat', sans-serif;
-            opacity: 0; visibility: hidden; transform: translateX(-140%);
-            transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s;
-            box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+            position: fixed; bottom: 35px; left: 0px; z-index: 99000;
+            display: flex; align-items: center; gap: 16px;
+            background: rgba(10, 10, 12, 0.92);
+            border: 2px solid rgba(198, 159, 102, 0.9);
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            backdrop-filter: blur(12px);
+            padding: 16px 30px 16px 22px; font-family: 'Montserrat', sans-serif;
+            opacity: 0; visibility: hidden; transform: translateX(-100%);
+            transition: opacity 0.4s ease, transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.25), visibility 0.55s;
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.8);
         }
         .server-change-banner.visible { opacity: 1; visibility: visible; transform: translateX(0); }
-        .server-change-banner-ball { font-size: 22px; flex-shrink: 0; }
-        .server-change-banner-text { display: flex; flex-direction: column; }
-        .server-change-banner-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; }
-        .server-change-banner-name { font-size: 16px; font-weight: 800; color: #fff; }
+        .server-change-banner-ball { font-size: 32px; flex-shrink: 0; filter: drop-shadow(0 0 10px rgba(198,159,102,0.8)); }
+        .server-change-banner-text { display: flex; flex-direction: column; gap: 2px; }
+        .server-change-banner-label { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; }
+        .server-change-banner-name { font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
 
-        /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             width: 220px; height: 90px;
@@ -445,12 +351,7 @@
             transition: opacity 0.4s ease, visibility 0.4s;
         }
         .sponsor-logo-frame.visible { opacity: 1; visibility: visible; }
-        .sponsor-logo-frame img {
-            max-width: 100%; max-height: 100%;
-            width: auto; height: auto;
-            object-fit: contain;
-            transition: opacity 0.4s ease;
-        }
+        .sponsor-logo-frame img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transition: opacity 0.4s ease; }
 
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
@@ -464,62 +365,16 @@
             transition: opacity 0.4s ease, visibility 0.4s;
         }
         .sponsor-logo-all-frame.visible { opacity: 1; visibility: visible; }
-        .sponsor-logo-all-frame img {
-            max-height: 70px; max-width: 130px;
-            width: auto; height: auto;
-            object-fit: contain;
-        }
+        .sponsor-logo-all-frame img { max-height: 70px; max-width: 130px; width: auto; height: auto; object-fit: contain; }
 
-        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
-        .fullscreen-media-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: #000000;
-            z-index: 100000;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 0.6s ease, visibility 0.6s ease, background-color 0.3s ease;
-        }
-        .fullscreen-media-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        .fullscreen-media-overlay.transparent-bg-mode {
-            background-color: rgba(0, 0, 0, 0.45);
-        }
-        .fullscreen-media-content {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        .fullscreen-media-content.active {
-            display: block;
-        }
-        .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content {
-            object-fit: contain;
-        }
-        .fullscreen-text-content {
-            display: none;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-sizing: border-box;
-            padding: 60px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
-            line-height: 1.25;
-            word-break: break-word;
-            white-space: pre-wrap;
-            text-shadow: 0 4px 18px rgba(0,0,0,0.85);
-        }
-        .fullscreen-text-content.active {
-            display: flex;
-        }
+        .fullscreen-media-overlay { position: fixed; inset: 0; background-color: #000000; z-index: 100000; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s ease, visibility 0.6s ease, background-color 0.3s ease; }
+        .fullscreen-media-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+        .fullscreen-media-overlay.transparent-bg-mode { background-color: rgba(0, 0, 0, 0.45); }
+        .fullscreen-media-content { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .fullscreen-media-content.active { display: block; }
+        .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content { object-fit: contain; }
+        .fullscreen-text-content { display: none; width: 100%; height: 100%; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 60px; font-family: 'Montserrat', sans-serif; font-weight: 900; line-height: 1.25; word-break: break-word; white-space: pre-wrap; text-shadow: 0 4px 18px rgba(0,0,0,0.85); }
+        .fullscreen-text-content.active { display: flex; }
 
         .double-fault-red-flash { background: linear-gradient(to bottom, #b91c1c, #7f1d1d) !important; color: #ffffff !important; }
         .sr-set-label { font-size: 14px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
@@ -534,79 +389,22 @@
         .qr-code-wrapper.visible { opacity: 1; visibility: visible; }
         .qr-code-wrapper img { width: 130px; height: 130px; display: block; border-radius: 0; }
         .qr-code-text { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; text-align: center; background: transparent; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
-
-        /* ТЕМАТИЧНІ СТИЛІ */
-        html.theme-courtgreen .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-courtgreen .server-indicator, html.theme-courtgreen .player-serving { color: var(--accent); }
-        html.theme-courtgreen .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
-        html.theme-courtgreen .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-courtgreen .r-proset-style { color: var(--accent); border-color: rgba(163,230,53,0.35); }
-        html.theme-courtgreen .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
-        html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
-        html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-courtgreen .match-finished-board, html.theme-courtgreen .statistics-overlay, html.theme-courtgreen .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-courtgreen .mfb-header, html.theme-courtgreen .mfb-winner, html.theme-courtgreen .sr-set-label, html.theme-courtgreen .sm-header, html.theme-courtgreen .h-set-time, html.theme-courtgreen .mfb-table td.mfb-set-win, html.theme-courtgreen .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-courtgreen .sm-val.gold { color: var(--accent); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td, html.theme-courtgreen .sm-val, html.theme-courtgreen .h-set-score, html.theme-courtgreen .sr-score, html.theme-courtgreen .sr-team { color: var(--panel-text); }
-        html.theme-courtgreen .mfb-table th, html.theme-courtgreen .mfb-table td { border-bottom-color: rgba(163, 230, 53, 0.25); }
-        html.theme-courtgreen .break-label, html.theme-courtgreen .break-score-sep { color: var(--accent); }
-
-        html.theme-graydark .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-graydark .server-indicator, html.theme-graydark .player-serving { color: var(--accent); }
-        html.theme-graydark .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
-        html.theme-graydark .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-graydark .r-proset-style { color: var(--accent); border-color: rgba(209,213,219,0.35); }
-        html.theme-graydark .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
-        html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
-        html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-graydark .match-finished-board, html.theme-graydark .statistics-overlay, html.theme-graydark .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-graydark .mfb-header, html.theme-graydark .mfb-winner, html.theme-graydark .sr-set-label, html.theme-graydark .sm-header, html.theme-graydark .h-set-time, html.theme-graydark .mfb-table td.mfb-set-win, html.theme-graydark .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-graydark .sm-val.gold { color: var(--accent); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td, html.theme-graydark .sm-val, html.theme-graydark .h-set-score, html.theme-graydark .sr-score, html.theme-graydark .sr-team { color: var(--panel-text); }
-        html.theme-graydark .mfb-table th, html.theme-graydark .mfb-table td { border-bottom-color: rgba(209, 213, 219, 0.25); }
-        html.theme-graydark .break-label, html.theme-graydark .break-score-sep { color: var(--accent); }
-
-        html.theme-lightgray .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
-        html.theme-lightgray .server-indicator, html.theme-lightgray .player-serving { color: var(--accent); }
-        html.theme-lightgray .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
-        html.theme-lightgray .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-lightgray .r-proset-style { color: var(--accent); border-color: rgba(107,114,128,0.35); }
-        html.theme-lightgray .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
-        html.theme-lightgray .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
-        html.theme-lightgray .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
-        html.theme-lightgray .match-finished-board, html.theme-lightgray .statistics-overlay, html.theme-lightgray .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-lightgray .mfb-header, html.theme-lightgray .mfb-winner, html.theme-lightgray .sr-set-label, html.theme-lightgray .sm-header, html.theme-lightgray .h-set-time, html.theme-lightgray .mfb-table td.mfb-set-win, html.theme-lightgray .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-lightgray .sm-val.gold { color: var(--accent); }
-        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td, html.theme-lightgray .sm-val, html.theme-lightgray .h-set-score, html.theme-lightgray .sr-score, html.theme-lightgray .sr-team { color: var(--panel-text); }
-        html.theme-lightgray .mfb-table th, html.theme-lightgray .mfb-table td { border-bottom-color: rgba(107, 114, 128, 0.25); }
-        html.theme-lightgray .break-label, html.theme-lightgray .break-score-sep { color: var(--accent); }
-
-        html.theme-transparent .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); border: 1.5px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .server-indicator, html.theme-transparent .player-serving { color: var(--accent); }
-        html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .r-proset-style { color: var(--accent); border-color: rgba(255,255,255,0.4); }
-        html.theme-transparent .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .match-finished-board, html.theme-transparent .statistics-overlay, html.theme-transparent .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
-        html.theme-transparent .mfb-header, html.theme-transparent .mfb-winner, html.theme-transparent .sr-set-label, html.theme-transparent .sm-header, html.theme-transparent .h-set-time, html.theme-transparent .mfb-table td.mfb-set-win, html.theme-transparent .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-transparent .sm-val.gold { color: var(--accent); }
-        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
-        html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td { border-bottom-color: rgba(255, 255, 255, 0.2); }
-        html.theme-transparent .break-label, html.theme-transparent .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <!-- ПОЗНАЧКА "REPLAY" ДЛЯ ГЛЯДАЧІВ -->
+    <!-- ПОЗНАЧКА "REPLAY" -->
     <div class="replay-label" id="replay-label">
         <span class="replay-label-dot"></span>
         <span>REPLAY</span>
     </div>
 
-    <!-- БАНЕР "ХТО ПОДАЄ" -->
+    <!-- СЛАЙДЕР "ПОДАЄ" (ВИЇЖДЖАЄ ЗЛІВА НАПРАВО) -->
     <div class="server-change-banner" id="server-change-banner">
         <span class="server-change-banner-ball">🎾</span>
         <div class="server-change-banner-text">
             <span class="server-change-banner-label" id="server-change-banner-label">ПОДАЄ</span>
-            <span class="server-change-banner-name" id="server-change-banner-name">Команда A</span>
+            <span class="server-change-banner-name" id="server-change-banner-name">ГРАВЕЦЬ</span>
         </div>
     </div>
 
@@ -618,7 +416,7 @@
     <!-- ЛОГОТИПИ СПОНСОРІВ (всі одразу) -->
     <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
 
-    <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
+    <!-- ПОЛНОЕКРАННА ЗАСТАВКА -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
@@ -660,12 +458,6 @@
                             <span id="name-display-t2">GALAN / CHINGOTTO</span>
                             <span class="server-indicator" id="srv2">🎾</span>
                         </div>
-                    </div>
-
-                    <!-- Збільшений прозорий банер гравець на подачі -->
-                    <div class="server-banner" id="server-banner">
-                        <span class="icon">🎾</span>
-                        <span id="server-player-name">ПОДАЄ: ІМ'Я ГРАВЦЯ</span>
                     </div>
                 </div>
 
@@ -1090,7 +882,6 @@
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
-                const stPanel = document.getElementById('statistics-panel');
 
                 if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
@@ -1142,24 +933,6 @@
                         if (cfg.bg) { lineEl.style.background = cfg.bg; lineEl.classList.add('has-bg'); }
                         else { lineEl.style.background = "transparent"; lineEl.classList.remove('has-bg'); }
                     }
-                }
-
-                // Визначення імені подаючого гравця для банера
-                const showServerName = (state.showServerNameOnOverlay !== false);
-                const serverTeamName = (state.currentServer === 1 ? state.p1name : state.p2name) || "";
-                const parts = serverTeamName.split('/').map(p => p.trim()).filter(p => p.length > 0);
-                const serverSlot = (state.currentServer === 1 ? state.p1ServerSlot : state.p2ServerSlot) || 1;
-
-                const serverBanner = document.getElementById('server-banner');
-                if (showServerName && parts.length === 2) {
-                    const activePlayerName = parts[serverSlot - 1] || parts[0];
-                    document.getElementById('server-player-name').innerText = `ПОДАЄ: ${activePlayerName}`;
-                    serverBanner.classList.add('visible');
-                } else if (showServerName && parts.length === 1 && parts[0] !== "") {
-                    document.getElementById('server-player-name').innerText = `ПОДАЄ: ${parts[0]}`;
-                    serverBanner.classList.add('visible');
-                } else {
-                    serverBanner.classList.remove('visible');
                 }
 
                 const ribbonMatch = document.getElementById('ribbon-match');
@@ -1334,25 +1107,32 @@
                         replayLabelTimer = setTimeout(() => { replayEl.classList.remove('visible'); }, 15000);
                     }
 
-                    if (state.serverChangeTrigger && state.serverChangeTrigger !== lastServerChangeTrigger) {
+                    /* УПРАВЛІННЯ ВИСУВНИМ СЛАЙДЕРОМ ЗЛІВА ЗНИЗУ */
+                    const isServerSlideEnabled = (state.showServerNameOnOverlay !== false);
+
+                    if (isServerSlideEnabled && state.serverChangeTrigger && state.serverChangeTrigger !== lastServerChangeTrigger) {
                         lastServerChangeTrigger = state.serverChangeTrigger;
                         const triggeredServer = state.currentServer, triggeredP1Slot = state.p1ServerSlot, triggeredP2Slot = state.p2ServerSlot;
                         const triggeredP1Name = state.p1name, triggeredP2Name = state.p2name, triggeredLang = state.cornerSlideLang;
+                        
                         clearTimeout(serverChangeBannerDelayTimer);
                         serverChangeBannerDelayTimer = setTimeout(() => {
                             const banner = document.getElementById('server-change-banner');
                             const nameEl = document.getElementById('server-change-banner-name');
                             const labelEl = document.getElementById('server-change-banner-label');
+                            
                             labelEl.innerText = (triggeredLang === 'ua') ? 'ПОДАЄ' : 'SERVING';
                             const servingName = triggeredServer === 2 ? (triggeredP2Name || getStatsLabel('team2Fallback', state)) : (triggeredP1Name || getStatsLabel('team1Fallback', state));
                             const servingSlot = triggeredServer === 2 ? (triggeredP2Slot || 1) : (triggeredP1Slot || 1);
                             const servingParts = servingName.split('/').map(p => p.trim()).filter(p => p.length > 0);
                             const servingPlayerName = (servingParts.length === 2) ? servingParts[servingSlot === 2 ? 1 : 0] : servingName;
+                            
                             nameEl.innerText = servingPlayerName;
                             banner.classList.add('visible');
+                            
                             clearTimeout(serverChangeBannerTimer);
                             serverChangeBannerTimer = setTimeout(() => { banner.classList.remove('visible'); }, 5000);
-                        }, 3000);
+                        }, 2000);
                     }
 
                     const sponsorFrame = document.getElementById('sponsor-logo-frame');
