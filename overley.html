@@ -169,10 +169,10 @@
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
-        /* ===== ПІДПИС "ADVANTAGE 1, 2" ПІД ТАБЛОМ (ПЕРЕНЕСЕНО НИЖЧЕ) ===== */
+        /* ===== ПІДПИС "ADVANTAGE 1, 2" ПІД ТАБЛОМ ===== */
         .advantage-callout {
             position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); 
-            margin-top: 6px; /* Збільшено відступ вниз */
+            margin-top: 6px;
             background: #ffffff; color: #111;
             font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px;
             letter-spacing: 0.5px; text-transform: uppercase;
@@ -320,9 +320,9 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== ЗБІЛЬШЕНИЙ СЛАЙДЕР "ПОДАЄ" (ВИЇЖДЖАЄ ЗЛІВА НАПРАВО ЗНИЗУ) ===== */
+        /* ===== ОНОВЛЕНИЙ СЛАЙДЕР "ПОДАЄ" (ПЕРЕНЕСЕНО ВИЩЕ ДО bottom: 90px;) ===== */
         .server-change-banner {
-            position: fixed; bottom: 35px; left: 0px; z-index: 99000;
+            position: fixed; bottom: 90px; left: 0px; z-index: 99000;
             display: flex; align-items: center; gap: 16px;
             background: rgba(10, 10, 12, 0.92);
             border: 2px solid rgba(198, 159, 102, 0.9);
@@ -338,7 +338,13 @@
         .server-change-banner-ball { font-size: 32px; flex-shrink: 0; filter: drop-shadow(0 0 10px rgba(198,159,102,0.8)); }
         .server-change-banner-text { display: flex; flex-direction: column; gap: 2px; }
         .server-change-banner-label { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; }
-        .server-change-banner-name { font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+        
+        /* ЗРОБЛЕНО НАПІВПРОЗОРИМ ІМ'Я ГРАВЦЯ (opacity: 0.75) */
+        .server-change-banner-name { 
+            font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; 
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+            opacity: 0.75; 
+        }
 
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
