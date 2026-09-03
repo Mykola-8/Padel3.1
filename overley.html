@@ -169,13 +169,14 @@
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
-        /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
+        /* ===== ПІДПИС "ADVANTAGE 1, 2" ПІД ТАБЛОМ (ПЕРЕНЕСЕНО НИЖЧЕ) ===== */
         .advantage-callout {
-            position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); margin-top: -6px;
+            position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); 
+            margin-top: 6px; /* Збільшено відступ вниз */
             background: #ffffff; color: #111;
-            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px;
             letter-spacing: 0.5px; text-transform: uppercase;
-            padding: 6px 14px; border-radius: 0 0 4px 4px;
+            padding: 5px 12px; border-radius: 4px;
             box-shadow: 0 6px 14px rgba(0,0,0,0.4);
             opacity: 0; visibility: hidden; transform: translateY(-6px);
             transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
@@ -973,14 +974,14 @@
                         const atDeuce = p1 === 3 && p2 === 3;
                         const isAdvantageHeld = p1 === 4 || p2 === 4;
 
+                        /* ПОКАЗУЄМО ТІЛЬКИ ADVANTAGE 1 ТА ADVANTAGE 2, GOLDEN POINT НЕ ПОКАЗУЄМО ПІД ТАБЛОМ */
                         if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
                             const round = (state.deuceCounter || 0) + 1;
                             if (round <= 2) {
                                 advCallout.innerText = "ADVANTAGE " + round;
                                 advCallout.classList.add('visible');
                             } else {
-                                advCallout.innerText = "GOLDEN POINT";
-                                advCallout.classList.add('visible');
+                                advCallout.classList.remove('visible');
                             }
                         } else {
                             advCallout.classList.remove('visible');
