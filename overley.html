@@ -149,15 +149,15 @@
         .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (ОНОВЛЕНО ПОЗИЦІОНУВАННЯ ТА СТИЛІ) ===== */
+        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
         .board-promo-panel {
-            position: absolute; top: 100%; left: 120px; /* Зсунуто правіше (початок під назвами команд) */
-            margin-top: 36px; /* Перенесено нижче, щоб не перекривало слайди */
+            position: absolute; top: 100%; left: 120px;
+            margin-top: 36px;
             min-width: 240px; max-width: 420px;
-            background: rgba(0, 0, 0, 0.45); /* Прозорий фон */
+            background: rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(255,255,255,0.18);
             border-radius: 6px;
-            padding: 6px 10px; /* Мінімальні відступи всередині */
+            padding: 6px 10px;
             box-sizing: border-box;
             display: flex; flex-direction: column; gap: 4px; align-items: center;
             opacity: 0; visibility: hidden; transform: translateY(-8px);
@@ -322,7 +322,7 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== ОНОВЛЕНИЙ СЛАЙДЕР "ПОДАЄ" (ТОНШИЙ ШРИФТ ТА РОЗТЯГНУТО ПО ГОРИЗОНТАЛІ) ===== */
+        /* ===== СЛАЙДЕР "ПОДАЄ" ===== */
         .server-change-banner {
             position: fixed; bottom: 90px; left: 0px; z-index: 99000;
             display: flex; align-items: center; gap: 16px;
@@ -341,7 +341,6 @@
         .server-change-banner-text { display: flex; flex-direction: column; gap: 2px; }
         .server-change-banner-label { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; }
         
-        /* ТОНШИЙ ІМ'Я ГРАВЦЯ (font-weight: 600) + РОЗТЯГНУТО (letter-spacing / transform) */
         .server-change-banner-name { 
             font-size: 24px; font-weight: 600; color: #ffffff; 
             letter-spacing: 2.5px; text-transform: uppercase; 
@@ -411,7 +410,7 @@
         <span>REPLAY</span>
     </div>
 
-    <!-- СЛАЙДЕР "ПОДАЄ" (ВИЇЖДЖАЄ ЗЛІВА НАПРАВО) -->
+    <!-- СЛАЙДЕР "ПОДАЄ" -->
     <div class="server-change-banner" id="server-change-banner">
         <span class="server-change-banner-ball">🎾</span>
         <div class="server-change-banner-text">
@@ -965,7 +964,7 @@
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
 
-                /* ===== ПОВНЕ СКИДАННЯ КОРТУ: ПРИ 0:0, БЕЗ ПОДАЧІ ТА ЗІГРАНИХ ГЕЙМІВ — СХОВАТИ ТАБЛО РАХУНКУ ===== */
+                /* ===== ВИПРАВЛЕНО СИНТАКСИЧНУ ПОМИЛКУ СКИДАННЯ КОРТУ ===== */
                 let hasGamesInMatch = false;
                 for (let i = 1; i <= 5; i++) {
                     if ((state[`t1_s${i}`] || 0) > 0 || (state[`t2_s${i}`] || 0) > 0) {
@@ -975,7 +974,7 @@
                 }
                 const isCourtFreshReset = (p1 === 0 && p2 === 0 && !hasGamesInMatch && !state.currentServer);
 
-                if (isCourtFreshReset || (p1 === 0 && p2 === 0 && (state.is Americano || state.isMexicano)) || state.isMatchFinished) {
+                if (isCourtFreshReset || (p1 === 0 && p2 === 0 && (state.isAmericano || state.isMexicano)) || state.isMatchFinished) {
                     pb.classList.remove('visible');
                     document.getElementById('advantage-callout').classList.remove('visible');
                 } else {
@@ -1057,7 +1056,7 @@
 
                 const mfb = document.getElementById('match-finished-board');
                 if (state.isMatchFinished) {
-                    stPanel.classList.remove('visible');
+                    if (typeof stPanel !== 'undefined') stPanel.classList.remove('visible');
 
                     document.getElementById('mfb-header').innerText = `${getStatsLabel('court', state)} ${courtId} • ${getStatsLabel('matchFinished', state)}`;
                     let playedSets = [];
