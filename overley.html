@@ -149,24 +149,26 @@
         .logo-panel img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 0; margin: 0; border: none; }
         .logo-panel-text { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.2; padding: 0 4px; box-sizing: border-box; width: 100%; word-break: break-word; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
+        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (ОНОВЛЕНО ПОЗИЦІОНУВАННЯ ТА СТИЛІ) ===== */
         .board-promo-panel {
-            position: absolute; top: 100%; left: 0; margin-top: 10px;
-            min-width: 260px; max-width: 420px;
-            background: rgba(0,0,0,0.72);
+            position: absolute; top: 100%; left: 120px; /* Зсунуто правіше (початок під назвами команд) */
+            margin-top: 36px; /* Перенесено нижче, щоб не перекривало слайди */
+            min-width: 240px; max-width: 420px;
+            background: rgba(0, 0, 0, 0.45); /* Прозорий фон */
             border: 1px solid rgba(255,255,255,0.18);
             border-radius: 6px;
-            padding: 14px 18px;
+            padding: 6px 10px; /* Мінімальні відступи всередині */
             box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 6px; align-items: center;
+            display: flex; flex-direction: column; gap: 4px; align-items: center;
             opacity: 0; visibility: hidden; transform: translateY(-8px);
             transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
             font-family: 'Montserrat', sans-serif;
             z-index: 500;
+            backdrop-filter: blur(4px);
         }
         .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
+        .board-promo-line { text-align: center; line-height: 1.25; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .board-promo-line.has-bg { padding: 2px 8px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
         /* ===== ПІДПИС "ADVANTAGE 1, 2" ПІД ТАБЛОМ ===== */
@@ -320,7 +322,7 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== ОНОВЛЕНИЙ СЛАЙДЕР "ПОДАЄ" (ПЕРЕНЕСЕНО ВИЩЕ ДО bottom: 90px;) ===== */
+        /* ===== ОНОВЛЕНИЙ СЛАЙДЕР "ПОДАЄ" (ТОНШИЙ ШРИФТ ТА РОЗТЯГНУТО ПО ГОРИЗОНТАЛІ) ===== */
         .server-change-banner {
             position: fixed; bottom: 90px; left: 0px; z-index: 99000;
             display: flex; align-items: center; gap: 16px;
@@ -339,11 +341,14 @@
         .server-change-banner-text { display: flex; flex-direction: column; gap: 2px; }
         .server-change-banner-label { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; }
         
-        /* ЗРОБЛЕНО НАПІВПРОЗОРИМ ІМ'Я ГРАВЦЯ (opacity: 0.75) */
+        /* ТОНШИЙ ІМ'Я ГРАВЦЯ (font-weight: 600) + РОЗТЯГНУТО (letter-spacing / transform) */
         .server-change-banner-name { 
-            font-size: 24px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; 
+            font-size: 24px; font-weight: 600; color: #ffffff; 
+            letter-spacing: 2.5px; text-transform: uppercase; 
             text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-            opacity: 0.75; 
+            opacity: 0.85; 
+            transform: scaleX(1.1); transform-origin: left center;
+            display: inline-block;
         }
 
         .sponsor-logo-frame {
@@ -959,8 +964,21 @@
 
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
-                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); }
-                else {
+
+                /* ===== ПОВНЕ СКИДАННЯ КОРТУ: ПРИ 0:0, БЕЗ ПОДАЧІ ТА ЗІГРАНИХ ГЕЙМІВ — СХОВАТИ ТАБЛО РАХУНКУ ===== */
+                let hasGamesInMatch = false;
+                for (let i = 1; i <= 5; i++) {
+                    if ((state[`t1_s${i}`] || 0) > 0 || (state[`t2_s${i}`] || 0) > 0) {
+                        hasGamesInMatch = true;
+                        break;
+                    }
+                }
+                const isCourtFreshReset = (p1 === 0 && p2 === 0 && !hasGamesInMatch && !state.currentServer);
+
+                if (isCourtFreshReset || (p1 === 0 && p2 === 0 && (state.is Americano || state.isMexicano)) || state.isMatchFinished) {
+                    pb.classList.remove('visible');
+                    document.getElementById('advantage-callout').classList.remove('visible');
+                } else {
                     pb.classList.add('visible');
                     if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
@@ -980,7 +998,6 @@
                         const atDeuce = p1 === 3 && p2 === 3;
                         const isAdvantageHeld = p1 === 4 || p2 === 4;
 
-                        /* ПОКАЗУЄМО ТІЛЬКИ ADVANTAGE 1 ТА ADVANTAGE 2, GOLDEN POINT НЕ ПОКАЗУЄМО ПІД ТАБЛОМ */
                         if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
                             const round = (state.deuceCounter || 0) + 1;
                             if (round <= 2) {
