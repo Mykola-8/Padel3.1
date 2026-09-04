@@ -322,16 +322,16 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== СЛАЙДЕР "ПОДАЄ" ===== */
+      /* ===== СЛАЙДЕР "ПОДАЄ" (РОЗТЯГНУТО ПО ГОРИЗОНТАЛІ) ===== */
         .server-change-banner {
             position: fixed; bottom: 90px; left: 0px; z-index: 99000;
-            display: flex; align-items: center; gap: 12px;
+            display: flex; align-items: center; gap: 14px;
             background: rgba(10, 10, 12, 0.55);
             border: 1.5px solid var(--accent);
             border-left: none;
             border-radius: 0 8px 8px 0;
             backdrop-filter: blur(8px);
-            padding: 8px 36px 8px 18px;
+            padding: 8px 65px 8px 22px; /* Збільшено внутрішній відступ праворуч */
             font-family: 'Montserrat', sans-serif;
             opacity: 0; visibility: hidden; transform: translateX(-100%);
             transition: opacity 0.4s ease, transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.25), visibility 0.55s;
@@ -340,14 +340,14 @@
         .server-change-banner.visible { opacity: 1; visibility: visible; transform: translateX(0); }
         .server-change-banner-ball { font-size: 22px; flex-shrink: 0; filter: drop-shadow(0 0 6px var(--accent-soft)); }
         .server-change-banner-text { display: flex; flex-direction: column; gap: 1px; }
-        .server-change-banner-label { font-size: 10px; font-weight: 800; letter-spacing: 3.5px; text-transform: uppercase; color: var(--accent); }
+        .server-change-banner-label { font-size: 10px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); }
         
         .server-change-banner-name { 
             font-size: 18px; font-weight: 600; color: #ffffff; 
-            letter-spacing: 3.5px; text-transform: uppercase; 
+            letter-spacing: 4px; text-transform: uppercase; 
             text-shadow: 0 1px 4px rgba(0,0,0,0.9);
             opacity: 0.95; 
-            transform: scaleX(1.15); transform-origin: left center;
+            transform: scaleX(1.25); transform-origin: left center; /* Збільшено розтягнення тексту */
             display: inline-block;
         }
 
