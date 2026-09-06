@@ -363,9 +363,6 @@
         .clock-bezel-grad-0 { stop-color: var(--clock-bezel-0); }
         .clock-bezel-grad-45 { stop-color: var(--clock-bezel-45); }
         .clock-bezel-grad-100 { stop-color: var(--clock-bezel-100); }
-        .clock-face-grad-0 { stop-color: var(--clock-face-0); }
-        .clock-face-grad-45 { stop-color: var(--clock-face-45); }
-        .clock-face-grad-100 { stop-color: var(--clock-face-100); }
         .clock-circle-face { fill: url(#clockFace); stroke: var(--clock-stroke); }
         .clock-dots-group { fill: var(--clock-dots); }
         .clock-nums-group { fill: var(--clock-nums); }
@@ -1129,32 +1126,26 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Зчитуємо очки тайбрейку для кожної команди окремо з Firebase
+                    // Зчитуємо точні очки тайбрейку для кожної команди окремо з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // 1. Якщо є значення тайбрейка з Firebase — виводимо відповідні індекси
+                    // 1. Якщо є точні значення з Firebase для обох команд — показуємо їх у верхньому індексі
                     if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     } 
-                    // 2. Якщо записано індекс тільки для однієї команди
+                    // 2. Якщо записано очки тільки для першої команди
                     else if (tb1 !== null && tb1 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerText = g2;
                     }
+                    // 3. Якщо записано очки тільки для другої команди
                     else if (tb2 !== null && tb2 !== undefined) {
                         box1.innerText = g1;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     }
-                    // 3. Якщо сет 7:6 чи 6:7, але в базі немає очок — за замовчуванням виводимо 7 (переможцю) та 5 (програвшому)
-                    else if ((g1 >= 7 || g2 >= 7) && Math.abs(g1 - g2) === 1) {
-                        let defaultTb1 = (g1 > g2) ? 7 : 5;
-                        let defaultTb2 = (g2 > g1) ? 7 : 5;
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${defaultTb1}</span>`;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${defaultTb2}</span>`;
-                    } 
-                    // 4. Звичайний рахунок без тайбрейку
+                    // 4. Звичайний рахунок геймів без записаних очок тайбрейка
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
