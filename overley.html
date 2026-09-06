@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ОЧОК ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,29 +1126,18 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // 1. Зчитуємо явні очки тайбрейку з Firebase (якщо вони були записані)
+                    // Зчитуємо очки тайбрейку виключно з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // 2. Логіка автоматичного виявлення тайбрейку 7:6 / 6:7, якщо точних очок немає в БД
-                    if ((tb1 === null || tb2 === null) && ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7))) {
-                        if (g1 === 7) {
-                            tb1 = tb1 ?? 7;
-                            tb2 = tb2 ?? 5; 
-                        } else {
-                            tb1 = tb1 ?? 5;
-                            tb2 = tb2 ?? 7;
-                        }
-                    }
-
-                    // Рендеринг у DOM
-                    if (tb1 !== null && tb2 !== null) {
+                    // Відображення особистих очок кожної з команд
+                    if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
-                    } else if (tb1 !== null) {
+                    } else if (tb1 !== null && tb1 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerText = g2;
-                    } else if (tb2 !== null) {
+                    } else if (tb2 !== null && tb2 !== undefined) {
                         box1.innerText = g1;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     } else {
