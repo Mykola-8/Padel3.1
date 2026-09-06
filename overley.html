@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ (ПРЯМЕ ЗЧИТУВАННЯ З FIREBASE) */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,30 +1126,28 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Отримуємо очки тайбрейку з бази Firebase
+                    // Точне зчитування збережених очок з БД
                     let tb1 = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null);
                     let tb2 = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null);
 
-                    // 1. Поточний розіграш тайбрейку в процесі (6:6) — показуємо поточні очки обох команд
+                    // 1. Поточний тайбрейк у процесі (6:6)
                     if (g1 === 6 && g2 === 6 && (state.isTiebreak || s === activeSet)) {
                         let val1 = (tb1 !== null && tb1 !== undefined) ? tb1 : p1;
                         let val2 = (tb2 !== null && tb2 !== undefined) ? tb2 : p2;
                         box1.innerHTML = `${g1}<span class="set-tb-score">${val1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${val2}</span>`;
                     } 
-                    // 2. Завершений сет 7:6 (виграла Команда 1) — чисте 7 у переможця, індекс ТІЛЬКИ у Команди 2
+                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекс показується Команді 2 прямо з Firebase
                     else if (g1 === 7 && g2 === 6) {
                         box1.innerText = g1;
-                        let loserScore = (tb2 !== null && tb2 !== undefined) ? tb2 : (tb1 !== null && tb1 > 7 ? tb1 - 2 : 5);
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${loserScore}</span>`;
+                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
                     } 
-                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс ТІЛЬКИ у Команди 1, чисте 7 у переможця
+                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс показується Команді 1 прямо з Firebase
                     else if (g1 === 6 && g2 === 7) {
-                        let loserScore = (tb1 !== null && tb1 !== undefined) ? tb1 : (tb2 !== null && tb2 > 7 ? tb2 - 2 : 5);
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${loserScore}</span>`;
+                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
                         box2.innerText = g2;
                     } 
-                    // 4. Звичайний рахунок сету (6:4, 6:3, 6:2 тощо)
+                    // 4. Звичайний рахунок сету
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
