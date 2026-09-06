@@ -227,7 +227,7 @@
         .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
 
-        /* Маленькі цифри тайбрейку біля великої цифри геймів */
+        /* Стиль для очок тайбрейку (верхній індекс) */
         .set-tb-score {
             font-size: 13px;
             font-weight: 800;
@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ТОЧНИХ ОЧОК ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,21 +1126,27 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Зчитуємо очки тайбрейку для сету
+                    // Отримуємо очки тайбрейку з бази Firebase
                     let tb1 = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null);
                     let tb2 = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null);
 
-                    // Якщо є очки тайбрейку (під час гри 6:6 або після завершення 7:6 / 6:7)
-                    if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
-                    } else if (tb1 !== null && tb1 !== undefined) {
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
-                        box2.innerText = g2;
-                    } else if (tb2 !== null && tb2 !== undefined) {
+                    // 1. Поточний тайбрейк у процесі (6:6) — показуємо поточні очки обох
+                    if (g1 === 6 && g2 === 6 && state.isTiebreak) {
+                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
+                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
+                    } 
+                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекс додається ТІЛЬКИ Команді 2
+                    else if (g1 === 7 && g2 === 6) {
                         box1.innerText = g1;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
-                    } else {
+                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
+                    } 
+                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс додається ТІЛЬКИ Команді 1
+                    else if (g1 === 6 && g2 === 7) {
+                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
+                        box2.innerText = g2;
+                    } 
+                    // 4. Звичайний рахунок (6:4, 6:3 тощо)
+                    else {
                         box1.innerText = g1;
                         box2.innerText = g2;
                     }
