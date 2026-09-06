@@ -1129,16 +1129,16 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Отримуємо записаний рахунок тайбрейку з Firebase
+                    // Зчитуємо очки тайбрейку для кожної команди окремо з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // 1. Якщо є точні дані тайбрейку з Firebase (наприклад 7:2, 8:6, 2:7)
+                    // 1. Якщо є значення тайбрейка з Firebase — виводимо відповідні індекси
                     if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     } 
-                    // 2. Якщо є значення тільки для одного з гравців (наприклад, тільки очки програвшого)
+                    // 2. Якщо записано індекс тільки для однієї команди
                     else if (tb1 !== null && tb1 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerText = g2;
@@ -1147,14 +1147,14 @@
                         box1.innerText = g1;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     }
-                    // 3. Якщо сет завершився тайбрейком (7:6 / 6:7), але очок немає в базі — за замовчуванням показуємо індекс 5 або 7
+                    // 3. Якщо сет 7:6 чи 6:7, але в базі немає очок — за замовчуванням виводимо 7 (переможцю) та 5 (програвшому)
                     else if ((g1 >= 7 || g2 >= 7) && Math.abs(g1 - g2) === 1) {
                         let defaultTb1 = (g1 > g2) ? 7 : 5;
                         let defaultTb2 = (g2 > g1) ? 7 : 5;
                         box1.innerHTML = `${g1}<span class="set-tb-score">${defaultTb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${defaultTb2}</span>`;
                     } 
-                    // 4. Звичайний рахунок геймів без тайбрейку
+                    // 4. Звичайний рахунок без тайбрейку
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
