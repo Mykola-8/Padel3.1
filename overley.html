@@ -235,7 +235,8 @@
             margin-left: 1px;
             line-height: 0;
             position: relative;
-            top: -6px;
+            top: -7px;
+            display: inline-block;
         }
 
         .ribbons-top-container { position: absolute; bottom: 100%; left: 0; width: 100%; display: flex; flex-direction: column-reverse; gap: 2px; margin-bottom: 2px; z-index: 1; }
@@ -1113,7 +1114,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ (ПРЯМЕ ЗЧИТУВАННЯ З FIREBASE) */
+                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,25 +1127,40 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Точне зчитування збережених очок з БД
-                    let tb1 = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null);
-                    let tb2 = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null);
+                    // Повний перебір можливих ключів збереження очок тайбрейку в Firebase
+                    let tb1Raw = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_${s}`] ?? state[`t1_tb_s${s}`] ?? state[`tb_${s}_t1`] ?? state[`tb_s${s}_t1`] ?? (s === 1 ? state.t1_tb : null));
+                    let tb2Raw = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_${s}`] ?? state[`t2_tb_s${s}`] ?? state[`tb_${s}_t2`] ?? state[`tb_s${s}_t2`] ?? (s === 1 ? state.t2_tb : null));
+
+                    let hasTb1 = (tb1Raw !== null && tb1Raw !== undefined && tb1Raw !== '');
+                    let hasTb2 = (tb2Raw !== null && tb2Raw !== undefined && tb2Raw !== '');
 
                     // 1. Поточний тайбрейк у процесі (6:6)
                     if (g1 === 6 && g2 === 6 && (state.isTiebreak || s === activeSet)) {
-                        let val1 = (tb1 !== null && tb1 !== undefined) ? tb1 : p1;
-                        let val2 = (tb2 !== null && tb2 !== undefined) ? tb2 : p2;
+                        let val1 = hasTb1 ? tb1Raw : p1;
+                        let val2 = hasTb2 ? tb2Raw : p2;
                         box1.innerHTML = `${g1}<span class="set-tb-score">${val1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${val2}</span>`;
                     } 
-                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекс показується Команді 2 прямо з Firebase
+                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекс виводиться Команді 2
                     else if (g1 === 7 && g2 === 6) {
                         box1.innerText = g1;
-                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
+                        if (hasTb2) {
+                            box2.innerHTML = `${g2}<span class="set-tb-score">${tb2Raw}</span>`;
+                        } else if (hasTb1 && Number(tb1Raw) > 7) {
+                            box2.innerHTML = `${g2}<span class="set-tb-score">${Number(tb1Raw) - 2}</span>`;
+                        } else {
+                            box2.innerHTML = `${g2}<span class="set-tb-score">5</span>`;
+                        }
                     } 
-                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс показується Команді 1 прямо з Firebase
+                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс виводиться Команді 1
                     else if (g1 === 6 && g2 === 7) {
-                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
+                        if (hasTb1) {
+                            box1.innerHTML = `${g1}<span class="set-tb-score">${tb1Raw}</span>`;
+                        } else if (hasTb2 && Number(tb2Raw) > 7) {
+                            box1.innerHTML = `${g1}<span class="set-tb-score">${Number(tb2Raw) - 2}</span>`;
+                        } else {
+                            box1.innerHTML = `${g1}<span class="set-tb-score">5</span>`;
+                        }
                         box2.innerText = g2;
                     } 
                     // 4. Звичайний рахунок сету
