@@ -1116,7 +1116,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА МАЛЕНЬКИХ ЦИФР ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА МАЛЕНЬКИХ ЦИФР ТАЙБРЕЙКУ (З АВТОМАШШТАБУВАННЯМ) */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1129,10 +1129,18 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
+                    // Перевіряємо наявність очок тайбрейку з бази даних
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    if (tb1 !== null && tb2 !== null && (tb1 > 0 || tb2 > 0)) {
+                    // Логіка для тайбрейків 7:6 або 6:7
+                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7)) {
+                        let finalTb1 = (tb1 !== null && tb1 !== undefined) ? tb1 : (g1 === 7 ? 7 : 3);
+                        let finalTb2 = (tb2 !== null && tb2 !== undefined) ? tb2 : (g2 === 7 ? 7 : 3);
+
+                        box1.innerHTML = `${g1}<span class="set-tb-score">${finalTb1}</span>`;
+                        box2.innerHTML = `${g2}<span class="set-tb-score">${finalTb2}</span>`;
+                    } else if (tb1 !== null && tb2 !== null && (tb1 > 0 || tb2 > 0)) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
                     } else {
