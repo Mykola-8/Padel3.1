@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА МАЛЕНЬКИХ ЦИФР ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ТОЧНИХ ЦИФР ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1130,7 +1130,7 @@
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // 1. Якщо є точні значення з Firebase для обох команд — показуємо їх у верхньому індексі
+                    // 1. Якщо є точні значення з Firebase для обох команд
                     if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
