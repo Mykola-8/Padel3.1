@@ -1130,22 +1130,26 @@
                     let tb1 = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null);
                     let tb2 = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null);
 
-                    // 1. Поточний тайбрейк у процесі (6:6) — показуємо поточні очки обох
-                    if (g1 === 6 && g2 === 6 && state.isTiebreak) {
-                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
-                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
+                    // 1. Поточний розіграш тайбрейку в процесі (6:6) — показуємо поточні очки обох команд
+                    if (g1 === 6 && g2 === 6 && (state.isTiebreak || s === activeSet)) {
+                        let val1 = (tb1 !== null && tb1 !== undefined) ? tb1 : p1;
+                        let val2 = (tb2 !== null && tb2 !== undefined) ? tb2 : p2;
+                        box1.innerHTML = `${g1}<span class="set-tb-score">${val1}</span>`;
+                        box2.innerHTML = `${g2}<span class="set-tb-score">${val2}</span>`;
                     } 
-                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекс додається ТІЛЬКИ Команді 2
+                    // 2. Завершений сет 7:6 (виграла Команда 1) — чисте 7 у переможця, індекс ТІЛЬКИ у Команди 2
                     else if (g1 === 7 && g2 === 6) {
                         box1.innerText = g1;
-                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
+                        let loserScore = (tb2 !== null && tb2 !== undefined) ? tb2 : (tb1 !== null && tb1 > 7 ? tb1 - 2 : 5);
+                        box2.innerHTML = `${g2}<span class="set-tb-score">${loserScore}</span>`;
                     } 
-                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс додається ТІЛЬКИ Команді 1
+                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекс ТІЛЬКИ у Команди 1, чисте 7 у переможця
                     else if (g1 === 6 && g2 === 7) {
-                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
+                        let loserScore = (tb1 !== null && tb1 !== undefined) ? tb1 : (tb2 !== null && tb2 > 7 ? tb2 - 2 : 5);
+                        box1.innerHTML = `${g1}<span class="set-tb-score">${loserScore}</span>`;
                         box2.innerText = g2;
                     } 
-                    // 4. Звичайний рахунок (6:4, 6:3 тощо)
+                    // 4. Звичайний рахунок сету (6:4, 6:3, 6:2 тощо)
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
