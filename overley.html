@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ТОЧНИХ ОЧОК ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,26 +1126,29 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Зчитуємо очки тайбрейку з Firebase
+                    // Зчитуємо очки тайбрейку безпосередньо з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // Точні очки тайбрейку для обох команд (наприклад, 10 та 8)
-                    if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
+                    // 1. Якщо Команда 1 виграла тайбрейк (7:6)
+                    if (g1 === 7 && g2 === 6) {
+                        box1.innerText = g1; // Переможець завжди чистий 7
+                        if (tb2 !== null && tb2 !== undefined) {
+                            box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
+                        } else {
+                            box2.innerText = g2;
+                        }
                     } 
-                    // Рахунок 7:6 без заданого tb1/tb2 — переможець (7) чистий, програвшому (6) виводимо 5 або tb2
-                    else if (g1 === 7 && g2 === 6) {
-                        box1.innerText = g1;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${tb2 !== null ? tb2 : 5}</span>`;
-                    } 
-                    // Рахунок 6:7 без заданого tb1/tb2 — програвшому (6) виводимо 5 або tb1, переможець (7) чистий
+                    // 2. Якщо Команда 2 виграла тайбрейк (6:7)
                     else if (g1 === 6 && g2 === 7) {
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${tb1 !== null ? tb1 : 5}</span>`;
-                        box2.innerText = g2;
+                        if (tb1 !== null && tb1 !== undefined) {
+                            box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
+                        } else {
+                            box1.innerText = g1;
+                        }
+                        box2.innerText = g2; // Переможець завжди чистий 7
                     } 
-                    // Звичайне відображення для геймів без тайбрейку
+                    // 3. Усі інші випадки (звичайні гейми 6:4, 6:3 тощо)
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
