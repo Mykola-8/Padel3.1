@@ -1126,29 +1126,29 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Зчитуємо очки тайбрейку безпосередньо з Firebase
+                    // Перевіряємо всі можливі ключі очок тайбрейку з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // 1. Якщо Команда 1 виграла тайбрейк (7:6)
-                    if (g1 === 7 && g2 === 6) {
-                        box1.innerText = g1; // Переможець завжди чистий 7
-                        if (tb2 !== null && tb2 !== undefined) {
-                            box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
-                        } else {
-                            box2.innerText = g2;
-                        }
+                    // 1. Поточний тайбрейк у процесі (рахунок 6:6)
+                    if (g1 === 6 && g2 === 6) {
+                        let currentTb1 = (s === activeSet && state.isTiebreak) ? p1 : tb1;
+                        let currentTb2 = (s === activeSet && state.isTiebreak) ? p2 : tb2;
+
+                        box1.innerHTML = (currentTb1 !== null && currentTb1 !== undefined) ? `${g1}<span class="set-tb-score">${currentTb1}</span>` : g1;
+                        box2.innerHTML = (currentTb2 !== null && currentTb2 !== undefined) ? `${g2}<span class="set-tb-score">${currentTb2}</span>` : g2;
+                    }
+                    // 2. Завершений сет Команди 1 (7:6)
+                    else if (g1 === 7 && g2 === 6) {
+                        box1.innerText = g1; // Переможець чисто 7
+                        box2.innerHTML = (tb2 !== null && tb2 !== undefined) ? `${g2}<span class="set-tb-score">${tb2}</span>` : g2;
                     } 
-                    // 2. Якщо Команда 2 виграла тайбрейк (6:7)
+                    // 3. Завершений сет Команди 2 (6:7)
                     else if (g1 === 6 && g2 === 7) {
-                        if (tb1 !== null && tb1 !== undefined) {
-                            box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
-                        } else {
-                            box1.innerText = g1;
-                        }
-                        box2.innerText = g2; // Переможець завжди чистий 7
+                        box1.innerHTML = (tb1 !== null && tb1 !== undefined) ? `${g1}<span class="set-tb-score">${tb1}</span>` : g1;
+                        box2.innerText = g2; // Переможець чисто 7
                     } 
-                    // 3. Усі інші випадки (звичайні гейми 6:4, 6:3 тощо)
+                    // 4. Звичайні раунди (6:4, 6:3 тощо)
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
