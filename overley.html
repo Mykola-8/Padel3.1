@@ -1113,7 +1113,7 @@
 
                 let sMax = 0; document.querySelectorAll('[id^="t1-s"]').forEach(el => { let n = parseInt(el.id.replace('t1-s','')); if (!isNaN(n) && n > sMax) sMax = n; });
                 
-                /* РЕНДЕРИНГ СЕТІВ ТА ОЧОК ТАЙБРЕЙКУ */
+                /* РЕНДЕРИНГ СЕТІВ ТА ІНДЕКСІВ ТАЙБРЕЙКУ */
                 for (let s = 1; s <= sMax; s++) {
                     let box1 = document.getElementById(`t1-s${s}`), box2 = document.getElementById(`t2-s${s}`);
                     if (!box1 || !box2) continue;
@@ -1126,11 +1126,22 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Зчитуємо очки тайбрейку виключно з Firebase
+                    // 1. Зчитуємо очки тайбрейку з Firebase
                     let tb1 = state[`t1_tb_s${s}`] ?? state[`tb_s${s}_t1`] ?? null;
                     let tb2 = state[`t2_tb_s${s}`] ?? state[`tb_s${s}_t2`] ?? null;
 
-                    // Відображення особистих очок кожної з команд
+                    // 2. Якщо рахунок 7:6 або 6:7, але очок тайбрейку у БД немає, підставляємо стандартні індекси 7 та 5
+                    if ((tb1 === null || tb1 === undefined) && (tb2 === null || tb2 === undefined)) {
+                        if (g1 === 7 && g2 === 6) {
+                            tb1 = 7;
+                            tb2 = 5;
+                        } else if (g1 === 6 && g2 === 7) {
+                            tb1 = 5;
+                            tb2 = 7;
+                        }
+                    }
+
+                    // 3. Відображення цифр і верхніх індексів
                     if (tb1 !== null && tb1 !== undefined && tb2 !== null && tb2 !== undefined) {
                         box1.innerHTML = `${g1}<span class="set-tb-score">${tb1}</span>`;
                         box2.innerHTML = `${g2}<span class="set-tb-score">${tb2}</span>`;
