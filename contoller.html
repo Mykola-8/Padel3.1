@@ -29,13 +29,14 @@
         .btn-red { background: #b91c1c; }
         .btn-orange { background: linear-gradient(to bottom, #f97316, #ea580c); color: white; }
         .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
+        .btn-purple-net { background: linear-gradient(to bottom, #7c3aed, #5b21b6) !important; color: white !important; border: 1px solid #a78bfa !important; }
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn span { font-size: 56px; font-weight: 900; }
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 800; text-transform: uppercase; font-size: 12px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
-        .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-large-action { padding: 18px !important; font-size: 13px !important; font-weight: 800 !important; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 8px; }
         .status-badge { background: #2a2a2a; color: #c69f66; padding: 10px; font-size: 13px; border-radius: 4px; font-weight: 800; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
         .preview-scoreboard { border: 2px solid #b28a55; border-radius: 4px; display: flex; flex-direction: column; background: #1a1a1a; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 5px; }
@@ -120,6 +121,7 @@
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
+        <button class="btn btn-purple-net btn-large-action" onclick="triggerNetCordShot()">🕸 М'ЯЧ ВІД СІТКИ (NET CORD SHOT)</button>
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
@@ -226,9 +228,13 @@
         <div style="display:flex; flex-direction:column; gap:14px;">
             
             <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла (надписом передається на Garmin):</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option>
+                    <option value="gold">GOLD (Золото)</option>
+                    <option value="courtgreen">GREEN (Корт / Салатова)</option>
+                    <option value="graydark">DARK (Сіро-темна)</option>
+                    <option value="lightgray">LIGHT (Світло-сіра)</option>
+                    <option value="transparent">TRANSPARENT (Прозора)</option>
                 </select>
             </div>
 
@@ -548,8 +554,11 @@
                 isMexicano: false, mexicanoLimit: 24,
                 isProSet: false, proSetLimit: 8,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
+                activeMatchRibbon: "NONE", 
+                boardTheme: "gold", theme: "gold", themeName: "gold",
+                cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
+                p1NetCords: 0, p2NetCords: 0, t1_net_cords: 0, t2_net_cords: 0,
                 showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
@@ -885,8 +894,12 @@
                 isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: false, superTiebreakLimit: state.superTiebreakLimit || 10, 
-                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
+                activeMatchRibbon: "NONE", 
+                boardTheme: state.boardTheme || "gold", theme: state.boardTheme || "gold", themeName: state.boardTheme || "gold",
+                cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0,
+                p1NetCords: 0, p2NetCords: 0, t1_net_cords: 0, t2_net_cords: 0,
+                showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
@@ -905,6 +918,14 @@
         }
 
         function renderUI() {
+            const currentTheme = state.boardTheme || "gold";
+            state.theme = currentTheme;
+            state.themeName = currentTheme;
+
+            if (document.getElementById('board-theme-selector')) {
+                document.getElementById('board-theme-selector').value = currentTheme;
+            }
+
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             
@@ -1159,11 +1180,32 @@
             state.serverChangeTrigger = Date.now();
         }
 
+        window.triggerNetCordShot = function() {
+            if (state.isMatchFinished) return;
+            if (isControllerLocked()) return;
+            saveToHistory(state);
+            const scoringTeam = state.currentServer || 1;
+            if (scoringTeam === 1) {
+                state.p1NetCords = (state.p1NetCords || 0) + 1;
+                state.t1_net_cords = state.p1NetCords;
+            } else {
+                state.p2NetCords = (state.p2NetCords || 0) + 1;
+                state.t2_net_cords = state.p2NetCords;
+            }
+            state.animation = { team: scoringTeam, type: 'net_cord', ts: Date.now() };
+            window.scorePointWithoutHistorySave(scoringTeam);
+        }
+
         window.triggerServerDoubleFault = function() { if (state.isMatchFinished) return; saveToHistory(state); const s = state.currentServer || 1; if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1; else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1; state.animation = { team: s, type: 'double_fault', ts: Date.now() }; window.scorePointWithoutHistorySave(s === 1 ? 2 : 1); }
         window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
         window.toggleMainBoard = function() { saveToHistory(state); state.showMainBoard = !state.showMainBoard; set(matchRef, state); }
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); }
-        window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
+        window.updateBoardTheme = function(v) { 
+            state.boardTheme = v; 
+            state.theme = v; 
+            state.themeName = v; 
+            set(matchRef, state); 
+        }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; state.serverChangeTrigger = Date.now(); set(matchRef, state); }
         window.setServerSlotManual = function(team, slot) {
