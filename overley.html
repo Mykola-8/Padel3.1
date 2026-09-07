@@ -1127,57 +1127,19 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
-                    // Перевірка всіх можливих варіантів ключів Firebase для тайбрейку
+                    // Отримуємо точні значення очок тайбрейку безпосередньо з Firebase
                     let tb1Raw = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_${s}`] ?? state[`t1_tb_s${s}`] ?? state[`tb_${s}_t1`] ?? state[`tb_s${s}_t1`] ?? (s === 1 ? state.t1_tb : null));
                     let tb2Raw = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_${s}`] ?? state[`t2_tb_s${s}`] ?? state[`tb_${s}_t2`] ?? state[`tb_s${s}_t2`] ?? (s === 1 ? state.t2_tb : null));
 
                     let hasTb1 = (tb1Raw !== null && tb1Raw !== undefined && tb1Raw !== '');
                     let hasTb2 = (tb2Raw !== null && tb2Raw !== undefined && tb2Raw !== '');
 
-                    // 1. Поточний тайбрейк у процесі (6:6) — показуємо поточні очки обох команд (6^4 : 6^2)
-                    if (g1 === 6 && g2 === 6 && (state.isTiebreak || s === activeSet)) {
-                        let val1 = hasTb1 ? tb1Raw : p1;
-                        let val2 = hasTb2 ? tb2Raw : p2;
-                        box1.innerHTML = `${g1}<span class="set-tb-score">${val1}</span>`;
-                        box2.innerHTML = `${g2}<span class="set-tb-score">${val2}</span>`;
+                    // Якщо сет дійшов до тайбрейку або завершився з тайбрейком (6:6, 7:6, 6:7)
+                    if ((g1 === 6 && g2 === 6) || (g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7)) {
+                        box1.innerHTML = hasTb1 ? `${g1}<span class="set-tb-score">${tb1Raw}</span>` : g1;
+                        box2.innerHTML = hasTb2 ? `${g2}<span class="set-tb-score">${tb2Raw}</span>` : g2;
                     } 
-                    // 2. Завершений сет 7:6 (виграла Команда 1) — індекси показуються біля ОБОХ цифр (7^9 : 6^7)
-                    else if (g1 === 7 && g2 === 6) {
-                        if (hasTb1) {
-                            box1.innerHTML = `${g1}<span class="set-tb-score">${tb1Raw}</span>`;
-                        } else if (hasTb2) {
-                            box1.innerHTML = `${g1}<span class="set-tb-score">${Number(tb2Raw) + 2}</span>`;
-                        } else {
-                            box1.innerText = g1;
-                        }
-
-                        if (hasTb2) {
-                            box2.innerHTML = `${g2}<span class="set-tb-score">${tb2Raw}</span>`;
-                        } else if (hasTb1 && Number(tb1Raw) >= 7) {
-                            box2.innerHTML = `${g2}<span class="set-tb-score">${Number(tb1Raw) - 2}</span>`;
-                        } else {
-                            box2.innerText = g2;
-                        }
-                    } 
-                    // 3. Завершений сет 6:7 (виграла Команда 2) — індекси показуються біля ОБОХ цифр (6^5 : 7^7)
-                    else if (g1 === 6 && g2 === 7) {
-                        if (hasTb1) {
-                            box1.innerHTML = `${g1}<span class="set-tb-score">${tb1Raw}</span>`;
-                        } else if (hasTb2 && Number(tb2Raw) >= 7) {
-                            box1.innerHTML = `${g1}<span class="set-tb-score">${Number(tb2Raw) - 2}</span>`;
-                        } else {
-                            box1.innerText = g1;
-                        }
-
-                        if (hasTb2) {
-                            box2.innerHTML = `${g2}<span class="set-tb-score">${tb2Raw}</span>`;
-                        } else if (hasTb1) {
-                            box2.innerHTML = `${g2}<span class="set-tb-score">${Number(tb1Raw) + 2}</span>`;
-                        } else {
-                            box2.innerText = g2;
-                        }
-                    } 
-                    // 4. Звичайний рахунок сету
+                    // Звичайний рахунок сету без тайбрейку
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
