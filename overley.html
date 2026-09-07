@@ -605,6 +605,7 @@
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Голден-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-df1">0</div><div class="sm-label" id="stm-lbl-doublefaults">Дабл фоли</div><div class="sm-val" id="stm-df2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-net1">0</div><div class="sm-label" id="stm-lbl-netcords">М'ячів від сітки</div><div class="sm-val" id="stm-net2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
             <div class="sm-row">
                 <div style="text-align:center;"><div class="sm-val gold" id="stm-time-set">00:00</div><div class="sm-label" id="stm-lbl-set-time">Час сету</div></div>
@@ -699,6 +700,7 @@
             breakpoints: { en: 'Break Points', ua: 'Брейк-поінти' },
             goldenpoints: { en: 'Golden Points', ua: 'Голден-поінти' },
             doublefaults: { en: 'Double Faults', ua: 'Дабл фоли' },
+            netcords: { en: 'Net cord shots', ua: "М'ячів від сітки" },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
@@ -1355,6 +1357,11 @@
                     document.getElementById('stm-df1').innerText = df1; document.getElementById('stm-df2').innerText = df2;
                     document.getElementById('stm-df1').closest('.sm-row').style.display = (df1 === 0 && df2 === 0) ? 'none' : 'grid';
 
+                    const net1 = state.p1NetCords || state.t1_net_cords || 0;
+                    const net2 = state.p2NetCords || state.t2_net_cords || 0;
+                    document.getElementById('stm-net1').innerText = net1; document.getElementById('stm-net2').innerText = net2;
+                    document.getElementById('stm-net1').closest('.sm-row').style.display = (net1 === 0 && net2 === 0) ? 'none' : 'grid';
+
                     let totalGames1 = 0, totalGames2 = 0;
                     for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
                     document.getElementById('stm-g1').innerText = totalGames1; document.getElementById('stm-g2').innerText = totalGames2;
@@ -1368,6 +1375,7 @@
                     document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
                     document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
                     document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
+                    document.getElementById('stm-lbl-netcords').innerText = getStatsLabel('netcords', state);
                     document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
                     document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
 
