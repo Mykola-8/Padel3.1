@@ -1043,8 +1043,18 @@
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 let lim = parseInt(state.superTiebreakLimit) || 10;
-                if (state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
-                else if (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+                if ((state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2))) { 
+                    const curS = state.currentSet || 1;
+                    state[`t1_tb_s${curS}`] = state.p1Index;
+                    state[`t2_tb_s${curS}`] = state.p2Index;
+                    state[`t1_tb_${curS}`] = state.p1Index;
+                    state[`t2_tb_${curS}`] = state.p2Index;
+                    state['t1_s'+state.currentSet] = state.p1Index; 
+                    state['t2_s'+state.currentSet] = state.p2Index; 
+                    state.p1Index = 0; 
+                    state.p2Index = 0; 
+                    state.currentSet++; 
+                }
             } else if (state.isAmericano) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -1075,18 +1085,61 @@
         }
 
         function winGame(winTeam) {
-            const wasTB = !!state.isTiebreak; if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; }
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            if (winTeam !== state.currentServer) { if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; }
+            const wasTB = !!state.isTiebreak; 
+            
+            if (wasTB) {
+                const curS = state.currentSet || 1;
+                const p1Score = state.p1Index || 0;
+                const p2Score = state.p2Index || 0;
+
+                state[`t1_tb_s${curS}`] = p1Score;
+                state[`t2_tb_s${curS}`] = p2Score;
+                state[`t1_tb_${curS}`] = p1Score;
+                state[`t2_tb_${curS}`] = p2Score;
+            }
+
+            if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
+                state[`t1_lg_s${state.currentSet}`] = (state[`t1_lg_s${state.currentSet}`] || 0) + 1; 
+            }
+            
+            state.p1Index = 0; 
+            state.p2Index = 0; 
+            state.isTiebreak = false; 
+            state.deuceCounter = 0;
+
+            if (winTeam !== state.currentServer) { 
+                if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; 
+                else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; 
+            }
+            
             state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
             state['t2_s' + state.currentSet] = (state['t2_s' + state.currentSet] || 0) + (winTeam === 2 ? 1 : 0);
+            
             if(!state.gamesTimeHistory) state.gamesTimeHistory = [];
-            state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); gameStartTimestamp = Date.now();
+            state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); 
+            gameStartTimestamp = Date.now();
+
             let g1 = state['t1_s' + state.currentSet], g2 = state['t2_s' + state.currentSet], isOver = false, lim = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
-            if (state.isProSet) { if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; else if (g1 === lim && g2 === lim) state.isTiebreak = true; }
-            else { if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; else if (g1 === 6 && g2 === 6) state.isTiebreak = true; }
+            
+            if (state.isProSet) { 
+                if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; 
+                else if (g1 === lim && g2 === lim) state.isTiebreak = true; 
+            } else { 
+                if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; 
+                else if (g1 === 6 && g2 === 6) state.isTiebreak = true; 
+            }
+            
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
-            if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
+            
+            if (isOver) { 
+                state.showSetOverlayTrigger = true; 
+                state.lastFinishedSetNum = state.currentSet; 
+                state.currentSet++; 
+                state.p1BreakPoints = 0; 
+                state.p2BreakPoints = 0; 
+                state.gamesTimeHistory = []; 
+            }
+            
             state.completedGamesCount = (state.completedGamesCount || 0) + 1;
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
@@ -1174,7 +1227,6 @@
         }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
 
-        /* ЗБЕРЕЖЕННЯ РАХУНКУ ПРИ ЗМІНІ РЕЖИМІВ ГРИ */
         window.toggleAmericanoMode = function(c) { 
             state.isAmericano = c; 
             if(c) { state.isProSet = false; state.isSuperTiebreak = false; state.isMexicano = false; } 
