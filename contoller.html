@@ -226,9 +226,13 @@
         <div style="display:flex; flex-direction:column; gap:14px;">
             
             <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла (надписом передається на Garmin):</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option>
+                    <option value="gold">GOLD (Золото)</option>
+                    <option value="courtgreen">GREEN (Корт / Салатова)</option>
+                    <option value="graydark">DARK (Сіро-темна)</option>
+                    <option value="lightgray">LIGHT (Світло-сіра)</option>
+                    <option value="transparent">TRANSPARENT (Прозора)</option>
                 </select>
             </div>
 
@@ -548,7 +552,9 @@
                 isMexicano: false, mexicanoLimit: 24,
                 isProSet: false, proSetLimit: 8,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
+                activeMatchRibbon: "NONE", 
+                boardTheme: "gold", theme: "gold", themeName: "gold",
+                cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
@@ -885,7 +891,9 @@
                 isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: false, superTiebreakLimit: state.superTiebreakLimit || 10, 
-                activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
+                activeMatchRibbon: "NONE", 
+                boardTheme: state.boardTheme || "gold", theme: state.boardTheme || "gold", themeName: state.boardTheme || "gold",
+                cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
@@ -905,6 +913,15 @@
         }
 
         function renderUI() {
+            // Оновлюємо тему для годинника Garmin відповідно до обраного варіанту на контролері
+            const currentTheme = state.boardTheme || "gold";
+            state.theme = currentTheme;
+            state.themeName = currentTheme;
+
+            if (document.getElementById('board-theme-selector')) {
+                document.getElementById('board-theme-selector').value = currentTheme;
+            }
+
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             
@@ -1163,7 +1180,12 @@
         window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } }
         window.toggleMainBoard = function() { saveToHistory(state); state.showMainBoard = !state.showMainBoard; set(matchRef, state); }
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); }
-        window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
+        window.updateBoardTheme = function(v) { 
+            state.boardTheme = v; 
+            state.theme = v; 
+            state.themeName = v; 
+            set(matchRef, state); 
+        }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         window.setServer = function(s) { saveToHistory(state); state.currentServer = s; state.serverChangeTrigger = Date.now(); set(matchRef, state); }
         window.setServerSlotManual = function(team, slot) {
