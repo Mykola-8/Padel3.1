@@ -1128,18 +1128,25 @@
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
                     // Отримуємо точні значення очок тайбрейку безпосередньо з Firebase
-                    let tb1Raw = (s === activeSet && state.isTiebreak) ? p1 : (state[`t1_tb_${s}`] ?? state[`t1_tb_s${s}`] ?? state[`tb_${s}_t1`] ?? state[`tb_s${s}_t1`] ?? (s === 1 ? state.t1_tb : null));
-                    let tb2Raw = (s === activeSet && state.isTiebreak) ? p2 : (state[`t2_tb_${s}`] ?? state[`t2_tb_s${s}`] ?? state[`tb_${s}_t2`] ?? state[`tb_s${s}_t2`] ?? (s === 1 ? state.t2_tb : null));
+                    let tb1Raw = (s === activeSet && state.isTiebreak) 
+                        ? p1 
+                        : (state[`t1_tb_s${s}`] ?? state[`t1_tb_${s}`] ?? state[`tb_s${s}_t1`] ?? state[`tb_${s}_t1`] ?? (s === 1 ? state.t1_tb : null));
+                        
+                    let tb2Raw = (s === activeSet && state.isTiebreak) 
+                        ? p2 
+                        : (state[`t2_tb_s${s}`] ?? state[`t2_tb_${s}`] ?? state[`tb_s${s}_t2`] ?? state[`tb_${s}_t2`] ?? (s === 1 ? state.t2_tb : null));
 
                     let hasTb1 = (tb1Raw !== null && tb1Raw !== undefined && tb1Raw !== '');
                     let hasTb2 = (tb2Raw !== null && tb2Raw !== undefined && tb2Raw !== '');
 
-                    // Якщо сет дійшов до тайбрейку або завершився з тайбрейком (6:6, 7:6, 6:7)
-                    if ((g1 === 6 && g2 === 6) || (g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7)) {
+                    // Перевіряємо, чи сет тайбрейковий (6:6 під час гри, або 7:6 / 6:7 після завершення)
+                    const isTiebreakSet = (g1 === 6 && g2 === 6) || (g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7);
+
+                    if (isTiebreakSet) {
+                        // Чітко відображаємо точні збережені цифри тайбрейку без жодних математичних обчислень
                         box1.innerHTML = hasTb1 ? `${g1}<span class="set-tb-score">${tb1Raw}</span>` : g1;
                         box2.innerHTML = hasTb2 ? `${g2}<span class="set-tb-score">${tb2Raw}</span>` : g2;
                     } 
-                    // Звичайний рахунок сету без тайбрейку
                     else {
                         box1.innerText = g1;
                         box2.innerText = g2;
