@@ -31,6 +31,7 @@
         .btn-orange-fault { background: linear-gradient(to bottom, #ea580c, #b91c1c) !important; color: white !important; border: 1px solid #ff781f !important; }
         .btn-purple-net { background: linear-gradient(to bottom, #7c3aed, #5b21b6) !important; color: white !important; border: 1px solid #a78bfa !important; }
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
+        .net-cord-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn span { font-size: 56px; font-weight: 900; }
         .serve-box { display: flex; gap: 10px; width: 100%; }
@@ -121,7 +122,11 @@
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
-        <button class="btn btn-purple-net btn-large-action" onclick="triggerNetCordShot()">🕸 М'ЯЧ ВІД СІТКИ (NET CORD SHOT)</button>
+        <div class="net-cord-grid">
+            <button class="btn btn-purple-net" id="btn-net-cord-1" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerNetCordShot(1)">🕸 ВІД СІТКИ (К1)</button>
+            <button class="btn btn-purple-net" id="btn-net-cord-2" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerNetCordShot(2)">🕸 ВІД СІТКИ (К2)</button>
+        </div>
+
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
@@ -926,7 +931,15 @@
                 document.getElementById('board-theme-selector').value = currentTheme;
             }
 
-            document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
+            const p1Text = state.p1name && state.p1name.trim() !== "" ? state.p1name : "Команда 1";
+            const p2Text = state.p2name && state.p2name.trim() !== "" ? state.p2name : "Команда 2";
+
+            document.getElementById('lbl-p1').innerText = p1Text; 
+            document.getElementById('lbl-p2').innerText = p2Text;
+
+            document.getElementById('btn-net-cord-1').innerText = `🕸 ВІД СІТКИ (${p1Text})`;
+            document.getElementById('btn-net-cord-2').innerText = `🕸 ВІД СІТКИ (${p2Text})`;
+
             renderServerSlotPickers();
             
             document.getElementById('srv-btn-1').classList.toggle('active', state.currentServer === 1);
@@ -1180,20 +1193,21 @@
             state.serverChangeTrigger = Date.now();
         }
 
-        window.triggerNetCordShot = function() {
+        window.triggerNetCordShot = function(team) {
             if (state.isMatchFinished) return;
             if (isControllerLocked()) return;
             saveToHistory(state);
-            const scoringTeam = state.currentServer || 1;
-            if (scoringTeam === 1) {
+            
+            const targetTeam = team || state.currentServer || 1;
+            if (targetTeam === 1) {
                 state.p1NetCords = (state.p1NetCords || 0) + 1;
                 state.t1_net_cords = state.p1NetCords;
             } else {
                 state.p2NetCords = (state.p2NetCords || 0) + 1;
                 state.t2_net_cords = state.p2NetCords;
             }
-            state.animation = { team: scoringTeam, type: 'net_cord', ts: Date.now() };
-            window.scorePointWithoutHistorySave(scoringTeam);
+            state.animation = { team: targetTeam, type: 'net_cord', ts: Date.now() };
+            window.scorePointWithoutHistorySave(targetTeam);
         }
 
         window.triggerServerDoubleFault = function() { if (state.isMatchFinished) return; saveToHistory(state); const s = state.currentServer || 1; if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1; else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1; state.animation = { team: s, type: 'double_fault', ts: Date.now() }; window.scorePointWithoutHistorySave(s === 1 ? 2 : 1); }
