@@ -90,6 +90,7 @@
         <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
     </nav>
 
+    <!-- Вкладка ПУЛЬТ -->
     <div id="tab-remote" class="tab-content active">
         <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px;">
             <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
@@ -107,6 +108,7 @@
 
         <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
 
+        <!-- Попередній перегляд табло -->
         <div class="preview-scoreboard">
             <div class="preview-row">
                 <div class="preview-name-block"><span id="pr-name1">Команда A</span><span class="preview-srv" id="pr-srv1">🎾</span></div>
@@ -118,16 +120,19 @@
             </div>
         </div>
 
+        <!-- Кнопки швидкого нарахування очок -->
         <div class="score-grid">
             <button class="score-btn btn-green" id="btn-team-1" onclick="scorePoint(1)"><small id="lbl-p1">Команда 1</small><span id="view-p1-pts">0</span></button>
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
+        <!-- Кнопки дій: М'яч від сітки -->
         <div class="net-cord-grid">
             <button class="btn btn-purple-net" id="btn-net-cord-1" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerNetCordShot(1)">🕸 ВІД СІТКИ (К1)</button>
             <button class="btn btn-purple-net" id="btn-net-cord-2" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerNetCordShot(2)">🕸 ВІД СІТКИ (К2)</button>
         </div>
 
+        <!-- Кнопки дій: Смеш на виліт -->
         <div class="net-cord-grid">
             <button class="btn btn-amber-smash" id="btn-smash-1" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerSmashWinner(1)">💥 СМЕШ (К1)</button>
             <button class="btn btn-amber-smash" id="btn-smash-2" style="padding:14px 8px; font-weight:800; font-size:11px;" onclick="triggerSmashWinner(2)">💥 СМЕШ (К2)</button>
@@ -152,6 +157,7 @@
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:12px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         </div>
 
+        <!-- Панель керування камерами для Admin -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
@@ -167,6 +173,7 @@
         </div>
     </div>
 
+    <!-- Вкладка ІСТОРІЯ -->
     <div id="tab-history" class="tab-content">
         <h2>📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
@@ -174,6 +181,7 @@
         </div>
     </div>
 
+    <!-- Вкладка ГРАВЦІ -->
     <div id="tab-players" class="tab-content">
         <h2>📊 База та статистика гравців</h2>
         <div class="card">
@@ -182,6 +190,7 @@
         <div id="players-container" style="display:flex; flex-direction:column; gap:10px; margin-top:5px;"></div>
     </div>
 
+    <!-- Вкладка ПРОФІЛЬ -->
     <div id="tab-profile" class="tab-content">
         <h2>👤 Налаштування профілю користувача</h2>
         <div class="card" style="display:flex; flex-direction:column; gap:10px;">
@@ -217,13 +226,15 @@
         </div>
     </div>
 
-    <!-- Модальне вікно налаштувань -->
+    <!-- МОДАЛЬНЕ ВІКНО НАЛАШТУВАНЬ (ПОВНЕ) -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
             <div class="modal-title">⚙️ Налаштування корту</div>
             <button class="modal-close-btn" onclick="closeModalSettings()">Закрити</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:14px;">
+            
+            <!-- Тема -->
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла (надписом передається на Garmin):</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
@@ -234,10 +245,158 @@
                     <option value="transparent">TRANSPARENT (Прозора)</option>
                 </select>
             </div>
-            <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+
+            <!-- Команди та Подача -->
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
+                <div class="row">
+                    <input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)">
+                    <input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)">
+                </div>
+                <div style="font-size:9px; color:#888; margin-top:4px; margin-bottom:10px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро".</div>
+
+                <div class="switch-row" style="background: rgba(198,159,102,0.15); padding:10px; border-radius:6px; margin-bottom:10px;">
+                    <div style="display:flex; flex-direction:column; gap:2px;">
+                        <span style="font-size:12px; font-weight:800; color:#c69f66;">Показувати слайд "ПОДАЄ" на трансляції:</span>
+                        <span style="font-size:9px; color:#aaa;">Вмикає висувний банер зліва знизу при зміні подаючої команди або гравця</span>
+                    </div>
+                    <input type="checkbox" id="show-server-name-checkbox" style="width:22px; height:22px;" onchange="toggleShowServerName(this.checked)">
+                </div>
+
+                <div style="font-size:10px; font-weight:800; color:#c69f66; margin-bottom:6px; text-transform:uppercase;">Вибір подаючої команди:</div>
+                <div class="serve-box" style="margin-bottom:10px;">
+                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+                </div>
+
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
+                <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
+
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді B (на початку гейму):</div>
+                <div class="row" id="server-slot-picker-2" style="gap:6px;"></div>
+            </div>
+
+            <!-- Режими гри -->
+            <div class="card">
+                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
+                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
+                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
+                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
+                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
+                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
+                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
+                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
+            </div>
+
+            <!-- Правила 40:40 -->
+            <div class="card">
+                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
+                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
+                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
+                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
+            </div>
+
+            <!-- QR-код та Скидання -->
+            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
+                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
+                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
+                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+            </div>
+
+            <!-- Лого спонсора -->
+            <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
+                <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#e0b878;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="logo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleLogoVisibility(this.checked)">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання на зображення (URL):</span>
+                        <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
+                    </div>
+                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл:</span>
+                        <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
+                            📁 Вибрати зображення лого
+                            <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
+                        </label>
+                        <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
+                    </div>
+                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
+                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого:</span>
+                        <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
+                    </div>
+                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
+                </div>
+            </div>
+
+            <!-- Інформаційна панель під табло -->
+            <div class="card" style="border: 2px solid #f472b6; background: #241019;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло</div>
+                <div class="switch-row" style="background: rgba(244,114,182,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
+                </div>
+                <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <!-- Логотипи спонсорів (карусель) -->
+            <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель)</div>
+                <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
+                    <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
+                </div>
+                <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
+                <div class="row"><span>Позиція X:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
+                <div class="row"><span>Режим показу:</span>
+                    <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
+                        <option value="carousel">Карусель (по черзі)</option>
+                        <option value="all">Всі одразу (в ряд)</option>
+                    </select>
+                </div>
+                <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
+                <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
+            </div>
+
+            <!-- Масштабування та позиція -->
+            <div class="card">
+                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
+                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
+                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
+            </div>
+
+            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+
+            <!-- Повноекранна Медіа-Заставка -->
+            <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
+                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
+                <div class="switch-row" style="background: rgba(124, 58, 237, 0.2); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+                    <span style="font-size:13px; font-weight:800; color: #a78bfa;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
+                    <input type="checkbox" id="promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleFullscreenPromo(this.checked)">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
+                    </div>
+                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
+                        <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
+                            📁 Вибрати Фото чи короткий Відеоролик
+                            <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
+                        </label>
+                        <div id="promo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
+                    </div>
+                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    <!-- JavaScript Модуль -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -334,7 +493,7 @@
             set(matchRef, state);
         };
 
-        // Ручний перемикач статистики для OBS
+        // Ручна статистика OBS
         window.toggleStatsManual = function() {
             if (isControllerLocked()) return;
             saveToHistory(state);
@@ -342,7 +501,7 @@
             set(matchRef, state);
         };
 
-        // Автоматична статистика між геймами
+        // Авто статистика
         window.toggleStatsBetweenGames = function(checked) {
             if (isControllerLocked()) return;
             saveToHistory(state);
@@ -350,7 +509,7 @@
             set(matchRef, state);
         };
 
-        // Кнопки дій: Від сітки
+        // Дія: Від сітки
         window.triggerNetCordShot = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             saveToHistory(state);
@@ -360,7 +519,7 @@
             window.scorePointWithoutHistorySave(targetTeam);
         };
 
-        // Кнопки дій: Смеш
+        // Дія: Смеш
         window.triggerSmashWinner = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             saveToHistory(state);
@@ -379,12 +538,57 @@
             window.scorePointWithoutHistorySave(s === 1 ? 2 : 1);
         };
 
+        // Допоміжні функції налаштувань
+        window.liveUpdateName = function(team, name) {
+            if (team === 1) state.p1name = name; else state.p2name = name;
+            set(matchRef, state);
+        };
+        window.setServer = function(srv) { state.currentServer = srv; set(matchRef, state); };
+        window.toggleShowServerName = function(v) { state.showServerNameOnOverlay = !!v; set(matchRef, state); };
+        window.updateBoardTheme = function(v) { state.boardTheme = v; state.theme = v; set(matchRef, state); };
+        window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); };
+        window.changeDeuceStyle = function(style) { state.deuceStyle = style; set(matchRef, state); };
+        window.toggleAmericanoMode = function(v) { state.isAmericano = !!v; set(matchRef, state); };
+        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v) || 21; set(matchRef, state); };
+        window.toggleMexicanoMode = function(v) { state.isMexicano = !!v; set(matchRef, state); };
+        window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); };
+        window.toggleProSetMode = function(v) { state.isProSet = !!v; set(matchRef, state); };
+        window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v) || 8; set(matchRef, state); };
+        window.toggleSuperTiebreakMode = function(v) { state.isSuperTiebreak = !!v; set(matchRef, state); };
+        window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v) || 10; set(matchRef, state); };
+        window.toggleQrCodeVisibility = function(v) { state.showQrCode = !!v; set(matchRef, state); };
+        window.updateQrCodeUrl = function(v) { state.qrCodeUrl = v; set(matchRef, state); };
+        window.updateQrDescription = function(v) { state.qrCodeDescription = v; set(matchRef, state); };
+        window.toggleLogoVisibility = function(v) { state.showLogo = !!v; set(matchRef, state); };
+        window.updateLogoUrl = function(v) { state.logoUrl = v; state.logoSrc = v; set(matchRef, state); };
+        window.updateLogoText = function(v) { state.customLogoText = v; set(matchRef, state); };
+        window.clearLogoData = function() { state.logoUrl = ""; state.logoSrc = ""; state.customLogoText = ""; set(matchRef, state); };
+        window.toggleSponsorLogos = function(v) { state.showSponsorLogos = !!v; set(matchRef, state); };
+        window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
+        window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
+        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
+        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
+        window.updateScale = function(v) { state.scale = parseFloat(v) || 1; set(matchRef, state); };
+        window.updatePosition = function() {
+            state.posX = parseInt(document.getElementById('pos-x-slider').value) || 0;
+            state.posY = parseInt(document.getElementById('pos-y-slider').value) || 0;
+            set(matchRef, state);
+        };
+        window.toggleFullscreenPromo = function(v) { state.showFullscreenPromo = !!v; set(matchRef, state); };
+        window.updatePromoUrl = function(v) { state.promoUrl = v; state.promoSrc = v; set(matchRef, state); };
+        window.clearPromoData = function() { state.promoUrl = ""; state.promoSrc = ""; set(matchRef, state); };
+
         function saveToHistory(s) { stateHistory.push(JSON.parse(JSON.stringify(s))); if (stateHistory.length > 30) stateHistory.shift(); }
         window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } };
         window.toggleMainBoard = function() { saveToHistory(state); state.showMainBoard = !state.showMainBoard; set(matchRef, state); };
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); };
-        window.updateBoardTheme = function(v) { state.boardTheme = v; state.theme = v; set(matchRef, state); };
-        window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); };
+        window.resetMatch = function() {
+            if (confirm("Повностю скинути корт?")) {
+                state.p1Index = 0; state.p2Index = 0; state.currentSet = 1; state.isMatchFinished = false;
+                for (let s = 1; s <= 5; s++) { state[`t1_s${s}`] = 0; state[`t2_s${s}`] = 0; }
+                set(matchRef, state);
+            }
+        };
 
         function renderUI() {
             const p1Text = state.p1name && state.p1name.trim() !== "" ? state.p1name : "Команда 1";
