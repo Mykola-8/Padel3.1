@@ -143,27 +143,13 @@
             <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
         </div>
 
+        <!-- Керування статистикою OBS -->
         <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
             <div class="switch-row">
                 <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
-            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
-                <div class="switch-row">
-                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
-                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
-                </div>
-                <div class="row" style="margin-top:6px;">
-                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
-                </div>
-                <div class="row" style="margin-top:6px; align-items:center;">
-                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
-                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
-                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
-                </div>
-            </div>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:12px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         </div>
 
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
@@ -222,15 +208,16 @@
 
         <h2>🚨 Глобальне керування базою даних</h2>
         <div class="card" style="border: 1px solid #ea580c; background: #1a1508; display:flex; flex-direction:column; gap:10px;">
-            <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану: назви команд, рахунки, логотипи, зображення-заставки та анімації. Структура бази (самі корти) лишається — просто весь вміст очищається.</p>
+            <p style="font-size:11px; color:#ffc98a; margin:0; line-height:1.4;">Скидає КОЖЕН з 10 кортів до чистого стану.</p>
             <button class="btn" style="padding:14px; font-weight:800; background:#ea580c; color:#fff;" onclick="resetAllCourts()">🔄 СКИНУТИ ВСІ 10 КОРТІВ ДО ЧИСТОГО СТАНУ</button>
         </div>
         <div class="card" style="border: 1px solid #b91c1c; background: #1a1010; display:flex; flex-direction:column; gap:10px;">
-            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Кнопка нижче повністю очистить усю вашу базу даних Firebase.</p>
+            <p style="font-size:11px; color:#ffa3a3; margin:0; line-height:1.4;">Повністю очистити усю вашу базу даних Firebase.</p>
             <button class="btn btn-red" style="padding:14px; font-weight:800;" onclick="hardResetAllFirebase()">💥 ПОВНЕ ОЧИЩЕННЯ ВСЬОГО (FIREBASE RESET)</button>
         </div>
     </div>
 
+    <!-- Модальне вікно налаштувань -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
             <div class="modal-title">⚙️ Налаштування корту</div>
@@ -247,141 +234,7 @@
                     <option value="transparent">TRANSPARENT (Прозора)</option>
                 </select>
             </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
-                <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
-                <div style="font-size:9px; color:#888; margin-top:4px; margin-bottom:10px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро".</div>
-
-                <div class="switch-row" style="background: rgba(198,159,102,0.15); padding:10px; border-radius:6px; margin-bottom:10px;">
-                    <div style="display:flex; flex-direction:column; gap:2px;">
-                        <span style="font-size:12px; font-weight:800; color:#c69f66;">Показувати слайд "ПОДАЄ" на трансляції:</span>
-                        <span style="font-size:9px; color:#aaa;">Вмикає висувний банер зліва знизу при зміні подаючої команди або гравця</span>
-                    </div>
-                    <input type="checkbox" id="show-server-name-checkbox" style="width:22px; height:22px;" onchange="toggleShowServerName(this.checked)">
-                </div>
-
-                <div style="font-size:10px; font-weight:800; color:#c69f66; margin-bottom:6px; text-transform:uppercase;">Вибір подаючої команди:</div>
-                <div class="serve-box" style="margin-bottom:10px;">
-                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-                </div>
-
-                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
-                <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
-
-                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді B (на початку гейму):</div>
-                <div class="row" id="server-slot-picker-2" style="gap:6px;"></div>
-            </div>
-
-            <div class="card">
-                <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
-                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
-                <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
-                <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
-                <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
-                <div class="row" id="proset-limit-row" style="display:none;"><span>Геймів:</span><input type="number" id="s-proset-limit" value="8" onchange="updateProSetLimit(this.value)"></div>
-                <div class="switch-row"><span>Супер-тайбрейк:</span><input type="checkbox" id="mode-supertb-checkbox" onchange="toggleSuperTiebreakMode(this.checked)"></div>
-                <div class="row" id="supertb-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-supertb-limit" value="10" onchange="updateSuperTiebreakLimit(this.value)"></div>
-            </div>
-
-            <div class="card">
-                <div style="font-size:11px; font-weight:700;">Тип розіграшу при 40:40:</div>
-                <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
-                <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
-                <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:10px;">
-                <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-            </div>
-
-            <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#e0b878; text-transform:uppercase;">🏷️ Лого спонсора (виїжджає зліва від табло)</div>
-                <div class="switch-row" style="background: rgba(198,159,102,0.18); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#e0b878;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="logo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleLogoVisibility(this.checked)">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div>
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання на зображення (URL):</span>
-                        <input type="text" id="logo-url-input" placeholder="https://site.com/logo.png" style="width:100%; box-sizing:border-box;" onchange="updateLogoUrl(this.value)">
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 2. Завантажити файл (120×96):</span>
-                        <label class="btn" style="display:block; text-align:center; background:#5a4528; padding:10px;">
-                            📁 Вибрати зображення лого
-                            <input type="file" accept="image/*" style="display:none" onchange="uploadAndCompressLogoFile(event)">
-                        </label>
-                        <div id="logo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top:8px; margin-top:4px;">
-                        <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Текст замість лого:</span>
-                        <input type="text" id="logo-text-input" placeholder="QATAR AIRWAYS" onchange="updateLogoText(this.value)">
-                    </div>
-                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
-                </div>
-            </div>
-
-            <div class="card" style="border: 2px solid #f472b6; background: #241019;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло</div>
-                <div class="switch-row" style="background: rgba(244,114,182,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#f9a8d4;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="board-promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleBoardPromoPanel(this.checked)">
-                </div>
-                <div id="board-promo-lines-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-            </div>
-
-            <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель)</div>
-                <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
-                    <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
-                </div>
-                <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
-                <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
-                <div class="row"><span>Режим показу:</span>
-                    <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
-                        <option value="carousel">Карусель (по черзі)</option>
-                        <option value="all">Всі одразу (в ряд)</option>
-                    </select>
-                </div>
-                <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
-                <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
-            </div>
-
-            <div class="card">
-                <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
-                <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
-                <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
-            </div>
-
-            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-
-            <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
-                <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
-                <div class="switch-row" style="background: rgba(124, 58, 237, 0.2); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
-                    <span style="font-size:13px; font-weight:800; color: #a78bfa;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
-                    <input type="checkbox" id="promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleFullscreenPromo(this.checked)">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div>
-                        <input type="text" id="promo-url-input" placeholder="https://site.com/video.mp4" style="width:100%; box-sizing:border-box;" oninput="updatePromoUrl(this.value)">
-                    </div>
-                    <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
-                        <label class="btn" style="display:block; text-align:center; background:#4c1d95; padding:10px;">
-                            📁 Вибрати Фото чи короткий Відеоролик
-                            <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadAndCompressPromoFile(event)">
-                        </label>
-                        <div id="promo-file-status" style="font-size:11px; color:#c69f66; text-align:center; margin-top:5px; font-weight:700;">Файл не вибрано</div>
-                    </div>
-                    <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearPromoData()">Скинути заставку</button>
-                </div>
-            </div>
+            <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
         </div>
     </div>
 
@@ -399,10 +252,11 @@
             appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
         };
 
-        const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig); 
+        const db = getDatabase(app);
         let courtId = "1", databasePath = `padel/courts/court_${courtId}`, matchRef = ref(db, databasePath), unsubscribeCurrentOnValue = null;
         const pointSequence = ['0', '15', '30', '40', 'AD'];
-        let state = {}, stateHistory = [], gameStartTimestamp = Date.now(), allPlayersData = {};
+        let state = {}, stateHistory = [], allPlayersData = {};
 
         let mySessionId = localStorage.getItem('padel_session_id');
         if (!mySessionId) {
@@ -437,7 +291,9 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
         };
 
         window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); };
@@ -449,94 +305,13 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; renderUI(); }
             });
         }
+
         window.switchCourt = function(v) {
             const nUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?court=' + v;
             window.history.pushState({ path: nUrl }, '', nUrl); initCourtConnection();
-        };
-
-        onValue(ref(db, 'padel/history'), (snapshot) => {
-            const historyData = snapshot.val(); const container = document.getElementById('history-container');
-            if (!historyData) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія порожня.</div>'; return; }
-            container.innerHTML = '';
-            Object.keys(historyData).reverse().forEach(key => {
-                const m = historyData[key]; const card = document.createElement('div'); card.className = 'match-card';
-                card.innerHTML = `<div class="match-card-header"><span>Корт №${m.courtId || 1} • ${m.date || ''}</span><button class="btn btn-red" style="padding:4px 8px; font-size:9px;" onclick="deleteMatchHistory('${key}')">Видалити 🗑</button></div><div class="match-card-teams"><span>${m.p1name}</span><span>vs</span><span>${m.p2name}</span></div><div class="match-card-scores">Рахунок по сетам: ${m.scoreLine || '0:0'}</div>`;
-                container.appendChild(card);
-            });
-        });
-
-        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
-
-        function renderPlayersList(playersObj) {
-            const container = document.getElementById('players-container');
-            if (Object.keys(playersObj).length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Гравців не знайдено.</div>'; return; }
-            container.innerHTML = '';
-            Object.keys(playersObj).forEach(key => {
-                const p = playersObj[key]; const item = document.createElement('div'); item.className = 'player-list-item';
-                item.innerHTML = `<div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats-mini">Рука: ${p.hand || 'Права'} | Матчів: ${p.matchesPlayed || 0} (В: ${p.wins || 0})</div></div><button class="btn btn-red" style="padding:5px 10px; font-size:10px;" onclick="deletePlayer('${key}')">❌</button>`;
-                container.appendChild(item);
-            });
-        }
-
-        window.filterPlayers = function(query) {
-            if (!query) { renderPlayersList(allPlayersData); return; }
-            const filtered = {};
-            Object.keys(allPlayersData).forEach(k => { if (allPlayersData[k].name && allPlayersData[k].name.toLowerCase().includes(query.toLowerCase())) filtered[k] = allPlayersData[k]; });
-            renderPlayersList(filtered);
-        };
-
-        window.deleteMatchHistory = function(key) { if (confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); };
-        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); };
-
-        window.createNewPlayer = function() {
-            const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
-            if (!name) { alert("Введіть ім'я."); return; }
-            push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
-            document.getElementById('new-player-name').value = '';
-        };
-
-        window.saveProfileData = function() {
-            localStorage.setItem('padel_org_name', document.getElementById('profile-name').value);
-            localStorage.setItem('padel_org_club', document.getElementById('profile-club').value);
-            alert("Збережено!");
-        };
-
-        window.hardResetAllFirebase = function() {
-            if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
-                remove(ref(db, 'padel')).then(() => window.location.reload());
-            }
-        };
-
-        window.resetAllCourts = function() {
-            if (!confirm("🔄 Скинути ВСІ 10 кортів до чистого стану?")) return;
-            const freshCourtState = {
-                p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
-                showServerNameOnOverlay: true, scale: 1, posX: 30, posY: 30, isTiebreak: false, isAmericano: false, americanoLimit: 21,
-                isMexicano: false, mexicanoLimit: 24, isProSet: false, proSetLimit: 8, isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: "gold", theme: "gold", themeName: "gold", cornerSlideLang: "en", deuceStyle: "classic",
-                deuceCounter: 0, p1DoubleFaults: 0, p2DoubleFaults: 0, p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
-                p1NetCords: 0, p2NetCords: 0, t1_net_cords: 0, t2_net_cords: 0, p1Smashes: 0, p2Smashes: 0, t1_smashes: 0, t2_smashes: 0,
-                showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, cameraCommand: { key: "", ts: 0 },
-                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false, logoUrl: "", logoSrc: "",
-                customLogoText: "", showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4, sponsorLogos: new Array(10).fill(""),
-                sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0, showBoardPromoPanel: false,
-                boardPromoLines: new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })), showMainBoard: true,
-                showBreak: false, showQrCode: false, qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME", isMatchFinished: false,
-                showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, promoText: "", promoTypeIsText: false,
-                promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false, t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
-            };
-
-            const writes = [];
-            for (let i = 1; i <= 10; i++) {
-                writes.push(set(ref(db, 'padel/courts/court_' + i), freshCourtState));
-            }
-            Promise.all(writes).then(() => {
-                alert("✅ Усі 10 кортів скинуто до чистого стану.");
-                window.location.reload();
-            });
         };
 
         window.scorePoint = function(team) {
@@ -549,110 +324,49 @@
         };
 
         window.scorePointWithoutHistorySave = function(tIndex) {
-            if (state.isSuperTiebreak) {
-                if (tIndex === 1) state.p1Index++; else state.p2Index++;
-                if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                let lim = parseInt(state.superTiebreakLimit) || 10;
-                if ((state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2))) { 
-                    const curS = state.currentSet || 1;
-                    state[`t1_tb_s${curS}`] = state.p1Index; state[`t2_tb_s${curS}`] = state.p2Index;
-                    state['t1_s'+state.currentSet] = state.p1Index; state['t2_s'+state.currentSet] = state.p2Index; 
-                    state.p1Index = 0; state.p2Index = 0; state.currentSet++; 
-                }
-            } else if (state.isAmericano) {
-                if (tIndex === 1) state.p1Index++; else state.p2Index++;
-                if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
-            } else if (state.isMexicano) {
-                if (tIndex === 1) state.p1Index++; else state.p2Index++;
-                if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
-            } else if (state.isTiebreak) {
-                if (tIndex === 1) state.p1Index++; else state.p2Index++;
-                if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
-                else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) winGame(2);
+            if (tIndex === 1) {
+                if (state.p1Index === 3) state.p1Index = 4;
+                else state.p1Index = (state.p1Index || 0) + 1;
             } else {
-                let style = state.deuceStyle || "one-golden";
-                if (tIndex === 1) {
-                    if (state.p1Index === 3 && state.p2Index === 3) { if (style === "one-golden" || (style === "double" && (state.deuceCounter||0) >= 2)) winGame(1); else state.p1Index = 4; }
-                    else if (state.p1Index === 3 && state.p2Index === 4) { state.p2Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
-                    else if (state.p1Index === 4 || (state.p1Index === 3 && state.p2Index < 3)) winGame(1);
-                    else state.p1Index++;
-                } else {
-                    if (state.p2Index === 3 && state.p1Index === 3) { if (style === "one-golden" || (style === "double" && (state.deuceCounter||0) >= 2)) winGame(2); else state.p2Index = 4; }
-                    else if (state.p2Index === 3 && state.p1Index === 4) { state.p1Index = 3; state.deuceCounter = (state.deuceCounter || 0) + 1; }
-                    else if (state.p2Index === 4 || (state.p2Index === 3 && state.p1Index < 3)) winGame(2);
-                    else state.p2Index++;
-                }
+                if (state.p2Index === 3) state.p2Index = 4;
+                else state.p2Index = (state.p2Index || 0) + 1;
             }
-            recalculateRibbons(state); set(matchRef, state);
+            set(matchRef, state);
         };
 
-        function winGame(winTeam) {
-            const wasTB = !!state.isTiebreak; 
-            if (wasTB) {
-                const curS = state.currentSet || 1;
-                state[`t1_tb_s${curS}`] = state.p1Index || 0;
-                state[`t2_tb_s${curS}`] = state.p2Index || 0;
-            }
-            if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
-                state[`t1_lg_s${state.currentSet}`] = (state[`t1_lg_s${state.currentSet}`] || 0) + 1; 
-            }
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            if (winTeam !== state.currentServer) { 
-                if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; 
-                else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; 
-            }
-            state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
-            state['t2_s' + state.currentSet] = (state['t2_s' + state.currentSet] || 0) + (winTeam === 2 ? 1 : 0);
-            
-            let g1 = state['t1_s' + state.currentSet], g2 = state['t2_s' + state.currentSet], isOver = false, lim = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
-            if (state.isProSet) { 
-                if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; 
-                else if (g1 === lim && g2 === lim) state.isTiebreak = true; 
-            } else { 
-                if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; 
-                else if (g1 === 6 && g2 === 6) state.isTiebreak = true; 
-            }
-            state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
-            if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; }
-            state.completedGamesCount = (state.completedGamesCount || 0) + 1;
-            
-            const curServer = state.currentServer || 1;
-            if (curServer === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; state.currentServer = 2; }
-            else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; state.currentServer = 1; }
-            state.serverChangeTrigger = Date.now();
-        }
+        // Ручний перемикач статистики для OBS
+        window.toggleStatsManual = function() {
+            if (isControllerLocked()) return;
+            saveToHistory(state);
+            state.showStatsOverlay = !state.showStatsOverlay;
+            set(matchRef, state);
+        };
 
-        // КНОПКИ ВІД СІТКИ (NET CORD)
+        // Автоматична статистика між геймами
+        window.toggleStatsBetweenGames = function(checked) {
+            if (isControllerLocked()) return;
+            saveToHistory(state);
+            state.showStatsBetweenGames = !!checked;
+            set(matchRef, state);
+        };
+
+        // Кнопки дій: Від сітки
         window.triggerNetCordShot = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             saveToHistory(state);
             const targetTeam = team || state.currentServer || 1;
-            if (targetTeam === 1) {
-                state.p1NetCords = (state.p1NetCords || 0) + 1;
-                state.t1_net_cords = state.p1NetCords;
-            } else {
-                state.p2NetCords = (state.p2NetCords || 0) + 1;
-                state.t2_net_cords = state.p2NetCords;
-            }
-            state.animation = { team: targetTeam, type: 'net_cord', ts: Date.now() };
+            if (targetTeam === 1) state.p1NetCords = (state.p1NetCords || 0) + 1;
+            else state.p2NetCords = (state.p2NetCords || 0) + 1;
             window.scorePointWithoutHistorySave(targetTeam);
         };
 
-        // КНОПКИ СМЕШ НА ВИЛІТ (SMASH WINNER)
+        // Кнопки дій: Смеш
         window.triggerSmashWinner = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             saveToHistory(state);
             const targetTeam = team || state.currentServer || 1;
-            if (targetTeam === 1) {
-                state.p1Smashes = (state.p1Smashes || 0) + 1;
-                state.t1_smashes = state.p1Smashes;
-            } else {
-                state.p2Smashes = (state.p2Smashes || 0) + 1;
-                state.t2_smashes = state.p2Smashes;
-            }
-            state.animation = { team: targetTeam, type: 'smash_winner', ts: Date.now() };
+            if (targetTeam === 1) state.p1Smashes = (state.p1Smashes || 0) + 1;
+            else state.p2Smashes = (state.p2Smashes || 0) + 1;
             window.scorePointWithoutHistorySave(targetTeam);
         };
 
@@ -662,7 +376,6 @@
             const s = state.currentServer || 1;
             if (s === 1) state.p1DoubleFaults = (state.p1DoubleFaults || 0) + 1;
             else state.p2DoubleFaults = (state.p2DoubleFaults || 0) + 1;
-            state.animation = { team: s, type: 'double_fault', ts: Date.now() };
             window.scorePointWithoutHistorySave(s === 1 ? 2 : 1);
         };
 
@@ -670,7 +383,7 @@
         window.undoAction = function() { if (stateHistory.length > 0) { state = stateHistory.pop(); set(matchRef, state); } };
         window.toggleMainBoard = function() { saveToHistory(state); state.showMainBoard = !state.showMainBoard; set(matchRef, state); };
         window.toggleBreak = function() { saveToHistory(state); state.showBreak = !state.showBreak; set(matchRef, state); };
-        window.updateBoardTheme = function(v) { state.boardTheme = v; state.theme = v; state.themeName = v; set(matchRef, state); };
+        window.updateBoardTheme = function(v) { state.boardTheme = v; state.theme = v; set(matchRef, state); };
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); };
 
         function renderUI() {
@@ -686,40 +399,32 @@
             document.getElementById('btn-smash-1').innerText = `💥 СМЕШ (${p1Text})`;
             document.getElementById('btn-smash-2').innerText = `💥 СМЕШ (${p2Text})`;
 
-            if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
-                document.getElementById('view-p1-pts').innerText = state.p1Index; document.getElementById('view-p2-pts').innerText = state.p2Index;
-            } else {
-                document.getElementById('view-p1-pts').innerText = state.p1Index === 4 ? "AD" : (state.p2Index === 4 ? "" : pointSequence[state.p1Index]);
-                document.getElementById('view-p2-pts').innerText = state.p2Index === 4 ? "AD" : (state.p1Index === 4 ? "" : pointSequence[state.p2Index]);
-            }
+            document.getElementById('view-p1-pts').innerText = pointSequence[state.p1Index] || "0";
+            document.getElementById('view-p2-pts').innerText = pointSequence[state.p2Index] || "0";
 
             document.getElementById('pr-name1').innerText = state.p1name || "Команда A"; 
             document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
             document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1); 
             document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
 
-            for (let s = 1; s <= 5; s++) {
-                document.getElementById('pr-t1-s' + s).innerText = state['t1_s' + s] || 0; 
-                document.getElementById('pr-t2-s' + s).innerText = state['t2_s' + s] || 0;
+            const btnStats = document.getElementById('btn-toggle-stats');
+            if (btnStats) {
+                if (state.showStatsOverlay) {
+                    btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS";
+                    btnStats.style.background = "#b91c1c";
+                } else {
+                    btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)";
+                    btnStats.style.background = "#15803d";
+                }
             }
+
+            const chkStats = document.getElementById('mode-stats-between-games-checkbox');
+            if (chkStats) chkStats.checked = !!state.showStatsBetweenGames;
 
             const lockedOut = isControllerLocked();
             document.getElementById('tab-remote').classList.toggle('controls-locked', lockedOut);
             document.getElementById('settings-modal').classList.toggle('controls-locked', lockedOut);
             document.getElementById('lock-status-badge').classList.toggle('visible', lockedOut);
-        }
-
-        function recalculateRibbons(s) {
-            if (s.isAmericano || s.isMexicano || s.isSuperTiebreak) { s.activeMatchRibbon = "NONE"; return; }
-            if (!!s.isTiebreak) { s.activeMatchRibbon = (s.p1Index >= 6 && s.p1Index>s.p2Index) || (s.p2Index >= 6 && s.p2Index>s.p1Index) ? ((s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT") : "TIEBREAK_POINT"; return; }
-            let isG = s.p1Index===3 && s.p2Index===3 && (s.deuceStyle==="one-golden"||(s.deuceStyle==="double" && (s.deuceCounter||0)>=2));
-            let p1G = (s.p1Index===3 && s.p2Index<3) || s.p1Index===4 || isG, p2G = (s.p2Index===3 && s.p1Index<3) || s.p2Index===4 || isG;
-            if(!p1G && !p2G) { s.activeMatchRibbon = "NONE"; return; }
-            let lim = s.isProSet ? (parseInt(s.proSetLimit)||8) : 6, g1 = s['t1_s'+s.currentSet]||0, g2 = s['t2_s'+s.currentSet]||0;
-            let p1S = (g1===lim-1 && g2<=lim-2) || g1===lim, p2S = (g2===lim-1 && g1<=lim-2) || g2===lim;
-            if((p1G && p1S) || (p2G && p2S)) { s.activeMatchRibbon = (s.currentSet>=3||s.isProSet)?"MATCH_POINT":"SET_POINT"; return; }
-            if(isG) { s.activeMatchRibbon = "GOLDEN_POINT"; return; }
-            s.activeMatchRibbon = (p1G && s.currentServer===2) || (p2G && s.currentServer===1) ? "BREAK_POINT" : "GAME_POINT";
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -728,8 +433,8 @@
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
             }
+            initCourtConnection();
         });
-        initCourtConnection();
     </script>
 </body>
 </html>
