@@ -28,14 +28,6 @@
             --panel-bg: rgba(8, 8, 8, 0.55);
             --panel-border: rgba(198, 159, 102, 0.4);
             --panel-text: #ffffff;
-            --slide-gamepoint: rgba(42, 42, 42, 0.55);
-            --slide-breakpoint: rgba(198, 159, 102, 0.55);
-            --slide-setpoint: rgba(29, 78, 216, 0.55);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(245, 158, 11, 0.55);
-            --slide-tiebreak: rgba(75, 85, 99, 0.55);
-            --slide-deuce: rgba(91, 33, 182, 0.55);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-courtgreen {
@@ -59,14 +51,6 @@
             --panel-bg: rgba(10, 14, 3, 0.62);
             --panel-border: rgba(163, 230, 53, 0.4);
             --panel-text: #f7ffe0;
-            --slide-gamepoint: rgba(35, 46, 15, 0.6);
-            --slide-breakpoint: rgba(163, 230, 53, 0.55);
-            --slide-setpoint: rgba(77, 124, 15, 0.6);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
-            --slide-tiebreak: rgba(54, 83, 20, 0.7);
-            --slide-deuce: rgba(63, 98, 18, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-graydark {
@@ -90,14 +74,6 @@
             --panel-bg: rgba(10, 12, 16, 0.62);
             --panel-border: rgba(209, 213, 219, 0.35);
             --panel-text: #f3f4f6;
-            --slide-gamepoint: rgba(55, 65, 81, 0.6);
-            --slide-breakpoint: rgba(156, 163, 175, 0.55);
-            --slide-setpoint: rgba(75, 85, 99, 0.65);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.6);
-            --slide-tiebreak: rgba(31, 41, 55, 0.75);
-            --slide-deuce: rgba(88, 28, 135, 0.5);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-lightgray {
@@ -121,14 +97,6 @@
             --panel-bg: rgba(229, 231, 235, 0.9);
             --panel-border: rgba(107, 114, 128, 0.4);
             --panel-text: #000000;
-            --slide-gamepoint: rgba(209, 213, 219, 0.75);
-            --slide-breakpoint: rgba(156, 163, 175, 0.75);
-            --slide-setpoint: rgba(107, 114, 128, 0.7);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(202, 138, 4, 0.5);
-            --slide-tiebreak: rgba(107, 114, 128, 0.65);
-            --slide-deuce: rgba(156, 163, 175, 0.6);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-transparent {
@@ -152,14 +120,6 @@
             --panel-bg: rgba(0, 0, 0, 0.15);
             --panel-border: rgba(255, 255, 255, 0.5);
             --panel-text: #ffffff;
-            --slide-gamepoint: rgba(255, 255, 255, 0.15);
-            --slide-breakpoint: rgba(255, 255, 255, 0.22);
-            --slide-setpoint: rgba(255, 255, 255, 0.3);
-            --slide-matchpoint: rgba(185, 28, 28, 0.55);
-            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
-            --slide-tiebreak: rgba(255, 255, 255, 0.22);
-            --slide-deuce: rgba(255, 255, 255, 0.18);
-            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html, body {
@@ -178,24 +138,36 @@
 
         .logo-panel { transform: translateX(100%); opacity: 0; height: 96px; width: 120px; background: rgba(0, 0, 0, 0.55); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-sizing: border-box; order: 1; padding: 0 !important; margin: 0 !important; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ ===== */
+        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (ОНОВЛЕНО) ===== */
         .board-promo-panel {
-            position: absolute; top: 100%; left: 0; margin-top: 10px;
-            min-width: 260px; max-width: 420px;
-            background: rgba(0,0,0,0.72);
-            border: 1px solid rgba(255,255,255,0.18);
+            position: absolute; 
+            top: 100%; 
+            left: 120px; /* Перенесено правіше — звідки починаються назви команд */
+            margin-top: 36px; /* Збільшено відступ, щоб не накривало плашки брейк поінтів */
+            min-width: 240px; 
+            max-width: var(--team-name-width, 320px);
+            background: rgba(8, 8, 8, 0.45); /* Напівпрозорий фон */
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 6px;
-            padding: 14px 18px;
+            padding: 2px 6px; /* Відступи всередині (0.1rem / ~2px) */
             box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 6px; align-items: center;
-            opacity: 0; visibility: hidden; transform: translateY(-8px);
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+            display: flex; flex-direction: column; gap: 2px; align-items: center;
+            opacity: 0; visibility: hidden; 
+            transform: translateY(-20px); /* Початковий стан для анімації згори донизу */
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s;
             font-family: 'Montserrat', sans-serif;
             z-index: 500;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
         }
-        .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
+        .board-promo-panel.visible { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateY(0); /* Анімація появи згори донизу */
+        }
+        .board-promo-line { text-align: center; line-height: 1.2; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .board-promo-line.has-bg { padding: 2px 6px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
         /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
@@ -243,7 +215,7 @@
         .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
 
-        /* ===== КУТОВІ СЛАЙДИЗЛІВА ЗНИЗУ ===== */
+        /* ===== КУТОВІ СЛАЙДИ ЗЛІВА ЗНИЗУ ===== */
         .corner-slide-wrapper { position: fixed; bottom: 30px; left: 0; overflow: hidden; border-radius: 0 6px 6px 0; z-index: 9997; width: 0; height: 54px; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
         .corner-slide-wrapper.visible { width: 320px; }
         .corner-slide-plate { width: 320px; height: 54px; display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; box-sizing: border-box; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; color: #111111; text-align: right; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border: 1px solid rgba(0,0,0,0.15); border-left: none; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
@@ -1083,6 +1055,7 @@
                     txtNode.style.color = state.logoFontColor || '#ffffff'; txtNode.style.display = 'block';
                 }
 
+                // РЕНДЕР ІНФОРМАЦІЙНОЇ ПАНЕЛІ ПІД ТАБЛОМ
                 const boardPromoPanel = document.getElementById('board-promo-panel');
                 if (boardPromoPanel) {
                     boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
@@ -1121,13 +1094,11 @@
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
                 
-                // ВІДОБРАЖЕННЯ ТАЙБРЕЙКУ ТА ЗВИЧАЙНОГО РАХУНКУ
                 if ((p1 === 0 && p2 === 0 && !state.isTiebreak) || state.isMatchFinished) { 
                     pb.classList.remove('visible'); 
                     document.getElementById('advantage-callout').classList.remove('visible'); 
                 } else {
                     pb.classList.add('visible');
-                    // Прямі цифри розіграшу (0, 1, 2, 3... 6, 7, 8) для тайбрейку
                     if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1; pbT2.innerText = p2; 
                         pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
