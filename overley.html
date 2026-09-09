@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
+    <!-- Підключено спортивний акцентний шрифт Teko для яскравого вигляду таймерів та написів перерви -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗМІННІ ТЕМИ ТАБЛА ===== */
@@ -28,6 +29,14 @@
             --panel-bg: rgba(8, 8, 8, 0.55);
             --panel-border: rgba(198, 159, 102, 0.4);
             --panel-text: #ffffff;
+            --slide-gamepoint: rgba(42, 42, 42, 0.55);
+            --slide-breakpoint: rgba(198, 159, 102, 0.55);
+            --slide-setpoint: rgba(29, 78, 216, 0.55);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(245, 158, 11, 0.55);
+            --slide-tiebreak: rgba(75, 85, 99, 0.55);
+            --slide-deuce: rgba(91, 33, 182, 0.55);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-courtgreen {
@@ -51,6 +60,14 @@
             --panel-bg: rgba(10, 14, 3, 0.62);
             --panel-border: rgba(163, 230, 53, 0.4);
             --panel-text: #f7ffe0;
+            --slide-gamepoint: rgba(35, 46, 15, 0.6);
+            --slide-breakpoint: rgba(163, 230, 53, 0.55);
+            --slide-setpoint: rgba(77, 124, 15, 0.6);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
+            --slide-tiebreak: rgba(54, 83, 20, 0.7);
+            --slide-deuce: rgba(63, 98, 18, 0.6);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-graydark {
@@ -74,6 +91,14 @@
             --panel-bg: rgba(10, 12, 16, 0.62);
             --panel-border: rgba(209, 213, 219, 0.35);
             --panel-text: #f3f4f6;
+            --slide-gamepoint: rgba(55, 65, 81, 0.6);
+            --slide-breakpoint: rgba(156, 163, 175, 0.55);
+            --slide-setpoint: rgba(75, 85, 99, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(202, 138, 4, 0.6);
+            --slide-tiebreak: rgba(31, 41, 55, 0.75);
+            --slide-deuce: rgba(88, 28, 135, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-lightgray {
@@ -97,6 +122,14 @@
             --panel-bg: rgba(229, 231, 235, 0.9);
             --panel-border: rgba(107, 114, 128, 0.4);
             --panel-text: #000000;
+            --slide-gamepoint: rgba(209, 213, 219, 0.75);
+            --slide-breakpoint: rgba(156, 163, 175, 0.75);
+            --slide-setpoint: rgba(107, 114, 128, 0.7);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(202, 138, 4, 0.5);
+            --slide-tiebreak: rgba(107, 114, 128, 0.65);
+            --slide-deuce: rgba(156, 163, 175, 0.6);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html.theme-transparent {
@@ -120,6 +153,14 @@
             --panel-bg: rgba(0, 0, 0, 0.15);
             --panel-border: rgba(255, 255, 255, 0.5);
             --panel-text: #ffffff;
+            --slide-gamepoint: rgba(255, 255, 255, 0.15);
+            --slide-breakpoint: rgba(255, 255, 255, 0.22);
+            --slide-setpoint: rgba(255, 255, 255, 0.3);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
+            --slide-tiebreak: rgba(255, 255, 255, 0.22);
+            --slide-deuce: rgba(255, 255, 255, 0.18);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
         html, body {
@@ -138,36 +179,24 @@
 
         .logo-panel { transform: translateX(100%); opacity: 0; height: 96px; width: 120px; background: rgba(0, 0, 0, 0.55); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-sizing: border-box; order: 1; padding: 0 !important; margin: 0 !important; }
 
-        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (ОНОВЛЕНО) ===== */
+        /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (реклама/анонс) ===== */
         .board-promo-panel {
-            position: absolute; 
-            top: 100%; 
-            left: 120px; /* Перенесено правіше — звідки починаються назви команд */
-            margin-top: 36px; /* Збільшено відступ, щоб не накривало плашки брейк поінтів */
-            min-width: 240px; 
-            max-width: var(--team-name-width, 320px);
-            background: rgba(8, 8, 8, 0.45); /* Напівпрозорий фон */
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: absolute; top: 100%; left: 0; margin-top: 10px;
+            min-width: 260px; max-width: 420px;
+            background: rgba(0,0,0,0.72);
+            border: 1px solid rgba(255,255,255,0.18);
             border-radius: 6px;
-            padding: 2px 6px; /* Відступи всередині (0.1rem / ~2px) */
+            padding: 14px 18px;
             box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 2px; align-items: center;
-            opacity: 0; visibility: hidden; 
-            transform: translateY(-20px); /* Початковий стан для анімації згори донизу */
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s;
+            display: flex; flex-direction: column; gap: 6px; align-items: center;
+            opacity: 0; visibility: hidden; transform: translateY(-8px);
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
             font-family: 'Montserrat', sans-serif;
             z-index: 500;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
         }
-        .board-promo-panel.visible { 
-            opacity: 1; 
-            visibility: visible; 
-            transform: translateY(0); /* Анімація появи згори донизу */
-        }
-        .board-promo-line { text-align: center; line-height: 1.2; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .board-promo-line.has-bg { padding: 2px 6px; border-radius: 3px; text-shadow: none; }
+        .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
         /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
@@ -215,7 +244,7 @@
         .ribbon-gamepoint { background: rgba(42, 42, 42, 0.65); color: #fff; }
         .ribbon-goldenpoint { background: rgba(245, 158, 11, 0.65); color: #fff; font-weight: 900; }
 
-        /* ===== КУТОВІ СЛАЙДИ ЗЛІВА ЗНИЗУ ===== */
+        /* ===== КУТОВІ СЛАЙДИ ЗЛІВА ЗНИЗУ (БІЛИЙ ФОН) ===== */
         .corner-slide-wrapper { position: fixed; bottom: 30px; left: 0; overflow: hidden; border-radius: 0 6px 6px 0; z-index: 9997; width: 0; height: 54px; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
         .corner-slide-wrapper.visible { width: 320px; }
         .corner-slide-plate { width: 320px; height: 54px; display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; box-sizing: border-box; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; color: #111111; text-align: right; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border: 1px solid rgba(0,0,0,0.15); border-left: none; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
@@ -295,6 +324,7 @@
         .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
         .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #a1731f; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
         .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
+        .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 580px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
@@ -308,6 +338,12 @@
         .sm-label { font-size: 10px; font-weight: 700; color: #cccccc; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .sm-val { font-size: 18px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
         .sm-val.gold { color: #c69f66; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
+        .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .h-set-title { font-weight: 700; color: #eeeeee; text-transform: uppercase; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .h-set-score { font-weight: 800; font-size: 16px; color: white; letter-spacing: 1px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .h-set-time { font-weight: 700; color: #c69f66; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         
         .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
@@ -806,6 +842,41 @@
             cornerSlideTimeout = setTimeout(() => { wrapper.classList.remove('visible'); }, 5000);
         }
 
+        /* ===== ЛОГІКА ОБРАХУНКУ СТОРОНИ ТА ГРАВЦЯ ПОДАЧІ НА ТАЙБРЕЙКУ ===== */
+        function calculateTiebreakServeState(p1Points, p2Points, initialServer, initialT1Slot, initialT2Slot) {
+            const totalPoints = (p1Points || 0) + (p2Points || 0);
+            
+            // 1-ше очко подається з правої сторони (R), наступні кожні 2 очки змінюють сторону (L -> R -> L -> R)
+            const serveSide = (totalPoints % 2 === 0) ? 'R' : 'L';
+
+            // Перша подача (0-ве очко): подає початкова команда
+            // Наступні очки міняються парами (по 2 очки кожна команда): 1,2 -> друга; 3,4 -> перша; 5,6 -> друга...
+            const groupIndex = Math.floor((totalPoints + 1) / 2);
+            const currentServerTeam = (groupIndex % 2 === 0) ? initialServer : (initialServer === 1 ? 2 : 1);
+
+            // Визначення слоту гравця в команді (Slot 1 або Slot 2)
+            // Кожна команда робить ротацію гравців при кожній своїй наступній черзі
+            let p1Slot = initialT1Slot || 1;
+            let p2Slot = initialT2Slot || 1;
+
+            const t1ServesCount = Math.floor((totalPoints + (initialServer === 1 ? 2 : 0)) / 4);
+            if (t1ServesCount % 2 !== 0) {
+                p1Slot = (initialT1Slot === 1) ? 2 : 1;
+            }
+
+            const t2ServesCount = Math.floor((totalPoints + (initialServer === 2 ? 2 : 0)) / 4);
+            if (t2ServesCount % 2 !== 0) {
+                p2Slot = (initialT2Slot === 1) ? 2 : 1;
+            }
+
+            return {
+                currentServer: currentServerTeam,
+                p1ServerSlot: p1Slot,
+                p2ServerSlot: p2Slot,
+                serveSide: serveSide
+            };
+        }
+
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
@@ -941,6 +1012,26 @@
             if (state) {
                 lastKnownState = state;
 
+                // Перевірка режимів тайбрейку та автоматичний перерахунок подачі
+                let activeServer = state.currentServer;
+                let activeP1Slot = state.p1ServerSlot || 1;
+                let activeP2Slot = state.p2ServerSlot || 1;
+                let activeServeSide = state.serveSide || 'R';
+
+                if (state.isTiebreak || state.isSuperTiebreak) {
+                    const tbServe = calculateTiebreakServeState(
+                        state.p1Index || 0,
+                        state.p2Index || 0,
+                        state.initialTiebreakServer || state.currentServer || 1,
+                        state.initialTiebreakP1Slot || state.p1ServerSlot || 1,
+                        state.initialTiebreakP2Slot || state.p2ServerSlot || 1
+                    );
+                    activeServer = tbServe.currentServer;
+                    activeP1Slot = tbServe.p1ServerSlot;
+                    activeP2Slot = tbServe.p2ServerSlot;
+                    activeServeSide = tbServe.serveSide;
+                }
+
                 const curP1Idx = state.p1Index || 0, curP2Idx = state.p2Index || 0;
                 if (statsTrackerInitialized && statsAutoActive && (curP1Idx !== lastP1IndexTracked || curP2Idx !== lastP2IndexTracked)) {
                     forceCloseStatsPanel();
@@ -988,7 +1079,7 @@
                 document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
-                if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || state.currentServer>0) && !matchTimerStarted && !state.isMatchFinished) {
+                if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
                     matchTimerStarted = true;
                 }
                 if (state.isMatchFinished) matchTimerStarted = false;
@@ -1017,6 +1108,7 @@
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
+                const stPanel = document.getElementById('statistics-panel');
 
                 if (!!state.isTiebreak && !state.isMatchFinished && !state.showSetOverlayTrigger && !state.isSuperTiebreak) {
                     document.getElementById('ribbon-top-tiebreak').classList.add('visible');
@@ -1036,8 +1128,8 @@
                     document.getElementById('qr-code-panel').classList.add('visible');
                 } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
 
-                renderTeamNamePlayers('name-display-t1', state.p1name || getStatsLabel('team1Fallback', state), state.currentServer === 1, state.p1ServerSlot || 1);
-                renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), state.currentServer === 2, state.p2ServerSlot || 1);
+                renderTeamNamePlayers('name-display-t1', state.p1name || getStatsLabel('team1Fallback', state), activeServer === 1, activeP1Slot);
+                renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), activeServer === 2, activeP2Slot);
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
@@ -1055,7 +1147,6 @@
                     txtNode.style.color = state.logoFontColor || '#ffffff'; txtNode.style.display = 'block';
                 }
 
-                // РЕНДЕР ІНФОРМАЦІЙНОЇ ПАНЕЛІ ПІД ТАБЛОМ
                 const boardPromoPanel = document.getElementById('board-promo-panel');
                 if (boardPromoPanel) {
                     boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
@@ -1093,15 +1184,11 @@
 
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
-                
-                if ((p1 === 0 && p2 === 0 && !state.isTiebreak) || state.isMatchFinished) { 
-                    pb.classList.remove('visible'); 
-                    document.getElementById('advantage-callout').classList.remove('visible'); 
-                } else {
+                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); }
+                else {
                     pb.classList.add('visible');
                     if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
-                        pbT1.innerText = p1; pbT2.innerText = p2; 
-                        pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
+                        pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                         document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
                         const isDoubleStyleAd = state.deuceStyle === 'double';
@@ -1133,8 +1220,8 @@
                     }
                 }
 
-                document.getElementById('srv1').classList.toggle('active', state.currentServer === 1);
-                document.getElementById('srv2').classList.toggle('active', state.currentServer === 2);
+                document.getElementById('srv1').classList.toggle('active', activeServer === 1);
+                document.getElementById('srv2').classList.toggle('active', activeServer === 2);
 
                 const activeSet = state.currentSet || 1;
                 if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
@@ -1166,6 +1253,14 @@
                     let g1 = isCurSuperTB ? p1 : (state[`t1_s${s}`] || 0), g2 = isCurSuperTB ? p2 : (state[`t2_s${s}`] || 0);
                     
                     let tbVal1 = state[`t1_tb_s${s}`], tbVal2 = state[`t2_tb_s${s}`];
+                    
+                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9)))) {
+                        if (tbVal1 === undefined && tbVal2 === undefined) {
+                            if (state.lastTiebreakScore1 !== undefined && state.lastTiebreakScore2 !== undefined) {
+                                tbVal1 = state.lastTiebreakScore1; tbVal2 = state.lastTiebreakScore2;
+                            }
+                        }
+                    }
 
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
@@ -1183,6 +1278,8 @@
 
                 const mfb = document.getElementById('match-finished-board');
                 if (state.isMatchFinished) {
+                    stPanel.classList.remove('visible');
+
                     document.getElementById('mfb-header').innerText = `${getStatsLabel('court', state)} ${courtId} • ${getStatsLabel('matchFinished', state)}`;
                     let playedSets = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
@@ -1211,10 +1308,210 @@
 
                     mfb.classList.remove('fading-out');
                     mfb.classList.add('visible');
+                    if (!matchFinishedWasVisible) {
+                        matchFinishedWasVisible = true;
+                        statsRevealAllowed = false;
+                        if (matchFinishedFadeTimer) clearTimeout(matchFinishedFadeTimer);
+                        matchFinishedFadeTimer = setTimeout(() => {
+                            mfb.classList.add('fading-out');
+                        }, 15000);
+                        statsAfterFinishLocallyDismissed = false;
+                        if (statsRevealTimer) clearTimeout(statsRevealTimer);
+                        statsRevealTimer = setTimeout(() => {
+                            statsRevealAllowed = true;
+                            updateManualStatsPanelVisibility();
+
+                            const spm = document.getElementById('statistics-panel-manual');
+                            if (statsAfterFinishDismissTimer) clearTimeout(statsAfterFinishDismissTimer);
+                            statsAfterFinishDismissTimer = setTimeout(() => {
+                                if (spm) spm.classList.add('fading-out');
+                                setTimeout(() => {
+                                    statsAfterFinishLocallyDismissed = true;
+                                    if (spm) spm.classList.remove('visible', 'fading-out');
+                                    refreshBoardVisibility();
+                                }, 1200);
+                            }, 15000);
+                        }, 16300);
+                    }
                     if (statsAutoActive) { forceCloseStatsPanel(); }
                 } else {
                     mfb.classList.remove('visible'); mfb.classList.remove('fading-out');
+                    matchFinishedWasVisible = false;
+                    statsRevealAllowed = false;
+                    statsAfterFinishLocallyDismissed = false;
+                    if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
+                    if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
+                    if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
+                    document.getElementById('statistics-panel-manual').classList.remove('fading-out');
+
+                    const isNewStatsTrigger = !!(state.statsAutoTrigger && state.statsAutoTrigger !== lastStatsAutoTrigger);
+                    if (isNewStatsTrigger) {
+                        lastStatsAutoTrigger = state.statsAutoTrigger;
+                        statsAutoActive = true;
+                    }
+
+                    if (state.replayLabelTrigger && state.replayLabelTrigger !== lastReplayLabelTrigger) {
+                        lastReplayLabelTrigger = state.replayLabelTrigger;
+                        const replayEl = document.getElementById('replay-label');
+                        replayEl.classList.add('visible');
+                        clearTimeout(replayLabelTimer);
+                        replayLabelTimer = setTimeout(() => { replayEl.classList.remove('visible'); }, 15000);
+                    }
+
+                    if (state.serverChangeTrigger && state.serverChangeTrigger !== lastServerChangeTrigger) {
+                        lastServerChangeTrigger = state.serverChangeTrigger;
+                        const triggeredServer = activeServer, triggeredP1Slot = activeP1Slot, triggeredP2Slot = activeP2Slot;
+                        const triggeredP1Name = state.p1name, triggeredP2Name = state.p2name, triggeredLang = state.cornerSlideLang;
+                        clearTimeout(serverChangeBannerDelayTimer);
+                        serverChangeBannerDelayTimer = setTimeout(() => {
+                            const banner = document.getElementById('server-change-banner');
+                            const nameEl = document.getElementById('server-change-banner-name');
+                            const labelEl = document.getElementById('server-change-banner-label');
+                            labelEl.innerText = (triggeredLang === 'ua') ? 'ПОДАЄ' : 'SERVING';
+                            const servingName = triggeredServer === 2 ? (triggeredP2Name || getStatsLabel('team2Fallback', state)) : (triggeredP1Name || getStatsLabel('team1Fallback', state));
+                            const servingSlot = triggeredServer === 2 ? (triggeredP2Slot || 1) : (triggeredP1Slot || 1);
+                            const servingParts = servingName.split('/').map(p => p.trim()).filter(p => p.length > 0);
+                            const servingPlayerName = (servingParts.length === 2) ? servingParts[servingSlot === 2 ? 1 : 0] : servingName;
+                            nameEl.innerText = servingPlayerName;
+                            banner.classList.add('visible');
+                            clearTimeout(serverChangeBannerTimer);
+                            serverChangeBannerTimer = setTimeout(() => { banner.classList.remove('visible'); }, 5000);
+                        }, 3000);
+                    }
+
+                    const sponsorFrame = document.getElementById('sponsor-logo-frame');
+                    const sponsorAllFrame = document.getElementById('sponsor-logo-all-frame');
+                    if (sponsorFrame && sponsorAllFrame) {
+                        const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
+                        const showAllMode = state.sponsorLogoDisplayMode === 'all';
+                        const scaleTransform = 'translateX(calc(-50% + ' + (state.sponsorLogoPosX || 0) + 'px)) scale(' + (state.sponsorLogoScale || 1) + ')';
+
+                        sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos && !showAllMode);
+                        sponsorFrame.style.transform = scaleTransform;
+                        sponsorAllFrame.classList.toggle('visible', !!state.showSponsorLogos && showAllMode);
+                        sponsorAllFrame.style.transform = scaleTransform;
+
+                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode;
+                        if (signature !== lastSponsorLogosSignature) {
+                            lastSponsorLogosSignature = signature;
+                            if (showAllMode) {
+                                clearInterval(sponsorLogoTimer);
+                                sponsorAllFrame.innerHTML = validLogos.map(u => '<img src="' + u + '">').join('');
+                            } else {
+                                startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
+                            }
+                        }
+                    }
+
+                    if (state.showStatsOverlay || statsAutoActive) {
+                        document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
+                        document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                        if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
+
+                        document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; 
+                        document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+                        document.getElementById('st-nc1').innerText = state.p1NetCords || 0; 
+                        document.getElementById('st-nc2').innerText = state.p2NetCords || 0;
+                        document.getElementById('st-sm1').innerText = state.p1Smashes || 0; 
+                        document.getElementById('st-sm2').innerText = state.p2Smashes || 0;
+                        document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0; 
+                        document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
+                        document.getElementById('st-gp1').innerText = state.p1GoldenPoints || 0; 
+                        document.getElementById('st-gp2').innerText = state.p2GoldenPoints || 0;
+
+                        const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
+                        const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
+                        const statsLogoTxt = document.getElementById('stats-broadcast-logo-text');
+                        const hasLogoContent = !!(state.logoUrl || state.logoSrc || state.customLogoText);
+                        if (state.showLogo && hasLogoContent) {
+                            statsLogoBox.classList.add('visible');
+                            if (state.logoUrl || state.logoSrc) {
+                                statsLogoTxt.style.display = 'none';
+                                statsLogoImg.src = state.logoUrl || state.logoSrc; statsLogoImg.style.display = 'block';
+                            } else {
+                                statsLogoImg.style.display = 'none';
+                                statsLogoTxt.innerText = state.customLogoText || ""; statsLogoTxt.style.display = 'block';
+                            }
+                        } else {
+                            statsLogoBox.classList.remove('visible');
+                        }
+
+                        const statsLeftLogoBox = document.getElementById('stats-broadcast-logo-box-left');
+                        const statsLeftLogoImg = document.getElementById('stats-broadcast-logo-left-img');
+                        const leftLogoSrc = state.statsLeftLogoUrl || state.statsLeftLogoSrc || "";
+                        if (state.showStatsLeftLogo && leftLogoSrc) {
+                            statsLeftLogoBox.classList.add('visible');
+                            statsLeftLogoImg.src = leftLogoSrc;
+                        } else {
+                            statsLeftLogoBox.classList.remove('visible');
+                        }
+                    }
+
+                    if (isNewStatsTrigger) {
+                        runStatsRevealSequence();
+                    }
                 }
+
+                if (state.showStatsOverlay) {
+                    document.getElementById('stm-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('stm-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
+
+                    const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
+                    document.getElementById('stm-df1').innerText = df1; document.getElementById('stm-df2').innerText = df2;
+                    document.getElementById('stm-df1').closest('.sm-row').style.display = (df1 === 0 && df2 === 0) ? 'none' : 'grid';
+
+                    const nc1 = state.p1NetCords || 0, nc2 = state.p2NetCords || 0;
+                    document.getElementById('stm-nc1').innerText = nc1; document.getElementById('stm-nc2').innerText = nc2;
+                    document.getElementById('stm-nc1').closest('.sm-row').style.display = (nc1 === 0 && nc2 === 0) ? 'none' : 'grid';
+
+                    const sm1 = state.p1Smashes || 0, sm2 = state.p2Smashes || 0;
+                    document.getElementById('stm-sm1').innerText = sm1; document.getElementById('stm-sm2').innerText = sm2;
+                    document.getElementById('stm-sm1').closest('.sm-row').style.display = (sm1 === 0 && sm2 === 0) ? 'none' : 'grid';
+
+                    const bp1 = state.p1BreakPoints || 0, bp2 = state.p2BreakPoints || 0;
+                    document.getElementById('stm-bp1').innerText = bp1; document.getElementById('stm-bp2').innerText = bp2;
+                    document.getElementById('stm-bp1').closest('.sm-row').style.display = (bp1 === 0 && bp2 === 0) ? 'none' : 'grid';
+
+                    const gp1 = state.p1GoldenPoints || 0, gp2 = state.p2GoldenPoints || 0;
+                    document.getElementById('stm-gp1').innerText = gp1; document.getElementById('stm-gp2').innerText = gp2;
+                    document.getElementById('stm-gp1').closest('.sm-row').style.display = (gp1 === 0 && gp2 === 0) ? 'none' : 'grid';
+
+                    let totalGames1 = 0, totalGames2 = 0;
+                    for (let i = 1; i <= activeSet; i++) { totalGames1 += state[`t1_s${i}`] || 0; totalGames2 += state[`t2_s${i}`] || 0; }
+                    document.getElementById('stm-g1').innerText = totalGames1; document.getElementById('stm-g2').innerText = totalGames2;
+
+                    let lg1 = 0, lg2 = 0; for(let i=1;i<=9;i++){ lg1+=state[`t1_lg_s${i}`]||0; lg2+=state[`t2_lg_s${i}`]||0; }
+                    document.getElementById('stm-lg1').innerText = lg1; document.getElementById('stm-lg2').innerText = lg2;
+                    document.getElementById('stm-lg1').closest('.sm-row').style.display = (lg1 === 0 && lg2 === 0) ? 'none' : 'grid';
+
+                    document.getElementById('stm-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
+                    document.getElementById('stm-lbl-teams').innerText = getStatsLabel('teams', state); document.getElementById('stm-lbl-games-set').innerText = getStatsLabel('gamesSet', state);
+                    document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
+                    if(document.getElementById('stm-lbl-netcords')) document.getElementById('stm-lbl-netcords').innerText = getStatsLabel('netcords', state);
+                    if(document.getElementById('stm-lbl-smashes')) document.getElementById('stm-lbl-smashes').innerText = getStatsLabel('smashes', state);
+                    document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
+                    document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
+                    document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
+                    document.getElementById('stm-lbl-match-time').innerText = getStatsLabel('matchTime', state); document.getElementById('stm-lbl-history').innerText = getStatsLabel('history', state);
+
+                    const hasHistory = (state.gamesTimeHistory || []).length > 0;
+                    document.getElementById('stm-game-history').innerText = hasHistory ? state.gamesTimeHistory.join(' ') : "-";
+                    document.getElementById('stm-game-history').closest('.sm-row').style.display = hasHistory ? 'grid' : 'none';
+
+                    let setsResultParts = [];
+                    for (let i = 1; i <= (state.currentSet||1); i++) {
+                        let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
+                        let tb1 = state[`t1_tb_s${i}`], tb2 = state[`t2_tb_s${i}`];
+                        if (sg1 > 0 || sg2 > 0) {
+                            let str1 = (tb1 !== undefined && tb1 !== null) ? `${sg1}<sup>${tb1}</sup>` : `${sg1}`;
+                            let str2 = (tb2 !== undefined && tb2 !== null) ? `${sg2}<sup>${tb2}</sup>` : `${sg2}`;
+                            setsResultParts.push(`${str1}:${str2}`);
+                        }
+                    }
+                    document.getElementById('stm-sets-result').innerHTML = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
+                    document.getElementById('stm-lbl-sets-result').innerText = getStatsLabel('setsResult', state);
+                    document.getElementById('stm-sets-result').closest('.sm-row').style.display = (setsResultParts.length > 0) ? 'grid' : 'none';
+                }
+                updateManualStatsPanelVisibility();
 
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
                     lastAnimationTs = state.animation.ts; const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
