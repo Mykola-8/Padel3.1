@@ -123,7 +123,6 @@
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
-        <!-- Додаткові кнопки статистичних дій для К1 та К2 -->
         <div class="action-grid">
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
@@ -1042,7 +1041,6 @@
             saveToHistory(state); if (state.showSetOverlayTrigger) state.showSetOverlayTrigger = false; window.scorePointWithoutHistorySave(team);
         }
 
-        // Реєстрація м'яча від сітки з додаванням балу та оновленням статистики
         window.registerNetCord = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
@@ -1059,7 +1057,6 @@
             window.scorePointWithoutHistorySave(team);
         }
 
-        // Реєстрація смешу на виліт з додаванням балу та оновленням статистики
         window.registerSmashWinner = function(team) {
             if (state.isMatchFinished || isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
@@ -1122,7 +1119,6 @@
         function winGame(winTeam) {
             const wasTB = !!state.isTiebreak; 
             if (wasTB) {
-                // Збереження очок тайбрейку для індексів
                 state[`t1_tb_s${state.currentSet}`] = state.p1Index;
                 state[`t2_tb_s${state.currentSet}`] = state.p2Index;
                 state.lastTiebreakScore1 = state.p1Index;
@@ -1130,21 +1126,50 @@
             } else if ((winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
                 state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; 
             }
-            state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
-            if (winTeam !== state.currentServer) { if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; }
+            
+            state.p1Index = 0; 
+            state.p2Index = 0; 
+            state.isTiebreak = false; 
+            state.deuceCounter = 0;
+
+            if (winTeam !== state.currentServer) { 
+                if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; 
+                else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; 
+            }
+
             state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
             state['t2_s' + state.currentSet] = (state['t2_s' + state.currentSet] || 0) + (winTeam === 2 ? 1 : 0);
+
             if(!state.gamesTimeHistory) state.gamesTimeHistory = [];
-            state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); gameStartTimestamp = Date.now();
+            state.gamesTimeHistory.push(Math.max(1, Math.round((Date.now() - gameStartTimestamp) / 60000)) + '`'); 
+            gameStartTimestamp = Date.now();
+
             let g1 = state['t1_s' + state.currentSet], g2 = state['t2_s' + state.currentSet], isOver = false, lim = state.isProSet ? (parseInt(state.proSetLimit) || 8) : 6;
-            if (state.isProSet) { if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; else if (g1 === lim && g2 === lim) state.isTiebreak = true; }
-            else { if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; else if (g1 === 6 && g2 === 6) state.isTiebreak = true; }
+            
+            if (state.isProSet) { 
+                if (wasTB || (g1 === lim+1 && g2 === lim-1) || (g2 === lim+1 && g1 === lim-1) || (g1 >= lim && g1-g2 >= 2) || (g2 >= lim && g2-g1 >= 2)) isOver = true; 
+                else if (g1 === lim && g2 === lim) state.isTiebreak = true; 
+            } else { 
+                if (wasTB || (g1 >= 6 && g1-g2 >= 2) || g1 === 7 || (g2 >= 6 && g2-g1 >= 2) || g2 === 7) isOver = true; 
+                else if (g1 === 6 && g2 === 6) state.isTiebreak = true; 
+            }
+
             state.animation = { team: winTeam, type: isOver ? 'set' : 'game', ts: Date.now() };
-            if (isOver) { state.showSetOverlayTrigger = true; state.lastFinishedSetNum = state.currentSet; state.currentSet++; state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = []; }
+
+            if (isOver) { 
+                state.showSetOverlayTrigger = true; 
+                state.lastFinishedSetNum = state.currentSet; 
+                state.currentSet++; 
+                state.p1BreakPoints = 0; 
+                state.p2BreakPoints = 0; 
+                state.gamesTimeHistory = []; 
+            }
+
             state.completedGamesCount = (state.completedGamesCount || 0) + 1;
             if (state.showStatsBetweenGames && !state.isMatchFinished && (state.completedGamesCount % 2 === 1)) {
                 state.statsAutoTrigger = Date.now();
             }
+
             const newServerTeam = state.currentServer === 1 ? 2 : 1;
             if (newServerTeam === 1) { state.p1ServerSlot = (state.p1ServerSlot === 1) ? 2 : 1; }
             else { state.p2ServerSlot = (state.p2ServerSlot === 1) ? 2 : 1; }
