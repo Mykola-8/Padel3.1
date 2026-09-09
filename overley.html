@@ -224,7 +224,8 @@
         .player-serving { color: #c69f66; text-shadow: 0 0 10px rgba(198,159,102,0.7); }
         .player-sep { opacity: 0.5; font-weight: 400; }
         .server-indicator.active { visibility: visible; }
-        .score-box { width: 40px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
+        .score-box { min-width: 40px; padding: 0 4px; display: none; justify-content: center; align-items: center; font-size: 26px; font-weight: 800; }
+        .score-box sup { font-size: 14px; font-weight: 800; vertical-align: super; line-height: 0; }
         .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
         .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
 
@@ -326,7 +327,7 @@
         .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
         .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* ===== РУЧНА СТАТИСТИКА (ВАРІАНТ A, ПО ЦЕНТРУ, АНІМОВАНА) ===== */
+        /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 580px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(0.94); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
@@ -348,7 +349,7 @@
         .set-result-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); width: 820px; background: rgba(8, 8, 8, 0.52); border: 1px solid rgba(198, 159, 102, 0.4); border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 9998; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px; box-sizing: border-box; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s; backdrop-filter: blur(14px); }
         .set-result-overlay.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* ===== ПАНЕЛЬ ПЕРЕРВИ — ОНОВЛЕНИЙ СПОРТИВНИЙ СТИЛЬ ===== */
+        /* ===== ПАНЕЛЬ ПЕРЕРВИ ===== */
         .break-overlay { position: fixed; inset: 0; transform: scale(0.96); background: rgba(6, 6, 10, 0.42); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), visibility 0.5s; }
         .break-overlay.visible { opacity: 1; visibility: visible; transform: scale(1); }
         .break-label { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #c69f66; margin-bottom: 12px; line-height: 1; }
@@ -360,7 +361,7 @@
         .break-score-sep { font-family: 'Teko', sans-serif; font-size: 34px; font-weight: 700; color: #c69f66; line-height: 1; }
         .break-sets-line { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 3px; }
 
-        /* ===== ПОЗНАЧКА "REPLAY" (для глядачів під час показу повтору) ===== */
+        /* ===== ПОЗНАЧКА "REPLAY" ===== */
         .replay-label {
             position: fixed; bottom: 20px; left: 50%; z-index: 99000;
             display: flex; align-items: center; gap: 8px;
@@ -374,7 +375,7 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== БАНЕР "ХТО ПОДАЄ" (5с, знизу-зліва) ===== */
+        /* ===== БАНЕР "ХТО ПОДАЄ" ===== */
         .server-change-banner {
             position: fixed; bottom: 110px; left: 140px; z-index: 99000;
             display: flex; align-items: center; gap: 10px;
@@ -391,7 +392,7 @@
         .server-change-banner-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; }
         .server-change-banner-name { font-size: 16px; font-weight: 800; color: #fff; }
 
-        /* ===== ЛОГОТИПИ СПОНСОРІВ (по центру зверху, над табло) ===== */
+        /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             width: 220px; height: 90px;
@@ -411,7 +412,6 @@
             transition: opacity 0.4s ease;
         }
 
-        /* Режим "показати всі одразу" — ряд усіх завантажених логотипів */
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             transform-origin: top center;
@@ -430,12 +430,12 @@
             object-fit: contain;
         }
 
-        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА (РЕКЛАМА / СПОНСОР) ===== */
+        /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
         .fullscreen-media-overlay {
             position: fixed;
             inset: 0;
             background-color: #000000;
-            z-index: 100000; /* Перекриває абсолютно все */
+            z-index: 100000;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -648,7 +648,7 @@
 
     <div class="corner-slide-wrapper" id="corner-slide-wrapper"><div class="corner-slide-plate" id="corner-slide-plate"></div></div>
 
-    <!-- АВТОМАТИЧНА СТАТИСТИКА МІЖ ГЕЙМАМИ (ДОДАНО NET ТА SMASH) -->
+    <!-- АВТОМАТИЧНА СТАТИСТИКА МІЖ ГЕЙМАМИ -->
     <div class="statistics-overlay" id="statistics-panel">
         <div class="stats-broadcast-card stats-broadcast-row-anim">
             <div class="stats-broadcast-logo-box stats-broadcast-logo-box-left" id="stats-broadcast-logo-box-left">
@@ -688,7 +688,7 @@
         </div>
     </div>
 
-    <!-- РУЧНА СТАТИСТИКА (ДОДАНО ВІД СІТКИ ТА СМЕШ НА ВИЛІТ) -->
+    <!-- РУЧНА СТАТИСТИКА -->
     <div class="statistics-overlay-manual" id="statistics-panel-manual">
         <div class="sm-header" id="stm-header">Матч-Статистика</div>
         <div class="sm-table">
@@ -1197,9 +1197,24 @@
                     if (s > setsToRender) { box1.style.display = 'none'; box2.style.display = 'none'; continue; }
                     let isCurSuperTB = state.isSuperTiebreak && s === activeSet;
                     let g1 = isCurSuperTB ? p1 : (state[`t1_s${s}`] || 0), g2 = isCurSuperTB ? p2 : (state[`t2_s${s}`] || 0);
+                    
+                    // Перевірка на тайбрейк та відображення маленького субіндексу
+                    let tbVal1 = state[`t1_tb_s${s}`], tbVal2 = state[`t2_tb_s${s}`];
+                    
+                    // Якщо тайбрейк у поточному сеті закінчився або іде
+                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9)))) {
+                        if (tbVal1 === undefined && tbVal2 === undefined) {
+                            if (state.lastTiebreakScore1 !== undefined && state.lastTiebreakScore2 !== undefined) {
+                                tbVal1 = state.lastTiebreakScore1; tbVal2 = state.lastTiebreakScore2;
+                            }
+                        }
+                    }
+
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
-                    box1.innerText = g1; box2.innerText = g2;
+                    
+                    box1.innerHTML = (tbVal1 !== undefined && tbVal1 !== null && tbVal1 !== "") ? `${g1}<sup>${tbVal1}</sup>` : `${g1}`;
+                    box2.innerHTML = (tbVal2 !== undefined && tbVal2 !== null && tbVal2 !== "") ? `${g2}<sup>${tbVal2}</sup>` : `${g2}`;
                 }
 
                 const ribbonProset = document.getElementById('ribbon-proset');
@@ -1217,7 +1232,8 @@
                     let playedSets = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
                         let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
-                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2});
+                        let tb1 = state[`t1_tb_s${i}`], tb2 = state[`t2_tb_s${i}`];
+                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2, tb1, tb2});
                     }
                     let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
                     document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||getStatsLabel('team1Fallback', state)) : (setsWon2 > setsWon1 ? (state.p2name||getStatsLabel('team2Fallback', state)) : getStatsLabel('tie', state));
@@ -1230,7 +1246,12 @@
                     r1.className = setsWon1 > setsWon2 ? 'mfb-winner-row' : ''; r2.className = setsWon2 > setsWon1 ? 'mfb-winner-row' : '';
 
                     let h1 = `<td class="mfb-team-name">${state.p1name||getStatsLabel('team1Fallback', state)}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||getStatsLabel('team2Fallback', state)}</td>`;
-                    playedSets.forEach(s => { h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${s.g1}</td>`; h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${s.g2}</td>`; });
+                    playedSets.forEach(s => { 
+                        let str1 = (s.tb1 !== undefined && s.tb1 !== null) ? `${s.g1}<sup>${s.tb1}</sup>` : `${s.g1}`;
+                        let str2 = (s.tb2 !== undefined && s.tb2 !== null) ? `${s.g2}<sup>${s.tb2}</sup>` : `${s.g2}`;
+                        h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${str1}</td>`; 
+                        h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${str2}</td>`; 
+                    });
                     r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
 
                     mfb.classList.remove('fading-out');
@@ -1427,9 +1448,14 @@
                     let setsResultParts = [];
                     for (let i = 1; i <= (state.currentSet||1); i++) {
                         let sg1 = state[`t1_s${i}`]||0, sg2 = state[`t2_s${i}`]||0;
-                        if (sg1 > 0 || sg2 > 0) setsResultParts.push(`${sg1}:${sg2}`);
+                        let tb1 = state[`t1_tb_s${i}`], tb2 = state[`t2_tb_s${i}`];
+                        if (sg1 > 0 || sg2 > 0) {
+                            let str1 = (tb1 !== undefined && tb1 !== null) ? `${sg1}<sup>${tb1}</sup>` : `${sg1}`;
+                            let str2 = (tb2 !== undefined && tb2 !== null) ? `${sg2}<sup>${tb2}</sup>` : `${sg2}`;
+                            setsResultParts.push(`${str1}:${str2}`);
+                        }
                     }
-                    document.getElementById('stm-sets-result').innerText = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
+                    document.getElementById('stm-sets-result').innerHTML = setsResultParts.length > 0 ? setsResultParts.join('   ') : "-";
                     document.getElementById('stm-lbl-sets-result').innerText = getStatsLabel('setsResult', state);
                     document.getElementById('stm-sets-result').closest('.sm-row').style.display = (setsResultParts.length > 0) ? 'grid' : 'none';
                 }
