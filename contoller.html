@@ -570,7 +570,8 @@
                 qrCodeUrl: "https://google.com", qrCodeDescription: "SCAN ME",
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false,
                 promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
-                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+                t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
+                animation: { team: 0, type: "", ts: 0 }
             };
 
             const writes = [];
@@ -909,7 +910,8 @@
                 qrCodeUrl: state.qrCodeUrl || "https://google.com", qrCodeDescription: state.qrCodeDescription || "SCAN ME", 
                 isMatchFinished: false, showFullscreenPromo: false, promoUrl: "", promoSrc: "", promoTypeIsVideo: false, 
                 promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
-                t1_s1: 0, t2_s1: 0, animation: { team: 0, type: "", ts: 0 }
+                t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
+                animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
 
@@ -1079,8 +1081,15 @@
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
                 let lim = parseInt(state.superTiebreakLimit) || 10;
-                if (state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
-                else if (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+                if ((state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2))) { 
+                    state['t1_s'+state.currentSet] = state.p1Index; 
+                    state['t2_s'+state.currentSet] = state.p2Index; 
+                    state[`t1_tb_s${state.currentSet}`] = state.p1Index;
+                    state[`t2_tb_s${state.currentSet}`] = state.p2Index;
+                    state.lastTiebreakScore1 = state.p1Index;
+                    state.lastTiebreakScore2 = state.p2Index;
+                    state.p1Index = 0; state.p2Index = 0; state.currentSet++; 
+                }
             } else if (state.isAmericano) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -1111,7 +1120,16 @@
         }
 
         function winGame(winTeam) {
-            const wasTB = !!state.isTiebreak; if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; }
+            const wasTB = !!state.isTiebreak; 
+            if (wasTB) {
+                // Збереження очок тайбрейку для індексів
+                state[`t1_tb_s${state.currentSet}`] = state.p1Index;
+                state[`t2_tb_s${state.currentSet}`] = state.p2Index;
+                state.lastTiebreakScore1 = state.p1Index;
+                state.lastTiebreakScore2 = state.p2Index;
+            } else if ((winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
+                state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; 
+            }
             state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; state.deuceCounter = 0;
             if (winTeam !== state.currentServer) { if (winTeam === 1) state.p1BreakPoints = (state.p1BreakPoints || 0) + 1; else state.p2BreakPoints = (state.p2BreakPoints || 0) + 1; }
             state['t1_s' + state.currentSet] = (state['t1_s' + state.currentSet] || 0) + (winTeam === 1 ? 1 : 0);
@@ -1222,7 +1240,17 @@
             if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
             if(confirm("Завершити матч та зберегти в історію?")){
                 state.isMatchFinished = true; state.showStatsOverlay = true; let scoreLines = [];
-                for(let i = 1; i <= 5; i++) { let s1 = state[`t1_s${i}`] || 0; let s2 = state[`t2_s${i}`] || 0; if(s1 > 0 || s2 > 0) scoreLines.push(`${s1}:${s2}`); }
+                for(let i = 1; i <= 5; i++) { 
+                    let s1 = state[`t1_s${i}`] || 0; 
+                    let s2 = state[`t2_s${i}`] || 0; 
+                    let tb1 = state[`t1_tb_s${i}`];
+                    let tb2 = state[`t2_tb_s${i}`];
+                    if(s1 > 0 || s2 > 0) {
+                        let str1 = (tb1 !== undefined && tb1 !== null && tb1 !== "") ? `${s1}(${tb1})` : `${s1}`;
+                        let str2 = (tb2 !== undefined && tb2 !== null && tb2 !== "") ? `${s2}(${tb2})` : `${s2}`;
+                        scoreLines.push(`${str1}:${str2}`);
+                    }
+                }
                 push(ref(db, 'padel/history'), { courtId: courtId, p1name: state.p1name || "Команда A", p2name: state.p2name || "Команда B", scoreLine: scoreLines.join(', '), date: new Date().toLocaleString('uk-UA') });
                 set(matchRef, state); closeModalSettings();
             }
