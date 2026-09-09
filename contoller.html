@@ -338,7 +338,7 @@
                 <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
                 <div class="row"><span>Режим показу:</span>
                     <select id="sponsor-logo-mode-select" onchange="updateSponsorLogoMode(this.value)">
-                        <option value="carousel">Карусель (по черзі)</option>
+                        <option value="carousel">Карусель (по чергі)</option>
                         <option value="all">Всі одразу (в ряд)</option>
                     </select>
                 </div>
@@ -888,11 +888,11 @@
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
-                scale: state.scale || 1, posX: 30, posY: 30,
-                isTiebreak: false, isAmericano: false, americanoLimit: state.americanoLimit || 21, 
-                isMexicano: false, mexicanoLimit: state.mexicanoLimit || 24, 
-                isProSet: false, proSetLimit: state.proSetLimit || 8, 
-                isSuperTiebreak: false, superTiebreakLimit: state.superTiebreakLimit || 10, 
+                scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30,
+                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
+                isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
+                isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
+                isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: state.boardTheme || "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
@@ -1097,8 +1097,21 @@
                 if ((state.p1Index + state.p2Index) >= (parseInt(state.mexicanoLimit) || 24)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isTiebreak) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
-                if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) winGame(1);
-                else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) winGame(2);
+                
+                // Перевірка перемоги у тайбрейку з попереднім збереженням фінальних очок
+                if (state.p1Index >= 7 && (state.p1Index - state.p2Index >= 2)) {
+                    state[`t1_tb_s${state.currentSet}`] = state.p1Index;
+                    state[`t2_tb_s${state.currentSet}`] = state.p2Index;
+                    state.lastTiebreakScore1 = state.p1Index;
+                    state.lastTiebreakScore2 = state.p2Index;
+                    winGame(1);
+                } else if (state.p2Index >= 7 && (state.p2Index - state.p1Index >= 2)) {
+                    state[`t1_tb_s${state.currentSet}`] = state.p1Index;
+                    state[`t2_tb_s${state.currentSet}`] = state.p2Index;
+                    state.lastTiebreakScore1 = state.p1Index;
+                    state.lastTiebreakScore2 = state.p2Index;
+                    winGame(2);
+                }
             } else {
                 let style = state.deuceStyle || "one-golden";
                 if (tIndex === 1) {
@@ -1118,15 +1131,10 @@
 
         function winGame(winTeam) {
             const wasTB = !!state.isTiebreak; 
-            if (wasTB) {
-                state[`t1_tb_s${state.currentSet}`] = state.p1Index;
-                state[`t2_tb_s${state.currentSet}`] = state.p2Index;
-                state.lastTiebreakScore1 = state.p1Index;
-                state.lastTiebreakScore2 = state.p2Index;
-            } else if ((winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
+            if (!wasTB && (winTeam === 1 ? state.p2Index : state.p1Index) === 0) { 
                 state[`t${winTeam}_lg_s${state.currentSet}`] = (state[`t${winTeam}_lg_s${state.currentSet}`] || 0) + 1; 
             }
-            
+
             state.p1Index = 0; 
             state.p2Index = 0; 
             state.isTiebreak = false; 
