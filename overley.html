@@ -374,22 +374,23 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== БАНЕР "ХТО ПОДАЄ" ===== */
+        /* ===== БАНЕР "ХТО ПОДАЄ" (РОЗТЯГНУТО ЯК СЛАЙД БРЕЙКПОІНТ) ===== */
         .server-change-banner {
-            position: fixed; bottom: 110px; left: 140px; z-index: 99000;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(8,8,8,0.42); border: 1px solid rgba(198,159,102,0.5); border-radius: 8px;
-            backdrop-filter: blur(4px);
-            padding: 10px 18px; font-family: 'Montserrat', sans-serif;
-            opacity: 0; visibility: hidden; transform: translateX(-140%);
-            transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s;
-            box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+            position: fixed; bottom: 30px; left: 0; z-index: 99000;
+            display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+            width: 320px; height: 54px; box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.15); border-left: none; border-radius: 0 6px 6px 0;
+            padding: 0 22px; font-family: 'Montserrat', sans-serif;
+            opacity: 0; visibility: hidden; transform: translateX(-100%);
+            transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.55s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
         .server-change-banner.visible { opacity: 1; visibility: visible; transform: translateX(0); }
-        .server-change-banner-ball { font-size: 22px; flex-shrink: 0; }
-        .server-change-banner-text { display: flex; flex-direction: column; }
-        .server-change-banner-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c69f66; }
-        .server-change-banner-name { font-size: 16px; font-weight: 800; color: #fff; }
+        .server-change-banner-ball { font-size: 20px; flex-shrink: 0; }
+        .server-change-banner-text { display: flex; flex-direction: column; text-align: right; }
+        .server-change-banner-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #b28a55; }
+        .server-change-banner-name { font-size: 16px; font-weight: 900; color: #111111; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
 
         /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
