@@ -232,6 +232,21 @@
         .ribbons-top-container { position: absolute; bottom: 100%; left: 0; width: 100%; display: flex; flex-direction: column-reverse; gap: 2px; margin-bottom: 2px; z-index: 1; }
         .ribbon-top-item { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; background: rgba(30, 30, 30, 0.95); color: #ffffff; border-radius: 4px 4px 0 0; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease, padding 0.3s; box-sizing: border-box; white-space: nowrap; }
         .ribbon-top-item.visible { height: 22px; opacity: 1; padding: 0 14px; }
+
+        /* ===== НОВИЙ НАПИС СТАДІЇ ТУРНІРУ НАД ТАБЛОМ (FINAL, SEMIFINAL, GROUP A) ===== */
+        .r-stage-style {
+            background: rgba(18, 18, 18, 0.85);
+            color: #c69f66;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            align-self: flex-start;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid rgba(198, 159, 102, 0.4);
+            border-bottom: none;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+
         .r-proset-style { color: #c69f66; border: 2px solid #5a4528; border-bottom: none; align-self: center; }
         .r-tiebreak-style { background: rgba(75, 85, 99, 0.85); color: #fff; font-size: 11px; letter-spacing: 2px; align-self: flex-end; border-radius: 4px 4px 4px 4px; margin-right: 2px; }
 
@@ -603,6 +618,8 @@
 
         <div class="scoreboard-container">
             <div class="ribbons-top-container">
+                <!-- СТАДІЯ ТУРНІРУ (FINAL, SEMIFINAL, QUARTER-FINAL, GROUP A, B...) -->
+                <div class="ribbon-top-item r-stage-style" id="tournament-stage-ribbon">FINAL</div>
                 <div class="ribbon-top-item r-proset-style" id="ribbon-proset">PRO-SET 8</div>
                 <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
             </div>
@@ -1268,6 +1285,15 @@
                     
                     box1.innerHTML = (tbVal1 !== undefined && tbVal1 !== null && tbVal1 !== "") ? `${g1}<sup>${tbVal1}</sup>` : `${g1}`;
                     box2.innerHTML = (tbVal2 !== undefined && tbVal2 !== null && tbVal2 !== "") ? `${g2}<sup>${tbVal2}</sup>` : `${g2}`;
+                }
+
+                // ОБРОБКА ТА ВІДОБРАЖЕННЯ СТАДІЇ ТУРНІРУ (FINAL, SEMIFINAL ТА ІН.)
+                const stageRibbon = document.getElementById('tournament-stage-ribbon');
+                if (state.tournamentStage && state.tournamentStage.trim() !== "") {
+                    stageRibbon.innerText = state.tournamentStage.trim().toUpperCase();
+                    stageRibbon.classList.add('visible');
+                } else {
+                    stageRibbon.classList.remove('visible');
                 }
 
                 const ribbonProset = document.getElementById('ribbon-proset');
