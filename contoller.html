@@ -50,6 +50,11 @@
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
+
+        /* Стилі для трьох плашок над табло */
+        .top-info-bar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-bottom: 6px; width: 100%; }
+        .top-info-badge { background-color: #ffffff; color: #000000; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.2); white-space: nowrap; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 1100; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
@@ -106,6 +111,13 @@
         <h2>Пульт Padel Pro (Master)</h2>
 
         <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
+
+        <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛО (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
+        <div class="top-info-bar">
+            <div class="top-info-badge" id="top-stage-badge" style="display:none;"></div>
+            <div class="top-info-badge" id="top-mode-badge" style="display:none;"></div>
+            <div class="top-info-badge" id="top-tb-badge" style="display:none;"></div>
+        </div>
 
         <div class="preview-scoreboard">
             <div class="preview-row">
@@ -167,7 +179,7 @@
             </div>
         </div>
 
-        <!-- ===== БЛОКИ ADMIN (ПЕРЕНЕСЕНО В НИЗ ПІД СТАТИСТИКУ) ===== -->
+        <!-- ===== БЛОКИ ADMIN ===== -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
@@ -296,7 +308,6 @@
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
-                <!-- КНОПКИ ПОДАЄ К1 / К2 (ПЕРЕНЕСЕНО СЮДИ) -->
                 <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Команда на подачі:</div>
                 <div class="serve-box" style="margin-bottom:8px;">
                     <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
@@ -334,7 +345,6 @@
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-                <!-- КНОПКУ КІНЕЦЬ МАТЧУ ПЕРЕНЕСЕНО СЮДИ (ПІД РОЗБЛОКУВАТИ) -->
                 <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
             </div>
 
@@ -483,12 +493,11 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        // МАСИВ ЦИКЛІЧНОЇ ПОСЛІДОВНОСТІ ПОДАЧ
         const serverOrder = [
-            { team: 1, slot: 1 }, // 0: Команда A, Гравець 1
-            { team: 2, slot: 1 }, // 1: Команда B, Гравець 1
-            { team: 1, slot: 2 }, // 2: Команда A, Гравець 2
-            { team: 2, slot: 2 }  // 3: Команда B, Гравець 2
+            { team: 1, slot: 1 },
+            { team: 2, slot: 1 },
+            { team: 1, slot: 2 },
+            { team: 2, slot: 2 }
         ];
 
         let mySessionId = localStorage.getItem('padel_session_id');
@@ -520,7 +529,6 @@
             }
         };
 
-        // КЕРУВАННЯ СТАДІЄЮ ТУРНІРУ
         window.setTournamentStage = function(val) {
             saveToHistory(state);
             state.tournamentStage = val;
@@ -1000,7 +1008,41 @@
                 }
             }
 
-            // ОНОВЛЕННЯ СТАНУ СТАДІЇ ТУРНІРУ В UI
+            // ОНОВЛЕННЯ 3-Х ПЛАШОК НАД ТАБЛО
+            const stageBadge = document.getElementById('top-stage-badge');
+            const modeBadge = document.getElementById('top-mode-badge');
+            const tbBadge = document.getElementById('top-tb-badge');
+
+            // 1. Стадія турніру
+            if (state.tournamentStage) {
+                stageBadge.innerText = "🏆 " + state.tournamentStage;
+                stageBadge.style.display = "inline-block";
+            } else {
+                stageBadge.style.display = "none";
+            }
+
+            // 2. Режим гри
+            let modeText = "";
+            if (state.isSuperTiebreak) modeText = `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit || 10})`;
+            else if (state.isAmericano) modeText = `АМЕРИКАНО (${state.americanoLimit || 21})`;
+            else if (state.isMexicano) modeText = `МЕКСИКАНО (${state.mexicanoLimit || 24})`;
+            else if (state.isProSet) modeText = `PRO-SET (${state.proSetLimit || 8})`;
+
+            if (modeText) {
+                modeBadge.innerText = "🎮 " + modeText;
+                modeBadge.style.display = "inline-block";
+            } else {
+                modeBadge.style.display = "none";
+            }
+
+            // 3. Тайбрейк
+            if (state.isTiebreak) {
+                tbBadge.innerText = "🔥 TIEBREAK";
+                tbBadge.style.display = "inline-block";
+            } else {
+                tbBadge.style.display = "none";
+            }
+
             const curStage = state.tournamentStage || "";
             const stageRadios = document.querySelectorAll('input[name="tournament-stage-opt"]');
             let matchedRadio = false;
@@ -1270,15 +1312,12 @@
                 state.statsAutoTrigger = Date.now();
             }
 
-            // ===== ЦИКЛІЧНЕ ПЕРЕМИКАННЯ ПОДАЧІ (T1P1 -> T2P1 -> T1P2 -> T2P2) =====
             const curTeam = state.currentServer || 1;
             const curSlot = (curTeam === 1 ? state.p1ServerSlot : state.p2ServerSlot) || 1;
             
-            // Знаходимо поточний індекс у циклі 0..3
             let curIndex = serverOrder.findIndex(s => s.team === curTeam && s.slot === curSlot);
             if (curIndex === -1) curIndex = 0;
 
-            // Перехід на наступного гравця
             const nextIndex = (curIndex + 1) % 4;
             const nextServer = serverOrder[nextIndex];
 
@@ -1299,7 +1338,6 @@
         window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         
-        // РУЧНИЙ ВИБІР ПОДАЮЧОЇ КОМАНДИ
         window.setServer = function(s) { 
             saveToHistory(state); 
             state.currentServer = s; 
@@ -1307,7 +1345,6 @@
             set(matchRef, state); 
         }
 
-        // РУЧНИЙ ВИБІР КОНКРЕТНОГО ГРАВЦЯ (СЛОТА)
         window.setServerSlotManual = function(team, slot) {
             saveToHistory(state);
             state.currentServer = team;
