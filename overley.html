@@ -229,26 +229,45 @@
         .set-past { background-color: rgba(255,255,255,0.9); color: #1a1a1a; }
         .set-current { background-color: rgba(122,122,122,0.75); color: #ffffff; }
 
-        .ribbons-top-container { position: absolute; bottom: 100%; left: 0; width: 100%; display: flex; flex-direction: column-reverse; gap: 2px; margin-bottom: 2px; z-index: 1; }
-        .ribbon-top-item { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; background: rgba(30, 30, 30, 0.95); color: #ffffff; border-radius: 4px 4px 0 0; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease, padding 0.3s; box-sizing: border-box; white-space: nowrap; }
-        .ribbon-top-item.visible { height: 22px; opacity: 1; padding: 0 14px; }
-
-        /* ===== НОВИЙ НАПИС СТАДІЇ ТУРНІРУ НАД ТАБЛОМ (FINAL, SEMIFINAL, GROUP A) ===== */
-        .r-stage-style {
-            background: rgba(18, 18, 18, 0.85);
-            color: #c69f66;
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            align-self: flex-start;
-            border-radius: 4px 4px 0 0;
-            border: 1px solid rgba(198, 159, 102, 0.4);
-            border-bottom: none;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        /* ===== КОНТЕЙНЕР ДЛЯ 3-Х ПЛАШОК ЧІТКО НАД ТАБЛОМ (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) ===== */
+        .ribbons-top-container { 
+            position: absolute; 
+            bottom: 100%; 
+            left: 0; 
+            width: 100%; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 4px; 
+            margin-bottom: 4px; 
+            z-index: 10; 
+            align-items: center;
         }
 
-        .r-proset-style { color: #c69f66; border: 2px solid #5a4528; border-bottom: none; align-self: center; }
-        .r-tiebreak-style { background: rgba(75, 85, 99, 0.85); color: #fff; font-size: 11px; letter-spacing: 2px; align-self: flex-end; border-radius: 4px 4px 4px 4px; margin-right: 2px; }
+        .ribbon-top-item { 
+            height: 0; 
+            opacity: 0; 
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 11px; 
+            background: #ffffff; 
+            color: #000000; 
+            border-radius: 4px; 
+            border: 1px solid #cccccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease, padding 0.3s; 
+            box-sizing: border-box; 
+            white-space: nowrap; 
+        }
+        .ribbon-top-item.visible { 
+            height: 22px; 
+            opacity: 1; 
+            padding: 0 10px; 
+        }
 
         .info-ribbons-container { position: absolute; top: 100%; left: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; z-index: 1; margin-top: 2px; }
         .ribbon { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; border-radius: 0 0 4px 4px; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease; box-sizing: border-box; white-space: nowrap; }
@@ -389,7 +408,7 @@
         .replay-label-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: replayBlink 1s infinite; }
         @keyframes replayBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        /* ===== БАНЕР "ХТО ПОДАЄ" (РОЗТЯГНУТО ЯК СЛАЙД БРЕЙКПОІНТ) ===== */
+        /* ===== БАНЕР "ХТО ПОДАЄ" ===== */
         .server-change-banner {
             position: fixed; bottom: 30px; left: 0; z-index: 99000;
             display: flex; align-items: center; justify-content: flex-end; gap: 10px;
@@ -515,7 +534,6 @@
         html.theme-courtgreen .server-indicator, html.theme-courtgreen .player-serving { color: var(--accent); }
         html.theme-courtgreen .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-courtgreen .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-courtgreen .r-proset-style { color: var(--accent); border-color: rgba(163,230,53,0.35); }
         html.theme-courtgreen .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-courtgreen .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
@@ -529,7 +547,6 @@
         html.theme-graydark .server-indicator, html.theme-graydark .player-serving { color: var(--accent); }
         html.theme-graydark .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-graydark .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-graydark .r-proset-style { color: var(--accent); border-color: rgba(209,213,219,0.35); }
         html.theme-graydark .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-graydark .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
@@ -543,7 +560,6 @@
         html.theme-lightgray .server-indicator, html.theme-lightgray .player-serving { color: var(--accent); }
         html.theme-lightgray .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
         html.theme-lightgray .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
-        html.theme-lightgray .r-proset-style { color: var(--accent); border-color: rgba(107,114,128,0.35); }
         html.theme-lightgray .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
         html.theme-lightgray .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
         html.theme-lightgray .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
@@ -557,7 +573,6 @@
         html.theme-transparent .server-indicator, html.theme-transparent .player-serving { color: var(--accent); }
         html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .r-proset-style { color: var(--accent); border-color: rgba(255,255,255,0.4); }
         html.theme-transparent .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
@@ -617,11 +632,11 @@
         <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
 
         <div class="scoreboard-container">
+            <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛОМ (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
             <div class="ribbons-top-container">
-                <!-- СТАДІЯ ТУРНІРУ (FINAL, SEMIFINAL, QUARTER-FINAL, GROUP A, B...) -->
-                <div class="ribbon-top-item r-stage-style" id="tournament-stage-ribbon">FINAL</div>
-                <div class="ribbon-top-item r-proset-style" id="ribbon-proset">PRO-SET 8</div>
-                <div class="ribbon-top-item r-tiebreak-style" id="ribbon-top-tiebreak">TIEBREAK</div>
+                <div class="ribbon-top-item" id="tournament-stage-ribbon">FINAL</div>
+                <div class="ribbon-top-item" id="ribbon-proset">PRO-SET 8</div>
+                <div class="ribbon-top-item" id="ribbon-top-tiebreak">TIEBREAK</div>
             </div>
 
             <div style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
@@ -864,16 +879,11 @@
         function calculateTiebreakServeState(p1Points, p2Points, initialServer, initialT1Slot, initialT2Slot) {
             const totalPoints = (p1Points || 0) + (p2Points || 0);
             
-            // 1-ше очко подається з правої сторони (R), наступні кожні 2 очки змінюють сторону (L -> R -> L -> R)
             const serveSide = (totalPoints % 2 === 0) ? 'R' : 'L';
 
-            // Перша подача (0-ве очко): подає початкова команда
-            // Наступні очки міняються парами (по 2 очки кожна команда): 1,2 -> друга; 3,4 -> перша; 5,6 -> друга...
             const groupIndex = Math.floor((totalPoints + 1) / 2);
             const currentServerTeam = (groupIndex % 2 === 0) ? initialServer : (initialServer === 1 ? 2 : 1);
 
-            // Визначення слоту гравця в команді (Slot 1 або Slot 2)
-            // Кожна команда робить ротацію гравців при кожній своїй наступній черзі
             let p1Slot = initialT1Slot || 1;
             let p2Slot = initialT2Slot || 1;
 
@@ -1030,7 +1040,6 @@
             if (state) {
                 lastKnownState = state;
 
-                // Перевірка режимів тайбрейку та автоматичний перерахунок подачі
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
                 let activeP2Slot = state.p2ServerSlot || 1;
@@ -1287,7 +1296,7 @@
                     box2.innerHTML = (tbVal2 !== undefined && tbVal2 !== null && tbVal2 !== "") ? `${g2}<sup>${tbVal2}</sup>` : `${g2}`;
                 }
 
-                // ОБРОБКА ТА ВІДОБРАЖЕННЯ СТАДІЇ ТУРНІРУ (FINAL, SEMIFINAL ТА ІН.)
+                // ВІДОБРАЖЕННЯ 3-Х ПЛАШОК ЧІТКО НАД ТАБЛОМ
                 const stageRibbon = document.getElementById('tournament-stage-ribbon');
                 if (state.tournamentStage && state.tournamentStage.trim() !== "") {
                     stageRibbon.innerText = state.tournamentStage.trim().toUpperCase();
