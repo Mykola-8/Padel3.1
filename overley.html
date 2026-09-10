@@ -862,7 +862,8 @@
         }
         function getCornerSlideText(key, state) {
             const lang = (state && state.cornerSlideLang === 'ua') ? 'ua' : 'en';
-            return CORNER_SLIDE_LABELS[key][lang];
+            const entry = CORNER_SLIDE_LABELS[key];
+            return entry ? entry[lang] : '';
         }
 
         function showCornerSlide(text, cssClass) {
@@ -1203,7 +1204,7 @@
                     const curRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
                     if (!!state.isTiebreak && !lastCornerTiebreak) showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
                     else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano && !state.isMexicano) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
-                    else if (curRibbon && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
+                    else if (curRibbon && curRibbon !== "TIEBREAK_POINT" && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
                         showCornerSlide(getCornerSlideText(curRibbon.toLowerCase().replace('_',''), state), 'csp-' + curRibbon.toLowerCase().replace('_',''));
                     }
                     lastCornerRibbon = curRibbon; lastCornerDeuce = state.deuceCounter || 0; lastCornerTiebreak = !!state.isTiebreak;
