@@ -134,16 +134,40 @@
             </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <div class="serve-box">
-                <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-                <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-            </div>
-        </div>
-
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
 
+        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
+
+        <div style="display:flex; gap:8px;">
+            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
+            <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
+        </div>
+
+        <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
+            <div class="switch-row">
+                <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
+                <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
+            </div>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
+                <div class="switch-row">
+                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
+                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
+                </div>
+                <div class="row" style="margin-top:6px;">
+                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
+                </div>
+                <div class="row" style="margin-top:6px; align-items:center;">
+                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
+                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
+                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== БЛОКИ ADMIN (ПЕРЕНЕСЕНО В НИЗ ПІД СТАТИСТИКУ) ===== -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
@@ -158,7 +182,6 @@
             <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
 
-        <!-- ===== БЛОК "TOURNAMENT" (ТІЛЬКИ ДЛЯ ADMIN) ===== -->
         <div class="card" id="admin-tournament-panel" style="display:none; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
             <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 ADMIN — Стадія турніру (Tournament)</div>
             
@@ -200,36 +223,6 @@
             <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
                 <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
                 <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
-            </div>
-        </div>
-
-        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
-
-        <div style="display:flex; gap:8px;">
-            <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
-            <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
-        </div>
-
-        <div class="card" style="border: 1px solid #444; background: #161616; display:flex; flex-direction:column; gap:8px;">
-            <div class="switch-row">
-                <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
-                <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
-            </div>
-            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
-                <div class="switch-row">
-                    <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
-                    <input type="checkbox" id="stats-left-logo-visibility-checkbox" style="width:20px; height:20px;" onchange="toggleStatsLeftLogo(this.checked)">
-                </div>
-                <div class="row" style="margin-top:6px;">
-                    <input type="text" id="stats-left-logo-url-input" placeholder="URL зображення" style="flex:1; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateStatsLeftLogoUrl(this.value)">
-                </div>
-                <div class="row" style="margin-top:6px; align-items:center;">
-                    <button type="button" class="btn" style="flex:1; padding:8px; font-size:11px; background:#444;" onclick="document.getElementById('stats-left-logo-file-input').click()">📁 Завантажити з пристрою</button>
-                    <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
-                    <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
-                </div>
             </div>
         </div>
     </div>
@@ -303,6 +296,13 @@
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
+                <!-- КНОПКИ ПОДАЄ К1 / К2 (ПЕРЕНЕСЕНО СЮДИ) -->
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Команда на подачі:</div>
+                <div class="serve-box" style="margin-bottom:8px;">
+                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+                </div>
+
                 <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
                 <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
 
@@ -334,6 +334,8 @@
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+                <!-- КНОПКУ КІНЕЦЬ МАТЧУ ПЕРЕНЕСЕНО СЮДИ (ПІД РОЗБЛОКУВАТИ) -->
+                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
             </div>
 
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
@@ -399,8 +401,6 @@
                 <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
                 <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
             </div>
-
-            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
 
             <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
