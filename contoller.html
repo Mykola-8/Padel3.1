@@ -158,9 +158,9 @@
             <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
 
-        <!-- ===== БЛОК "TOURNAMENT" (СТАДІЯ ТУРНІРУ) ===== -->
-        <div class="card" style="border: 2px solid #c69f66; background: #1f1b13; display:flex; flex-direction:column; gap:10px;">
-            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 Стадія турніру (Tournament)</div>
+        <!-- ===== БЛОК "TOURNAMENT" (ТІЛЬКИ ДЛЯ ADMIN) ===== -->
+        <div class="card" id="admin-tournament-panel" style="display:none; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 ADMIN — Стадія турніру (Tournament)</div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
                 <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
@@ -1436,6 +1436,7 @@
                 document.getElementById('admin-badge').classList.add('visible');
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
+                document.getElementById('admin-tournament-panel').style.display = 'flex';
                 document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
             }
         });
