@@ -50,6 +50,11 @@
         .p-past { background: #fff; color: #000; }
         .p-curr { background: #666; color: #fff; }
         .p-pts { background: linear-gradient(to bottom, #c69f66, #9c7a4b); color: #fff; width: 45px; border-left: 2px solid #5a4528; font-size: 15px; }
+
+        /* Стилі для трьох плашок над табло */
+        .top-info-bar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-bottom: 6px; width: 100%; }
+        .top-info-badge { background-color: #ffffff; color: #000000; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.2); white-space: nowrap; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.96); z-index: 1100; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
@@ -107,6 +112,13 @@
 
         <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
 
+        <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛО (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
+        <div class="top-info-bar">
+            <div class="top-info-badge" id="top-stage-badge" style="display:none;"></div>
+            <div class="top-info-badge" id="top-mode-badge" style="display:none;"></div>
+            <div class="top-info-badge" id="top-tb-badge" style="display:none;"></div>
+        </div>
+
         <div class="preview-scoreboard">
             <div class="preview-row">
                 <div class="preview-name-block"><span id="pr-name1">Команда A</span><span class="preview-srv" id="pr-srv1">🎾</span></div>
@@ -134,29 +146,8 @@
             </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <div class="serve-box">
-                <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
-                <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
-            </div>
-        </div>
-
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
-
-        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
-            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
-                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
-            </div>
-            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
-        </div>
 
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
@@ -185,6 +176,65 @@
                     <input type="file" id="stats-left-logo-file-input" accept="image/*" style="display:none" onchange="uploadStatsLeftLogoFile(event)">
                     <span id="stats-left-logo-status" style="font-size:11px; color:#4ade80; margin-left:8px;"></span>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== БЛОКИ ADMIN ===== -->
+        <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👑 ADMIN — Камери Prisma Live (ноутбук)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('1')">📷 Камера 1</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('2')">📷 Камера 2</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#7c3aed; color:#fff;" onclick="sendCameraCommand('3')">📷 Камера 3</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#b91c1c; color:#fff;" onclick="sendCameraCommand('rec')">⏺ REC</button>
+                <button class="btn" style="padding:16px 4px; font-weight:800; background:#0369a1; color:#fff;" onclick="sendCameraCommand('replay')">▶️ REPLAY</button>
+            </div>
+            <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
+        </div>
+
+        <div class="card" id="admin-tournament-panel" style="display:none; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 ADMIN — Стадія турніру (Tournament)</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">SEMIFINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="SEMIFINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">1/4 QUARTER-FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="1/4 QUARTER-FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP A</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP A" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP B</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP B" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP C</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP C" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP D</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP D" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #b91c1c;">
+                    <span style="font-size:11px; font-weight:800; color:#ef4444;">Вимкнути (Сховати)</span>
+                    <input type="radio" name="tournament-stage-opt" id="ts-opt-off" value="" onchange="setTournamentStage(this.value)">
+                </label>
+            </div>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
+                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
+                <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
             </div>
         </div>
     </div>
@@ -258,6 +308,12 @@
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
+                <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Команда на подачі:</div>
+                <div class="serve-box" style="margin-bottom:8px;">
+                    <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
+                    <button class="serve-btn" id="srv-btn-2" onclick="setServer(2)">Подає К2 🎾</button>
+                </div>
+
                 <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Хто подає першим у команді A (на початку гейму):</div>
                 <div class="row" id="server-slot-picker-1" style="gap:6px;"></div>
 
@@ -289,6 +345,7 @@
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
             </div>
 
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
@@ -354,8 +411,6 @@
                 <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
                 <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
             </div>
-
-            <button class="btn btn-red" style="padding:16px; font-size:14px;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
 
             <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#a78bfa; text-transform:uppercase;">📺 Повноекранна Медіа-Заставка</div>
@@ -438,12 +493,11 @@
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let state = {}, stateHistory = [], statsTimeout = null, gameStartTimestamp = Date.now(), allPlayersData = {};
 
-        // МАСИВ ЦИКЛІЧНОЇ ПОСЛІДОВНОСТІ ПОДАЧ
         const serverOrder = [
-            { team: 1, slot: 1 }, // 0: Команда A, Гравець 1
-            { team: 2, slot: 1 }, // 1: Команда B, Гравець 1
-            { team: 1, slot: 2 }, // 2: Команда A, Гравець 2
-            { team: 2, slot: 2 }  // 3: Команда B, Гравець 2
+            { team: 1, slot: 1 },
+            { team: 2, slot: 1 },
+            { team: 1, slot: 2 },
+            { team: 2, slot: 2 }
         ];
 
         let mySessionId = localStorage.getItem('padel_session_id');
@@ -473,6 +527,24 @@
                 statusEl.innerText = "✅ Надіслано: " + (labels[camNumber] || camNumber);
                 setTimeout(() => { statusEl.innerText = ""; }, 2500);
             }
+        };
+
+        window.setTournamentStage = function(val) {
+            saveToHistory(state);
+            state.tournamentStage = val;
+            const customInput = document.getElementById('tournament-stage-custom-input');
+            if (customInput) customInput.value = val;
+            set(matchRef, state);
+        };
+
+        let tsCustomTimeout = null;
+        window.updateTournamentStageCustom = function(val) {
+            clearTimeout(tsCustomTimeout);
+            tsCustomTimeout = setTimeout(() => {
+                saveToHistory(state);
+                state.tournamentStage = val;
+                set(matchRef, state);
+            }, 400);
         };
 
         window.switchTab = function(tabId) {
@@ -558,7 +630,7 @@
 
             const freshCourtState = {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
-                scale: 1, posX: 30, posY: 30,
+                scale: 1, posX: 30, posY: 30, tournamentStage: "",
                 isTiebreak: false, isAmericano: false, americanoLimit: 21,
                 isMexicano: false, mexicanoLimit: 24,
                 isProSet: false, proSetLimit: 8,
@@ -896,7 +968,7 @@
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
-                scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30,
+                scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30, tournamentStage: state.tournamentStage || "",
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
                 isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
@@ -934,6 +1006,61 @@
                 if (!state.statsLeftLogoSrc && document.activeElement !== document.getElementById('stats-left-logo-url-input')) {
                     document.getElementById('stats-left-logo-url-input').value = state.statsLeftLogoUrl || "";
                 }
+            }
+
+            // ОНОВЛЕННЯ 3-Х ПЛАШОК НАД ТАБЛО
+            const stageBadge = document.getElementById('top-stage-badge');
+            const modeBadge = document.getElementById('top-mode-badge');
+            const tbBadge = document.getElementById('top-tb-badge');
+
+            // 1. Стадія турніру
+            if (state.tournamentStage) {
+                stageBadge.innerText = "🏆 " + state.tournamentStage;
+                stageBadge.style.display = "inline-block";
+            } else {
+                stageBadge.style.display = "none";
+            }
+
+            // 2. Режим гри
+            let modeText = "";
+            if (state.isSuperTiebreak) modeText = `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit || 10})`;
+            else if (state.isAmericano) modeText = `АМЕРИКАНО (${state.americanoLimit || 21})`;
+            else if (state.isMexicano) modeText = `МЕКСИКАНО (${state.mexicanoLimit || 24})`;
+            else if (state.isProSet) modeText = `PRO-SET (${state.proSetLimit || 8})`;
+
+            if (modeText) {
+                modeBadge.innerText = "🎮 " + modeText;
+                modeBadge.style.display = "inline-block";
+            } else {
+                modeBadge.style.display = "none";
+            }
+
+            // 3. Тайбрейк
+            if (state.isTiebreak) {
+                tbBadge.innerText = "🔥 TIEBREAK";
+                tbBadge.style.display = "inline-block";
+            } else {
+                tbBadge.style.display = "none";
+            }
+
+            const curStage = state.tournamentStage || "";
+            const stageRadios = document.querySelectorAll('input[name="tournament-stage-opt"]');
+            let matchedRadio = false;
+            stageRadios.forEach(r => {
+                if (r.value === curStage) {
+                    r.checked = true;
+                    matchedRadio = true;
+                } else {
+                    r.checked = false;
+                }
+            });
+            if (!matchedRadio && curStage === "") {
+                const offRadio = document.getElementById('ts-opt-off');
+                if (offRadio) offRadio.checked = true;
+            }
+            const customStageInput = document.getElementById('tournament-stage-custom-input');
+            if (customStageInput && document.activeElement !== customStageInput) {
+                customStageInput.value = curStage;
             }
 
             if (document.getElementById('sponsor-logos-visibility-checkbox')) {
@@ -1185,15 +1312,12 @@
                 state.statsAutoTrigger = Date.now();
             }
 
-            // ===== ЦИКЛІЧНЕ ПЕРЕМИКАННЯ ПОДАЧІ (T1P1 -> T2P1 -> T1P2 -> T2P2) =====
             const curTeam = state.currentServer || 1;
             const curSlot = (curTeam === 1 ? state.p1ServerSlot : state.p2ServerSlot) || 1;
             
-            // Знаходимо поточний індекс у циклі 0..3
             let curIndex = serverOrder.findIndex(s => s.team === curTeam && s.slot === curSlot);
             if (curIndex === -1) curIndex = 0;
 
-            // Перехід на наступного гравця
             const nextIndex = (curIndex + 1) % 4;
             const nextServer = serverOrder[nextIndex];
 
@@ -1214,7 +1338,6 @@
         window.updateBoardTheme = function(v) { state.boardTheme = v; set(matchRef, state); }
         window.updateOverlayLang = function(v) { state.cornerSlideLang = v; set(matchRef, state); }
         
-        // РУЧНИЙ ВИБІР ПОДАЮЧОЇ КОМАНДИ
         window.setServer = function(s) { 
             saveToHistory(state); 
             state.currentServer = s; 
@@ -1222,7 +1345,6 @@
             set(matchRef, state); 
         }
 
-        // РУЧНИЙ ВИБІР КОНКРЕТНОГО ГРАВЦЯ (СЛОТА)
         window.setServerSlotManual = function(team, slot) {
             saveToHistory(state);
             state.currentServer = team;
@@ -1351,6 +1473,7 @@
                 document.getElementById('admin-badge').classList.add('visible');
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
+                document.getElementById('admin-tournament-panel').style.display = 'flex';
                 document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
             }
         });
