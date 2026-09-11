@@ -275,6 +275,33 @@
             border-color: #1a1a1a;
         }
 
+        /* ===== ОКРЕМА ПЛАШКА "СТАДІЯ ТУРНІРУ" — НЕЗАЛЕЖНА ВІД ТАБЛА ===== */
+        .stage-badge-wrapper {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 15;
+            transform: translateX(-120%);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .stage-badge-wrapper.visible { transform: translateX(0); opacity: 1; }
+        .stage-badge-plate {
+            display: inline-flex;
+            align-items: center;
+            background: #a6a6a6;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+            white-space: nowrap;
+        }
+
         .info-ribbons-container { position: absolute; top: 100%; left: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; z-index: 1; margin-top: 2px; }
         .ribbon { height: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; border-radius: 0 0 4px 4px; transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease; box-sizing: border-box; white-space: nowrap; }
         .ribbon.visible { height: 28px; opacity: 1; padding: 0 15px; }
@@ -640,7 +667,6 @@
         <div class="scoreboard-container">
             <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛОМ (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
             <div class="ribbons-top-container">
-                <div class="ribbon-top-item" id="tournament-stage-ribbon">FINAL</div>
                 <div class="ribbon-top-item" id="ribbon-proset">PRO-SET 8</div>
                 <div class="ribbon-top-item" id="ribbon-top-tiebreak">TIEBREAK</div>
             </div>
@@ -674,6 +700,8 @@
             </div>
         </div>
     </div>
+
+    <div class="stage-badge-wrapper" id="stage-badge-wrapper"><div class="stage-badge-plate" id="stage-badge-plate"></div></div>
 
     <div class="match-finished-board" id="match-finished-board">
         <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
@@ -1303,13 +1331,19 @@
                     box2.innerHTML = (tbVal2 !== undefined && tbVal2 !== null && tbVal2 !== "") ? `${g2}<sup>${tbVal2}</sup>` : `${g2}`;
                 }
 
-                // ВІДОБРАЖЕННЯ 3-Х ПЛАШОК ЧІТКО НАД ТАБЛОМ
-                const stageRibbon = document.getElementById('tournament-stage-ribbon');
+                // ВІДОБРАЖЕННЯ 2-Х ПЛАШОК ЧІТКО НАД ТАБЛОМ (proset / tiebreak)
+
+                // ОКРЕМА ПЛАШКА "СТАДІЯ ТУРНІРУ" — НЕЗАЛЕЖНА ВІД ТОГО, ЧИ СХОВАНЕ ОСНОВНЕ ТАБЛО
+                const stageBadgeWrapper = document.getElementById('stage-badge-wrapper');
+                const stageBadgePlate = document.getElementById('stage-badge-plate');
                 if (state.tournamentStage && state.tournamentStage.trim() !== "") {
-                    stageRibbon.innerText = state.tournamentStage.trim().toUpperCase();
-                    stageRibbon.classList.add('visible');
+                    stageBadgePlate.innerText = "🏆 " + state.tournamentStage.trim().toUpperCase();
+                    const boardRect = boardWrapper.getBoundingClientRect();
+                    stageBadgeWrapper.style.top = (boardRect.bottom + 10) + 'px';
+                    stageBadgeWrapper.style.left = boardRect.left + 'px';
+                    stageBadgeWrapper.classList.add('visible');
                 } else {
-                    stageRibbon.classList.remove('visible');
+                    stageBadgeWrapper.classList.remove('visible');
                 }
 
                 const ribbonProset = document.getElementById('ribbon-proset');
