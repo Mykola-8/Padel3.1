@@ -968,7 +968,7 @@
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
             set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
-                scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30, tournamentStage: state.tournamentStage || "",
+                scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30, tournamentStage: "",
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
                 isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
