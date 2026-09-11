@@ -181,21 +181,21 @@
 
         /* ===== ІНФОРМАЦІЙНА ПАНЕЛЬ ПІД ТАБЛОМ (реклама/анонс) ===== */
         .board-promo-panel {
-            position: absolute; top: 100%; left: 0; margin-top: 10px;
+            position: fixed; top: 0; left: 0;
             min-width: 260px; max-width: 420px;
-            background: rgba(0,0,0,0.72);
-            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(0,0,0,0.1);
             border-radius: 6px;
-            padding: 14px 18px;
+            padding: 0;
             box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 6px; align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             opacity: 0; visibility: hidden; transform: translateY(-8px);
             transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
             font-family: 'Montserrat', sans-serif;
             z-index: 500;
         }
         .board-promo-panel.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .board-promo-line { text-align: center; line-height: 1.35; white-space: pre-wrap; word-break: break-word; width: 100%; box-sizing: border-box; font-weight: 700; color: #1a1a1a; text-shadow: none; }
         .board-promo-line.has-bg { padding: 3px 10px; border-radius: 3px; text-shadow: none; }
         .board-promo-line:empty { display: none; }
 
@@ -292,14 +292,16 @@
             background: #a6a6a6;
             color: #ffffff;
             font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 12px;
+            letter-spacing: 0.5px;
+            font-size: 13px;
             padding: 6px 14px;
             border-radius: 4px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.35);
             white-space: nowrap;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         .info-ribbons-container { position: absolute; top: 100%; left: 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; z-index: 1; margin-top: 2px; }
@@ -654,14 +656,6 @@
             <img id="logo-img-node" src="" style="display:none;">
         </div>
 
-        <div class="board-promo-panel" id="board-promo-panel">
-            <div class="board-promo-line" id="board-promo-line-1"></div>
-            <div class="board-promo-line" id="board-promo-line-2"></div>
-            <div class="board-promo-line" id="board-promo-line-3"></div>
-            <div class="board-promo-line" id="board-promo-line-4"></div>
-            <div class="board-promo-line" id="board-promo-line-5"></div>
-        </div>
-
         <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
 
         <div class="scoreboard-container">
@@ -702,6 +696,14 @@
     </div>
 
     <div class="stage-badge-wrapper" id="stage-badge-wrapper"><div class="stage-badge-plate" id="stage-badge-plate"></div></div>
+
+    <div class="board-promo-panel" id="board-promo-panel">
+        <div class="board-promo-line" id="board-promo-line-1"></div>
+        <div class="board-promo-line" id="board-promo-line-2"></div>
+        <div class="board-promo-line" id="board-promo-line-3"></div>
+        <div class="board-promo-line" id="board-promo-line-4"></div>
+        <div class="board-promo-line" id="board-promo-line-5"></div>
+    </div>
 
     <div class="match-finished-board" id="match-finished-board">
         <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
@@ -1209,8 +1211,21 @@
                     txtNode.style.color = state.logoFontColor || '#ffffff'; txtNode.style.display = 'block';
                 }
 
+                // ОКРЕМА ПЛАШКА "СТАДІЯ ТУРНІРУ" — НЕЗАЛЕЖНА ВІД ТОГО, ЧИ СХОВАНЕ ОСНОВНЕ ТАБЛО
+                const stageBadgeWrapper = document.getElementById('stage-badge-wrapper');
+                const stageBadgePlate = document.getElementById('stage-badge-plate');
+                const boardRect = boardWrapper.getBoundingClientRect();
+                const teamNameStartX = boardRect.left + 120; // початок блоку з назвами команд (ширина logo-panel)
+                stageBadgePlate.innerText = (state.tournamentStage || "").trim().toUpperCase();
+                stageBadgeWrapper.style.top = (boardRect.bottom + 46) + 'px'; // нижче написів BREAK POINT / GAME POINT
+                stageBadgeWrapper.style.left = teamNameStartX + 'px';
+                stageBadgeWrapper.classList.toggle('visible', !!(state.tournamentStage && state.tournamentStage.trim() !== ""));
+
                 const boardPromoPanel = document.getElementById('board-promo-panel');
                 if (boardPromoPanel) {
+                    const stageBadgeRect = stageBadgeWrapper.getBoundingClientRect();
+                    boardPromoPanel.style.top = (stageBadgeRect.bottom + 8) + 'px';
+                    boardPromoPanel.style.left = teamNameStartX + 'px';
                     boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
                     const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
                     for (let i = 1; i <= 5; i++) {
@@ -1332,19 +1347,6 @@
                 }
 
                 // ВІДОБРАЖЕННЯ 2-Х ПЛАШОК ЧІТКО НАД ТАБЛОМ (proset / tiebreak)
-
-                // ОКРЕМА ПЛАШКА "СТАДІЯ ТУРНІРУ" — НЕЗАЛЕЖНА ВІД ТОГО, ЧИ СХОВАНЕ ОСНОВНЕ ТАБЛО
-                const stageBadgeWrapper = document.getElementById('stage-badge-wrapper');
-                const stageBadgePlate = document.getElementById('stage-badge-plate');
-                if (state.tournamentStage && state.tournamentStage.trim() !== "") {
-                    stageBadgePlate.innerText = "🏆 " + state.tournamentStage.trim().toUpperCase();
-                    const boardRect = boardWrapper.getBoundingClientRect();
-                    stageBadgeWrapper.style.top = (boardRect.bottom + 10) + 'px';
-                    stageBadgeWrapper.style.left = boardRect.left + 'px';
-                    stageBadgeWrapper.classList.add('visible');
-                } else {
-                    stageBadgeWrapper.classList.remove('visible');
-                }
 
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
