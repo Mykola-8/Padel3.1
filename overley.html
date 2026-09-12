@@ -1217,8 +1217,11 @@
                 const boardRect = boardWrapper.getBoundingClientRect();
                 const teamNameStartX = boardRect.left + 120; // початок блоку з назвами команд (ширина logo-panel)
                 stageBadgePlate.innerText = (state.tournamentStage || "").trim().toUpperCase();
-                stageBadgeWrapper.style.top = (boardRect.bottom + 46) + 'px'; // нижче написів BREAK POINT / GAME POINT
-                stageBadgeWrapper.style.left = teamNameStartX + 'px';
+                stageBadgePlate.style.fontSize = (state.stageFontSize || 13) + 'px';
+                stageBadgePlate.style.background = state.stageBgColor || '#a6a6a6';
+                stageBadgePlate.style.color = state.stageTextColor || '#ffffff';
+                stageBadgeWrapper.style.top = (boardRect.bottom + 46 + (state.stageOffsetY || 0)) + 'px'; // нижче написів BREAK POINT / GAME POINT
+                stageBadgeWrapper.style.left = (teamNameStartX + (state.stageOffsetX || 0)) + 'px';
                 stageBadgeWrapper.classList.toggle('visible', !!(state.tournamentStage && state.tournamentStage.trim() !== ""));
 
                 const boardPromoPanel = document.getElementById('board-promo-panel');
