@@ -1192,8 +1192,9 @@
                     document.getElementById('qr-code-panel').classList.add('visible');
                 } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
 
-                renderTeamNamePlayers('name-display-t1', state.p1name || getStatsLabel('team1Fallback', state), activeServer === 1, activeP1Slot);
-                renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), activeServer === 2, activeP2Slot);
+                const serverIndicatorOn = state.showServerIndicator !== false;
+                renderTeamNamePlayers('name-display-t1', state.p1name || getStatsLabel('team1Fallback', state), serverIndicatorOn && activeServer === 1, activeP1Slot);
+                renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), serverIndicatorOn && activeServer === 2, activeP2Slot);
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
@@ -1300,8 +1301,8 @@
                     }
                 }
 
-                document.getElementById('srv1').classList.toggle('active', activeServer === 1);
-                document.getElementById('srv2').classList.toggle('active', activeServer === 2);
+                document.getElementById('srv1').classList.toggle('active', serverIndicatorOn && activeServer === 1);
+                document.getElementById('srv2').classList.toggle('active', serverIndicatorOn && activeServer === 2);
 
                 const activeSet = state.currentSet || 1;
                 if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
