@@ -466,29 +466,32 @@
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             width: 220px; height: 90px;
             transform-origin: top center;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
+            background: transparent;
+            border: none; border-radius: 0;
             display: flex; align-items: center; justify-content: center;
-            padding: 8px; box-sizing: border-box;
+            padding: 0; box-sizing: border-box;
             opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s;
         }
         .sponsor-logo-frame.visible { opacity: 1; visibility: visible; }
         .sponsor-logo-frame img {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto;
             max-width: 100%; max-height: 100%;
             width: auto; height: auto;
             object-fit: contain;
-            transition: opacity 0.4s ease;
+            opacity: 0;
+            transition: opacity 0.35s ease;
         }
+        .sponsor-logo-frame img.active { opacity: 1; }
 
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
             transform-origin: top center;
             display: flex; align-items: center; justify-content: center; gap: 16px;
             max-width: 90vw; flex-wrap: nowrap;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
-            padding: 10px 18px; box-sizing: border-box;
+            background: transparent;
+            border: none; border-radius: 0;
+            padding: 0; box-sizing: border-box;
             opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s;
         }
@@ -636,9 +639,7 @@
     </div>
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (карусель) -->
-    <div class="sponsor-logo-frame" id="sponsor-logo-frame">
-        <img id="sponsor-logo-img" src="" alt="">
-    </div>
+    <div class="sponsor-logo-frame" id="sponsor-logo-frame"></div>
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (всі одразу) -->
     <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
@@ -696,7 +697,7 @@
     </div>
 
     <div class="stage-badge-wrapper" id="stage-badge-wrapper"><div class="stage-badge-plate" id="stage-badge-plate"></div></div>
-
+ 
     <div class="board-promo-panel" id="board-promo-panel">
         <div class="board-promo-line" id="board-promo-line-1"></div>
         <div class="board-promo-line" id="board-promo-line-2"></div>
@@ -704,7 +705,7 @@
         <div class="board-promo-line" id="board-promo-line-4"></div>
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
-
+ 
     <div class="match-finished-board" id="match-finished-board">
         <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
         <div class="mfb-winner" id="mfb-winner"><span class="trophy">🏆</span><span id="mfb-winner-name">Команда A</span></div>
@@ -953,19 +954,17 @@
             clearInterval(sponsorLogoTimer);
             sponsorLogoActiveUrls = urls;
             sponsorLogoIndex = 0;
-            const imgEl = document.getElementById('sponsor-logo-img');
-            if (!imgEl) return;
-            if (urls.length === 0) { imgEl.src = ""; return; }
-            imgEl.style.opacity = 1;
-            imgEl.src = urls[0];
-            if (urls.length > 1) {
+            const frameEl = document.getElementById('sponsor-logo-frame');
+            if (!frameEl) return;
+            frameEl.innerHTML = urls.map(u => '<img src="' + u + '">').join('');
+            const imgs = frameEl.querySelectorAll('img');
+            if (imgs.length === 0) return;
+            imgs[0].classList.add('active');
+            if (imgs.length > 1) {
                 sponsorLogoTimer = setInterval(() => {
-                    sponsorLogoIndex = (sponsorLogoIndex + 1) % sponsorLogoActiveUrls.length;
-                    imgEl.style.opacity = 0;
-                    setTimeout(() => {
-                        imgEl.src = sponsorLogoActiveUrls[sponsorLogoIndex];
-                        imgEl.style.opacity = 1;
-                    }, 350);
+                    imgs[sponsorLogoIndex].classList.remove('active');
+                    sponsorLogoIndex = (sponsorLogoIndex + 1) % imgs.length;
+                    setTimeout(() => { imgs[sponsorLogoIndex].classList.add('active'); }, 350);
                 }, Math.max(1, intervalSec || 4) * 1000);
             }
         }
@@ -1468,11 +1467,14 @@
                         const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
                         const showAllMode = state.sponsorLogoDisplayMode === 'all';
                         const scaleTransform = 'translateX(calc(-50% + ' + (state.sponsorLogoPosX || 0) + 'px)) scale(' + (state.sponsorLogoScale || 1) + ')';
+                        const topPx = (20 + (state.sponsorLogoPosY || 0)) + 'px';
 
                         sponsorFrame.classList.toggle('visible', !!state.showSponsorLogos && !showAllMode);
                         sponsorFrame.style.transform = scaleTransform;
+                        sponsorFrame.style.top = topPx;
                         sponsorAllFrame.classList.toggle('visible', !!state.showSponsorLogos && showAllMode);
                         sponsorAllFrame.style.transform = scaleTransform;
+                        sponsorAllFrame.style.top = topPx;
 
                         const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode;
                         if (signature !== lastSponsorLogosSignature) {
