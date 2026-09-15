@@ -567,7 +567,7 @@
             state.showServerIndicator = checked;
             set(matchRef, state);
         };
-
+ 
         window.setTournamentStage = function(val) {
             saveToHistory(state);
             state.tournamentStage = val;
@@ -1128,7 +1128,7 @@
 
             const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
             if (serverIndicatorCheckbox) serverIndicatorCheckbox.checked = state.showServerIndicator !== false;
-
+ 
             const fsSlider = document.getElementById('stage-fontsize-slider');
             const fsLabel = document.getElementById('stage-fontsize-value');
             if (fsSlider && document.activeElement !== fsSlider) {
