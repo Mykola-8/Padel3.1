@@ -338,6 +338,8 @@
                 <div class="row"><input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
+                <div class="switch-row" style="margin-top:8px;"><span>Показувати індикатор подачі на трансляції:</span><input type="checkbox" id="server-indicator-checkbox" checked onchange="toggleServerIndicator(this.checked)"></div>
+
                 <div style="font-size:10px; color:#ccc; margin-top:10px; margin-bottom:4px;">Команда на подачі:</div>
                 <div class="serve-box" style="margin-bottom:8px;">
                     <button class="serve-btn" id="srv-btn-1" onclick="setServer(1)">Подає К1 🎾</button>
@@ -557,6 +559,12 @@
                 statusEl.innerText = "✅ Надіслано: " + (labels[camNumber] || camNumber);
                 setTimeout(() => { statusEl.innerText = ""; }, 2500);
             }
+        };
+
+        window.toggleServerIndicator = function(checked) {
+            saveToHistory(state);
+            state.showServerIndicator = checked;
+            set(matchRef, state);
         };
 
         window.setTournamentStage = function(val) {
@@ -1115,6 +1123,9 @@
             if (customStageInput && document.activeElement !== customStageInput) {
                 customStageInput.value = curStage;
             }
+
+            const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
+            if (serverIndicatorCheckbox) serverIndicatorCheckbox.checked = state.showServerIndicator !== false;
 
             const fsSlider = document.getElementById('stage-fontsize-slider');
             const fsLabel = document.getElementById('stage-fontsize-value');
