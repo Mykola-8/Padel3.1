@@ -502,6 +502,32 @@
             object-fit: contain;
         }
 
+        /* ===== БІГУЧИЙ РЯДОК ===== */
+        .ticker-bar {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 9600;
+            height: 34px; overflow: hidden;
+            display: flex; align-items: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+        .ticker-bar.visible { opacity: 1; visibility: visible; }
+        .ticker-track {
+            display: flex; align-items: center; white-space: nowrap;
+            will-change: transform;
+            animation: ticker-scroll linear infinite;
+        }
+        .ticker-track span {
+            padding: 0 50px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800; font-size: 15px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            -webkit-font-smoothing: antialiased;
+        }
+        @keyframes ticker-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
         /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
         .fullscreen-media-overlay {
             position: fixed;
@@ -643,6 +669,13 @@
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (всі одразу) -->
     <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
+
+    <!-- БІГУЧИЙ РЯДОК -->
+    <div class="ticker-bar" id="ticker-bar">
+        <div class="ticker-track" id="ticker-track">
+            <span id="ticker-text-1"></span><span id="ticker-text-2"></span>
+        </div>
+    </div>
 
     <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
@@ -1486,6 +1519,21 @@
                                 startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
                             }
                         }
+                    }
+
+                    // ===== БІГУЧИЙ РЯДОК =====
+                    const tickerBar = document.getElementById('ticker-bar');
+                    if (tickerBar) {
+                        const tickerText = (state.tickerText || '').trim();
+                        tickerBar.classList.toggle('visible', !!state.tickerEnabled && tickerText !== '');
+                        tickerBar.style.background = state.tickerBgColor || '#141414';
+                        const t1 = document.getElementById('ticker-text-1');
+                        const t2 = document.getElementById('ticker-text-2');
+                        const track = document.getElementById('ticker-track');
+                        if (t1.innerText !== tickerText) { t1.innerText = tickerText; t2.innerText = tickerText; }
+                        const tColor = state.tickerTextColor || '#ffffff';
+                        t1.style.color = tColor; t2.style.color = tColor;
+                        track.style.animationDuration = (state.tickerSpeed || 20) + 's';
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
