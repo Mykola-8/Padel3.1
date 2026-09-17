@@ -438,6 +438,24 @@
             </div>
 
             <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Бігучий рядок (внизу екрана):</div>
+                <div class="switch-row"><span>Увімкнути бігучий рядок:</span><input type="checkbox" id="ticker-enabled-checkbox" onchange="updateTickerEnabled(this.checked)"></div>
+                <textarea id="ticker-text-input" placeholder="Наприклад: Ласкаво просимо на турнір! Наступний матч о 15:00 на корті №2 • Слідкуйте за результатами..." rows="3" style="width:100%; box-sizing:border-box; margin-top:6px;" oninput="updateTickerText(this.value)"></textarea>
+                <div class="row" style="margin-top:8px;">
+                    <span>Колір фону:</span>
+                    <input type="color" id="ticker-bgcolor-input" value="#141414" oninput="updateTickerColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                </div>
+                <div class="row">
+                    <span>Колір тексту:</span>
+                    <input type="color" id="ticker-textcolor-input" value="#ffffff" oninput="updateTickerColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                </div>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Швидкість руху тексту (менше — швидше): <b id="ticker-speed-value" style="color:#e0b878;">20с</b></span>
+                    <input type="range" id="ticker-speed-slider" min="5" max="60" step="1" value="20" oninput="updateTickerSpeed(this.value)">
+                </label>
+            </div>
+
+            <div class="card">
                 <div class="row"><span>Масштаб:</span><input type="range" id="scale-slider" min="0.5" max="1.5" step="0.05" oninput="updateScale(this.value)"></div>
                 <div class="row"><span>Позиція X:</span><input type="range" id="pos-x-slider" min="-960" max="1920" step="5" oninput="updatePosition()"></div>
                 <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
@@ -567,7 +585,7 @@
             state.showServerIndicator = checked;
             set(matchRef, state);
         };
- 
+
         window.setTournamentStage = function(val) {
             saveToHistory(state);
             state.tournamentStage = val;
@@ -945,6 +963,30 @@
         window.updateSponsorLogoScale = function(v) { state.sponsorLogoScale = parseFloat(v) || 1; set(matchRef, state); };
         window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
         window.updateSponsorLogoPosY = function(v) { state.sponsorLogoPosY = parseInt(v) || 0; set(matchRef, state); };
+
+        window.updateTickerEnabled = function(checked) { saveToHistory(state); state.tickerEnabled = checked; set(matchRef, state); };
+
+        let tickerTextTimeout = null;
+        window.updateTickerText = function(val) {
+            clearTimeout(tickerTextTimeout);
+            tickerTextTimeout = setTimeout(() => {
+                state.tickerText = val;
+                set(matchRef, state);
+            }, 400);
+        };
+
+        window.updateTickerColors = function() {
+            state.tickerBgColor = document.getElementById('ticker-bgcolor-input').value || '#141414';
+            state.tickerTextColor = document.getElementById('ticker-textcolor-input').value || '#ffffff';
+            set(matchRef, state);
+        };
+
+        window.updateTickerSpeed = function(v) {
+            state.tickerSpeed = parseInt(v) || 20;
+            const lbl = document.getElementById('ticker-speed-value');
+            if (lbl) lbl.innerText = state.tickerSpeed + 'с';
+            set(matchRef, state);
+        };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
         window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
@@ -1126,9 +1168,24 @@
                 customStageInput.value = curStage;
             }
 
+            const tickerEnabledCheckbox = document.getElementById('ticker-enabled-checkbox');
+            if (tickerEnabledCheckbox) tickerEnabledCheckbox.checked = !!state.tickerEnabled;
+            const tickerTextInput = document.getElementById('ticker-text-input');
+            if (tickerTextInput && document.activeElement !== tickerTextInput) tickerTextInput.value = state.tickerText || '';
+            const tickerBgInput = document.getElementById('ticker-bgcolor-input');
+            if (tickerBgInput && document.activeElement !== tickerBgInput) tickerBgInput.value = state.tickerBgColor || '#141414';
+            const tickerTextColorInput = document.getElementById('ticker-textcolor-input');
+            if (tickerTextColorInput && document.activeElement !== tickerTextColorInput) tickerTextColorInput.value = state.tickerTextColor || '#ffffff';
+            const tickerSpeedSlider = document.getElementById('ticker-speed-slider');
+            const tickerSpeedLbl = document.getElementById('ticker-speed-value');
+            if (tickerSpeedSlider && document.activeElement !== tickerSpeedSlider) {
+                tickerSpeedSlider.value = state.tickerSpeed || 20;
+                if (tickerSpeedLbl) tickerSpeedLbl.innerText = (state.tickerSpeed || 20) + 'с';
+            }
+
             const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
             if (serverIndicatorCheckbox) serverIndicatorCheckbox.checked = state.showServerIndicator !== false;
- 
+
             const fsSlider = document.getElementById('stage-fontsize-slider');
             const fsLabel = document.getElementById('stage-fontsize-value');
             if (fsSlider && document.activeElement !== fsSlider) {
