@@ -362,7 +362,7 @@
         .stats-broadcast-row-anim.row-in { opacity: 1; }
         .stats-broadcast-card {
             display: flex; align-items: stretch;
-            background: rgba(240, 240, 243, 0.96);
+            background: rgba(60, 60, 64, 0.82);
             border: 1px solid rgba(198, 159, 102, 0.55);
             border-radius: 8px;
             overflow: hidden;
@@ -371,29 +371,29 @@
             font-family: 'Montserrat', sans-serif;
         }
         .stats-broadcast-main { padding: 12px 20px; min-width: 440px; box-sizing: border-box; }
-        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #a1731f; margin-bottom: 8px; text-shadow: none; }
-        .stats-broadcast-header span:last-child { color: #555; font-weight: 700; letter-spacing: 0.5px; }
-        .stats-broadcast-header span:last-child b { color: #111; }
+        .stats-broadcast-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #e0b878; margin-bottom: 8px; text-shadow: none; }
+        .stats-broadcast-header span:last-child { color: #d5d5d8; font-weight: 700; letter-spacing: 0.5px; }
+        .stats-broadcast-header span:last-child b { color: #ffffff; }
         .stats-broadcast-collbls { display: grid; grid-template-columns: 1fr 40px 40px 50px 55px 55px; padding: 0 10px; margin-bottom: 3px; }
-        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #777; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+        .stats-broadcast-collbls span { font-size: 8px; font-weight: 800; color: #c9c9cc; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
         .stats-broadcast-collbls span:first-child { text-align: left; }
         .stats-broadcast-table { display: flex; flex-direction: column; gap: 4px; }
-        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 40px 40px 50px 55px 55px; align-items: center; background: rgba(0,0,0,0.06); border-radius: 4px; padding: 7px 10px; }
-        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #111; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; }
-        .stats-broadcast-cell { font-size: 15px; font-weight: 900; color: #111; text-align: center; text-shadow: none; }
+        .stats-broadcast-row { display: grid; grid-template-columns: 1fr 40px 40px 50px 55px 55px; align-items: center; background: rgba(255,255,255,0.08); border-radius: 4px; padding: 7px 10px; }
+        .stats-broadcast-name { font-size: 14px; font-weight: 800; color: #ffffff; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: none; -webkit-font-smoothing: antialiased; }
+        .stats-broadcast-cell { font-size: 15px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: none; -webkit-font-smoothing: antialiased; }
         .stats-broadcast-logo-box {
             display: none;
             flex-direction: column; align-items: center; justify-content: center; gap: 4px;
             width: 96px; flex-shrink: 0;
-            background: rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.05);
             border-left: 1px solid rgba(198,159,102,0.4);
             padding: 8px; box-sizing: border-box;
         }
         .stats-broadcast-logo-box.visible { display: flex; }
         .stats-broadcast-logo-box img { max-width: 100%; max-height: 56px; object-fit: contain; }
-        .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #a1731f; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
+        .stats-broadcast-logo-box .stats-broadcast-logo-text { font-size: 10px; font-weight: 800; color: #e0b878; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.25; }
         .stats-broadcast-logo-box-left { border-left: none; border-right: 1px solid rgba(198,159,102,0.4); }
-        .stats-broadcast-logo-caption { font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats-broadcast-logo-caption { font-size: 7px; color: #c9c9cc; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ===== РУЧНА СТАТИСТИКА ===== */
         .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 580px; background: rgba(8, 8, 8, 0.55); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 24px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
@@ -697,7 +697,7 @@
     </div>
 
     <div class="stage-badge-wrapper" id="stage-badge-wrapper"><div class="stage-badge-plate" id="stage-badge-plate"></div></div>
- 
+
     <div class="board-promo-panel" id="board-promo-panel">
         <div class="board-promo-line" id="board-promo-line-1"></div>
         <div class="board-promo-line" id="board-promo-line-2"></div>
@@ -705,7 +705,7 @@
         <div class="board-promo-line" id="board-promo-line-4"></div>
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
- 
+
     <div class="match-finished-board" id="match-finished-board">
         <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
         <div class="mfb-winner" id="mfb-winner"><span class="trophy">🏆</span><span id="mfb-winner-name">Команда A</span></div>
@@ -729,7 +729,7 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span>DF</span><span>NET</span><span>SMASH</span><span>BREAK</span><span>GOLDEN</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
@@ -1503,6 +1503,27 @@
                         document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
                         document.getElementById('st-gp1').innerText = state.p1GoldenPoints || 0; 
                         document.getElementById('st-gp2').innerText = state.p2GoldenPoints || 0;
+
+                        // Приховуємо колонки статистики, де в обох команд значення 0
+                        const statCols = [
+                            { label: 'col-lbl-df', cells: ['st-df1', 'st-df2'], width: '40px', val: (state.p1DoubleFaults || 0) + (state.p2DoubleFaults || 0) },
+                            { label: 'col-lbl-nc', cells: ['st-nc1', 'st-nc2'], width: '40px', val: (state.p1NetCords || 0) + (state.p2NetCords || 0) },
+                            { label: 'col-lbl-sm', cells: ['st-sm1', 'st-sm2'], width: '50px', val: (state.p1Smashes || 0) + (state.p2Smashes || 0) },
+                            { label: 'col-lbl-bp', cells: ['st-bp1', 'st-bp2'], width: '55px', val: (state.p1BreakPoints || 0) + (state.p2BreakPoints || 0) },
+                            { label: 'col-lbl-gp', cells: ['st-gp1', 'st-gp2'], width: '55px', val: (state.p1GoldenPoints || 0) + (state.p2GoldenPoints || 0) }
+                        ];
+                        let activeWidths = [];
+                        statCols.forEach(col => {
+                            const active = col.val > 0;
+                            const lblEl = document.getElementById(col.label);
+                            if (lblEl) lblEl.style.display = active ? '' : 'none';
+                            col.cells.forEach(cId => { const c = document.getElementById(cId); if (c) c.style.display = active ? '' : 'none'; });
+                            if (active) activeWidths.push(col.width);
+                        });
+                        const dynamicGridTemplate = '1fr ' + activeWidths.join(' ');
+                        const collblsEl = document.querySelector('#statistics-panel .stats-broadcast-collbls');
+                        if (collblsEl) collblsEl.style.gridTemplateColumns = dynamicGridTemplate;
+                        document.querySelectorAll('#statistics-panel .stats-broadcast-row').forEach(rowEl => { rowEl.style.gridTemplateColumns = dynamicGridTemplate; });
 
                         const statsLogoBox = document.getElementById('stats-broadcast-logo-box');
                         const statsLogoImg = document.getElementById('stats-broadcast-logo-img');
