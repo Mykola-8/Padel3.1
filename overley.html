@@ -505,27 +505,30 @@
         /* ===== БІГУЧИЙ РЯДОК ===== */
         .ticker-bar {
             position: fixed; left: 0; right: 0; bottom: 0; z-index: 9600;
-            height: 34px; overflow: hidden;
-            display: flex; align-items: center;
+            overflow: hidden;
+            display: block;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s;
+            transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
         }
         .ticker-bar.visible { opacity: 1; visibility: visible; }
         .ticker-track {
+            position: absolute; top: 0; left: 0; height: 100%;
             display: flex; align-items: center; white-space: nowrap;
             will-change: transform;
-            animation: ticker-scroll linear infinite;
+            animation-name: ticker-scroll;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            transform: translateX(var(--ticker-start, 100%));
         }
         .ticker-track span {
-            padding: 0 50px;
             font-family: 'Montserrat', sans-serif;
             font-weight: 800; font-size: 15px;
             text-transform: uppercase; letter-spacing: 0.5px;
             -webkit-font-smoothing: antialiased;
         }
         @keyframes ticker-scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
+            from { transform: translateX(var(--ticker-start, 100%)); }
+            to { transform: translateX(var(--ticker-end, -100%)); }
         }
 
         /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
@@ -673,7 +676,7 @@
     <!-- БІГУЧИЙ РЯДОК -->
     <div class="ticker-bar" id="ticker-bar">
         <div class="ticker-track" id="ticker-track">
-            <span id="ticker-text-1"></span><span id="ticker-text-2"></span>
+            <span id="ticker-text-1"></span>
         </div>
     </div>
 
@@ -1526,14 +1529,27 @@
                     if (tickerBar) {
                         const tickerText = (state.tickerText || '').trim();
                         tickerBar.classList.toggle('visible', !!state.tickerEnabled && tickerText !== '');
-                        tickerBar.style.background = state.tickerBgColor || '#141414';
+
+                        const hex = (state.tickerBgColor || '#141414').replace('#', '');
+                        const r = parseInt(hex.substring(0, 2), 16) || 0;
+                        const g = parseInt(hex.substring(2, 4), 16) || 0;
+                        const b = parseInt(hex.substring(4, 6), 16) || 0;
+                        const alpha = (state.tickerBgAlpha !== undefined ? state.tickerBgAlpha : 85) / 100;
+                        tickerBar.style.background = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+                        tickerBar.style.height = (state.tickerHeight || 34) + 'px';
+
                         const t1 = document.getElementById('ticker-text-1');
-                        const t2 = document.getElementById('ticker-text-2');
                         const track = document.getElementById('ticker-track');
-                        if (t1.innerText !== tickerText) { t1.innerText = tickerText; t2.innerText = tickerText; }
+                        if (t1.innerText !== tickerText) { t1.innerText = tickerText; }
                         const tColor = state.tickerTextColor || '#ffffff';
-                        t1.style.color = tColor; t2.style.color = tColor;
+                        t1.style.color = tColor;
                         track.style.animationDuration = (state.tickerSpeed || 20) + 's';
+
+                        // Стартуємо строго з-за правого краю екрана, закінчуємо за лівим
+                        const barWidth = tickerBar.clientWidth || window.innerWidth;
+                        const textWidth = t1.offsetWidth || 0;
+                        track.style.setProperty('--ticker-start', barWidth + 'px');
+                        track.style.setProperty('--ticker-end', (-textWidth) + 'px');
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
