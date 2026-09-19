@@ -17,6 +17,8 @@
         .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
+        #ticker-content-editable:empty:before { content: attr(data-placeholder); color: #777; }
+        #ticker-content-editable img { height: 26px; width: auto; vertical-align: middle; margin: 0 4px; border-radius: 2px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
@@ -440,7 +442,8 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Бігучий рядок (внизу екрана):</div>
                 <div class="switch-row"><span>Увімкнути бігучий рядок:</span><input type="checkbox" id="ticker-enabled-checkbox" onchange="updateTickerEnabled(this.checked)"></div>
-                <textarea id="ticker-text-input" placeholder="Наприклад: Ласкаво просимо на турнір! Наступний матч о 15:00 на корті №2 • Слідкуйте за результатами..." rows="3" style="width:100%; box-sizing:border-box; margin-top:6px;" oninput="updateTickerText(this.value)"></textarea>
+                <div id="ticker-content-editable" contenteditable="true" data-placeholder="Вставте текст або скопійований логотип (Ctrl+V)..." style="width:100%; box-sizing:border-box; margin-top:6px; min-height:60px; max-height:120px; overflow-y:auto; background:#1c1c1c; border:1px solid #444; border-radius:6px; padding:8px 10px; color:#eee; font-family:inherit; font-size:13px; line-height:1.5;" onpaste="handleTickerPaste(event)" oninput="saveTickerContent()"></div>
+                <div style="font-size:9px; color:#888; margin-top:4px;">Можна вставити (Ctrl+V) скопійований текст — шрифт залишиться однаковим, або скопійоване зображення/логотип — воно автоматично стиснеться і покажеться в рядку в зменшеному вигляді.</div>
                 <div class="row" style="margin-top:8px;">
                     <span>Колір фону:</span>
                     <input type="color" id="ticker-bgcolor-input" value="#141414" oninput="updateTickerColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
@@ -974,13 +977,86 @@
 
         window.updateTickerEnabled = function(checked) { saveToHistory(state); state.tickerEnabled = checked; set(matchRef, state); };
 
+        // Дозволяємо в бігучому рядку лише текстові вузли та <img src="data:...">, без жодних інших тегів/стилів/шрифтів
+        function sanitizeTickerHTML(node) {
+            let out = "";
+            node.childNodes.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    out += child.textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    if (child.tagName === "IMG" && child.src && child.src.indexOf("data:image") === 0) {
+                        out += '<img src="' + child.src + '">';
+                    } else if (child.tagName === "BR") {
+                        out += " ";
+                    } else {
+                        out += sanitizeTickerHTML(child);
+                    }
+                }
+            });
+            return out;
+        }
+
+        function compressImageForTicker(dataUrl, callback) {
+            const img = new Image();
+            img.onload = function() {
+                const targetHeight = 60;
+                const scale = targetHeight / img.height;
+                const canvas = document.createElement('canvas');
+                canvas.height = targetHeight;
+                canvas.width = Math.round(img.width * scale);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                callback(canvas.toDataURL('image/png'));
+            };
+            img.src = dataUrl;
+        }
+
         let tickerTextTimeout = null;
-        window.updateTickerText = function(val) {
+        window.saveTickerContent = function() {
             clearTimeout(tickerTextTimeout);
             tickerTextTimeout = setTimeout(() => {
-                state.tickerText = val;
+                const box = document.getElementById('ticker-content-editable');
+                state.tickerContentHTML = sanitizeTickerHTML(box);
                 set(matchRef, state);
             }, 400);
+        };
+
+        window.handleTickerPaste = function(e) {
+            e.preventDefault();
+            const items = (e.clipboardData || window.clipboardData).items;
+            let handledImage = false;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') === 0) {
+                    handledImage = true;
+                    const file = items[i].getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        compressImageForTicker(ev.target.result, function(compressedDataUrl) {
+                            const img = document.createElement('img');
+                            img.src = compressedDataUrl;
+                            const sel = window.getSelection();
+                            if (sel && sel.rangeCount > 0) {
+                                const range = sel.getRangeAt(0);
+                                range.deleteContents();
+                                range.insertNode(img);
+                                range.setStartAfter(img);
+                                range.setEndAfter(img);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            } else {
+                                document.getElementById('ticker-content-editable').appendChild(img);
+                            }
+                            window.saveTickerContent();
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            if (!handledImage) {
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, text);
+                window.saveTickerContent();
+            }
         };
 
         window.updateTickerColors = function() {
@@ -1192,8 +1268,11 @@
 
             const tickerEnabledCheckbox = document.getElementById('ticker-enabled-checkbox');
             if (tickerEnabledCheckbox) tickerEnabledCheckbox.checked = !!state.tickerEnabled;
-            const tickerTextInput = document.getElementById('ticker-text-input');
-            if (tickerTextInput && document.activeElement !== tickerTextInput) tickerTextInput.value = state.tickerText || '';
+            const tickerContentBox = document.getElementById('ticker-content-editable');
+            if (tickerContentBox && document.activeElement !== tickerContentBox) {
+                const newHtml = state.tickerContentHTML || '';
+                if (tickerContentBox.innerHTML !== newHtml) tickerContentBox.innerHTML = newHtml;
+            }
             const tickerBgInput = document.getElementById('ticker-bgcolor-input');
             if (tickerBgInput && document.activeElement !== tickerBgInput) tickerBgInput.value = state.tickerBgColor || '#141414';
             const tickerTextColorInput = document.getElementById('ticker-textcolor-input');
