@@ -526,6 +526,12 @@
             text-transform: uppercase; letter-spacing: 0.5px;
             -webkit-font-smoothing: antialiased;
         }
+        .ticker-track span img {
+            height: 26px; width: auto;
+            vertical-align: middle;
+            margin: 0 10px;
+            display: inline-block;
+        }
         @keyframes ticker-scroll {
             from { transform: translateX(var(--ticker-start, 100%)); }
             to { transform: translateX(var(--ticker-end, -100%)); }
@@ -1527,8 +1533,8 @@
                     // ===== БІГУЧИЙ РЯДОК =====
                     const tickerBar = document.getElementById('ticker-bar');
                     if (tickerBar) {
-                        const tickerText = (state.tickerText || '').trim();
-                        tickerBar.classList.toggle('visible', !!state.tickerEnabled && tickerText !== '');
+                        const tickerHtml = (state.tickerContentHTML || state.tickerText || '').trim();
+                        tickerBar.classList.toggle('visible', !!state.tickerEnabled && tickerHtml !== '');
 
                         const hex = (state.tickerBgColor || '#141414').replace('#', '');
                         const r = parseInt(hex.substring(0, 2), 16) || 0;
@@ -1540,7 +1546,7 @@
 
                         const t1 = document.getElementById('ticker-text-1');
                         const track = document.getElementById('ticker-track');
-                        if (t1.innerText !== tickerText) { t1.innerText = tickerText; }
+                        if (t1.getAttribute('data-src') !== tickerHtml) { t1.innerHTML = tickerHtml; t1.setAttribute('data-src', tickerHtml); }
                         const tColor = state.tickerTextColor || '#ffffff';
                         t1.style.color = tColor;
                         track.style.animationDuration = (state.tickerSpeed || 20) + 's';
@@ -1550,6 +1556,17 @@
                         const textWidth = t1.offsetWidth || 0;
                         track.style.setProperty('--ticker-start', barWidth + 'px');
                         track.style.setProperty('--ticker-end', (-textWidth) + 'px');
+
+                        t1.querySelectorAll('img').forEach(imgEl => {
+                            if (!imgEl.complete) {
+                                imgEl.onload = () => {
+                                    const bw = tickerBar.clientWidth || window.innerWidth;
+                                    const tw = t1.offsetWidth || 0;
+                                    track.style.setProperty('--ticker-start', bw + 'px');
+                                    track.style.setProperty('--ticker-end', (-tw) + 'px');
+                                };
+                            }
+                        });
                     }
 
                     if (state.showStatsOverlay || statsAutoActive) {
