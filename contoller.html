@@ -450,6 +450,14 @@
                     <input type="color" id="ticker-textcolor-input" value="#ffffff" oninput="updateTickerColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
                 </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Прозорість фону: <b id="ticker-alpha-value" style="color:#e0b878;">85%</b></span>
+                    <input type="range" id="ticker-alpha-slider" min="0" max="100" step="1" value="85" oninput="updateTickerAlpha(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Висота смуги: <b id="ticker-height-value" style="color:#e0b878;">34px</b></span>
+                    <input type="range" id="ticker-height-slider" min="20" max="100" step="1" value="34" oninput="updateTickerHeight(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Швидкість руху тексту (менше — швидше): <b id="ticker-speed-value" style="color:#e0b878;">20с</b></span>
                     <input type="range" id="ticker-speed-slider" min="5" max="60" step="1" value="20" oninput="updateTickerSpeed(this.value)">
                 </label>
@@ -987,6 +995,20 @@
             if (lbl) lbl.innerText = state.tickerSpeed + 'с';
             set(matchRef, state);
         };
+
+        window.updateTickerAlpha = function(v) {
+            state.tickerBgAlpha = parseInt(v);
+            const lbl = document.getElementById('ticker-alpha-value');
+            if (lbl) lbl.innerText = state.tickerBgAlpha + '%';
+            set(matchRef, state);
+        };
+
+        window.updateTickerHeight = function(v) {
+            state.tickerHeight = parseInt(v) || 34;
+            const lbl = document.getElementById('ticker-height-value');
+            if (lbl) lbl.innerText = state.tickerHeight + 'px';
+            set(matchRef, state);
+        };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
         window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
@@ -1181,6 +1203,19 @@
             if (tickerSpeedSlider && document.activeElement !== tickerSpeedSlider) {
                 tickerSpeedSlider.value = state.tickerSpeed || 20;
                 if (tickerSpeedLbl) tickerSpeedLbl.innerText = (state.tickerSpeed || 20) + 'с';
+            }
+            const tickerAlphaSlider = document.getElementById('ticker-alpha-slider');
+            const tickerAlphaLbl = document.getElementById('ticker-alpha-value');
+            if (tickerAlphaSlider && document.activeElement !== tickerAlphaSlider) {
+                const alphaVal = state.tickerBgAlpha !== undefined ? state.tickerBgAlpha : 85;
+                tickerAlphaSlider.value = alphaVal;
+                if (tickerAlphaLbl) tickerAlphaLbl.innerText = alphaVal + '%';
+            }
+            const tickerHeightSlider = document.getElementById('ticker-height-slider');
+            const tickerHeightLbl = document.getElementById('ticker-height-value');
+            if (tickerHeightSlider && document.activeElement !== tickerHeightSlider) {
+                tickerHeightSlider.value = state.tickerHeight || 34;
+                if (tickerHeightLbl) tickerHeightLbl.innerText = (state.tickerHeight || 34) + 'px';
             }
 
             const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
