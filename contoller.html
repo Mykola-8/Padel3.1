@@ -977,7 +977,16 @@
 
         window.updateTickerEnabled = function(checked) { saveToHistory(state); state.tickerEnabled = checked; set(matchRef, state); };
 
-        // Дозволяємо в бігучому рядку лише текстові вузли та <img src="data:...">, без жодних інших тегів/стилів/шрифтів
+        // Дозволяємо в бігучому рядку текст зі збереженим форматуванням (шрифт, жирність, курсив, регістр, колір) + <img src="data:...">
+        const TICKER_ALLOWED_STYLE_PROPS = ["font-family", "font-weight", "font-style", "font-size", "color", "text-decoration", "text-transform", "letter-spacing"];
+        function sanitizeTickerStyle(styleDecl) {
+            let out = "";
+            TICKER_ALLOWED_STYLE_PROPS.forEach(prop => {
+                const val = styleDecl.getPropertyValue(prop);
+                if (val) out += prop + ":" + val + ";";
+            });
+            return out;
+        }
         function sanitizeTickerHTML(node) {
             let out = "";
             node.childNodes.forEach(child => {
@@ -988,8 +997,15 @@
                         out += '<img src="' + child.src + '">';
                     } else if (child.tagName === "BR") {
                         out += " ";
+                    } else if (["B", "STRONG", "I", "EM", "U"].indexOf(child.tagName) !== -1) {
+                        const tag = child.tagName.toLowerCase();
+                        out += "<" + tag + ">" + sanitizeTickerHTML(child) + "</" + tag + ">";
                     } else {
-                        out += sanitizeTickerHTML(child);
+                        const styleStr = child.style ? sanitizeTickerStyle(child.style) : "";
+                        const inner = sanitizeTickerHTML(child);
+                        if (!inner) { /* порожній елемент — пропускаємо */ }
+                        else if (styleStr) out += '<span style="' + styleStr + '">' + inner + '</span>';
+                        else out += inner;
                     }
                 }
             });
@@ -1053,8 +1069,33 @@
                 }
             }
             if (!handledImage) {
-                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                document.execCommand('insertText', false, text);
+                const clipboard = (e.clipboardData || window.clipboardData);
+                const html = clipboard.getData('text/html');
+                if (html) {
+                    // Вставляємо як є (форматування джерела збережеться), санітизація прибере зайве/небезпечне при збереженні
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        const frag = document.createDocumentFragment();
+                        let node, lastNode;
+                        while ((node = temp.firstChild)) { lastNode = frag.appendChild(node); }
+                        range.insertNode(frag);
+                        if (lastNode) {
+                            range.setStartAfter(lastNode);
+                            range.setEndAfter(lastNode);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    } else {
+                        document.getElementById('ticker-content-editable').appendChild(temp);
+                    }
+                } else {
+                    const text = clipboard.getData('text/plain');
+                    document.execCommand('insertText', false, text);
+                }
                 window.saveTickerContent();
             }
         };
