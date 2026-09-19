@@ -1543,6 +1543,7 @@
                         const alpha = (state.tickerBgAlpha !== undefined ? state.tickerBgAlpha : 85) / 100;
                         tickerBar.style.background = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
                         tickerBar.style.height = (state.tickerHeight || 34) + 'px';
+                        tickerBar.style.bottom = (state.tickerOffsetY || 0) + 'px';
 
                         const t1 = document.getElementById('ticker-text-1');
                         const track = document.getElementById('ticker-track');
