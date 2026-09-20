@@ -17,6 +17,11 @@
         .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
+        .player-suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: #262626; border: 1px solid #444; border-radius: 6px; margin-top: 2px; max-height: 180px; overflow-y: auto; display: none; }
+        .player-suggestions.visible { display: block; }
+        .player-suggestion-item { padding: 9px 12px; font-size: 13px; color: #eee; cursor: pointer; border-bottom: 1px solid #333; }
+        .player-suggestion-item:last-child { border-bottom: none; }
+        .player-suggestion-item:hover, .player-suggestion-item:active { background: #3a3a3a; }
         #ticker-content-editable:empty:before { content: attr(data-placeholder); color: #777; }
         #ticker-content-editable img { height: 26px; width: auto; vertical-align: middle; margin: 0 4px; border-radius: 2px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
@@ -343,8 +348,16 @@
 
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Назви команд:</div>
-                <div class="row"><input type="text" id="p1-name-input" list="players-datalist" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(1,this.value)"><input type="text" id="p2-name-input" list="players-datalist" placeholder="Гравець1 / Гравець2" oninput="liveUpdateName(2,this.value)"></div>
-                <datalist id="players-datalist"></datalist>
+                <div class="row" style="position:relative; align-items:flex-start;">
+                    <div style="flex:1; position:relative;">
+                        <input type="text" id="p1-name-input" placeholder="Гравець1 / Гравець2" autocomplete="off" oninput="liveUpdateName(1,this.value); showPlayerSuggestions(1,this.value)" onfocus="showPlayerSuggestions(1,this.value)" onblur="setTimeout(()=>hidePlayerSuggestions(1), 200)">
+                        <div class="player-suggestions" id="p1-suggestions"></div>
+                    </div>
+                    <div style="flex:1; position:relative;">
+                        <input type="text" id="p2-name-input" placeholder="Гравець1 / Гравець2" autocomplete="off" oninput="liveUpdateName(2,this.value); showPlayerSuggestions(2,this.value)" onfocus="showPlayerSuggestions(2,this.value)" onblur="setTimeout(()=>hidePlayerSuggestions(2), 200)">
+                        <div class="player-suggestions" id="p2-suggestions"></div>
+                    </div>
+                </div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
                 <div class="switch-row" style="margin-top:8px;"><span>Показувати індикатор подачі на трансляції:</span><input type="checkbox" id="server-indicator-checkbox" checked onchange="toggleServerIndicator(this.checked)"></div>
@@ -684,13 +697,38 @@
             });
         });
 
-        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); populatePlayersDatalist(allPlayersData); });
+        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
 
-        function populatePlayersDatalist(playersObj) {
-            const dl = document.getElementById('players-datalist');
-            if (!dl) return;
-            dl.innerHTML = Object.values(playersObj).map(p => `<option value="${(p.name || '').replace(/"/g, '&quot;')}">`).join('');
-        }
+        window.showPlayerSuggestions = function(teamIndex, currentValue) {
+            const box = document.getElementById('p' + teamIndex + '-suggestions');
+            if (!box) return;
+            const parts = (currentValue || '').split('/');
+            const searchTerm = parts[parts.length - 1].trim().toLowerCase();
+            const allNames = Object.values(allPlayersData || {}).map(p => p.name).filter(n => !!n);
+            const matches = (searchTerm === ''
+                ? allNames
+                : allNames.filter(n => n.toLowerCase().includes(searchTerm))
+            ).slice(0, 8);
+            if (matches.length === 0) { box.classList.remove('visible'); box.innerHTML = ''; return; }
+            box.innerHTML = matches.map(n => `<div class="player-suggestion-item" onmousedown="selectPlayerSuggestion(${teamIndex}, '${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
+            box.classList.add('visible');
+        };
+
+        window.hidePlayerSuggestions = function(teamIndex) {
+            const box = document.getElementById('p' + teamIndex + '-suggestions');
+            if (box) box.classList.remove('visible');
+        };
+
+        window.selectPlayerSuggestion = function(teamIndex, name) {
+            const input = document.getElementById('p' + teamIndex + '-name-input');
+            const parts = input.value.split('/');
+            parts[parts.length - 1] = ' ' + name;
+            let newValue = parts.map((p, i) => i === 0 ? p.trim() : p.trim()).join(' / ');
+            input.value = newValue;
+            window.liveUpdateName(teamIndex, newValue);
+            hidePlayerSuggestions(teamIndex);
+            input.focus();
+        };
 
         function renderPlayersList(playersObj) {
             const container = document.getElementById('players-container');
