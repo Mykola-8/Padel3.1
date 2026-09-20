@@ -172,8 +172,8 @@
 
         .scoreboard-wrapper {
             display: flex; flex-direction: row; align-items: flex-start; width: max-content;
-            transform-origin: top left; transition: transform 0.2s ease, opacity 0.4s ease, visibility 0.4s;
-            filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: 1; visibility: visible; will-change: transform;
+            transform-origin: top left; transition: transform 0.2s ease, opacity 0.2s ease, visibility 0.4s;
+            filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: var(--board-opacity, 1); visibility: visible; will-change: transform;
         }
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
 
@@ -1238,6 +1238,7 @@
                 renderTeamNamePlayers('name-display-t2', state.p2name || getStatsLabel('team2Fallback', state), serverIndicatorOn && activeServer === 2, activeP2Slot);
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
+                boardWrapper.style.setProperty('--board-opacity', (state.boardOpacity !== undefined ? state.boardOpacity : 100) / 100);
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
 
                 document.documentElement.style.setProperty('--team-name-width', (state.teamNameWidth || 320) + 'px');
