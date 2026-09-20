@@ -496,6 +496,7 @@
                 <div class="row"><span>Позиція Y:</span><input type="range" id="pos-y-slider" min="-540" max="1080" step="5" oninput="updatePosition()"></div>
                 <div class="row"><span>Ширина імен:</span><input type="range" id="team-width-slider" min="200" max="700" step="10" oninput="updateTeamWidth(this.value)"></div>
                 <div class="row"><span>Шрифт імен:</span><input type="range" id="team-font-slider" min="10" max="32" step="1" oninput="updateTeamFont(this.value)"></div>
+                <div class="row"><span>Прозорість табла:</span><input type="range" id="board-opacity-slider" min="10" max="100" step="1" value="100" oninput="updateBoardOpacity(this.value)"></div>
             </div>
 
             <div class="card" style="border: 2px solid #7c3aed; background: #1a1525;">
@@ -1510,6 +1511,7 @@
             if (document.activeElement !== document.getElementById('scale-slider')) document.getElementById('scale-slider').value = state.scale || 1;
             if (document.activeElement !== document.getElementById('pos-x-slider')) document.getElementById('pos-x-slider').value = state.posX || 0;
             if (document.activeElement !== document.getElementById('pos-y-slider')) document.getElementById('pos-y-slider').value = state.posY || 0;
+            if (document.activeElement !== document.getElementById('board-opacity-slider')) document.getElementById('board-opacity-slider').value = (state.boardOpacity !== undefined ? state.boardOpacity : 100);
             
             const btnStats = document.getElementById('btn-toggle-stats');
             if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
@@ -1832,6 +1834,7 @@
         window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); }
         window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); }
         window.updatePosition = function() { state.posX = parseInt(document.getElementById('pos-x-slider').value)||0; state.posY = parseInt(document.getElementById('pos-y-slider').value)||0; set(matchRef, state); }
+        window.updateBoardOpacity = function(v) { state.boardOpacity = parseInt(v); set(matchRef, state); }
         
         window.finishMatchPro = function() {
             if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
