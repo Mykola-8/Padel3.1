@@ -697,12 +697,12 @@
             });
         });
 
-        onValue(ref(db, 'padel/players'), (snapshot) => {
+        onValue(ref(db, 'padel/courts/players'), (snapshot) => {
             allPlayersData = snapshot.val() || {};
-            console.log('padel/players завантажено, гравців:', Object.keys(allPlayersData).length);
+            console.log('padel/courts/players завантажено, гравців:', Object.keys(allPlayersData).length);
             renderPlayersList(allPlayersData);
         }, (err) => {
-            console.error('Помилка читання padel/players:', err);
+            console.error('Помилка читання padel/courts/players:', err);
             alert("Не вдалося прочитати базу гравців.\nПомилка: " + err.message);
         });
 
@@ -756,13 +756,13 @@
         }
 
         window.deleteMatchHistory = function(key) { if (confirm("Видалити цей матч з історії?")) remove(ref(db, `padel/history/${key}`)); }
-        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/players/${key}`)); }
+        window.deletePlayer = function(key) { if (confirm("Видалити гравця з бази?")) remove(ref(db, `padel/courts/players/${key}`)); }
 
         window.createNewPlayer = function() {
             const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
             if (!name) { alert("Введіть ім'я."); return; }
-            push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 })
-                .then(() => { console.log('Гравець додан до padel/players:', name); })
+            push(ref(db, 'padel/courts/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 })
+                .then(() => { console.log('Гравець додан до padel/courts/players:', name); })
                 .catch(err => { console.error('Помилка запису гравця:', err); alert("Не вдалося зберегти гравця в базу.\nПомилка: " + err.message); });
             document.getElementById('new-player-name').value = '';
         }
@@ -777,7 +777,7 @@
             names.forEach(name => {
                 if (existingNames.includes(name.toLowerCase())) { skipped++; return; }
                 writes.push(
-                    push(ref(db, 'padel/players'), { name: name, hand: "Права", matchesPlayed: 0, wins: 0 })
+                    push(ref(db, 'padel/courts/players'), { name: name, hand: "Права", matchesPlayed: 0, wins: 0 })
                         .then(() => { added++; })
                         .catch(err => { failed++; console.error('Помилка запису гравця', name, err); })
                 );
@@ -798,7 +798,7 @@
         }
 
         window.hardResetAllFirebase = function() {
-            if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
+            if (confirm("🚨 УВАГА! Видалити ВСІ дані Firebase (корти, історію матчів, базу гравців)?") && confirm("ПІДТВЕРДЖУЄТЕ?")) {
                 remove(ref(db, 'padel')).then(() => window.location.reload());
             }
         }
