@@ -447,19 +447,19 @@
         .server-change-banner {
             position: fixed; bottom: 30px; left: 0; z-index: 99000;
             display: flex; align-items: center; justify-content: flex-end; gap: 10px;
-            width: 320px; height: 54px; box-sizing: border-box;
+            width: max-content; min-width: 320px; max-width: min(90vw, 900px); height: 54px; box-sizing: border-box;
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
             border: 1px solid rgba(0,0,0,0.15); border-left: none; border-radius: 0 6px 6px 0;
             padding: 0 22px; font-family: 'Montserrat', sans-serif;
             opacity: 0; visibility: hidden; transform: translateX(-100%);
-            transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.55s;
+            transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.55s, width 0.3s ease;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
         .server-change-banner.visible { opacity: 1; visibility: visible; transform: translateX(0); }
         .server-change-banner-ball { font-size: 20px; flex-shrink: 0; }
-        .server-change-banner-text { display: flex; flex-direction: column; text-align: right; }
+        .server-change-banner-text { display: flex; flex-direction: column; text-align: right; min-width: 0; }
         .server-change-banner-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #b28a55; }
-        .server-change-banner-name { font-size: 16px; font-weight: 900; color: #111111; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
+        .server-change-banner-name { font-size: 16px; font-weight: 900; color: #111111; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
 
         /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
