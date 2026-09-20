@@ -17,7 +17,7 @@
         .settings-gear-btn:active { transform: scale(0.95); background: #3a3a3a; }
         h2 { margin: 5px 0; font-size: 16px; text-align: center; color: #c69f66; letter-spacing: 1px; text-transform: uppercase; padding-right: 35px; }
         .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 12px; }
-        .player-suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: #262626; border: 1px solid #444; border-radius: 6px; margin-top: 2px; max-height: 180px; overflow-y: auto; display: none; }
+        .player-suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 99999; background: #262626; border: 1px solid #444; border-radius: 6px; margin-top: 2px; max-height: 180px; overflow-y: auto; display: none; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
         .player-suggestions.visible { display: block; }
         .player-suggestion-item { padding: 9px 12px; font-size: 13px; color: #eee; cursor: pointer; border-bottom: 1px solid #333; }
         .player-suggestion-item:last-child { border-bottom: none; }
@@ -697,7 +697,14 @@
             });
         });
 
-        onValue(ref(db, 'padel/players'), (snapshot) => { allPlayersData = snapshot.val() || {}; renderPlayersList(allPlayersData); });
+        onValue(ref(db, 'padel/players'), (snapshot) => {
+            allPlayersData = snapshot.val() || {};
+            console.log('padel/players завантажено, гравців:', Object.keys(allPlayersData).length);
+            renderPlayersList(allPlayersData);
+        }, (err) => {
+            console.error('Помилка читання padel/players:', err);
+            alert("Не вдалося прочитати базу гравців.\nПомилка: " + err.message);
+        });
 
         window.showPlayerSuggestions = function(teamIndex, currentValue) {
             const box = document.getElementById('p' + teamIndex + '-suggestions');
@@ -754,7 +761,9 @@
         window.createNewPlayer = function() {
             const name = document.getElementById('new-player-name').value.trim(); const hand = document.getElementById('new-player-hand').value;
             if (!name) { alert("Введіть ім'я."); return; }
-            push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 });
+            push(ref(db, 'padel/players'), { name: name, hand: hand, matchesPlayed: 0, wins: 0 })
+                .then(() => { console.log('Гравець додан до padel/players:', name); })
+                .catch(err => { console.error('Помилка запису гравця:', err); alert("Не вдалося зберегти гравця в базу.\nПомилка: " + err.message); });
             document.getElementById('new-player-name').value = '';
         }
 
@@ -763,14 +772,23 @@
             const names = raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
             if (names.length === 0) { alert("Список порожній."); return; }
             const existingNames = Object.values(allPlayersData || {}).map(p => (p.name || '').toLowerCase().trim());
-            let added = 0, skipped = 0;
+            let added = 0, skipped = 0, failed = 0;
+            const writes = [];
             names.forEach(name => {
                 if (existingNames.includes(name.toLowerCase())) { skipped++; return; }
-                push(ref(db, 'padel/players'), { name: name, hand: "Права", matchesPlayed: 0, wins: 0 });
-                added++;
+                writes.push(
+                    push(ref(db, 'padel/players'), { name: name, hand: "Права", matchesPlayed: 0, wins: 0 })
+                        .then(() => { added++; })
+                        .catch(err => { failed++; console.error('Помилка запису гравця', name, err); })
+                );
             });
-            document.getElementById('bulk-players-input').value = '';
-            alert(`Додано гравців: ${added}` + (skipped > 0 ? `\nПропущено (вже є в базі): ${skipped}` : ''));
+            Promise.all(writes).then(() => {
+                document.getElementById('bulk-players-input').value = '';
+                let msg = `Додано гравців: ${added}`;
+                if (skipped > 0) msg += `\nПропущено (вже є в базі): ${skipped}`;
+                if (failed > 0) msg += `\n⚠️ Помилка запису: ${failed} (перевірте правила доступу Firebase, дивіться консоль)`;
+                alert(msg);
+            });
         }
 
         window.saveProfileData = function() {
