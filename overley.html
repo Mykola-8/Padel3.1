@@ -163,6 +163,68 @@
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
+        html.theme-padelblue {
+            --accent: #d4ff3d;
+            --accent-soft: rgba(212, 255, 61, 0.45);
+            --team-bg-top: rgba(15, 79, 168, 0.85);
+            --team-bg-bottom: rgba(8, 45, 110, 0.88);
+            --team-text: #ffffff;
+            --score-set-past-bg: rgba(255, 255, 255, 0.92);
+            --score-set-past-text: #0b2a5c;
+            --score-set-current-bg: rgba(21, 101, 216, 0.9);
+            --score-set-current-text: #ffffff;
+            --points-team1-top: #2f7fe0;
+            --points-team1-bottom: #1565d8;
+            --points-team2-top: #1565d8;
+            --points-team2-bottom: #0b3d8f;
+            --points-text: #ffffff;
+            --points-ad-top: #eaffa0;
+            --points-ad-bottom: #d4ff3d;
+            --points-ad-text: #0b2a5c;
+            --panel-bg: rgba(5, 18, 42, 0.65);
+            --panel-border: rgba(212, 255, 61, 0.4);
+            --panel-text: #ffffff;
+            --slide-gamepoint: rgba(15, 79, 168, 0.6);
+            --slide-breakpoint: rgba(212, 255, 61, 0.5);
+            --slide-setpoint: rgba(21, 101, 216, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
+            --slide-tiebreak: rgba(8, 45, 110, 0.75);
+            --slide-deuce: rgba(91, 33, 182, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
+        html.theme-championship {
+            --accent: #ff6a1a;
+            --accent-soft: rgba(255, 106, 26, 0.45);
+            --team-bg-top: rgba(17, 38, 71, 0.88);
+            --team-bg-bottom: rgba(6, 15, 30, 0.92);
+            --team-text: #ffffff;
+            --score-set-past-bg: rgba(255, 255, 255, 0.92);
+            --score-set-past-text: #0b1e3d;
+            --score-set-current-bg: rgba(255, 106, 26, 0.9);
+            --score-set-current-text: #ffffff;
+            --points-team1-top: #ff8a4a;
+            --points-team1-bottom: #ff6a1a;
+            --points-team2-top: #2c4a7c;
+            --points-team2-bottom: #0b1e3d;
+            --points-text: #ffffff;
+            --points-ad-top: #ffd9a0;
+            --points-ad-bottom: #ff9d4d;
+            --points-ad-text: #3a1a00;
+            --panel-bg: rgba(6, 12, 24, 0.65);
+            --panel-border: rgba(255, 106, 26, 0.45);
+            --panel-text: #ffffff;
+            --slide-gamepoint: rgba(17, 38, 71, 0.6);
+            --slide-breakpoint: rgba(255, 106, 26, 0.55);
+            --slide-setpoint: rgba(44, 74, 124, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(255, 106, 26, 0.6);
+            --slide-tiebreak: rgba(11, 30, 61, 0.75);
+            --slide-deuce: rgba(91, 33, 182, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -654,6 +716,32 @@
         html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
         html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td { border-bottom-color: rgba(255, 255, 255, 0.2); }
         html.theme-transparent .break-label, html.theme-transparent .break-score-sep { color: var(--accent); }
+
+        html.theme-padelblue .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
+        html.theme-padelblue .server-indicator, html.theme-padelblue .player-serving { color: var(--accent); }
+        html.theme-padelblue .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-padelblue .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-padelblue .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-padelblue .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-padelblue .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-padelblue .match-finished-board, html.theme-padelblue .statistics-overlay, html.theme-padelblue .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-padelblue .mfb-header, html.theme-padelblue .mfb-winner, html.theme-padelblue .sr-set-label, html.theme-padelblue .sm-header, html.theme-padelblue .h-set-time, html.theme-padelblue .mfb-table td.mfb-set-win, html.theme-padelblue .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-padelblue .sm-val.gold { color: var(--accent); }
+        html.theme-padelblue .mfb-table th, html.theme-padelblue .mfb-table td, html.theme-padelblue .sm-val, html.theme-padelblue .h-set-score, html.theme-padelblue .sr-score, html.theme-padelblue .sr-team { color: var(--panel-text); }
+        html.theme-padelblue .mfb-table th, html.theme-padelblue .mfb-table td { border-bottom-color: rgba(212, 255, 61, 0.25); }
+        html.theme-padelblue .break-label, html.theme-padelblue .break-score-sep { color: var(--accent); }
+
+        html.theme-championship .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
+        html.theme-championship .server-indicator, html.theme-championship .player-serving { color: var(--accent); }
+        html.theme-championship .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-championship .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-championship .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-championship .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-championship .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-championship .match-finished-board, html.theme-championship .statistics-overlay, html.theme-championship .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-championship .mfb-header, html.theme-championship .mfb-winner, html.theme-championship .sr-set-label, html.theme-championship .sm-header, html.theme-championship .h-set-time, html.theme-championship .mfb-table td.mfb-set-win, html.theme-championship .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-championship .sm-val.gold { color: var(--accent); }
+        html.theme-championship .mfb-table th, html.theme-championship .mfb-table td, html.theme-championship .sm-val, html.theme-championship .h-set-score, html.theme-championship .sr-score, html.theme-championship .sr-team { color: var(--panel-text); }
+        html.theme-championship .mfb-table th, html.theme-championship .mfb-table td { border-bottom-color: rgba(255, 106, 26, 0.25); }
+        html.theme-championship .break-label, html.theme-championship .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -1182,6 +1270,8 @@
                 document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
                 document.documentElement.classList.toggle('theme-lightgray', state.boardTheme === 'lightgray');
                 document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
+                document.documentElement.classList.toggle('theme-padelblue', state.boardTheme === 'padelblue');
+                document.documentElement.classList.toggle('theme-championship', state.boardTheme === 'championship');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
