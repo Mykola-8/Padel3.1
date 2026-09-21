@@ -225,6 +225,68 @@
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
+        html.theme-mono {
+            --accent: #e8e8e8;
+            --accent-soft: rgba(232, 232, 232, 0.4);
+            --team-bg-top: rgba(28, 28, 28, 0.9);
+            --team-bg-bottom: rgba(4, 4, 4, 0.94);
+            --team-text: #ffffff;
+            --score-set-past-bg: rgba(255, 255, 255, 0.94);
+            --score-set-past-text: #0a0a0a;
+            --score-set-current-bg: rgba(130, 130, 130, 0.88);
+            --score-set-current-text: #ffffff;
+            --points-team1-top: #f5f5f5;
+            --points-team1-bottom: #c4c4c4;
+            --points-team2-top: #5a5a5a;
+            --points-team2-bottom: #262626;
+            --points-text: #0a0a0a;
+            --points-ad-top: #ffffff;
+            --points-ad-bottom: #d9d9d9;
+            --points-ad-text: #0a0a0a;
+            --panel-bg: rgba(0, 0, 0, 0.68);
+            --panel-border: rgba(255, 255, 255, 0.35);
+            --panel-text: #ffffff;
+            --slide-gamepoint: rgba(40, 40, 40, 0.65);
+            --slide-breakpoint: rgba(200, 200, 200, 0.4);
+            --slide-setpoint: rgba(90, 90, 90, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.55);
+            --slide-tiebreak: rgba(15, 15, 15, 0.8);
+            --slide-deuce: rgba(70, 70, 70, 0.6);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
+        html.theme-stonesand {
+            --accent: #c2703d;
+            --accent-soft: rgba(194, 112, 61, 0.45);
+            --team-bg-top: rgba(122, 109, 90, 0.85);
+            --team-bg-bottom: rgba(88, 77, 62, 0.9);
+            --team-text: #fdf8f0;
+            --score-set-past-bg: rgba(250, 244, 233, 0.94);
+            --score-set-past-text: #3a2a18;
+            --score-set-current-bg: rgba(194, 112, 61, 0.88);
+            --score-set-current-text: #fdf8f0;
+            --points-team1-top: #d8c6ab;
+            --points-team1-bottom: #b3a082;
+            --points-team2-top: #8a7a63;
+            --points-team2-bottom: #5c4f3d;
+            --points-text: #ffffff;
+            --points-ad-top: #f3e3c9;
+            --points-ad-bottom: #dba86a;
+            --points-ad-text: #3a2410;
+            --panel-bg: rgba(28, 21, 14, 0.68);
+            --panel-border: rgba(194, 112, 61, 0.45);
+            --panel-text: #fdf8f0;
+            --slide-gamepoint: rgba(88, 77, 62, 0.6);
+            --slide-breakpoint: rgba(194, 112, 61, 0.55);
+            --slide-setpoint: rgba(122, 109, 90, 0.65);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
+            --slide-tiebreak: rgba(58, 42, 24, 0.75);
+            --slide-deuce: rgba(91, 33, 182, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+        }
+
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -282,7 +344,10 @@
         .main-board { display: inline-flex; flex-direction: column; background-color: transparent; border-radius: 4px; z-index: 2; position: relative; overflow: hidden; transform-origin: left center; }
         .team-row { display: flex; height: 48px; }
         .team-names { width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
-        .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; }
+        .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; display: inline-flex; align-items: center; }
+        .icon-shape { display: inline-block; }
+        .icon-arrow { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 13px solid currentColor; }
+        .icon-triangle { width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 15px solid currentColor; }
         .player-serving { color: #c69f66; text-shadow: 0 0 10px rgba(198,159,102,0.7); }
         .player-sep { opacity: 0.5; font-weight: 400; }
         .server-indicator.active { visibility: visible; }
@@ -742,6 +807,32 @@
         html.theme-championship .mfb-table th, html.theme-championship .mfb-table td, html.theme-championship .sm-val, html.theme-championship .h-set-score, html.theme-championship .sr-score, html.theme-championship .sr-team { color: var(--panel-text); }
         html.theme-championship .mfb-table th, html.theme-championship .mfb-table td { border-bottom-color: rgba(255, 106, 26, 0.25); }
         html.theme-championship .break-label, html.theme-championship .break-score-sep { color: var(--accent); }
+
+        html.theme-mono .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
+        html.theme-mono .server-indicator, html.theme-mono .player-serving { color: var(--accent); }
+        html.theme-mono .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-mono .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-mono .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-mono .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-mono .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-mono .match-finished-board, html.theme-mono .statistics-overlay, html.theme-mono .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-mono .mfb-header, html.theme-mono .mfb-winner, html.theme-mono .sr-set-label, html.theme-mono .sm-header, html.theme-mono .h-set-time, html.theme-mono .mfb-table td.mfb-set-win, html.theme-mono .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-mono .sm-val.gold { color: var(--accent); }
+        html.theme-mono .mfb-table th, html.theme-mono .mfb-table td, html.theme-mono .sm-val, html.theme-mono .h-set-score, html.theme-mono .sr-score, html.theme-mono .sr-team { color: var(--panel-text); }
+        html.theme-mono .mfb-table th, html.theme-mono .mfb-table td { border-bottom-color: rgba(255, 255, 255, 0.2); }
+        html.theme-mono .break-label, html.theme-mono .break-score-sep { color: var(--accent); }
+
+        html.theme-stonesand .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); }
+        html.theme-stonesand .server-indicator, html.theme-stonesand .player-serving { color: var(--accent); }
+        html.theme-stonesand .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-stonesand .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-stonesand .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-stonesand .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-stonesand .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-stonesand .match-finished-board, html.theme-stonesand .statistics-overlay, html.theme-stonesand .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-stonesand .mfb-header, html.theme-stonesand .mfb-winner, html.theme-stonesand .sr-set-label, html.theme-stonesand .sm-header, html.theme-stonesand .h-set-time, html.theme-stonesand .mfb-table td.mfb-set-win, html.theme-stonesand .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-stonesand .sm-val.gold { color: var(--accent); }
+        html.theme-stonesand .mfb-table th, html.theme-stonesand .mfb-table td, html.theme-stonesand .sm-val, html.theme-stonesand .h-set-score, html.theme-stonesand .sr-score, html.theme-stonesand .sr-team { color: var(--panel-text); }
+        html.theme-stonesand .mfb-table th, html.theme-stonesand .mfb-table td { border-bottom-color: rgba(194, 112, 61, 0.25); }
+        html.theme-stonesand .break-label, html.theme-stonesand .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -1272,6 +1363,8 @@
                 document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
                 document.documentElement.classList.toggle('theme-padelblue', state.boardTheme === 'padelblue');
                 document.documentElement.classList.toggle('theme-championship', state.boardTheme === 'championship');
+                document.documentElement.classList.toggle('theme-mono', state.boardTheme === 'mono');
+                document.documentElement.classList.toggle('theme-stonesand', state.boardTheme === 'stonesand');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
@@ -1433,8 +1526,24 @@
                     }
                 }
 
-                document.getElementById('srv1').classList.toggle('active', serverIndicatorOn && activeServer === 1);
-                document.getElementById('srv2').classList.toggle('active', serverIndicatorOn && activeServer === 2);
+                const srv1El = document.getElementById('srv1'), srv2El = document.getElementById('srv2');
+                srv1El.classList.toggle('active', serverIndicatorOn && activeServer === 1);
+                srv2El.classList.toggle('active', serverIndicatorOn && activeServer === 2);
+
+                const serverBannerBallEl = document.querySelector('.server-change-banner-ball');
+                const iconType = state.serverIconType || 'ball';
+                const iconColor = state.serverIconColor || '#b28a55';
+                const iconHtml = iconType === 'arrow' ? '<span class="icon-shape icon-arrow"></span>'
+                    : iconType === 'triangle' ? '<span class="icon-shape icon-triangle"></span>'
+                    : '🎾';
+                [srv1El, srv2El, serverBannerBallEl].forEach(el => {
+                    if (!el) return;
+                    if (el.getAttribute('data-icon-type') !== iconType) {
+                        el.innerHTML = iconHtml;
+                        el.setAttribute('data-icon-type', iconType);
+                    }
+                    el.style.color = (iconType === 'ball') ? '' : iconColor;
+                });
 
                 const activeSet = state.currentSet || 1;
                 if (activeSet !== lastSetTracked) { setSeconds = 0; gameSeconds = 0; lastGamesCountTracked = 0; lastSetTracked = activeSet; }
