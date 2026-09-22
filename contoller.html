@@ -525,6 +525,10 @@
                     <input type="range" id="adbar-height-slider" min="30" max="150" step="1" value="60" oninput="updateAdBarHeight(this.value)">
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Відстань між копіями: <b id="adbar-gap-value" style="color:#e0b878;">26px</b></span>
+                    <input type="range" id="adbar-gap-slider" min="0" max="200" step="2" value="26" oninput="updateAdBarGap(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="adbar-offsety-value" style="color:#e0b878;">90px</b></span>
                     <input type="range" id="adbar-offsety-slider" min="-400" max="600" step="5" value="90" oninput="updateAdBarOffsetY(this.value)">
                 </label>
@@ -1345,6 +1349,13 @@
             set(matchRef, state);
         };
 
+        window.updateAdBarGap = function(v) {
+            state.adBarGap = parseInt(v);
+            const lbl = document.getElementById('adbar-gap-value');
+            if (lbl) lbl.innerText = state.adBarGap + 'px';
+            set(matchRef, state);
+        };
+
         window.updateAdBarOffsetY = function(v) {
             state.adBarOffsetY = parseInt(v);
             const lbl = document.getElementById('adbar-offsety-value');
@@ -1598,6 +1609,13 @@
             if (adBarHeightSlider && document.activeElement !== adBarHeightSlider) {
                 adBarHeightSlider.value = state.adBarHeight || 60;
                 if (adBarHeightLbl) adBarHeightLbl.innerText = (state.adBarHeight || 60) + 'px';
+            }
+            const adBarGapSlider = document.getElementById('adbar-gap-slider');
+            const adBarGapLbl = document.getElementById('adbar-gap-value');
+            if (adBarGapSlider && document.activeElement !== adBarGapSlider) {
+                const gv = state.adBarGap !== undefined ? state.adBarGap : 26;
+                adBarGapSlider.value = gv;
+                if (adBarGapLbl) adBarGapLbl.innerText = gv + 'px';
             }
             const adBarOffsetYSlider = document.getElementById('adbar-offsety-slider');
             const adBarOffsetYLbl = document.getElementById('adbar-offsety-value');
