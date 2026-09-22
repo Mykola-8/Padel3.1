@@ -511,10 +511,12 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Рекламний рядок (стаціонарний, ефект перекидання):</div>
                 <div class="switch-row"><span>Увімкнути рекламний рядок:</span><input type="checkbox" id="adbar-enabled-checkbox" onchange="updateAdBarEnabled(this.checked)"></div>
+                <div class="switch-row" style="margin-top:6px;"><span>Прибирати фон з лого/фото (прозорий):</span><input type="checkbox" id="adbar-removebg-checkbox" onchange="updateAdBarRemoveBg(this.checked)"></div>
+                <div style="font-size:9px; color:#888; margin-top:2px;">Визначає фон по кутах зображення й робить схожі кольори прозорими. Найкраще працює з логотипами на суцільному однотонному фоні.</div>
 
                 <div id="adbar-slides-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
                 <button class="btn btn-green" style="margin-top:8px;" onclick="addAdBarSlide()">+ Додати слайд (текст або лого)</button>
-                <div style="font-size:9px; color:#888; margin-top:4px;">У кожен слайд можна вставити (Ctrl+V) або текст, або одне зображення-логотип — воно автоматично стиснеться. Слайд повторюється по всій ширині екрана.</div>
+                <div style="font-size:9px; color:#888; margin-top:4px;">У кожен слайд можна вставити (Ctrl+V) текст (зі збереженням шрифту й розміру джерела) або одне зображення-логотип — воно автоматично стиснеться. Слайд повторюється по всій ширині екрана.</div>
 
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:10px;">
                     <span style="font-size:11px; color:#ccc;">Тривалість показу слайду: <b id="adbar-duration-value" style="color:#e0b878;">15с</b></span>
@@ -1168,7 +1170,26 @@
             return out;
         }
 
-        function compressImageForTicker(dataUrl, callback) {
+        function removeImageBackground(ctx, canvas, tolerance) {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const d = imgData.data;
+            const corners = [[0, 0], [canvas.width - 1, 0], [0, canvas.height - 1], [canvas.width - 1, canvas.height - 1]];
+            let br = 0, bg = 0, bb = 0;
+            corners.forEach(([x, y]) => {
+                const idx = (y * canvas.width + x) * 4;
+                br += d[idx]; bg += d[idx + 1]; bb += d[idx + 2];
+            });
+            br /= 4; bg /= 4; bb /= 4;
+            const tol = tolerance || 42;
+            for (let i = 0; i < d.length; i += 4) {
+                const dr = d[i] - br, dg = d[i + 1] - bg, db = d[i + 2] - bb;
+                const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+                if (dist < tol) { d[i + 3] = 0; }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function compressImageForTicker(dataUrl, callback, removeBg) {
             const img = new Image();
             img.onload = function() {
                 const targetHeight = 60;
@@ -1178,6 +1199,7 @@
                 canvas.width = Math.round(img.width * scale);
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                if (removeBg) { removeImageBackground(ctx, canvas); }
                 callback(canvas.toDataURL('image/png'));
             };
             img.src = dataUrl;
@@ -1263,12 +1285,17 @@
             set(matchRef, state);
         };
 
+        window.updateAdBarRemoveBg = function(checked) {
+            state.adBarRemoveBg = checked;
+            set(matchRef, state);
+        };
+
         function renderAdBarSlidesList() {
             const listEl = document.getElementById('adbar-slides-list');
             if (!listEl) return;
             const slides = Array.isArray(state.adBarSlides) ? state.adBarSlides : [];
             listEl.innerHTML = slides.map((slide, i) => {
-                const content = slide.type === 'logo' && slide.content ? '<img src="' + slide.content + '">' : (slide.content || '').replace(/</g, '&lt;');
+                const content = slide.type === 'logo' && slide.content ? '<img src="' + slide.content + '">' : (slide.content || '');
                 return '<div class="adbar-slide-row">' +
                     '<div class="adbar-slide-editable" contenteditable="true" data-placeholder="Слайд ' + (i + 1) + ': текст або лого (Ctrl+V)" data-index="' + i + '" onpaste="handleAdBarSlidePaste(event,' + i + ')" oninput="saveAdBarSlideText(' + i + ', this)">' + content + '</div>' +
                     '<button class="adbar-slide-remove-btn" onclick="removeAdBarSlide(' + i + ')">×</button>' +
@@ -1295,12 +1322,12 @@
             clearTimeout(adBarSlideTextTimeout);
             adBarSlideTextTimeout = setTimeout(() => {
                 if (!Array.isArray(state.adBarSlides) || !state.adBarSlides[i]) return;
-                // Якщо всередині є картинка — це слайд-лого, інакше просто текст
+                // Якщо всередині є картинка — це слайд-лого, інакше текст (зі збереженим форматуванням)
                 const img = el.querySelector('img');
                 if (img) {
                     state.adBarSlides[i] = { type: 'logo', content: img.src };
                 } else {
-                    state.adBarSlides[i] = { type: 'text', content: el.innerText };
+                    state.adBarSlides[i] = { type: 'text', content: sanitizeTickerHTML(el) };
                 }
                 set(matchRef, state);
             }, 400);
@@ -1321,16 +1348,41 @@
                             state.adBarSlides[i] = { type: 'logo', content: compressedDataUrl };
                             set(matchRef, state);
                             renderAdBarSlidesList();
-                        });
+                        }, !!state.adBarRemoveBg);
                     };
                     reader.readAsDataURL(file);
                 }
             }
             if (!handledImage) {
-                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                document.execCommand('insertText', false, text);
+                const clipboard = (e.clipboardData || window.clipboardData);
+                const html = clipboard.getData('text/html');
+                const targetEl = document.querySelector('.adbar-slide-editable[data-index="' + i + '"]') || e.target;
+                if (html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        const frag = document.createDocumentFragment();
+                        let node, lastNode;
+                        while ((node = temp.firstChild)) { lastNode = frag.appendChild(node); }
+                        range.insertNode(frag);
+                        if (lastNode) {
+                            range.setStartAfter(lastNode);
+                            range.setEndAfter(lastNode);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    } else {
+                        targetEl.appendChild(temp);
+                    }
+                } else {
+                    const text = clipboard.getData('text/plain');
+                    document.execCommand('insertText', false, text);
+                }
                 if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
-                state.adBarSlides[i] = { type: 'text', content: e.target.innerText };
+                state.adBarSlides[i] = { type: 'text', content: sanitizeTickerHTML(targetEl) };
                 set(matchRef, state);
             }
         };
@@ -1595,6 +1647,8 @@
 
             const adBarEnabledCheckbox = document.getElementById('adbar-enabled-checkbox');
             if (adBarEnabledCheckbox) adBarEnabledCheckbox.checked = !!state.adBarEnabled;
+            const adBarRemoveBgCheckbox = document.getElementById('adbar-removebg-checkbox');
+            if (adBarRemoveBgCheckbox) adBarRemoveBgCheckbox.checked = !!state.adBarRemoveBg;
             if (document.activeElement === null || !document.activeElement.classList || !document.activeElement.classList.contains('adbar-slide-editable')) {
                 renderAdBarSlidesList();
             }
