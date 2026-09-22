@@ -24,6 +24,11 @@
         .player-suggestion-item:hover, .player-suggestion-item:active { background: #3a3a3a; }
         #ticker-content-editable:empty:before { content: attr(data-placeholder); color: #777; }
         #ticker-content-editable img { height: 26px; width: auto; vertical-align: middle; margin: 0 4px; border-radius: 2px; }
+        .adbar-slide-row { display: flex; gap: 8px; align-items: center; }
+        .adbar-slide-editable { flex: 1; min-height: 40px; max-height: 80px; overflow-y: auto; background: #1c1c1c; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; color: #eee; font-size: 13px; }
+        .adbar-slide-editable:empty:before { content: attr(data-placeholder); color: #777; }
+        .adbar-slide-editable img { height: 30px; width: auto; vertical-align: middle; border-radius: 2px; }
+        .adbar-slide-remove-btn { background: #7a1e1e; color: #fff; border: none; border-radius: 6px; width: 34px; height: 34px; flex-shrink: 0; font-weight: 800; cursor: pointer; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; }
         .row:last-child { margin-bottom: 0; }
         input[type="text"], input[type="number"], select { flex: 1; background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 14px; }
@@ -501,6 +506,42 @@
                     <span style="font-size:11px; color:#ccc;">Швидкість руху тексту (менше — швидше): <b id="ticker-speed-value" style="color:#e0b878;">20с</b></span>
                     <input type="range" id="ticker-speed-slider" min="5" max="60" step="1" value="20" oninput="updateTickerSpeed(this.value)">
                 </label>
+            </div>
+
+            <div class="card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Рекламний рядок (стаціонарний, ефект перекидання):</div>
+                <div class="switch-row"><span>Увімкнути рекламний рядок:</span><input type="checkbox" id="adbar-enabled-checkbox" onchange="updateAdBarEnabled(this.checked)"></div>
+
+                <div id="adbar-slides-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                <button class="btn btn-green" style="margin-top:8px;" onclick="addAdBarSlide()">+ Додати слайд (текст або лого)</button>
+                <div style="font-size:9px; color:#888; margin-top:4px;">У кожен слайд можна вставити (Ctrl+V) або текст, або одне зображення-логотип — воно автоматично стиснеться. Слайд повторюється по всій ширині екрана.</div>
+
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:10px;">
+                    <span style="font-size:11px; color:#ccc;">Тривалість показу слайду: <b id="adbar-duration-value" style="color:#e0b878;">15с</b></span>
+                    <input type="range" id="adbar-duration-slider" min="5" max="60" step="1" value="15" oninput="updateAdBarDuration(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Висота смуги: <b id="adbar-height-value" style="color:#e0b878;">60px</b></span>
+                    <input type="range" id="adbar-height-slider" min="30" max="150" step="1" value="60" oninput="updateAdBarHeight(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="adbar-offsety-value" style="color:#e0b878;">90px</b></span>
+                    <input type="range" id="adbar-offsety-slider" min="-400" max="600" step="5" value="90" oninput="updateAdBarOffsetY(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Прозорість фону: <b id="adbar-alpha-value" style="color:#e0b878;">85%</b></span>
+                    <input type="range" id="adbar-alpha-slider" min="0" max="100" step="1" value="85" oninput="updateAdBarAlpha(this.value)">
+                </label>
+                <div style="display:flex; gap:12px; margin-top:8px;">
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір фону</span>
+                        <input type="color" id="adbar-bgcolor-input" value="#141414" oninput="updateAdBarColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір тексту</span>
+                        <input type="color" id="adbar-textcolor-input" value="#ffffff" oninput="updateAdBarColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                </div>
             </div>
 
             <div class="card">
@@ -1211,6 +1252,119 @@
             }
         };
 
+        // ===== РЕКЛАМНИЙ РЯДОК =====
+        window.updateAdBarEnabled = function(checked) {
+            saveToHistory(state);
+            state.adBarEnabled = checked;
+            set(matchRef, state);
+        };
+
+        function renderAdBarSlidesList() {
+            const listEl = document.getElementById('adbar-slides-list');
+            if (!listEl) return;
+            const slides = Array.isArray(state.adBarSlides) ? state.adBarSlides : [];
+            listEl.innerHTML = slides.map((slide, i) => {
+                const content = slide.type === 'logo' && slide.content ? '<img src="' + slide.content + '">' : (slide.content || '').replace(/</g, '&lt;');
+                return '<div class="adbar-slide-row">' +
+                    '<div class="adbar-slide-editable" contenteditable="true" data-placeholder="Слайд ' + (i + 1) + ': текст або лого (Ctrl+V)" data-index="' + i + '" onpaste="handleAdBarSlidePaste(event,' + i + ')" oninput="saveAdBarSlideText(' + i + ', this)">' + content + '</div>' +
+                    '<button class="adbar-slide-remove-btn" onclick="removeAdBarSlide(' + i + ')">×</button>' +
+                    '</div>';
+            }).join('');
+        }
+
+        window.addAdBarSlide = function() {
+            if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
+            state.adBarSlides.push({ type: 'text', content: '' });
+            set(matchRef, state);
+            setTimeout(renderAdBarSlidesList, 200);
+        };
+
+        window.removeAdBarSlide = function(i) {
+            if (!Array.isArray(state.adBarSlides)) return;
+            state.adBarSlides.splice(i, 1);
+            set(matchRef, state);
+            setTimeout(renderAdBarSlidesList, 200);
+        };
+
+        let adBarSlideTextTimeout = null;
+        window.saveAdBarSlideText = function(i, el) {
+            clearTimeout(adBarSlideTextTimeout);
+            adBarSlideTextTimeout = setTimeout(() => {
+                if (!Array.isArray(state.adBarSlides) || !state.adBarSlides[i]) return;
+                // Якщо всередині є картинка — це слайд-лого, інакше просто текст
+                const img = el.querySelector('img');
+                if (img) {
+                    state.adBarSlides[i] = { type: 'logo', content: img.src };
+                } else {
+                    state.adBarSlides[i] = { type: 'text', content: el.innerText };
+                }
+                set(matchRef, state);
+            }, 400);
+        };
+
+        window.handleAdBarSlidePaste = function(e, i) {
+            e.preventDefault();
+            const items = (e.clipboardData || window.clipboardData).items;
+            let handledImage = false;
+            for (let k = 0; k < items.length; k++) {
+                if (items[k].type.indexOf('image') === 0) {
+                    handledImage = true;
+                    const file = items[k].getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        compressImageForTicker(ev.target.result, function(compressedDataUrl) {
+                            if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
+                            state.adBarSlides[i] = { type: 'logo', content: compressedDataUrl };
+                            set(matchRef, state);
+                            renderAdBarSlidesList();
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            if (!handledImage) {
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, text);
+                if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
+                state.adBarSlides[i] = { type: 'text', content: e.target.innerText };
+                set(matchRef, state);
+            }
+        };
+
+        window.updateAdBarDuration = function(v) {
+            state.adBarDuration = parseInt(v) || 15;
+            const lbl = document.getElementById('adbar-duration-value');
+            if (lbl) lbl.innerText = state.adBarDuration + 'с';
+            set(matchRef, state);
+        };
+
+        window.updateAdBarHeight = function(v) {
+            state.adBarHeight = parseInt(v) || 60;
+            const lbl = document.getElementById('adbar-height-value');
+            if (lbl) lbl.innerText = state.adBarHeight + 'px';
+            set(matchRef, state);
+        };
+
+        window.updateAdBarOffsetY = function(v) {
+            state.adBarOffsetY = parseInt(v);
+            const lbl = document.getElementById('adbar-offsety-value');
+            if (lbl) lbl.innerText = state.adBarOffsetY + 'px';
+            set(matchRef, state);
+        };
+
+        window.updateAdBarAlpha = function(v) {
+            state.adBarBgAlpha = parseInt(v);
+            const lbl = document.getElementById('adbar-alpha-value');
+            if (lbl) lbl.innerText = state.adBarBgAlpha + '%';
+            set(matchRef, state);
+        };
+
+        window.updateAdBarColors = function() {
+            state.adBarBgColor = document.getElementById('adbar-bgcolor-input').value || '#141414';
+            state.adBarTextColor = document.getElementById('adbar-textcolor-input').value || '#ffffff';
+            set(matchRef, state);
+        };
+
         window.updateTickerColors = function() {
             state.tickerBgColor = document.getElementById('ticker-bgcolor-input').value || '#141414';
             state.tickerTextColor = document.getElementById('ticker-textcolor-input').value || '#ffffff';
@@ -1427,6 +1581,43 @@
 
             const tickerEnabledCheckbox = document.getElementById('ticker-enabled-checkbox');
             if (tickerEnabledCheckbox) tickerEnabledCheckbox.checked = !!state.tickerEnabled;
+
+            const adBarEnabledCheckbox = document.getElementById('adbar-enabled-checkbox');
+            if (adBarEnabledCheckbox) adBarEnabledCheckbox.checked = !!state.adBarEnabled;
+            if (document.activeElement === null || !document.activeElement.classList || !document.activeElement.classList.contains('adbar-slide-editable')) {
+                renderAdBarSlidesList();
+            }
+            const adBarDurationSlider = document.getElementById('adbar-duration-slider');
+            const adBarDurationLbl = document.getElementById('adbar-duration-value');
+            if (adBarDurationSlider && document.activeElement !== adBarDurationSlider) {
+                adBarDurationSlider.value = state.adBarDuration || 15;
+                if (adBarDurationLbl) adBarDurationLbl.innerText = (state.adBarDuration || 15) + 'с';
+            }
+            const adBarHeightSlider = document.getElementById('adbar-height-slider');
+            const adBarHeightLbl = document.getElementById('adbar-height-value');
+            if (adBarHeightSlider && document.activeElement !== adBarHeightSlider) {
+                adBarHeightSlider.value = state.adBarHeight || 60;
+                if (adBarHeightLbl) adBarHeightLbl.innerText = (state.adBarHeight || 60) + 'px';
+            }
+            const adBarOffsetYSlider = document.getElementById('adbar-offsety-slider');
+            const adBarOffsetYLbl = document.getElementById('adbar-offsety-value');
+            if (adBarOffsetYSlider && document.activeElement !== adBarOffsetYSlider) {
+                const ov = state.adBarOffsetY !== undefined ? state.adBarOffsetY : 90;
+                adBarOffsetYSlider.value = ov;
+                if (adBarOffsetYLbl) adBarOffsetYLbl.innerText = ov + 'px';
+            }
+            const adBarAlphaSlider = document.getElementById('adbar-alpha-slider');
+            const adBarAlphaLbl = document.getElementById('adbar-alpha-value');
+            if (adBarAlphaSlider && document.activeElement !== adBarAlphaSlider) {
+                const aav = state.adBarBgAlpha !== undefined ? state.adBarBgAlpha : 85;
+                adBarAlphaSlider.value = aav;
+                if (adBarAlphaLbl) adBarAlphaLbl.innerText = aav + '%';
+            }
+            const adBarBgInput = document.getElementById('adbar-bgcolor-input');
+            if (adBarBgInput && document.activeElement !== adBarBgInput) adBarBgInput.value = state.adBarBgColor || '#141414';
+            const adBarTextColorInput = document.getElementById('adbar-textcolor-input');
+            if (adBarTextColorInput && document.activeElement !== adBarTextColorInput) adBarTextColorInput.value = state.adBarTextColor || '#ffffff';
+
             const tickerContentBox = document.getElementById('ticker-content-editable');
             if (tickerContentBox && document.activeElement !== tickerContentBox) {
                 const newHtml = state.tickerContentHTML || '';
