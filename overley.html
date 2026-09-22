@@ -49,13 +49,13 @@
             --score-set-past-text: #1a2e0b;
             --score-set-current-bg: rgba(101, 163, 13, 0.85);
             --score-set-current-text: #f7ffe0;
-            --points-team1-top: #a3e635;
-            --points-team1-bottom: #65a30d;
-            --points-team2-top: #65a30d;
-            --points-team2-bottom: #3f6212;
+            --points-team1-top: #9ca3af;
+            --points-team1-bottom: #6b7280;
+            --points-team2-top: #6b7280;
+            --points-team2-bottom: #374151;
             --points-text: #ffffff;
-            --points-ad-top: #f7ffb0;
-            --points-ad-bottom: #bef264;
+            --points-ad-top: #e5e7eb;
+            --points-ad-bottom: #d1d5db;
             --points-ad-text: #1a2e0b;
             --panel-bg: rgba(10, 14, 3, 0.62);
             --panel-border: rgba(163, 230, 53, 0.4);
@@ -135,21 +135,21 @@
         html.theme-transparent {
             --accent: #ffffff;
             --accent-soft: rgba(255, 255, 255, 0.3);
-            --team-bg-top: rgba(0, 0, 0, 0.1);
-            --team-bg-bottom: rgba(0, 0, 0, 0.1);
+            --team-bg-top: rgba(45, 45, 45, 0.55);
+            --team-bg-bottom: rgba(25, 25, 25, 0.6);
             --team-text: #ffffff;
-            --score-set-past-bg: rgba(255, 255, 255, 0.08);
+            --score-set-past-bg: rgba(255, 255, 255, 0.32);
             --score-set-past-text: #ffffff;
-            --score-set-current-bg: rgba(255, 255, 255, 0.18);
+            --score-set-current-bg: rgba(255, 255, 255, 0.45);
             --score-set-current-text: #ffffff;
-            --points-team1-top: rgba(255, 255, 255, 0.06);
-            --points-team1-bottom: rgba(255, 255, 255, 0.06);
-            --points-team2-top: rgba(255, 255, 255, 0.06);
-            --points-team2-bottom: rgba(255, 255, 255, 0.06);
+            --points-team1-top: rgba(255, 255, 255, 0.3);
+            --points-team1-bottom: rgba(255, 255, 255, 0.3);
+            --points-team2-top: rgba(0, 0, 0, 0.35);
+            --points-team2-bottom: rgba(0, 0, 0, 0.35);
             --points-text: #ffffff;
-            --points-ad-top: rgba(255, 255, 255, 0.28);
-            --points-ad-bottom: rgba(255, 255, 255, 0.28);
-            --points-ad-text: #ffffff;
+            --points-ad-top: rgba(255, 255, 255, 0.55);
+            --points-ad-bottom: rgba(255, 255, 255, 0.55);
+            --points-ad-text: #1a1a1a;
             --panel-bg: rgba(0, 0, 0, 0.15);
             --panel-border: rgba(255, 255, 255, 0.5);
             --panel-text: #ffffff;
@@ -173,11 +173,11 @@
             --score-set-past-text: #0b2a5c;
             --score-set-current-bg: rgba(21, 101, 216, 0.9);
             --score-set-current-text: #ffffff;
-            --points-team1-top: #2f7fe0;
-            --points-team1-bottom: #1565d8;
-            --points-team2-top: #1565d8;
-            --points-team2-bottom: #0b3d8f;
-            --points-text: #ffffff;
+            --points-team1-top: #d8c6ab;
+            --points-team1-bottom: #b3a082;
+            --points-team2-top: #b3a082;
+            --points-team2-bottom: #8a7a63;
+            --points-text: #2a1f10;
             --points-ad-top: #eaffa0;
             --points-ad-bottom: #d4ff3d;
             --points-ad-text: #0b2a5c;
@@ -649,12 +649,12 @@
         }
         .ticker-track span {
             font-family: 'Montserrat', sans-serif;
-            font-size: 15px;
+            font-size: var(--ticker-font-size, 15px);
             letter-spacing: 0.3px;
             -webkit-font-smoothing: antialiased;
         }
         .ticker-track span img {
-            height: 26px; width: auto;
+            height: var(--ticker-img-height, 26px); width: auto;
             vertical-align: middle;
             margin: 0 10px;
             display: inline-block;
@@ -1812,6 +1812,9 @@
                         tickerBar.style.background = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
                         tickerBar.style.height = (state.tickerHeight || 34) + 'px';
                         tickerBar.style.bottom = (state.tickerOffsetY || 0) + 'px';
+                        const tickerScale = (state.tickerHeight || 34) / 34;
+                        document.getElementById('ticker-track').style.setProperty('--ticker-font-size', Math.round(15 * tickerScale) + 'px');
+                        document.getElementById('ticker-track').style.setProperty('--ticker-img-height', Math.round(26 * tickerScale) + 'px');
 
                         const t1 = document.getElementById('ticker-text-1');
                         const track = document.getElementById('ticker-track');
