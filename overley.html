@@ -664,6 +664,36 @@
             to { transform: translateX(var(--ticker-end, -100%)); }
         }
 
+        /* ===== РЕКЛАМНИЙ РЯДОК (СТАЦІОНАРНИЙ, З ЕФЕКТОМ ПЕРЕКИДАННЯ) ===== */
+        .ad-bar {
+            position: fixed; left: 0; right: 0; bottom: 90px; z-index: 9550;
+            overflow: hidden;
+            perspective: 900px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
+        }
+        .ad-bar.visible { opacity: 1; visibility: visible; }
+        .ad-bar-inner {
+            display: flex; align-items: center; justify-content: space-around;
+            height: 100%; width: 100%;
+            transform-origin: bottom center;
+            transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease;
+            transform: rotateX(0deg); opacity: 1;
+        }
+        .ad-bar-inner.flip-out { transform: rotateX(-100deg); opacity: 0; }
+        .ad-bar-inner.flip-in-start { transform: rotateX(100deg); opacity: 0; transition: none !important; }
+        .ad-bar-inner img {
+            height: 68%; width: auto; object-fit: contain;
+            margin: 0 26px; flex-shrink: 0;
+        }
+        .ad-bar-inner span.ad-bar-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900; font-size: 20px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            white-space: nowrap; margin: 0 26px; flex-shrink: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
         /* ===== ПОЛНОЕКРАННА МЕДІА ЗАСТАВКА ===== */
         .fullscreen-media-overlay {
             position: fixed;
@@ -863,6 +893,11 @@
         <div class="ticker-track" id="ticker-track">
             <span id="ticker-text-1"></span>
         </div>
+    </div>
+
+    <!-- РЕКЛАМНИЙ РЯДОК (стаціонарний, ефект перекидання) -->
+    <div class="ad-bar" id="ad-bar">
+        <div class="ad-bar-inner" id="ad-bar-inner"></div>
     </div>
 
     <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
@@ -1170,6 +1205,38 @@
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
         let serverChangeBannerTimer = null, serverChangeBannerDelayTimer = null, lastServerChangeTrigger = 0;
         let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
+
+        let adBarTimer = null, adBarIndex = 0, adBarSlidesActive = [], lastAdBarSignature = "";
+
+        function renderAdBarSlide(item) {
+            const inner = document.getElementById('ad-bar-inner');
+            if (!inner || !item) return;
+            const piece = item.type === 'logo'
+                ? '<img src="' + item.content + '">'
+                : '<span class="ad-bar-text">' + (item.content || '').replace(/</g, '&lt;') + '</span>';
+            inner.innerHTML = new Array(12).fill(piece).join('');
+        }
+
+        function startAdBarCycle(slides, durationSec) {
+            clearInterval(adBarTimer);
+            adBarSlidesActive = slides;
+            adBarIndex = 0;
+            const inner = document.getElementById('ad-bar-inner');
+            if (!inner || slides.length === 0) { if (inner) inner.innerHTML = ''; return; }
+            renderAdBarSlide(slides[0]);
+            if (slides.length > 1) {
+                adBarTimer = setInterval(() => {
+                    inner.classList.add('flip-out');
+                    setTimeout(() => {
+                        adBarIndex = (adBarIndex + 1) % adBarSlidesActive.length;
+                        renderAdBarSlide(adBarSlidesActive[adBarIndex]);
+                        inner.classList.remove('flip-out');
+                        inner.classList.add('flip-in-start');
+                        requestAnimationFrame(() => { requestAnimationFrame(() => { inner.classList.remove('flip-in-start'); }); });
+                    }, 560);
+                }, Math.max(5, durationSec || 15) * 1000);
+            }
+        }
 
         function startSponsorLogoCarousel(urls, intervalSec) {
             clearInterval(sponsorLogoTimer);
@@ -1770,7 +1837,30 @@
                         });
                     }
 
-                    if (state.showStatsOverlay || statsAutoActive) {
+                    // ===== РЕКЛАМНИЙ РЯДОК =====
+                    const adBar = document.getElementById('ad-bar');
+                    if (adBar) {
+                        const adSlides = Array.isArray(state.adBarSlides) ? state.adBarSlides.filter(s => s && ((s.type === 'logo' && s.content) || (s.type === 'text' && s.content && s.content.trim() !== ''))) : [];
+                        adBar.classList.toggle('visible', !!state.adBarEnabled && adSlides.length > 0);
+
+                        const ahex = (state.adBarBgColor || '#141414').replace('#', '');
+                        const ar = parseInt(ahex.substring(0, 2), 16) || 0;
+                        const ag = parseInt(ahex.substring(2, 4), 16) || 0;
+                        const ab = parseInt(ahex.substring(4, 6), 16) || 0;
+                        const aalpha = (state.adBarBgAlpha !== undefined ? state.adBarBgAlpha : 85) / 100;
+                        adBar.style.background = 'rgba(' + ar + ',' + ag + ',' + ab + ',' + aalpha + ')';
+                        adBar.style.height = (state.adBarHeight || 60) + 'px';
+                        adBar.style.bottom = (state.adBarOffsetY !== undefined ? state.adBarOffsetY : 90) + 'px';
+                        document.getElementById('ad-bar-inner').style.color = state.adBarTextColor || '#ffffff';
+
+                        const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15);
+                        if (adSignature !== lastAdBarSignature) {
+                            lastAdBarSignature = adSignature;
+                            startAdBarCycle(adSlides, state.adBarDuration || 15);
+                        }
+                    }
+
+
                         document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                         if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
