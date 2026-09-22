@@ -674,7 +674,8 @@
         }
         .ad-bar.visible { opacity: 1; visibility: visible; }
         .ad-bar-inner {
-            display: flex; align-items: center; justify-content: space-around;
+            display: flex; align-items: center; justify-content: flex-start;
+            gap: var(--ad-bar-gap, 26px);
             height: 100%; width: 100%;
             transform-origin: bottom center;
             transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease;
@@ -684,13 +685,13 @@
         .ad-bar-inner.flip-in-start { transform: rotateX(100deg); opacity: 0; transition: none !important; }
         .ad-bar-inner img {
             height: 68%; width: auto; object-fit: contain;
-            margin: 0 26px; flex-shrink: 0;
+            flex-shrink: 0;
         }
         .ad-bar-inner span.ad-bar-text {
             font-family: 'Montserrat', sans-serif;
             font-weight: 900; font-size: 20px;
             text-transform: uppercase; letter-spacing: 0.5px;
-            white-space: nowrap; margin: 0 26px; flex-shrink: 0;
+            white-space: nowrap; flex-shrink: 0;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -1214,7 +1215,7 @@
             const piece = item.type === 'logo'
                 ? '<img src="' + item.content + '">'
                 : '<span class="ad-bar-text">' + (item.content || '').replace(/</g, '&lt;') + '</span>';
-            inner.innerHTML = new Array(12).fill(piece).join('');
+            inner.innerHTML = new Array(24).fill(piece).join('');
         }
 
         function startAdBarCycle(slides, durationSec) {
@@ -1852,6 +1853,7 @@
                         adBar.style.height = (state.adBarHeight || 60) + 'px';
                         adBar.style.bottom = (state.adBarOffsetY !== undefined ? state.adBarOffsetY : 90) + 'px';
                         document.getElementById('ad-bar-inner').style.color = state.adBarTextColor || '#ffffff';
+                        document.getElementById('ad-bar-inner').style.setProperty('--ad-bar-gap', (state.adBarGap !== undefined ? state.adBarGap : 26) + 'px');
 
                         const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15);
                         if (adSignature !== lastAdBarSignature) {
