@@ -1860,7 +1860,7 @@
                         }
                     }
 
-
+                    if (state.showStatsOverlay || statsAutoActive) {
                         document.getElementById('st-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('st-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
                         document.getElementById('stats-main-header').innerText = getStatsLabel('header', state) + ' ' + courtId;
                         if (document.getElementById('lbl-game-time-footer').firstChild) document.getElementById('lbl-game-time-footer').firstChild.textContent = (state.cornerSlideLang === 'ua' ? 'Гейм' : 'Game') + ': ';
