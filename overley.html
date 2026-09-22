@@ -1214,7 +1214,7 @@
             if (!inner || !item) return;
             const piece = item.type === 'logo'
                 ? '<img src="' + item.content + '">'
-                : '<span class="ad-bar-text">' + (item.content || '').replace(/</g, '&lt;') + '</span>';
+                : '<span class="ad-bar-text">' + (item.content || '') + '</span>';
             inner.innerHTML = new Array(24).fill(piece).join('');
         }
 
