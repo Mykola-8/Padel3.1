@@ -683,6 +683,12 @@
         }
         .ad-bar-inner.flip-out { transform: rotateX(-100deg); opacity: 0; }
         .ad-bar-inner.flip-in-start { transform: rotateX(100deg); opacity: 0; transition: none !important; }
+        .ad-bar-inner.anim-fade-out { transform: none; opacity: 0; }
+        .ad-bar-inner.anim-fade-in-start { transform: none; opacity: 0; transition: none !important; }
+        .ad-bar-inner.anim-slidelr-out { transform: translateX(100%); opacity: 0; }
+        .ad-bar-inner.anim-slidelr-in-start { transform: translateX(-100%); opacity: 0; transition: none !important; }
+        .ad-bar-inner.anim-slidetb-out { transform: translateY(-100%); opacity: 0; }
+        .ad-bar-inner.anim-slidetb-in-start { transform: translateY(100%); opacity: 0; transition: none !important; }
         .ad-bar-inner img {
             height: 68%; width: auto; object-fit: contain;
             flex-shrink: 0;
@@ -1218,22 +1224,30 @@
             inner.innerHTML = new Array(24).fill(piece).join('');
         }
 
-        function startAdBarCycle(slides, durationSec) {
+        const AD_BAR_ANIM_CLASSES = {
+            flip: ['flip-out', 'flip-in-start'],
+            fade: ['anim-fade-out', 'anim-fade-in-start'],
+            'slide-lr': ['anim-slidelr-out', 'anim-slidelr-in-start'],
+            'slide-tb': ['anim-slidetb-out', 'anim-slidetb-in-start']
+        };
+
+        function startAdBarCycle(slides, durationSec, animType) {
             clearInterval(adBarTimer);
             adBarSlidesActive = slides;
             adBarIndex = 0;
             const inner = document.getElementById('ad-bar-inner');
             if (!inner || slides.length === 0) { if (inner) inner.innerHTML = ''; return; }
             renderAdBarSlide(slides[0]);
+            const [outClass, inClass] = AD_BAR_ANIM_CLASSES[animType] || AD_BAR_ANIM_CLASSES.flip;
             if (slides.length > 1) {
                 adBarTimer = setInterval(() => {
-                    inner.classList.add('flip-out');
+                    inner.classList.add(outClass);
                     setTimeout(() => {
                         adBarIndex = (adBarIndex + 1) % adBarSlidesActive.length;
                         renderAdBarSlide(adBarSlidesActive[adBarIndex]);
-                        inner.classList.remove('flip-out');
-                        inner.classList.add('flip-in-start');
-                        requestAnimationFrame(() => { requestAnimationFrame(() => { inner.classList.remove('flip-in-start'); }); });
+                        inner.classList.remove(outClass);
+                        inner.classList.add(inClass);
+                        requestAnimationFrame(() => { requestAnimationFrame(() => { inner.classList.remove(inClass); }); });
                     }, 560);
                 }, Math.max(5, durationSec || 15) * 1000);
             }
@@ -1858,10 +1872,10 @@
                         document.getElementById('ad-bar-inner').style.color = state.adBarTextColor || '#ffffff';
                         document.getElementById('ad-bar-inner').style.setProperty('--ad-bar-gap', (state.adBarGap !== undefined ? state.adBarGap : 26) + 'px');
 
-                        const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15);
+                        const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15) + '::' + (state.adBarAnimation || 'flip');
                         if (adSignature !== lastAdBarSignature) {
                             lastAdBarSignature = adSignature;
-                            startAdBarCycle(adSlides, state.adBarDuration || 15);
+                            startAdBarCycle(adSlides, state.adBarDuration || 15, state.adBarAnimation || 'flip');
                         }
                     }
 
