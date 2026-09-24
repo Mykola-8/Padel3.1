@@ -669,11 +669,19 @@
             position: fixed; left: 0; right: 0; bottom: 90px; z-index: 9550;
             overflow: hidden;
             perspective: 900px;
+            background: none !important;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
+            transition: opacity 0.4s ease, visibility 0.4s;
         }
         .ad-bar.visible { opacity: 1; visibility: visible; }
+        .ad-bar-bg {
+            position: absolute; inset: 0;
+            transform-origin: bottom center;
+            transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+            transform: none;
+        }
         .ad-bar-inner {
+            position: relative;
             display: flex; align-items: center; justify-content: flex-start;
             gap: var(--ad-bar-gap, 26px);
             height: 100%; width: 100%;
@@ -681,14 +689,24 @@
             transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease;
             transform: rotateX(0deg); opacity: 1;
         }
-        .ad-bar-inner.flip-out { transform: rotateX(-100deg); opacity: 0; }
-        .ad-bar-inner.flip-in-start { transform: rotateX(100deg); opacity: 0; transition: none !important; }
-        .ad-bar-inner.anim-fade-out { transform: none; opacity: 0; }
-        .ad-bar-inner.anim-fade-in-start { transform: none; opacity: 0; transition: none !important; }
-        .ad-bar-inner.anim-slidelr-out { transform: translateX(100%); opacity: 0; }
-        .ad-bar-inner.anim-slidelr-in-start { transform: translateX(-100%); opacity: 0; transition: none !important; }
-        .ad-bar-inner.anim-slidetb-out { transform: translateY(-100%); opacity: 0; }
-        .ad-bar-inner.anim-slidetb-in-start { transform: translateY(100%); opacity: 0; transition: none !important; }
+        .ad-bar-bg.flip-out, .ad-bar-inner.flip-out { transform: rotateX(-100deg); }
+        .ad-bar-inner.flip-out { opacity: 0; }
+        .ad-bar-bg.flip-in-start, .ad-bar-inner.flip-in-start { transform: rotateX(100deg); transition: none !important; }
+        .ad-bar-inner.flip-in-start { opacity: 0; }
+        .ad-bar-bg.anim-fade-out, .ad-bar-inner.anim-fade-out { transform: none; opacity: 0; }
+        .ad-bar-bg.anim-fade-in-start, .ad-bar-inner.anim-fade-in-start { transform: none; opacity: 0; transition: none !important; }
+        .ad-bar-bg.anim-slidelr-out, .ad-bar-inner.anim-slidelr-out { transform: translateX(100%); }
+        .ad-bar-inner.anim-slidelr-out { opacity: 0; }
+        .ad-bar-bg.anim-slidelr-in-start, .ad-bar-inner.anim-slidelr-in-start { transform: translateX(-100%); transition: none !important; }
+        .ad-bar-inner.anim-slidelr-in-start { opacity: 0; }
+        .ad-bar-bg.anim-slidetb-out, .ad-bar-inner.anim-slidetb-out { transform: translateY(-100%); }
+        .ad-bar-inner.anim-slidetb-out { opacity: 0; }
+        .ad-bar-bg.anim-slidetb-in-start, .ad-bar-inner.anim-slidetb-in-start { transform: translateY(100%); transition: none !important; }
+        .ad-bar-inner.anim-slidetb-in-start { opacity: 0; }
+        .ad-bar-bg.anim-3d-out, .ad-bar-inner.anim-3d-out { transform: perspective(700px) rotateY(-75deg) scale(0.7); }
+        .ad-bar-inner.anim-3d-out { opacity: 0; }
+        .ad-bar-bg.anim-3d-in-start, .ad-bar-inner.anim-3d-in-start { transform: perspective(700px) rotateY(75deg) scale(0.7); transition: none !important; }
+        .ad-bar-inner.anim-3d-in-start { opacity: 0; }
         .ad-bar-inner img {
             height: 68%; width: auto; object-fit: contain;
             flex-shrink: 0;
@@ -904,6 +922,7 @@
 
     <!-- РЕКЛАМНИЙ РЯДОК (стаціонарний, ефект перекидання) -->
     <div class="ad-bar" id="ad-bar">
+        <div class="ad-bar-bg" id="ad-bar-bg"></div>
         <div class="ad-bar-inner" id="ad-bar-inner"></div>
     </div>
 
@@ -1228,26 +1247,33 @@
             flip: ['flip-out', 'flip-in-start'],
             fade: ['anim-fade-out', 'anim-fade-in-start'],
             'slide-lr': ['anim-slidelr-out', 'anim-slidelr-in-start'],
-            'slide-tb': ['anim-slidetb-out', 'anim-slidetb-in-start']
+            'slide-tb': ['anim-slidetb-out', 'anim-slidetb-in-start'],
+            '3d': ['anim-3d-out', 'anim-3d-in-start']
         };
 
-        function startAdBarCycle(slides, durationSec, animType) {
+        function startAdBarCycle(slides, durationSec, animType, animateBg) {
             clearInterval(adBarTimer);
             adBarSlidesActive = slides;
             adBarIndex = 0;
             const inner = document.getElementById('ad-bar-inner');
+            const bg = document.getElementById('ad-bar-bg');
             if (!inner || slides.length === 0) { if (inner) inner.innerHTML = ''; return; }
             renderAdBarSlide(slides[0]);
             const [outClass, inClass] = AD_BAR_ANIM_CLASSES[animType] || AD_BAR_ANIM_CLASSES.flip;
             if (slides.length > 1) {
                 adBarTimer = setInterval(() => {
                     inner.classList.add(outClass);
+                    if (animateBg) bg.classList.add(outClass);
                     setTimeout(() => {
                         adBarIndex = (adBarIndex + 1) % adBarSlidesActive.length;
                         renderAdBarSlide(adBarSlidesActive[adBarIndex]);
                         inner.classList.remove(outClass);
                         inner.classList.add(inClass);
-                        requestAnimationFrame(() => { requestAnimationFrame(() => { inner.classList.remove(inClass); }); });
+                        if (animateBg) { bg.classList.remove(outClass); bg.classList.add(inClass); }
+                        requestAnimationFrame(() => { requestAnimationFrame(() => {
+                            inner.classList.remove(inClass);
+                            if (animateBg) bg.classList.remove(inClass);
+                        }); });
                     }, 560);
                 }, Math.max(5, durationSec || 15) * 1000);
             }
@@ -1866,16 +1892,16 @@
                         const ag = parseInt(ahex.substring(2, 4), 16) || 0;
                         const ab = parseInt(ahex.substring(4, 6), 16) || 0;
                         const aalpha = (state.adBarBgAlpha !== undefined ? state.adBarBgAlpha : 85) / 100;
-                        adBar.style.background = 'rgba(' + ar + ',' + ag + ',' + ab + ',' + aalpha + ')';
+                        document.getElementById('ad-bar-bg').style.background = 'rgba(' + ar + ',' + ag + ',' + ab + ',' + aalpha + ')';
                         adBar.style.height = (state.adBarHeight || 60) + 'px';
                         adBar.style.bottom = (state.adBarOffsetY !== undefined ? state.adBarOffsetY : 90) + 'px';
                         document.getElementById('ad-bar-inner').style.color = state.adBarTextColor || '#ffffff';
                         document.getElementById('ad-bar-inner').style.setProperty('--ad-bar-gap', (state.adBarGap !== undefined ? state.adBarGap : 26) + 'px');
 
-                        const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15) + '::' + (state.adBarAnimation || 'flip');
+                        const adSignature = JSON.stringify(adSlides) + '::' + (state.adBarDuration || 15) + '::' + (state.adBarAnimation || 'flip') + '::' + (!!state.adBarAnimateBg);
                         if (adSignature !== lastAdBarSignature) {
                             lastAdBarSignature = adSignature;
-                            startAdBarCycle(adSlides, state.adBarDuration || 15, state.adBarAnimation || 'flip');
+                            startAdBarCycle(adSlides, state.adBarDuration || 15, state.adBarAnimation || 'flip', !!state.adBarAnimateBg);
                         }
                     }
 
