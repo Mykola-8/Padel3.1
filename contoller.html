@@ -499,6 +499,10 @@
                     <input type="range" id="ticker-height-slider" min="20" max="100" step="1" value="34" oninput="updateTickerHeight(this.value)">
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="ticker-fontscale-value" style="color:#e0b878;">100%</b></span>
+                    <input type="range" id="ticker-fontscale-slider" min="50" max="200" step="5" value="100" oninput="updateTickerFontScale(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="ticker-offsety-value" style="color:#e0b878;">0px</b></span>
                     <input type="range" id="ticker-offsety-slider" min="-400" max="400" step="5" value="0" oninput="updateTickerOffsetY(this.value)">
                 </label>
@@ -1476,6 +1480,13 @@
             set(matchRef, state);
         };
 
+        window.updateTickerFontScale = function(v) {
+            state.tickerFontScale = parseInt(v) || 100;
+            const lbl = document.getElementById('ticker-fontscale-value');
+            if (lbl) lbl.innerText = state.tickerFontScale + '%';
+            set(matchRef, state);
+        };
+
         window.updateTickerOffsetY = function(v) {
             state.tickerOffsetY = parseInt(v) || 0;
             const lbl = document.getElementById('ticker-offsety-value');
@@ -1744,6 +1755,13 @@
             if (tickerHeightSlider && document.activeElement !== tickerHeightSlider) {
                 tickerHeightSlider.value = state.tickerHeight || 34;
                 if (tickerHeightLbl) tickerHeightLbl.innerText = (state.tickerHeight || 34) + 'px';
+            }
+            const tickerFontScaleSlider = document.getElementById('ticker-fontscale-slider');
+            const tickerFontScaleLbl = document.getElementById('ticker-fontscale-value');
+            if (tickerFontScaleSlider && document.activeElement !== tickerFontScaleSlider) {
+                const fsv = state.tickerFontScale !== undefined ? state.tickerFontScale : 100;
+                tickerFontScaleSlider.value = fsv;
+                if (tickerFontScaleLbl) tickerFontScaleLbl.innerText = fsv + '%';
             }
             const tickerOffsetYSlider = document.getElementById('ticker-offsety-slider');
             const tickerOffsetYLbl = document.getElementById('ticker-offsety-value');
