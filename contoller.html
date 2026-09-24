@@ -415,6 +415,7 @@
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
                 <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
                 <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
                 <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
@@ -1572,6 +1573,30 @@
             document.getElementById('logo-file-status').innerText = "Файл не вибрано";
             set(matchRef, state);
         };
+
+        window.resetMatchScore = function() {
+            if (!confirm("Скинути матч?\n\nРахунок і статистика гри обнуляться, табло та всі панелі статистики сховаються.\nНазви команд, тема, логотипи й інші налаштування НЕ зміняться.")) return;
+            if (statsTimeout) clearTimeout(statsTimeout);
+            gameStartTimestamp = Date.now();
+            const resetFields = {
+                p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
+                isTiebreak: false, deuceCounter: 0,
+                activeMatchRibbon: "NONE",
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0,
+                p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
+                completedGamesCount: 0, statsAutoTrigger: 0,
+                showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [],
+                showMainBoard: false, isMatchFinished: false, showBreak: false,
+                animation: { team: 0, type: "", ts: 0 }
+            };
+            for (let s = 1; s <= 9; s++) {
+                resetFields['t1_s' + s] = 0; resetFields['t2_s' + s] = 0;
+                resetFields['t1_lg_s' + s] = 0; resetFields['t2_lg_s' + s] = 0;
+                resetFields['t1_tb_s' + s] = ""; resetFields['t2_tb_s' + s] = "";
+            }
+            const newState = Object.assign({}, state, resetFields);
+            set(matchRef, newState).then(() => closeModalSettings());
+        }
 
         window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
 
