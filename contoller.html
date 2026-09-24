@@ -525,8 +525,10 @@
                         <option value="fade">Затухання</option>
                         <option value="slide-lr">Слайд зліва направо</option>
                         <option value="slide-tb">Слайд зверху до низу</option>
+                        <option value="3d">3D-ефект</option>
                     </select>
                 </div>
+                <div class="switch-row" style="margin-top:8px;"><span>Анімувати фон смуги разом з лого/текстом:</span><input type="checkbox" id="adbar-animatebg-checkbox" onchange="updateAdBarAnimateBg(this.checked)"></div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:10px;">
                     <span style="font-size:11px; color:#ccc;">Тривалість показу слайду: <b id="adbar-duration-value" style="color:#e0b878;">15с</b></span>
                     <input type="range" id="adbar-duration-slider" min="5" max="60" step="1" value="15" oninput="updateAdBarDuration(this.value)">
@@ -1408,6 +1410,11 @@
             set(matchRef, state);
         };
 
+        window.updateAdBarAnimateBg = function(checked) {
+            state.adBarAnimateBg = checked;
+            set(matchRef, state);
+        };
+
         window.updateAdBarHeight = function(v) {
             state.adBarHeight = parseInt(v) || 60;
             const lbl = document.getElementById('adbar-height-value');
@@ -1676,6 +1683,8 @@
             if (adBarAnimationSelector && document.activeElement !== adBarAnimationSelector) {
                 adBarAnimationSelector.value = state.adBarAnimation || 'flip';
             }
+            const adBarAnimateBgCheckbox = document.getElementById('adbar-animatebg-checkbox');
+            if (adBarAnimateBgCheckbox) adBarAnimateBgCheckbox.checked = !!state.adBarAnimateBg;
             const adBarHeightSlider = document.getElementById('adbar-height-slider');
             const adBarHeightLbl = document.getElementById('adbar-height-value');
             if (adBarHeightSlider && document.activeElement !== adBarHeightSlider) {
