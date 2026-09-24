@@ -1852,9 +1852,15 @@
                         tickerBar.style.background = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
                         tickerBar.style.height = (state.tickerHeight || 34) + 'px';
                         tickerBar.style.bottom = (state.tickerOffsetY || 0) + 'px';
-                        const tickerScale = (state.tickerHeight || 34) / 34;
-                        document.getElementById('ticker-track').style.setProperty('--ticker-font-size', Math.round(15 * tickerScale) + 'px');
-                        document.getElementById('ticker-track').style.setProperty('--ticker-img-height', Math.round(26 * tickerScale) + 'px');
+                        const tbHeight = state.tickerHeight || 34;
+                        const tickerScale = tbHeight / 34;
+                        const tickerFontMult = (state.tickerFontScale !== undefined ? state.tickerFontScale : 100) / 100;
+                        const maxTickerFont = Math.floor(tbHeight * 0.7);
+                        const tickerFontPx = Math.max(8, Math.min(Math.round(15 * tickerScale * tickerFontMult), maxTickerFont));
+                        const maxTickerImg = Math.floor(tbHeight * 0.85);
+                        const tickerImgPx = Math.max(10, Math.min(Math.round(26 * tickerScale * tickerFontMult), maxTickerImg));
+                        document.getElementById('ticker-track').style.setProperty('--ticker-font-size', tickerFontPx + 'px');
+                        document.getElementById('ticker-track').style.setProperty('--ticker-img-height', tickerImgPx + 'px');
 
                         const t1 = document.getElementById('ticker-text-1');
                         const track = document.getElementById('ticker-track');
