@@ -507,6 +507,15 @@
                     <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="ticker-fontscale-value" style="color:#e0b878;">100%</b></span>
                     <input type="range" id="ticker-fontscale-slider" min="50" max="200" step="5" value="100" oninput="updateTickerFontScale(this.value)">
                 </label>
+                <div class="row" style="margin-top:8px;">
+                    <span>Напрямок тексту:</span>
+                    <select id="ticker-direction-selector" onchange="updateTickerDirection(this.value)">
+                        <option value="rl">Справа наліво</option>
+                        <option value="lr">Зліва направо</option>
+                        <option value="tb">Зверху вниз (з затримкою)</option>
+                        <option value="bt">Знизу вгору (з затримкою)</option>
+                    </select>
+                </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="ticker-offsety-value" style="color:#e0b878;">0px</b></span>
                     <input type="range" id="ticker-offsety-slider" min="-400" max="400" step="5" value="0" oninput="updateTickerOffsetY(this.value)">
@@ -1492,6 +1501,11 @@
             set(matchRef, state);
         };
 
+        window.updateTickerDirection = function(v) {
+            state.tickerDirection = v;
+            set(matchRef, state);
+        };
+
         window.updateTickerOffsetY = function(v) {
             state.tickerOffsetY = parseInt(v) || 0;
             const lbl = document.getElementById('ticker-offsety-value');
@@ -1791,6 +1805,10 @@
                 const fsv = state.tickerFontScale !== undefined ? state.tickerFontScale : 100;
                 tickerFontScaleSlider.value = fsv;
                 if (tickerFontScaleLbl) tickerFontScaleLbl.innerText = fsv + '%';
+            }
+            const tickerDirectionSelector = document.getElementById('ticker-direction-selector');
+            if (tickerDirectionSelector && document.activeElement !== tickerDirectionSelector) {
+                tickerDirectionSelector.value = state.tickerDirection || 'rl';
             }
             const tickerOffsetYSlider = document.getElementById('ticker-offsety-slider');
             const tickerOffsetYLbl = document.getElementById('ticker-offsety-value');
