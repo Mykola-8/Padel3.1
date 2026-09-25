@@ -635,12 +635,13 @@
             position: fixed; left: 0; right: 0; bottom: 0; z-index: 9600;
             overflow: hidden;
             display: block;
+            padding: 0 4px; box-sizing: border-box;
             opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
         }
         .ticker-bar.visible { opacity: 1; visibility: visible; }
         .ticker-track {
-            position: absolute; top: 0; left: 0; height: 100%;
+            position: absolute; top: 0; left: 0; height: 100%; width: 100%;
             display: flex; align-items: center; white-space: nowrap;
             will-change: transform;
             animation-name: ticker-scroll;
@@ -648,21 +649,38 @@
             animation-iteration-count: infinite;
             transform: translateX(var(--ticker-start, 100%));
         }
+        .ticker-track.dir-tb, .ticker-track.dir-bt {
+            justify-content: center;
+            animation-timing-function: ease-in-out;
+        }
         .ticker-track span {
             font-family: 'Montserrat', sans-serif;
             font-size: var(--ticker-font-size, 15px);
             letter-spacing: 0.3px;
             -webkit-font-smoothing: antialiased;
+            padding: 0 2px;
         }
         .ticker-track span img {
             height: var(--ticker-img-height, 26px); width: auto;
             vertical-align: middle;
-            margin: 0 10px;
+            margin: 0 6px;
             display: inline-block;
         }
         @keyframes ticker-scroll {
             from { transform: translateX(var(--ticker-start, 100%)); }
             to { transform: translateX(var(--ticker-end, -100%)); }
+        }
+        @keyframes ticker-scroll-tb {
+            0% { transform: translateY(-140%); }
+            25% { transform: translateY(0); }
+            75% { transform: translateY(0); }
+            100% { transform: translateY(140%); }
+        }
+        @keyframes ticker-scroll-bt {
+            0% { transform: translateY(140%); }
+            25% { transform: translateY(0); }
+            75% { transform: translateY(0); }
+            100% { transform: translateY(-140%); }
         }
 
         /* ===== РЕКЛАМНИЙ РЯДОК (СТАЦІОНАРНИЙ, З ЕФЕКТОМ ПЕРЕКИДАННЯ) ===== */
@@ -1870,22 +1888,42 @@
                         t1.style.color = tColor;
                         track.style.animationDuration = (state.tickerSpeed || 20) + 's';
 
-                        // Стартуємо строго з-за правого краю екрана, закінчуємо за лівим
-                        const barWidth = tickerBar.clientWidth || window.innerWidth;
-                        const textWidth = t1.offsetWidth || 0;
-                        track.style.setProperty('--ticker-start', barWidth + 'px');
-                        track.style.setProperty('--ticker-end', (-textWidth) + 'px');
+                        const tickerDirection = state.tickerDirection || 'rl';
+                        track.classList.toggle('dir-tb', tickerDirection === 'tb');
+                        track.classList.toggle('dir-bt', tickerDirection === 'bt');
 
-                        t1.querySelectorAll('img').forEach(imgEl => {
-                            if (!imgEl.complete) {
-                                imgEl.onload = () => {
-                                    const bw = tickerBar.clientWidth || window.innerWidth;
-                                    const tw = t1.offsetWidth || 0;
-                                    track.style.setProperty('--ticker-start', bw + 'px');
-                                    track.style.setProperty('--ticker-end', (-tw) + 'px');
-                                };
+                        if (tickerDirection === 'tb' || tickerDirection === 'bt') {
+                            track.style.animationName = tickerDirection === 'tb' ? 'ticker-scroll-tb' : 'ticker-scroll-bt';
+                            track.style.transform = 'none';
+                        } else {
+                            track.style.animationName = 'ticker-scroll';
+                            // Стартуємо строго з-за одного краю екрана, закінчуємо за іншим (справа наліво або зліва направо)
+                            const barWidth = tickerBar.clientWidth || window.innerWidth;
+                            const textWidth = t1.offsetWidth || 0;
+                            if (tickerDirection === 'lr') {
+                                track.style.setProperty('--ticker-start', (-textWidth) + 'px');
+                                track.style.setProperty('--ticker-end', barWidth + 'px');
+                            } else {
+                                track.style.setProperty('--ticker-start', barWidth + 'px');
+                                track.style.setProperty('--ticker-end', (-textWidth) + 'px');
                             }
-                        });
+
+                            t1.querySelectorAll('img').forEach(imgEl => {
+                                if (!imgEl.complete) {
+                                    imgEl.onload = () => {
+                                        const bw = tickerBar.clientWidth || window.innerWidth;
+                                        const tw = t1.offsetWidth || 0;
+                                        if (tickerDirection === 'lr') {
+                                            track.style.setProperty('--ticker-start', (-tw) + 'px');
+                                            track.style.setProperty('--ticker-end', bw + 'px');
+                                        } else {
+                                            track.style.setProperty('--ticker-start', bw + 'px');
+                                            track.style.setProperty('--ticker-end', (-tw) + 'px');
+                                        }
+                                    };
+                                }
+                            });
+                        }
                     }
 
                     // ===== РЕКЛАМНИЙ РЯДОК =====
