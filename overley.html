@@ -42,20 +42,20 @@
         html.theme-courtgreen {
             --accent: #a3e635;
             --accent-soft: rgba(163, 230, 53, 0.45);
-            --team-bg-top: rgba(35, 46, 15, 0.82);
-            --team-bg-bottom: rgba(20, 26, 8, 0.82);
+            --team-bg-top: rgba(92, 64, 44, 0.85);
+            --team-bg-bottom: rgba(56, 38, 26, 0.88);
             --team-text: #f7ffe0;
             --score-set-past-bg: rgba(247, 255, 224, 0.92);
             --score-set-past-text: #1a2e0b;
             --score-set-current-bg: rgba(101, 163, 13, 0.85);
             --score-set-current-text: #f7ffe0;
-            --points-team1-top: #9ca3af;
-            --points-team1-bottom: #6b7280;
-            --points-team2-top: #6b7280;
-            --points-team2-bottom: #374151;
+            --points-team1-top: #9b9b3d;
+            --points-team1-bottom: #6b6b1f;
+            --points-team2-top: #6b6b1f;
+            --points-team2-bottom: #47470f;
             --points-text: #ffffff;
-            --points-ad-top: #e5e7eb;
-            --points-ad-bottom: #d1d5db;
+            --points-ad-top: #d4d48a;
+            --points-ad-bottom: #a3a352;
             --points-ad-text: #1a2e0b;
             --panel-bg: rgba(10, 14, 3, 0.62);
             --panel-border: rgba(163, 230, 53, 0.4);
@@ -138,18 +138,19 @@
             --team-bg-top: rgba(45, 45, 45, 0.55);
             --team-bg-bottom: rgba(25, 25, 25, 0.6);
             --team-text: #ffffff;
-            --score-set-past-bg: rgba(255, 255, 255, 0.32);
+            --score-set-past-bg: rgba(255, 255, 255, 0.12);
             --score-set-past-text: #ffffff;
-            --score-set-current-bg: rgba(255, 255, 255, 0.45);
+            --score-set-current-bg: rgba(255, 255, 255, 0.12);
             --score-set-current-text: #ffffff;
-            --points-team1-top: rgba(255, 255, 255, 0.3);
-            --points-team1-bottom: rgba(255, 255, 255, 0.3);
-            --points-team2-top: rgba(0, 0, 0, 0.35);
-            --points-team2-bottom: rgba(0, 0, 0, 0.35);
+            --points-team1-top: rgba(255, 255, 255, 0.12);
+            --points-team1-bottom: rgba(255, 255, 255, 0.12);
+            --points-team2-top: rgba(255, 255, 255, 0.12);
+            --points-team2-bottom: rgba(255, 255, 255, 0.12);
             --points-text: #ffffff;
-            --points-ad-top: rgba(255, 255, 255, 0.55);
-            --points-ad-bottom: rgba(255, 255, 255, 0.55);
-            --points-ad-text: #1a1a1a;
+            --points-ad-top: rgba(255, 255, 255, 0.12);
+            --points-ad-bottom: rgba(255, 255, 255, 0.12);
+            --points-ad-text: #ffffff;
+            --score-border: rgba(255, 255, 255, 0.55);
             --panel-bg: rgba(0, 0, 0, 0.15);
             --panel-border: rgba(255, 255, 255, 0.5);
             --panel-text: #ffffff;
@@ -164,23 +165,23 @@
         }
 
         html.theme-padelblue {
-            --accent: #d4ff3d;
-            --accent-soft: rgba(212, 255, 61, 0.45);
-            --team-bg-top: rgba(15, 79, 168, 0.85);
-            --team-bg-bottom: rgba(8, 45, 110, 0.88);
+            --accent: #00f0ff;
+            --accent-soft: rgba(0, 240, 255, 0.45);
+            --team-bg-top: rgba(21, 101, 216, 0.85);
+            --team-bg-bottom: rgba(21, 101, 216, 0.85);
             --team-text: #ffffff;
             --score-set-past-bg: rgba(255, 255, 255, 0.92);
             --score-set-past-text: #0b2a5c;
             --score-set-current-bg: rgba(21, 101, 216, 0.9);
             --score-set-current-text: #ffffff;
-            --points-team1-top: #d8c6ab;
-            --points-team1-bottom: #b3a082;
-            --points-team2-top: #b3a082;
-            --points-team2-bottom: #8a7a63;
-            --points-text: #2a1f10;
-            --points-ad-top: #eaffa0;
-            --points-ad-bottom: #d4ff3d;
-            --points-ad-text: #0b2a5c;
+            --points-team1-top: #3a3a40;
+            --points-team1-bottom: #222226;
+            --points-team2-top: #2e2e33;
+            --points-team2-bottom: #19191c;
+            --points-text: #00f0ff;
+            --points-ad-top: #66f9ff;
+            --points-ad-bottom: #00d9e8;
+            --points-ad-text: #071a1d;
             --panel-bg: rgba(5, 18, 42, 0.65);
             --panel-border: rgba(212, 255, 61, 0.4);
             --panel-text: #ffffff;
@@ -826,11 +827,11 @@
 
         html.theme-transparent .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); border: 1.5px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .server-indicator, html.theme-transparent .player-serving { color: var(--accent); }
-        html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--accent-soft); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-        html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); border: 1px solid var(--score-border); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); border: 1px solid var(--score-border); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); border: 1px solid var(--score-border); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); border: 1px solid var(--score-border); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
+        html.theme-transparent .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); border: 1px solid var(--score-border); text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
         html.theme-transparent .match-finished-board, html.theme-transparent .statistics-overlay, html.theme-transparent .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
         html.theme-transparent .mfb-header, html.theme-transparent .mfb-winner, html.theme-transparent .sr-set-label, html.theme-transparent .sm-header, html.theme-transparent .h-set-time, html.theme-transparent .mfb-table td.mfb-set-win, html.theme-transparent .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-transparent .sm-val.gold { color: var(--accent); }
         html.theme-transparent .mfb-table th, html.theme-transparent .mfb-table td, html.theme-transparent .sm-val, html.theme-transparent .h-set-score, html.theme-transparent .sr-score, html.theme-transparent .sr-team { color: var(--panel-text); }
