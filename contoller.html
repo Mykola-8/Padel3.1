@@ -594,6 +594,27 @@
                     <span style="font-size:13px; font-weight:800; color: #a78bfa;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
                     <input type="checkbox" id="promo-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleFullscreenPromo(this.checked)">
                 </div>
+                <div style="margin-bottom:12px;">
+                    <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Фоновий ефект / Motion Bumper (декоративний, позаду фото/відео/тексту):</span>
+                    <select id="promo-bg-effect-selector" onchange="updatePromoBackgroundEffect(this.value)" style="width:100%; box-sizing:border-box;">
+                        <option value="none">Немає (звичайний темний фон)</option>
+                        <optgroup label="Фонові атмосфери">
+                            <option value="neon-grid">Court Grid Motion / Neon Grid Loop</option>
+                            <option value="ball-trail">Abstract Ball Flight Path</option>
+                            <option value="pattern-flow">Padel Pattern Loop / Texture Flow</option>
+                            <option value="particles">Particle World / Dust &amp; Light</option>
+                        </optgroup>
+                        <optgroup label="3D-акценти">
+                            <option value="racket-spin">3D Racket Spin</option>
+                            <option value="floating-ball">Floating Ball (Depth of Field)</option>
+                            <option value="glass-wave">Court Wall Pulse / Glass Wave</option>
+                        </optgroup>
+                        <optgroup label="Текст і бренд">
+                            <option value="kinetic-type">Kinetic Typography Loop</option>
+                            <option value="logo-reveal">Logo Reveal / Ambient Rings</option>
+                        </optgroup>
+                    </select>
+                </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
                         <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 1. Посилання Інтернет (URL):</span>
@@ -1001,6 +1022,7 @@
         };
         window.togglePromoTypeVideo = function(c) { state.promoTypeIsVideo = c; set(matchRef, state); };
         window.togglePromoTransparentBg = function(c) { state.promoTransparentBg = c; set(matchRef, state); };
+        window.updatePromoBackgroundEffect = function(v) { state.promoBackgroundEffect = v; set(matchRef, state); };
 
         let pTextTimeout = null;
         window.updatePromoText = function(v) {
@@ -1910,6 +1932,8 @@
             
             if(document.getElementById('promo-visibility-checkbox')) {
                 document.getElementById('promo-visibility-checkbox').checked = !!state.showFullscreenPromo;
+                const bgFxSel = document.getElementById('promo-bg-effect-selector');
+                if (bgFxSel && document.activeElement !== bgFxSel) bgFxSel.value = state.promoBackgroundEffect || 'none';
                 if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
                 document.getElementById('promo-transparent-bg-checkbox').checked = !!state.promoTransparentBg;
