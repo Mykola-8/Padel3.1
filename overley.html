@@ -762,6 +762,8 @@
             height: 100%;
             object-fit: cover;
             display: none;
+            position: relative;
+            z-index: 1;
         }
         .fullscreen-media-content.active {
             display: block;
@@ -769,6 +771,105 @@
         .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content {
             object-fit: contain;
         }
+        /* ===== ФОНОВІ ЕФЕКТИ ЗАСТАВКИ (легкі, лише CSS-анімації) ===== */
+        .promo-bg-effect {
+            position: absolute; inset: 0; overflow: hidden;
+            display: none; pointer-events: none; z-index: 0;
+        }
+        .promo-bg-effect.active { display: block; }
+
+        /* 1. Neon Grid Loop — анімована неонова сітка корту */
+        .promo-bg-effect.fx-neon-grid {
+            background-image:
+                repeating-linear-gradient(90deg, rgba(0,240,255,0.35) 0 2px, transparent 2px 90px),
+                repeating-linear-gradient(0deg, rgba(0,240,255,0.35) 0 2px, transparent 2px 90px);
+            background-size: 200% 200%;
+            animation: fx-grid-move 9s linear infinite;
+        }
+        @keyframes fx-grid-move { from { background-position: 0 0, 0 0; } to { background-position: 180px 0, 0 180px; } }
+
+        /* 2. Kinetic Trajectory — світлові шлейфи траєкторії м'яча */
+        .promo-bg-effect.fx-ball-trail .fx-dot {
+            position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            background: #d4ff3d; box-shadow: 0 0 18px 6px rgba(212,255,61,0.7);
+            offset-path: path('M -20 400 C 300 100, 700 700, 1000 300 S 1500 100, 1900 500');
+            animation: fx-fly 4.5s ease-in-out infinite;
+        }
+        .promo-bg-effect.fx-ball-trail .fx-dot:nth-child(2) { animation-delay: 1.5s; opacity: 0.6; }
+        .promo-bg-effect.fx-ball-trail .fx-dot:nth-child(3) { animation-delay: 3s; opacity: 0.35; }
+        @keyframes fx-fly { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+
+        /* 3. Texture Flow — світло крізь отвори ракетки */
+        .promo-bg-effect.fx-pattern-flow {
+            background-image: radial-gradient(rgba(255,255,255,0.5) 2px, transparent 2.5px);
+            background-size: 46px 46px;
+            animation: fx-pattern-scroll 14s linear infinite;
+        }
+        @keyframes fx-pattern-scroll { from { background-position: 0 0; } to { background-position: -460px 460px; } }
+
+        /* 4. Dust & Light Particles */
+        .promo-bg-effect.fx-particles {
+            background-image:
+                radial-gradient(3px 3px at 10% 20%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 30% 70%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2.5px 2.5px at 55% 35%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(2px 2px at 75% 80%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(3px 3px at 90% 15%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(2px 2px at 42% 90%, rgba(255,255,255,0.5), transparent);
+            background-repeat: no-repeat;
+            animation: fx-particles-drift 10s ease-in-out infinite alternate;
+        }
+        @keyframes fx-particles-drift { from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; opacity: 0.6; } to { background-position: 0 -40px, 0 -60px, 0 -30px, 0 -50px, 0 -35px, 0 -45px; opacity: 1; } }
+
+        /* 5. 3D Racket Spin */
+        .promo-bg-effect.fx-racket-spin { perspective: 700px; display: flex; align-items: center; justify-content: center; }
+        .promo-bg-effect.fx-racket-spin .fx-racket {
+            font-size: 22vh; animation: fx-racket-turn 5s linear infinite;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+        }
+        @keyframes fx-racket-turn { from { transform: rotateY(0deg) rotateZ(-8deg); } to { transform: rotateY(360deg) rotateZ(-8deg); } }
+
+        /* 6. Floating Ball (Depth of Field) */
+        .promo-bg-effect.fx-floating-ball .fx-ball {
+            position: absolute; font-size: 9vh;
+            animation: fx-float 6s ease-in-out infinite;
+        }
+        .promo-bg-effect.fx-floating-ball .fx-ball:nth-child(1) { left: 20%; top: 30%; animation-delay: 0s; filter: blur(0); opacity: 1; }
+        .promo-bg-effect.fx-floating-ball .fx-ball:nth-child(2) { left: 65%; top: 55%; animation-delay: 1.4s; filter: blur(2px); opacity: 0.55; font-size: 6vh; }
+        .promo-bg-effect.fx-floating-ball .fx-ball:nth-child(3) { left: 45%; top: 15%; animation-delay: 2.8s; filter: blur(3px); opacity: 0.35; font-size: 5vh; }
+        @keyframes fx-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+
+        /* 7. Glass Wave — скляні стіни зі світловим відблиском */
+        .promo-bg-effect.fx-glass-wave {
+            background: repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0 60px, rgba(255,255,255,0.09) 60px 62px);
+        }
+        .promo-bg-effect.fx-glass-wave::before {
+            content: ""; position: absolute; top: 0; bottom: 0; left: -30%; width: 30%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.25), transparent);
+            animation: fx-glass-sheen 4s ease-in-out infinite;
+        }
+        @keyframes fx-glass-sheen { 0% { left: -30%; } 100% { left: 110%; } }
+
+        /* 8. Kinetic Typography Loop */
+        .promo-bg-effect.fx-kinetic-type {
+            display: flex; align-items: center; white-space: nowrap;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 12vh;
+            color: rgba(255,255,255,0.08); letter-spacing: 4px;
+            animation: fx-kinetic-scroll 16s linear infinite;
+        }
+        @keyframes fx-kinetic-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* 9. Logo Reveal — пульсуючі кільця */
+        .promo-bg-effect.fx-logo-reveal { display: flex; align-items: center; justify-content: center; }
+        .promo-bg-effect.fx-logo-reveal .fx-ring {
+            position: absolute; width: 20vh; height: 20vh; border-radius: 50%;
+            border: 2px solid rgba(0,240,255,0.55);
+            animation: fx-ring-pulse 3s ease-out infinite;
+        }
+        .promo-bg-effect.fx-logo-reveal .fx-ring:nth-child(2) { animation-delay: 1s; }
+        .promo-bg-effect.fx-logo-reveal .fx-ring:nth-child(3) { animation-delay: 2s; }
+        @keyframes fx-ring-pulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(2.2); opacity: 0; } }
+
         .fullscreen-intro-anim {
             position: absolute; top: 50%; left: 0;
             transform: translate(-130%, -50%);
@@ -790,6 +891,8 @@
             display: none;
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
             align-items: center;
             justify-content: center;
             text-align: center;
@@ -964,6 +1067,13 @@
 
     <!-- ПОЛНОЕКРАННА ЗАСТАВКА (РЕКЛАМА) -->
     <div class="fullscreen-media-overlay" id="fullscreen-promo-overlay">
+        <div class="promo-bg-effect" id="promo-bg-effect">
+            <div class="fx-dot"></div><div class="fx-dot"></div><div class="fx-dot"></div>
+            <div class="fx-racket">🏓</div>
+            <div class="fx-ball">🎾</div><div class="fx-ball">🎾</div><div class="fx-ball">🎾</div>
+            <div class="fx-ring"></div><div class="fx-ring"></div><div class="fx-ring"></div>
+            <span id="promo-bg-kinetic-text">PADEL &nbsp;•&nbsp; MATCH DAY &nbsp;•&nbsp; GAME ON &nbsp;•&nbsp; SPIN &nbsp;•&nbsp; SMASH &nbsp;•&nbsp; PADEL &nbsp;•&nbsp; MATCH DAY &nbsp;•&nbsp; GAME ON &nbsp;•&nbsp; SPIN &nbsp;•&nbsp; SMASH &nbsp;•&nbsp;</span>
+        </div>
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
         <div id="promo-text" class="fullscreen-text-content"></div>
@@ -1471,6 +1581,19 @@
                 const promoImg = document.getElementById('promo-img');
                 const promoVideo = document.getElementById('promo-video');
                 const promoTextEl = document.getElementById('promo-text');
+                const promoBgEffectEl = document.getElementById('promo-bg-effect');
+
+                if (promoBgEffectEl) {
+                    const bgEffect = state.promoBackgroundEffect || 'none';
+                    const FX_CLASSES = ['fx-neon-grid', 'fx-ball-trail', 'fx-pattern-flow', 'fx-particles', 'fx-racket-spin', 'fx-floating-ball', 'fx-glass-wave', 'fx-kinetic-type', 'fx-logo-reveal'];
+                    FX_CLASSES.forEach(c => promoBgEffectEl.classList.remove(c));
+                    if (bgEffect !== 'none') {
+                        promoBgEffectEl.classList.add('fx-' + bgEffect);
+                        promoBgEffectEl.classList.add('active');
+                    } else {
+                        promoBgEffectEl.classList.remove('active');
+                    }
+                }
 
                 if (!!state.showFullscreenPromo) {
                     promoOverlay.classList.toggle('transparent-bg-mode', !!state.promoTransparentBg);
