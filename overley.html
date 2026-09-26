@@ -769,6 +769,23 @@
         .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content {
             object-fit: contain;
         }
+        .fullscreen-intro-anim {
+            position: absolute; top: 50%; left: 0;
+            transform: translate(-130%, -50%);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900; font-size: 7vw;
+            color: #ffffff; white-space: nowrap;
+            letter-spacing: 2px;
+            z-index: 100002; pointer-events: none;
+            will-change: transform;
+        }
+        .fullscreen-intro-anim.playing {
+            animation: padel-intro-slide 3s linear 1;
+        }
+        @keyframes padel-intro-slide {
+            from { transform: translate(-130%, -50%); }
+            to { transform: translate(130vw, -50%); }
+        }
         .fullscreen-text-content {
             display: none;
             width: 100%;
@@ -950,6 +967,7 @@
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
         <div id="promo-text" class="fullscreen-text-content"></div>
+        <div class="fullscreen-intro-anim" id="fullscreen-intro-anim">PADEL 🎾</div>
     </div>
 
     <div class="scoreboard-wrapper" id="main-scoreboard">
@@ -1246,7 +1264,7 @@
 
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
-        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
+        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null, wasPromoOverlayVisible = false;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
         let serverChangeBannerTimer = null, serverChangeBannerDelayTimer = null, lastServerChangeTrigger = 0;
         let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
@@ -1479,8 +1497,19 @@
                             }
                         }
                     }
+                    if (!wasPromoOverlayVisible) {
+                        const introEl = document.getElementById('fullscreen-intro-anim');
+                        if (introEl) {
+                            introEl.classList.remove('playing');
+                            void introEl.offsetWidth; // форсуємо перезапуск CSS-анімації
+                            introEl.classList.add('playing');
+                            setTimeout(() => { introEl.classList.remove('playing'); }, 3200);
+                        }
+                    }
+                    wasPromoOverlayVisible = true;
                     promoOverlay.classList.add('visible');
                 } else {
+                    wasPromoOverlayVisible = false;
                     promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
                 }
 
