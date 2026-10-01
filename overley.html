@@ -598,6 +598,7 @@
             border: none; border-radius: 0;
             display: flex; align-items: center; justify-content: center;
             padding: 0; box-sizing: border-box;
+            overflow: hidden;
             opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s;
         }
@@ -610,7 +611,34 @@
             opacity: 0;
             transition: opacity 0.35s ease;
         }
-        .sponsor-logo-frame img.active { opacity: 1; }
+        .sponsor-logo-frame img.active {
+            opacity: 1;
+            animation: logo-enter-squeeze 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 1 both;
+        }
+        @keyframes logo-enter-squeeze {
+            0% { transform: translateX(120%) scaleX(0.25); opacity: 0; }
+            55% { transform: translateX(0%) scaleX(1.1); opacity: 1; }
+            75% { transform: translateX(0%) scaleX(0.95); }
+            100% { transform: translateX(0%) scaleX(1); opacity: 1; }
+        }
+        .sponsor-logo-shine {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5;
+        }
+        .sponsor-logo-shine::before {
+            content: ""; position: absolute; top: -60%; left: -60%; width: 35%; height: 220%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.65), transparent);
+            transform: rotate(18deg);
+            opacity: 0;
+        }
+        .sponsor-logo-shine.playing::before {
+            animation: logo-shine-sweep 0.9s ease-in-out 1;
+        }
+        @keyframes logo-shine-sweep {
+            0% { left: -60%; opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { left: 140%; opacity: 0; }
+        }
 
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
@@ -1457,17 +1485,29 @@
             sponsorLogoIndex = 0;
             const frameEl = document.getElementById('sponsor-logo-frame');
             if (!frameEl) return;
-            frameEl.innerHTML = urls.map(u => '<img src="' + u + '">').join('');
+            frameEl.innerHTML = urls.map(u => '<img src="' + u + '">').join('') + '<div class="sponsor-logo-shine" id="sponsor-logo-shine"></div>';
             const imgs = frameEl.querySelectorAll('img');
+            const shineEl = document.getElementById('sponsor-logo-shine');
             if (imgs.length === 0) return;
             imgs[0].classList.add('active');
+            replaySponsorShine(shineEl);
             if (imgs.length > 1) {
                 sponsorLogoTimer = setInterval(() => {
                     imgs[sponsorLogoIndex].classList.remove('active');
                     sponsorLogoIndex = (sponsorLogoIndex + 1) % imgs.length;
-                    setTimeout(() => { imgs[sponsorLogoIndex].classList.add('active'); }, 350);
+                    setTimeout(() => {
+                        imgs[sponsorLogoIndex].classList.add('active');
+                        replaySponsorShine(shineEl);
+                    }, 350);
                 }, Math.max(1, intervalSec || 4) * 1000);
             }
+        }
+
+        function replaySponsorShine(shineEl) {
+            if (!shineEl) return;
+            shineEl.classList.remove('playing');
+            void shineEl.offsetWidth; // форсуємо перезапуск CSS-анімації
+            shineEl.classList.add('playing');
         }
         let statsAutoActive = false, lastStatsAutoTrigger = 0;
         let statsRowTimers = [], statsFadeTimer = null;
