@@ -973,7 +973,7 @@
         .sr-vs-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
         .sr-score { font-size: 54px; font-weight: 900; color: #ffffff; letter-spacing: 2px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.95); }
         .sr-vs { font-size: 14px; font-weight: 800; color: #ccc; letter-spacing: 1px; margin-top: 5px; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .qr-code-wrapper { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; padding: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s; }
+        .qr-code-wrapper { position: fixed; bottom: 20px; right: 20px; transform-origin: bottom right; display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; padding: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s, transform 0.3s ease; }
         .qr-code-wrapper.visible { opacity: 1; visibility: visible; }
         .qr-code-wrapper img { width: 130px; height: 130px; display: block; border-radius: 0; }
         .qr-code-text { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; text-align: center; background: transparent; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
@@ -1746,7 +1746,10 @@
                         document.getElementById('qr-code-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentQrUrl)}`;
                     }
                     document.getElementById('qr-code-description-node').innerText = state.qrCodeDescription || "SCAN ME";
-                    document.getElementById('qr-code-panel').classList.add('visible');
+                    const qrPanelEl = document.getElementById('qr-code-panel');
+                    qrPanelEl.classList.add('visible');
+                    const qrScaleVal = (state.qrScale !== undefined ? state.qrScale : 100) / 100;
+                    qrPanelEl.style.transform = `translate(${state.qrOffsetX || 0}px, ${-1 * (state.qrOffsetY || 0)}px) scale(${qrScaleVal})`;
                 } else { document.getElementById('qr-code-panel').classList.remove('visible'); }
 
                 const serverIndicatorOn = state.showServerIndicator !== false;
