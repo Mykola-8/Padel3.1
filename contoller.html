@@ -25,6 +25,12 @@
         #ticker-content-editable:empty:before { content: attr(data-placeholder); color: #777; }
         #ticker-content-editable img { height: 26px; width: auto; vertical-align: middle; margin: 0 4px; border-radius: 2px; }
         .adbar-slide-row { display: flex; gap: 8px; align-items: center; }
+        .qr-link-row { display: flex; gap: 6px; align-items: center; background: #1c1c1c; border: 1px solid #333; border-radius: 6px; padding: 6px 8px; }
+        .qr-link-row.active-link { border-color: #e0b878; background: #2a2316; }
+        .qr-link-row-info { flex: 1; min-width: 0; cursor: pointer; }
+        .qr-link-row-desc { font-size: 12px; font-weight: 700; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .qr-link-row-url { font-size: 10px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .qr-link-remove-btn { background: #7a1e1e; color: #fff; border: none; border-radius: 6px; width: 28px; height: 28px; flex-shrink: 0; font-weight: 800; cursor: pointer; }
         .adbar-slide-editable { flex: 1; min-height: 40px; max-height: 80px; overflow-y: auto; background: #1c1c1c; border: 1px solid #444; border-radius: 6px; padding: 8px 10px; color: #eee; font-size: 13px; }
         .adbar-slide-editable:empty:before { content: attr(data-placeholder); color: #777; }
         .adbar-slide-editable img { height: 30px; width: auto; vertical-align: middle; border-radius: 2px; }
@@ -417,8 +423,29 @@
 
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
-                <input type="text" id="qr-code-url-input" placeholder="URL QR-коду" onchange="updateQrCodeUrl(this.value)">
-                <input type="text" id="qr-code-desc-input" placeholder="Текст QR" onchange="updateQrDescription(this.value)">
+
+                <div style="font-size:11px; font-weight:700;">Збережені посилання:</div>
+                <div id="qr-links-list" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;"></div>
+
+                <div style="border-top:1px dashed #444; padding-top:8px; display:flex; flex-direction:column; gap:6px;">
+                    <input type="text" id="qr-new-link-url" placeholder="URL нового посилання">
+                    <input type="text" id="qr-new-link-desc" placeholder="Опис (наприклад: НАШ САЙТ, ІНСТАГРАМ...)">
+                    <button class="btn btn-green" onclick="addQrLink()">+ Додати посилання до списку</button>
+                </div>
+
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+                    <span style="font-size:11px; color:#ccc;">Розмір QR-коду: <b id="qr-scale-value" style="color:#e0b878;">100%</b></span>
+                    <input type="range" id="qr-scale-slider" min="50" max="250" step="5" value="100" oninput="updateQrScale(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Позиція по горизонталі: <b id="qr-offsetx-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="qr-offsetx-slider" min="-800" max="800" step="5" value="0" oninput="updateQrOffsetX(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="qr-offsety-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="qr-offsety-slider" min="-800" max="800" step="5" value="0" oninput="updateQrOffsetY(this.value)">
+                </label>
+
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
                 <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
                 <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
@@ -1931,7 +1958,31 @@
             if (state.showStatsOverlay) { btnStats.innerText = "📊 СХОВАТИ СТАТИСТИКУ В OBS"; btnStats.style.background = "#b91c1c"; } 
             else { btnStats.innerText = "📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)"; btnStats.style.background = "#15803d"; }
 
-            document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode; document.getElementById('qr-code-url-input').value = state.qrCodeUrl || ""; document.getElementById('qr-code-desc-input').value = state.qrCodeDescription || "";
+            document.getElementById('mode-show-qr-checkbox').checked = !!state.showQrCode;
+            if (document.activeElement === null || !document.activeElement.closest || !document.activeElement.closest('#qr-links-list')) {
+                renderQrLinksList();
+            }
+            const qrScaleSlider = document.getElementById('qr-scale-slider');
+            const qrScaleLbl = document.getElementById('qr-scale-value');
+            if (qrScaleSlider && document.activeElement !== qrScaleSlider) {
+                const qsv = state.qrScale !== undefined ? state.qrScale : 100;
+                qrScaleSlider.value = qsv;
+                if (qrScaleLbl) qrScaleLbl.innerText = qsv + '%';
+            }
+            const qrOffsetXSlider = document.getElementById('qr-offsetx-slider');
+            const qrOffsetXLbl = document.getElementById('qr-offsetx-value');
+            if (qrOffsetXSlider && document.activeElement !== qrOffsetXSlider) {
+                const qxv = state.qrOffsetX || 0;
+                qrOffsetXSlider.value = qxv;
+                if (qrOffsetXLbl) qrOffsetXLbl.innerText = qxv + 'px';
+            }
+            const qrOffsetYSlider = document.getElementById('qr-offsety-slider');
+            const qrOffsetYLbl = document.getElementById('qr-offsety-value');
+            if (qrOffsetYSlider && document.activeElement !== qrOffsetYSlider) {
+                const qyv = state.qrOffsetY || 0;
+                qrOffsetYSlider.value = qyv;
+                if (qrOffsetYLbl) qrOffsetYLbl.innerText = qyv + 'px';
+            }
             if(document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`)) document.getElementById(`deuce-${state.deuceStyle || "one-golden"}`).checked = true;
             
             if(document.getElementById('promo-visibility-checkbox')) {
@@ -2246,6 +2297,80 @@
         window.toggleQrCodeVisibility = function(c) { state.showQrCode = c; set(matchRef, state); }
         window.updateQrCodeUrl = function(v) { state.qrCodeUrl = v; set(matchRef, state); }
         window.updateQrDescription = function(v) { state.qrCodeDescription = v; set(matchRef, state); }
+
+        function renderQrLinksList() {
+            const listEl = document.getElementById('qr-links-list');
+            if (!listEl) return;
+            const links = Array.isArray(state.qrLinks) ? state.qrLinks : [];
+            if (links.length === 0) {
+                listEl.innerHTML = '<div style="font-size:11px; color:#777;">Поки немає збережених посилань.</div>';
+                return;
+            }
+            listEl.innerHTML = links.map((link, i) => {
+                const isActive = (state.qrCodeUrl === link.url) && (state.qrCodeDescription === link.desc);
+                return '<div class="qr-link-row' + (isActive ? ' active-link' : '') + '">' +
+                    '<div class="qr-link-row-info" onclick="selectQrLink(' + i + ')">' +
+                        '<div class="qr-link-row-desc">' + (isActive ? '✓ ' : '') + (link.desc || 'Без опису') + '</div>' +
+                        '<div class="qr-link-row-url">' + (link.url || '') + '</div>' +
+                    '</div>' +
+                    '<button class="qr-link-remove-btn" onclick="removeQrLink(' + i + ')">×</button>' +
+                '</div>';
+            }).join('');
+        }
+
+        window.addQrLink = function() {
+            const url = document.getElementById('qr-new-link-url').value.trim();
+            const desc = document.getElementById('qr-new-link-desc').value.trim();
+            if (!url) { alert("Введіть URL посилання."); return; }
+            if (!Array.isArray(state.qrLinks)) state.qrLinks = [];
+            state.qrLinks.push({ url: url, desc: desc || "SCAN ME" });
+            // Одразу активуємо щойно додане посилання
+            state.qrCodeUrl = url;
+            state.qrCodeDescription = desc || "SCAN ME";
+            set(matchRef, state);
+            document.getElementById('qr-new-link-url').value = '';
+            document.getElementById('qr-new-link-desc').value = '';
+            setTimeout(renderQrLinksList, 200);
+        };
+
+        window.selectQrLink = function(i) {
+            const links = Array.isArray(state.qrLinks) ? state.qrLinks : [];
+            const link = links[i];
+            if (!link) return;
+            state.qrCodeUrl = link.url;
+            state.qrCodeDescription = link.desc;
+            set(matchRef, state);
+            setTimeout(renderQrLinksList, 200);
+        };
+
+        window.removeQrLink = function(i) {
+            if (!Array.isArray(state.qrLinks)) return;
+            state.qrLinks.splice(i, 1);
+            set(matchRef, state);
+            setTimeout(renderQrLinksList, 200);
+        };
+
+        window.updateQrScale = function(v) {
+            state.qrScale = parseInt(v) || 100;
+            const lbl = document.getElementById('qr-scale-value');
+            if (lbl) lbl.innerText = state.qrScale + '%';
+            set(matchRef, state);
+        };
+
+        window.updateQrOffsetX = function(v) {
+            state.qrOffsetX = parseInt(v) || 0;
+            const lbl = document.getElementById('qr-offsetx-value');
+            if (lbl) lbl.innerText = state.qrOffsetX + 'px';
+            set(matchRef, state);
+        };
+
+        window.updateQrOffsetY = function(v) {
+            state.qrOffsetY = parseInt(v) || 0;
+            const lbl = document.getElementById('qr-offsety-value');
+            if (lbl) lbl.innerText = state.qrOffsetY + 'px';
+            set(matchRef, state);
+        };
+
         window.updateScale = function(v) { state.scale = parseFloat(v); set(matchRef, state); }
         window.updateTeamWidth = function(v) { state.teamNameWidth = parseInt(v); set(matchRef, state); }
         window.updateTeamFont = function(v) { state.teamNameFontSize = parseInt(v); set(matchRef, state); }
