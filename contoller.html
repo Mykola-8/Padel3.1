@@ -2082,6 +2082,7 @@
                 state.p2NetCords = (state.p2NetCords || 0) + 1;
                 state.t2_net_cords = state.p2NetCords;
             }
+            state.animation = { team: team, type: "net_cord", ts: Date.now() };
             window.scorePointWithoutHistorySave(team);
         }
 
@@ -2098,6 +2099,7 @@
                 state.p2Smashes = (state.p2Smashes || 0) + 1;
                 state.t2_smashes = state.p2Smashes;
             }
+            state.animation = { team: team, type: "smash", ts: Date.now() };
             window.scorePointWithoutHistorySave(team);
         }
 
