@@ -163,6 +163,7 @@
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш на виліт (К2)</button>
             </div>
         </div>
+        <div class="switch-row" style="margin-top:2px;"><span>🎾 Анімація м'яча на табло (смеш / від сітки):</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
 
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
@@ -505,6 +506,15 @@
                     </select>
                 </div>
                 <div class="row" id="sponsor-logo-interval-row"><span>Секунд на лого:</span><input type="number" id="sponsor-logo-interval-input" min="1" max="30" value="4" style="width:60px;" onchange="updateSponsorLogoInterval(this.value)"></div>
+                <div class="row"><span>Анімація появи (карусель):</span>
+                    <select id="sponsor-logo-anim-select" onchange="updateSponsorLogoAnimStyle(this.value)">
+                        <option value="squeeze">Справа наліво + стиск + відблиск (класична)</option>
+                        <option value="right-slow">Справа наліво, повільно</option>
+                        <option value="top-down">Зверху вниз</option>
+                        <option value="bottom-up">Знизу вгору</option>
+                        <option value="zoom-far">Ефект "здалеку" (наближення, розмиття)</option>
+                    </select>
+                </div>
                 <div style="font-size:10px; color:#888; margin:6px 0;">Розташовується по центру зверху екрана, окремо від табла рахунку — щоб не перекривати його, тримайте табло в звичному кутку (не по центру зверху).</div>
                 <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
@@ -760,6 +770,11 @@
         window.toggleServerIndicator = function(checked) {
             saveToHistory(state);
             state.showServerIndicator = checked;
+            set(matchRef, state);
+        };
+
+        window.toggleBallAnimations = function(checked) {
+            state.showBallAnimations = checked;
             set(matchRef, state);
         };
 
@@ -1566,6 +1581,7 @@
             set(matchRef, state);
         };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
+        window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; set(matchRef, state); };
         window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
         function ensureSponsorLogosArray() {
@@ -1873,6 +1889,9 @@
             const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
             if (serverIndicatorCheckbox) serverIndicatorCheckbox.checked = state.showServerIndicator !== false;
 
+            const ballAnimCheckbox = document.getElementById('ball-anim-checkbox');
+            if (ballAnimCheckbox) ballAnimCheckbox.checked = state.showBallAnimations !== false;
+
             const serverIconTypeSelector = document.getElementById('server-icon-type-selector');
             const serverIconColorInput = document.getElementById('server-icon-color-input');
             const serverIconColorRow = document.getElementById('server-icon-color-row');
@@ -1913,6 +1932,8 @@
                 if (document.activeElement !== document.getElementById('sponsor-logo-posx-slider')) document.getElementById('sponsor-logo-posx-slider').value = state.sponsorLogoPosX || 0;
                 if (document.activeElement !== document.getElementById('sponsor-logo-posy-slider')) document.getElementById('sponsor-logo-posy-slider').value = state.sponsorLogoPosY || 0;
                 if (document.activeElement !== document.getElementById('sponsor-logo-interval-input')) document.getElementById('sponsor-logo-interval-input').value = state.sponsorLogoIntervalSec || 4;
+                const sponsorAnimSelect = document.getElementById('sponsor-logo-anim-select');
+                if (sponsorAnimSelect && document.activeElement !== sponsorAnimSelect) sponsorAnimSelect.value = state.sponsorLogoAnimStyle || 'squeeze';
                 const currentMode = state.sponsorLogoDisplayMode === 'all' ? 'all' : 'carousel';
                 if (document.activeElement !== document.getElementById('sponsor-logo-mode-select')) document.getElementById('sponsor-logo-mode-select').value = currentMode;
                 document.getElementById('sponsor-logo-interval-row').style.display = (currentMode === 'all') ? 'none' : 'flex';
