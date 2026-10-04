@@ -344,7 +344,37 @@
         .scoreboard-container { display: flex; flex-direction: column; width: max-content; order: 2; position: relative; }
         .main-board { display: inline-flex; flex-direction: column; background-color: transparent; border-radius: 4px; z-index: 2; position: relative; overflow: hidden; transform-origin: left center; }
         .team-row { display: flex; height: 48px; }
-        .team-names { width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
+        .team-names { position: relative; width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
+
+        .ball-fx {
+            position: absolute; top: 50%; left: -10%;
+            font-size: 1.1em; line-height: 1;
+            transform: translate(-50%, -50%);
+            opacity: 0; pointer-events: none; z-index: 20;
+        }
+        .ball-fx.fx-smash {
+            animation: ball-smash-comet 0.6s cubic-bezier(0.3, 0, 0.7, 1) 1;
+        }
+        .ball-fx.fx-smash::before {
+            content: ""; position: absolute; top: 50%; right: 100%;
+            width: 46px; height: 5px; transform: translateY(-50%);
+            background: linear-gradient(to left, rgba(255,255,255,0.85), transparent);
+            border-radius: 3px;
+        }
+        @keyframes ball-smash-comet {
+            0% { left: -10%; opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 110%; opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+        .ball-fx.fx-netcord {
+            animation: ball-netcord-roll 1.2s ease-in 1;
+        }
+        @keyframes ball-netcord-roll {
+            0% { left: -8%; opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            80% { opacity: 1; }
+            100% { left: 108%; opacity: 0; transform: translate(-50%, -50%) scale(0.3, 0.15) rotate(540deg); }
+        }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; display: inline-flex; align-items: center; }
         .icon-shape { display: inline-block; }
         .icon-arrow { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 13px solid currentColor; }
@@ -611,8 +641,8 @@
             opacity: 0;
             transition: opacity 0.35s ease;
         }
-        .sponsor-logo-frame img.active {
-            opacity: 1;
+        .sponsor-logo-frame img.active { opacity: 1; }
+        .sponsor-logo-frame img.active.anim-squeeze {
             animation: logo-enter-squeeze 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 1 both;
         }
         @keyframes logo-enter-squeeze {
@@ -620,6 +650,35 @@
             55% { transform: translateX(0%) scaleX(1.1); opacity: 1; }
             75% { transform: translateX(0%) scaleX(0.95); }
             100% { transform: translateX(0%) scaleX(1); opacity: 1; }
+        }
+        .sponsor-logo-frame img.active.anim-right-slow {
+            animation: logo-enter-right-slow 1.8s ease-out 1 both;
+        }
+        @keyframes logo-enter-right-slow {
+            0% { transform: translateX(140%); opacity: 0; }
+            100% { transform: translateX(0%); opacity: 1; }
+        }
+        .sponsor-logo-frame img.active.anim-top-down {
+            animation: logo-enter-top-down 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 1 both;
+        }
+        @keyframes logo-enter-top-down {
+            0% { transform: translateY(-140%); opacity: 0; }
+            100% { transform: translateY(0%); opacity: 1; }
+        }
+        .sponsor-logo-frame img.active.anim-zoom-far {
+            animation: logo-enter-zoom-far 1.1s ease-out 1 both;
+        }
+        @keyframes logo-enter-zoom-far {
+            0% { transform: scale(0.1); opacity: 0; filter: blur(6px); }
+            70% { opacity: 1; filter: blur(0); }
+            100% { transform: scale(1); opacity: 1; filter: blur(0); }
+        }
+        .sponsor-logo-frame img.active.anim-bottom-up {
+            animation: logo-enter-bottom-up 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 1 both;
+        }
+        @keyframes logo-enter-bottom-up {
+            0% { transform: translateY(140%); opacity: 0; }
+            100% { transform: translateY(0%); opacity: 1; }
         }
         .sponsor-logo-shine {
             position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5;
@@ -1154,12 +1213,14 @@
                         <div class="team-names" id="block-anim-1">
                             <span id="name-display-t1">TELLO / ARCE</span>
                             <span class="server-indicator" id="srv1">🎾</span>
+                            <span class="ball-fx" id="ball-fx-1">🎾</span>
                         </div>
                     </div>
                     <div class="team-row" id="row-team-2">
                         <div class="team-names" id="block-anim-2">
                             <span id="name-display-t2">GALAN / CHINGOTTO</span>
                             <span class="server-indicator" id="srv2">🎾</span>
+                            <span class="ball-fx" id="ball-fx-2">🎾</span>
                         </div>
                     </div>
                 </div>
@@ -1479,25 +1540,29 @@
             }
         }
 
-        function startSponsorLogoCarousel(urls, intervalSec) {
+        const SPONSOR_LOGO_ANIM_CLASSES = ['anim-squeeze', 'anim-right-slow', 'anim-top-down', 'anim-zoom-far', 'anim-bottom-up'];
+
+        function startSponsorLogoCarousel(urls, intervalSec, animStyle) {
             clearInterval(sponsorLogoTimer);
             sponsorLogoActiveUrls = urls;
             sponsorLogoIndex = 0;
+            const animClass = 'anim-' + (animStyle || 'squeeze');
             const frameEl = document.getElementById('sponsor-logo-frame');
             if (!frameEl) return;
             frameEl.innerHTML = urls.map(u => '<img src="' + u + '">').join('') + '<div class="sponsor-logo-shine" id="sponsor-logo-shine"></div>';
             const imgs = frameEl.querySelectorAll('img');
             const shineEl = document.getElementById('sponsor-logo-shine');
             if (imgs.length === 0) return;
-            imgs[0].classList.add('active');
-            replaySponsorShine(shineEl);
+            imgs[0].classList.add('active', animClass);
+            if (animClass === 'anim-squeeze') replaySponsorShine(shineEl);
             if (imgs.length > 1) {
                 sponsorLogoTimer = setInterval(() => {
+                    SPONSOR_LOGO_ANIM_CLASSES.forEach(c => imgs[sponsorLogoIndex].classList.remove(c));
                     imgs[sponsorLogoIndex].classList.remove('active');
                     sponsorLogoIndex = (sponsorLogoIndex + 1) % imgs.length;
                     setTimeout(() => {
-                        imgs[sponsorLogoIndex].classList.add('active');
-                        replaySponsorShine(shineEl);
+                        imgs[sponsorLogoIndex].classList.add('active', animClass);
+                        if (animClass === 'anim-squeeze') replaySponsorShine(shineEl);
                     }, 350);
                 }, Math.max(1, intervalSec || 4) * 1000);
             }
@@ -2054,14 +2119,14 @@
                         sponsorAllFrame.style.transform = scaleTransform;
                         sponsorAllFrame.style.top = topPx;
 
-                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode;
+                        const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode + '::' + (state.sponsorLogoAnimStyle || 'squeeze');
                         if (signature !== lastSponsorLogosSignature) {
                             lastSponsorLogosSignature = signature;
                             if (showAllMode) {
                                 clearInterval(sponsorLogoTimer);
                                 sponsorAllFrame.innerHTML = validLogos.map(u => '<img src="' + u + '">').join('');
                             } else {
-                                startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4);
+                                startSponsorLogoCarousel(validLogos, state.sponsorLogoIntervalSec || 4, state.sponsorLogoAnimStyle || 'squeeze');
                             }
                         }
                     }
@@ -2296,6 +2361,16 @@
                         if (state.animation.type === 'double_fault') {
                             tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
                             showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
+                        } else if (state.animation.type === 'smash' || state.animation.type === 'net_cord') {
+                            if (state.showBallAnimations !== false) {
+                                const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
+                                if (ballEl) {
+                                    const fxClass = state.animation.type === 'smash' ? 'fx-smash' : 'fx-netcord';
+                                    ballEl.classList.remove('fx-smash', 'fx-netcord');
+                                    void ballEl.offsetWidth; // форсуємо перезапуск CSS-анімації
+                                    ballEl.classList.add(fxClass);
+                                }
+                            }
                         } else {
                             tBlock.style.transition = 'none'; tBlock.style.background = state.animation.type === 'set' ? '#ffffff' : '#c69f66';
                             if (state.animation.type === 'set') tBlock.style.color = '#1a1a1a';
