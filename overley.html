@@ -347,33 +347,45 @@
         .team-names { position: relative; width: var(--team-name-width, 320px); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: var(--team-name-font, 22px); font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to bottom, rgba(42,42,42,0.75), rgba(26,26,26,0.75)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; transition: width 0.3s ease, font-size 0.3s ease; }
 
         .ball-fx {
-            position: absolute; top: 50%; left: -10%;
-            font-size: 1.1em; line-height: 1;
+            position: absolute; top: 50%; left: 2%;
+            font-size: 1.3em; line-height: 1;
             transform: translate(-50%, -50%);
             opacity: 0; pointer-events: none; z-index: 20;
         }
-        .ball-fx.fx-smash {
-            animation: ball-smash-comet 0.6s cubic-bezier(0.3, 0, 0.7, 1) 1;
+        /* СМЕШ — м'яч стрибає діаграмою (зигзаг) по всій ширині рядка, повільно */
+        .ball-fx.fx-smash-bounce {
+            animation: ball-smash-bounce 1.8s ease-in-out 1 both;
         }
-        .ball-fx.fx-smash::before {
-            content: ""; position: absolute; top: 50%; right: 100%;
-            width: 46px; height: 5px; transform: translateY(-50%);
-            background: linear-gradient(to left, rgba(255,255,255,0.85), transparent);
-            border-radius: 3px;
+        @keyframes ball-smash-bounce {
+            0%   { left: 2%;  top: 50%; opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            6%   { opacity: 1; }
+            16%  { left: 18%; top: 12%; }
+            32%  { left: 34%; top: 80%; }
+            48%  { left: 50%; top: 12%; }
+            64%  { left: 66%; top: 80%; }
+            80%  { left: 82%; top: 22%; }
+            100% { left: 96%; top: 50%; opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        @keyframes ball-smash-comet {
-            0% { left: -10%; opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { left: 110%; opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        /* Фаза вильоту (вмикається через JS, коли м'яч переходить у position:fixed і летить за межі табла) */
+        .ball-fx.fx-smash-exit {
+            position: fixed; z-index: 99999;
+            transition: transform 0.75s cubic-bezier(0.3, 0, 0.8, 0.15), opacity 0.75s ease-in;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
         }
+        .ball-fx.fx-smash-exit.go {
+            transform: translate(calc(-50% + 55vw), calc(-50% - 120vh)) scale(0.4);
+            opacity: 0;
+        }
+
+        /* М'ЯЧ В СІТКУ — котиться по всій ширині рядка, повільно, і в кінці спускається вниз */
         .ball-fx.fx-netcord {
-            animation: ball-netcord-roll 1.2s ease-in 1;
+            animation: ball-netcord-roll 2.2s ease-in 1 both;
         }
         @keyframes ball-netcord-roll {
-            0% { left: -8%; opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-            80% { opacity: 1; }
-            100% { left: 108%; opacity: 0; transform: translate(-50%, -50%) scale(0.3, 0.15) rotate(540deg); }
+            0%   { left: 2%;  top: 50%;  opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            70%  { left: 97%; top: 50%;  opacity: 1; transform: translate(-50%, -50%) rotate(620deg) scale(1); }
+            100% { left: 100%; top: 170%; opacity: 0; transform: translate(-50%, -50%) rotate(680deg) scale(0.85); }
         }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; display: inline-flex; align-items: center; }
         .icon-shape { display: inline-block; }
@@ -2365,10 +2377,31 @@
                             if (state.showBallAnimations !== false) {
                                 const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
                                 if (ballEl) {
-                                    const fxClass = state.animation.type === 'smash' ? 'fx-smash' : 'fx-netcord';
-                                    ballEl.classList.remove('fx-smash', 'fx-netcord');
+                                    ballEl.classList.remove('fx-smash-bounce', 'fx-netcord');
                                     void ballEl.offsetWidth; // форсуємо перезапуск CSS-анімації
-                                    ballEl.classList.add(fxClass);
+                                    if (state.animation.type === 'net_cord') {
+                                        ballEl.classList.add('fx-netcord');
+                                    } else {
+                                        ballEl.classList.add('fx-smash-bounce');
+                                        setTimeout(() => {
+                                            // Табло має власний transform (масштаб/позиція), тому справжній "виліт за межі екрана"
+                                            // робимо тимчасовим клоном прямо в body — так position:fixed рахується від вікна, а не від табла.
+                                            const rect = ballEl.getBoundingClientRect();
+                                            ballEl.style.opacity = '0';
+                                            const flyEl = document.createElement('div');
+                                            flyEl.textContent = '🎾';
+                                            flyEl.className = 'ball-fx fx-smash-exit';
+                                            flyEl.style.left = (rect.left + rect.width / 2) + 'px';
+                                            flyEl.style.top = (rect.top + rect.height / 2) + 'px';
+                                            document.body.appendChild(flyEl);
+                                            requestAnimationFrame(() => requestAnimationFrame(() => { flyEl.classList.add('go'); }));
+                                            setTimeout(() => {
+                                                flyEl.remove();
+                                                ballEl.classList.remove('fx-smash-bounce');
+                                                ballEl.style.opacity = '';
+                                            }, 800);
+                                        }, 1800);
+                                    }
                                 }
                             }
                         } else {
