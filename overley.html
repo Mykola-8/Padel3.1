@@ -387,6 +387,38 @@
             70%  { left: 97%; top: 50%;  opacity: 1; transform: translate(-50%, -50%) rotate(620deg) scale(1); }
             100% { left: 100%; top: 170%; opacity: 0; transform: translate(-50%, -50%) rotate(680deg) scale(0.85); }
         }
+
+        /* Текстові банери-накладки на рядок команди */
+        .action-label-fx {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.85em;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            opacity: 0; pointer-events: none; z-index: 15;
+        }
+        .action-label-fx.fx-smash-label {
+            animation: label-glow-fade-orange 1.8s ease-out 1;
+            background: radial-gradient(ellipse at center, rgba(255,140,0,0.95), rgba(255,140,0,0.05) 85%);
+        }
+        @keyframes label-glow-fade-orange {
+            0% { opacity: 0; }
+            12% { opacity: 1; }
+            55% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .action-label-fx.fx-netcord-label {
+            animation: label-glow-sweep-blue 2.2s ease-out 1;
+            background: linear-gradient(100deg, rgba(0,191,255,0) 0%, rgba(0,191,255,0.95) 45%, rgba(0,191,255,0) 90%);
+            background-size: 260% 100%;
+        }
+        @keyframes label-glow-sweep-blue {
+            0%   { opacity: 0; background-position: 0% 0%; }
+            12%  { opacity: 1; }
+            60%  { background-position: 100% 0%; }
+            85%  { opacity: 1; }
+            100% { opacity: 0; background-position: 160% 0%; }
+        }
         .server-indicator { color: #b28a55; font-size: 20px; visibility: hidden; flex-shrink: 0; margin-left: 10px; display: inline-flex; align-items: center; }
         .icon-shape { display: inline-block; }
         .icon-arrow { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 13px solid currentColor; }
@@ -1226,6 +1258,7 @@
                             <span id="name-display-t1">TELLO / ARCE</span>
                             <span class="server-indicator" id="srv1">🎾</span>
                             <span class="ball-fx" id="ball-fx-1">🎾</span>
+                            <div class="action-label-fx" id="action-label-1"></div>
                         </div>
                     </div>
                     <div class="team-row" id="row-team-2">
@@ -1233,6 +1266,7 @@
                             <span id="name-display-t2">GALAN / CHINGOTTO</span>
                             <span class="server-indicator" id="srv2">🎾</span>
                             <span class="ball-fx" id="ball-fx-2">🎾</span>
+                            <div class="action-label-fx" id="action-label-2"></div>
                         </div>
                     </div>
                 </div>
@@ -2376,13 +2410,20 @@
                         } else if (state.animation.type === 'smash' || state.animation.type === 'net_cord') {
                             if (state.showBallAnimations !== false) {
                                 const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
+                                const labelEl = document.getElementById(`action-label-${state.animation.team}`);
                                 if (ballEl) {
                                     ballEl.classList.remove('fx-smash-bounce', 'fx-netcord');
                                     void ballEl.offsetWidth; // форсуємо перезапуск CSS-анімації
+                                    if (labelEl) {
+                                        labelEl.classList.remove('fx-smash-label', 'fx-netcord-label');
+                                        void labelEl.offsetWidth;
+                                    }
                                     if (state.animation.type === 'net_cord') {
                                         ballEl.classList.add('fx-netcord');
+                                        if (labelEl) { labelEl.innerText = 'NET CORD WINNER'; labelEl.classList.add('fx-netcord-label'); }
                                     } else {
                                         ballEl.classList.add('fx-smash-bounce');
+                                        if (labelEl) { labelEl.innerText = 'SMASH WINNER'; labelEl.classList.add('fx-smash-label'); }
                                         setTimeout(() => {
                                             // Табло має власний transform (масштаб/позиція), тому справжній "виліт за межі екрана"
                                             // робимо тимчасовим клоном прямо в body — так position:fixed рахується від вікна, а не від табла.
