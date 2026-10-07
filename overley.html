@@ -378,6 +378,21 @@
             opacity: 0;
         }
 
+        /* DORMILONA (смеш з поверненням) — м'яч зигзагом летить вправо до "скла" і повертається назад */
+        .ball-fx.fx-dormilona {
+            animation: ball-dormilona 2.8s ease-in-out 1 both;
+        }
+        @keyframes ball-dormilona {
+            0%   { left: 2%;  top: 50%; opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            6%   { opacity: 1; }
+            20%  { left: 30%; top: 12%; }
+            36%  { left: 60%; top: 80%; }
+            50%  { left: 96%; top: 20%; }
+            64%  { left: 68%; top: 82%; }
+            80%  { left: 34%; top: 14%; }
+            100% { left: 2%;  top: 50%; opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
         /* М'ЯЧ В СІТКУ — котиться по всій ширині рядка, повільно, і в кінці спускається вниз */
         .ball-fx.fx-netcord {
             animation: ball-netcord-roll 2.2s ease-in 1 both;
@@ -1318,7 +1333,7 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
@@ -1326,6 +1341,9 @@
                         <span class="stats-broadcast-cell" id="st-df1">0</span>
                         <span class="stats-broadcast-cell" id="st-nc1">0</span>
                         <span class="stats-broadcast-cell" id="st-sm1">0</span>
+                        <span class="stats-broadcast-cell" id="st-p31">0</span>
+                        <span class="stats-broadcast-cell" id="st-p41">0</span>
+                        <span class="stats-broadcast-cell" id="st-dm1">0</span>
                         <span class="stats-broadcast-cell" id="st-bp1">0</span>
                         <span class="stats-broadcast-cell" id="st-gp1">0</span>
                     </div>
@@ -1334,6 +1352,9 @@
                         <span class="stats-broadcast-cell" id="st-df2">0</span>
                         <span class="stats-broadcast-cell" id="st-nc2">0</span>
                         <span class="stats-broadcast-cell" id="st-sm2">0</span>
+                        <span class="stats-broadcast-cell" id="st-p32">0</span>
+                        <span class="stats-broadcast-cell" id="st-p42">0</span>
+                        <span class="stats-broadcast-cell" id="st-dm2">0</span>
                         <span class="stats-broadcast-cell" id="st-bp2">0</span>
                         <span class="stats-broadcast-cell" id="st-gp2">0</span>
                     </div>
@@ -1354,7 +1375,10 @@
             <div class="sm-row"><div class="sm-val" id="stm-g1">0</div><div class="sm-label" id="stm-lbl-games-set">Гейми (всього)</div><div class="sm-val" id="stm-g2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-df1">0</div><div class="sm-label" id="stm-lbl-doublefaults">Дабл фоли</div><div class="sm-val" id="stm-df2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-nc1">0</div><div class="sm-label" id="stm-lbl-netcords">Від сітки (Net Cord)</div><div class="sm-val" id="stm-nc2">0</div></div>
-            <div class="sm-row"><div class="sm-val" id="stm-sm1">0</div><div class="sm-label" id="stm-lbl-smashes">Смеш на виліт</div><div class="sm-val" id="stm-sm2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-sm1">0</div><div class="sm-label" id="stm-lbl-smashes">Смеш</div><div class="sm-val" id="stm-sm2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-p31">0</div><div class="sm-label" id="stm-lbl-portres">Por Tres - X3</div><div class="sm-val" id="stm-p32">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-p41">0</div><div class="sm-label" id="stm-lbl-porcuatro">Por Cuatro - X4</div><div class="sm-val" id="stm-p42">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-dm1">0</div><div class="sm-label" id="stm-lbl-dormilona">Dormilona</div><div class="sm-val" id="stm-dm2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Голден-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
@@ -1451,7 +1475,10 @@
             goldenpoints: { en: 'Golden Points', ua: 'Голден-поінти' },
             doublefaults: { en: 'Double Faults', ua: 'Дабл фоли' },
             netcords: { en: 'Net Cords', ua: 'Від сітки (Net Cord)' },
-            smashes: { en: 'Smash Winners', ua: 'Смеш на виліт' },
+            smashes: { en: 'Smash', ua: 'Смеш' },
+            portres: { en: 'Por Tres - X3', ua: 'Por Tres - X3' },
+            porcuatro: { en: 'Por Cuatro - X4', ua: 'Por Cuatro - X4' },
+            dormilona: { en: 'Dormilona', ua: 'Смеш з поверненням' },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
@@ -2281,6 +2308,12 @@
                         document.getElementById('st-nc2').innerText = state.p2NetCords || 0;
                         document.getElementById('st-sm1').innerText = state.p1Smashes || 0; 
                         document.getElementById('st-sm2').innerText = state.p2Smashes || 0;
+                        document.getElementById('st-p31').innerText = state.p1PorTres || 0;
+                        document.getElementById('st-p32').innerText = state.p2PorTres || 0;
+                        document.getElementById('st-p41').innerText = state.p1PorCuatro || 0;
+                        document.getElementById('st-p42').innerText = state.p2PorCuatro || 0;
+                        document.getElementById('st-dm1').innerText = state.p1Dormilona || 0;
+                        document.getElementById('st-dm2').innerText = state.p2Dormilona || 0;
                         document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0; 
                         document.getElementById('st-bp2').innerText = state.p2BreakPoints || 0;
                         document.getElementById('st-gp1').innerText = state.p1GoldenPoints || 0; 
@@ -2291,6 +2324,9 @@
                             { label: 'col-lbl-df', cells: ['st-df1', 'st-df2'], width: '40px', val: (state.p1DoubleFaults || 0) + (state.p2DoubleFaults || 0) },
                             { label: 'col-lbl-nc', cells: ['st-nc1', 'st-nc2'], width: '40px', val: (state.p1NetCords || 0) + (state.p2NetCords || 0) },
                             { label: 'col-lbl-sm', cells: ['st-sm1', 'st-sm2'], width: '50px', val: (state.p1Smashes || 0) + (state.p2Smashes || 0) },
+                            { label: 'col-lbl-p3', cells: ['st-p31', 'st-p32'], width: '40px', val: (state.p1PorTres || 0) + (state.p2PorTres || 0) },
+                            { label: 'col-lbl-p4', cells: ['st-p41', 'st-p42'], width: '40px', val: (state.p1PorCuatro || 0) + (state.p2PorCuatro || 0) },
+                            { label: 'col-lbl-dm', cells: ['st-dm1', 'st-dm2'], width: '55px', val: (state.p1Dormilona || 0) + (state.p2Dormilona || 0) },
                             { label: 'col-lbl-bp', cells: ['st-bp1', 'st-bp2'], width: '55px', val: (state.p1BreakPoints || 0) + (state.p2BreakPoints || 0) },
                             { label: 'col-lbl-gp', cells: ['st-gp1', 'st-gp2'], width: '55px', val: (state.p1GoldenPoints || 0) + (state.p2GoldenPoints || 0) }
                         ];
@@ -2355,6 +2391,12 @@
                     document.getElementById('stm-sm1').innerText = sm1; document.getElementById('stm-sm2').innerText = sm2;
                     document.getElementById('stm-sm1').closest('.sm-row').style.display = (sm1 === 0 && sm2 === 0) ? 'none' : 'grid';
 
+                    [['p3', 'PorTres'], ['p4', 'PorCuatro'], ['dm', 'Dormilona']].forEach(([k, f]) => {
+                        const v1 = state['p1' + f] || 0, v2 = state['p2' + f] || 0;
+                        document.getElementById('stm-' + k + '1').innerText = v1; document.getElementById('stm-' + k + '2').innerText = v2;
+                        document.getElementById('stm-' + k + '1').closest('.sm-row').style.display = (v1 === 0 && v2 === 0) ? 'none' : 'grid';
+                    });
+
                     const bp1 = state.p1BreakPoints || 0, bp2 = state.p2BreakPoints || 0;
                     document.getElementById('stm-bp1').innerText = bp1; document.getElementById('stm-bp2').innerText = bp2;
                     document.getElementById('stm-bp1').closest('.sm-row').style.display = (bp1 === 0 && bp2 === 0) ? 'none' : 'grid';
@@ -2376,6 +2418,9 @@
                     document.getElementById('stm-lbl-doublefaults').innerText = getStatsLabel('doublefaults', state);
                     if(document.getElementById('stm-lbl-netcords')) document.getElementById('stm-lbl-netcords').innerText = getStatsLabel('netcords', state);
                     if(document.getElementById('stm-lbl-smashes')) document.getElementById('stm-lbl-smashes').innerText = getStatsLabel('smashes', state);
+                    if(document.getElementById('stm-lbl-portres')) document.getElementById('stm-lbl-portres').innerText = getStatsLabel('portres', state);
+                    if(document.getElementById('stm-lbl-porcuatro')) document.getElementById('stm-lbl-porcuatro').innerText = getStatsLabel('porcuatro', state);
+                    if(document.getElementById('stm-lbl-dormilona')) document.getElementById('stm-lbl-dormilona').innerText = getStatsLabel('dormilona', state);
                     document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
                     document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
                     document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
@@ -2407,42 +2452,50 @@
                         if (state.animation.type === 'double_fault') {
                             tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
                             showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
-                        } else if (state.animation.type === 'smash' || state.animation.type === 'net_cord') {
-                            if (state.showBallAnimations !== false) {
-                                const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
-                                const labelEl = document.getElementById(`action-label-${state.animation.team}`);
-                                if (ballEl) {
-                                    ballEl.classList.remove('fx-smash-bounce', 'fx-netcord');
-                                    void ballEl.offsetWidth; // форсуємо перезапуск CSS-анімації
-                                    if (labelEl) {
-                                        labelEl.classList.remove('fx-smash-label', 'fx-netcord-label');
-                                        void labelEl.offsetWidth;
-                                    }
-                                    if (state.animation.type === 'net_cord') {
-                                        ballEl.classList.add('fx-netcord');
-                                        if (labelEl) { labelEl.innerText = 'NET CORD WINNER'; labelEl.classList.add('fx-netcord-label'); }
-                                    } else {
-                                        ballEl.classList.add('fx-smash-bounce');
-                                        if (labelEl) { labelEl.innerText = 'SMASH WINNER'; labelEl.classList.add('fx-smash-label'); }
+                        } else if (['smash', 'net_cord', 'por_tres', 'por_cuatro', 'dormilona'].includes(state.animation.type)) {
+                            const aType = state.animation.type;
+                            const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
+                            const labelEl = document.getElementById(`action-label-${state.animation.team}`);
+                            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona' };
+
+                            // ТЕКСТ-НАПИС — окрема функція (вмикається/вимикається чекбоксом "Тексти-написи", не залежить від м'яча)
+                            if (labelEl && state.showActionLabels !== false) {
+                                labelEl.classList.remove('fx-smash-label', 'fx-netcord-label');
+                                void labelEl.offsetWidth; // форсуємо перезапуск CSS-анімації
+                                labelEl.innerText = labelTexts[aType];
+                                labelEl.classList.add(aType === 'net_cord' ? 'fx-netcord-label' : 'fx-smash-label');
+                            }
+
+                            // АНІМАЦІЯ М'ЯЧА — окрема функція (вмикається чекбоксом "Анімація м'яча", не залежить від тексту)
+                            if (ballEl && state.showBallAnimations !== false) {
+                                ballEl.classList.remove('fx-smash-bounce', 'fx-netcord', 'fx-dormilona');
+                                void ballEl.offsetWidth;
+                                if (aType === 'net_cord') {
+                                    ballEl.classList.add('fx-netcord');
+                                } else if (aType === 'dormilona') {
+                                    ballEl.classList.add('fx-dormilona');
+                                    setTimeout(() => { ballEl.classList.remove('fx-dormilona'); }, 2900);
+                                } else {
+                                    // smash / por_tres / por_cuatro — однакова анімація з вильотом за межі екрана
+                                    ballEl.classList.add('fx-smash-bounce');
+                                    setTimeout(() => {
+                                        // Табло має власний transform (масштаб/позиція), тому справжній "виліт за межі екрана"
+                                        // робимо тимчасовим клоном прямо в body — так position:fixed рахується від вікна, а не від табла.
+                                        const rect = ballEl.getBoundingClientRect();
+                                        ballEl.style.opacity = '0';
+                                        const flyEl = document.createElement('div');
+                                        flyEl.textContent = '🎾';
+                                        flyEl.className = 'ball-fx fx-smash-exit';
+                                        flyEl.style.left = (rect.left + rect.width / 2) + 'px';
+                                        flyEl.style.top = (rect.top + rect.height / 2) + 'px';
+                                        document.body.appendChild(flyEl);
+                                        requestAnimationFrame(() => requestAnimationFrame(() => { flyEl.classList.add('go'); }));
                                         setTimeout(() => {
-                                            // Табло має власний transform (масштаб/позиція), тому справжній "виліт за межі екрана"
-                                            // робимо тимчасовим клоном прямо в body — так position:fixed рахується від вікна, а не від табла.
-                                            const rect = ballEl.getBoundingClientRect();
-                                            ballEl.style.opacity = '0';
-                                            const flyEl = document.createElement('div');
-                                            flyEl.textContent = '🎾';
-                                            flyEl.className = 'ball-fx fx-smash-exit';
-                                            flyEl.style.left = (rect.left + rect.width / 2) + 'px';
-                                            flyEl.style.top = (rect.top + rect.height / 2) + 'px';
-                                            document.body.appendChild(flyEl);
-                                            requestAnimationFrame(() => requestAnimationFrame(() => { flyEl.classList.add('go'); }));
-                                            setTimeout(() => {
-                                                flyEl.remove();
-                                                ballEl.classList.remove('fx-smash-bounce');
-                                                ballEl.style.opacity = '';
-                                            }, 800);
-                                        }, 1800);
-                                    }
+                                            flyEl.remove();
+                                            ballEl.classList.remove('fx-smash-bounce');
+                                            ballEl.style.opacity = '';
+                                        }, 800);
+                                    }, 1800);
                                 }
                             }
                         } else {
