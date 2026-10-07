@@ -189,16 +189,6 @@
                 <span style="font-size:12px; font-weight:700;">📊 Показувати статистику між геймами:</span>
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
-            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
-            <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
-                <span style="font-size:11px; color:#ccc;">Чіткість фону статистики (ручна + кінець матчу): <b id="stats-bg-value" style="color:#e0b878;">75%</b> <span style="color:#888;">(прозорість <span id="stats-bg-transp">25</span>%)</span></span>
-                <input type="range" id="stats-bg-slider" min="0" max="100" step="5" value="75" oninput="updateStatsBgOpacity(this.value)">
-            </label>
-            <label style="display:flex; flex-direction:column; gap:4px;">
-                <span style="font-size:11px; color:#ccc;">Масштаб табла статистики: <b id="stats-scale-value" style="color:#e0b878;">75%</b></span>
-                <input type="range" id="stats-scale-slider" min="40" max="200" step="5" value="75" oninput="updateStatsBoardScale(this.value)">
-            </label>
-
             <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
                 <div class="switch-row">
                     <span style="font-size:11px; color:#ccc;">Лого зліва на табло статистики:</span>
@@ -437,6 +427,23 @@
                 <div class="switch-row"><span>Класичний перевага:</span><input type="radio" name="deuce-style" id="deuce-classic" onchange="changeDeuceStyle('classic')"></div>
                 <div class="switch-row"><span>Golden Point (Золоте):</span><input type="radio" name="deuce-style" id="deuce-one-golden" onchange="changeDeuceStyle('one-golden')"></div>
                 <div class="switch-row"><span>2 переваги → на 3-й GP:</span><input type="radio" name="deuce-style" id="deuce-double" onchange="changeDeuceStyle('double')"></div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:11px; font-weight:700;">📊 Статистика (ручна) в OBS:</div>
+            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+            <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+                <span style="font-size:11px; color:#ccc;">Чіткість фону статистики (ручна + кінець матчу): <b id="stats-bg-value" style="color:#e0b878;">75%</b> <span style="color:#888;">(прозорість <span id="stats-bg-transp">25</span>%)</span></span>
+                <input type="range" id="stats-bg-slider" min="0" max="100" step="5" value="75" oninput="updateStatsBgOpacity(this.value)">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:11px; color:#ccc;">Масштаб табла статистики: <b id="stats-scale-value" style="color:#e0b878;">75%</b></span>
+                <input type="range" id="stats-scale-slider" min="40" max="200" step="5" value="75" oninput="updateStatsBoardScale(this.value)">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:11px; color:#ccc;">Розмір тексту і цифр статистики: <b id="stats-text-value" style="color:#e0b878;">100%</b></span>
+                <input type="range" id="stats-text-slider" min="40" max="160" step="5" value="100" oninput="updateStatsTextScale(this.value)">
+            </label>
             </div>
 
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
@@ -1007,7 +1014,7 @@
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
-                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, gamesTimeHistory: [], showLogo: false,
+                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 100, gamesTimeHistory: [], showLogo: false,
                 logoUrl: "", logoSrc: "", customLogoText: "",
                 showSponsorLogos: false, sponsorLogoScale: 1, sponsorLogoIntervalSec: 4,
                 sponsorLogos: new Array(10).fill(""), sponsorLogoDisplayMode: "carousel", sponsorLogoPosX: 0, sponsorLogoPosY: 0,
@@ -1694,7 +1701,7 @@
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 completedGamesCount: 0, statsAutoTrigger: 0,
-                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, gamesTimeHistory: [],
+                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 100, gamesTimeHistory: [],
                 showMainBoard: false, isMatchFinished: false, showBreak: false,
                 animation: { team: 0, type: "", ts: 0 }
             };
@@ -1722,7 +1729,7 @@
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
-                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, gamesTimeHistory: [], showLogo: false,
+                showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 100, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
@@ -2014,6 +2021,12 @@
                 statsBgSlider.value = sbv;
                 document.getElementById('stats-bg-value').innerText = sbv + '%';
                 document.getElementById('stats-bg-transp').innerText = (100 - sbv);
+            }
+            const statsTextSlider = document.getElementById('stats-text-slider');
+            if (statsTextSlider && document.activeElement !== statsTextSlider) {
+                const stv = state.statsTextScale !== undefined ? state.statsTextScale : 100;
+                statsTextSlider.value = stv;
+                document.getElementById('stats-text-value').innerText = stv + '%';
             }
             const statsScaleSlider = document.getElementById('stats-scale-slider');
             if (statsScaleSlider && document.activeElement !== statsScaleSlider) {
@@ -2449,6 +2462,12 @@
             state.statsBgOpacity = Math.max(0, Math.min(100, parseInt(v) || 0));
             const lbl = document.getElementById('stats-bg-value'); if (lbl) lbl.innerText = state.statsBgOpacity + '%';
             const tr = document.getElementById('stats-bg-transp'); if (tr) tr.innerText = (100 - state.statsBgOpacity);
+            set(matchRef, state);
+        };
+
+        window.updateStatsTextScale = function(v) {
+            state.statsTextScale = Math.max(40, Math.min(160, parseInt(v) || 100));
+            const lbl = document.getElementById('stats-text-value'); if (lbl) lbl.innerText = state.statsTextScale + '%';
             set(matchRef, state);
         };
 
