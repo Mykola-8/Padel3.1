@@ -151,7 +151,7 @@
             <button class="score-btn btn-blue" id="btn-team-2" onclick="scorePoint(2)"><small id="lbl-p2">Команда 2</small><span id="view-p2-pts">0</span></button>
         </div>
 
-        <div class="action-grid">
+        <div class="action-grid" id="action-grid-admin">
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш (К1)</button>
@@ -167,7 +167,7 @@
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Смеш з поверненням / Dormilona (К2)</button>
             </div>
         </div>
-        <div style="display:flex; gap:10px; margin-top:2px;">
+        <div id="action-toggles-admin" style="display:flex; gap:10px; margin-top:2px;">
             <div class="switch-row" style="flex:1; font-size:12px;"><span>🎾 Анімація м'яча</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
             <div class="switch-row" style="flex:1; font-size:12px;"><span>🔤 Тексти-написи</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
         </div>
@@ -190,6 +190,14 @@
                 <input type="checkbox" id="mode-stats-between-games-checkbox" style="width:20px; height:20px;" onchange="toggleStatsBetweenGames(this.checked)">
             </div>
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+            <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
+                <span style="font-size:11px; color:#ccc;">Чіткість фону статистики (ручна + кінець матчу): <b id="stats-bg-value" style="color:#e0b878;">90%</b> <span style="color:#888;">(прозорість <span id="stats-bg-transp">10</span>%)</span></span>
+                <input type="range" id="stats-bg-slider" min="0" max="100" step="5" value="90" oninput="updateStatsBgOpacity(this.value)">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:11px; color:#ccc;">Масштаб табла статистики: <b id="stats-scale-value" style="color:#e0b878;">100%</b></span>
+                <input type="range" id="stats-scale-slider" min="40" max="200" step="5" value="100" oninput="updateStatsBoardScale(this.value)">
+            </label>
 
             <div style="border-top:1px dashed #444; padding-top:8px; margin-top:2px;">
                 <div class="switch-row">
@@ -2000,6 +2008,19 @@
             if (document.activeElement === null || !document.activeElement.closest || !document.activeElement.closest('#qr-links-list')) {
                 renderQrLinksList();
             }
+            const statsBgSlider = document.getElementById('stats-bg-slider');
+            if (statsBgSlider && document.activeElement !== statsBgSlider) {
+                const sbv = state.statsBgOpacity !== undefined ? state.statsBgOpacity : 90;
+                statsBgSlider.value = sbv;
+                document.getElementById('stats-bg-value').innerText = sbv + '%';
+                document.getElementById('stats-bg-transp').innerText = (100 - sbv);
+            }
+            const statsScaleSlider = document.getElementById('stats-scale-slider');
+            if (statsScaleSlider && document.activeElement !== statsScaleSlider) {
+                const ssv = state.statsBoardScale !== undefined ? state.statsBoardScale : 100;
+                statsScaleSlider.value = ssv;
+                document.getElementById('stats-scale-value').innerText = ssv + '%';
+            }
             const qrScaleSlider = document.getElementById('qr-scale-slider');
             const qrScaleLbl = document.getElementById('qr-scale-value');
             if (qrScaleSlider && document.activeElement !== qrScaleSlider) {
@@ -2424,6 +2445,19 @@
             setTimeout(renderQrLinksList, 200);
         };
 
+        window.updateStatsBgOpacity = function(v) {
+            state.statsBgOpacity = Math.max(0, Math.min(100, parseInt(v) || 0));
+            const lbl = document.getElementById('stats-bg-value'); if (lbl) lbl.innerText = state.statsBgOpacity + '%';
+            const tr = document.getElementById('stats-bg-transp'); if (tr) tr.innerText = (100 - state.statsBgOpacity);
+            set(matchRef, state);
+        };
+
+        window.updateStatsBoardScale = function(v) {
+            state.statsBoardScale = parseInt(v) || 100;
+            const lbl = document.getElementById('stats-scale-value'); if (lbl) lbl.innerText = state.statsBoardScale + '%';
+            set(matchRef, state);
+        };
+
         window.updateQrScale = function(v) {
             state.qrScale = parseInt(v) || 100;
             const lbl = document.getElementById('qr-scale-value');
@@ -2496,6 +2530,10 @@
                 document.getElementById('admin-camera-panel').style.display = 'flex';
                 document.getElementById('admin-tournament-panel').style.display = 'flex';
                 document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
+            } else {
+                // Для звичайного користувача (без ?admin=1) — ховаємо смеш / від сітки / Por Tres / Por Cuatro / Dormilona та чекбокси анімації/текстів
+                document.getElementById('action-grid-admin').style.display = 'none';
+                document.getElementById('action-toggles-admin').style.display = 'none';
             }
         });
         initCourtConnection();
