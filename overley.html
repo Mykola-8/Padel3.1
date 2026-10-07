@@ -404,17 +404,21 @@
         }
 
         /* Текстові банери-накладки на рядок команди */
+        /* Напис — компактна плашка справа в рядку (НЕ перекриває назву команди, без заливки на весь рядок) */
         .action-label-fx {
-            position: absolute; inset: 0;
+            position: absolute; top: 50%; right: 6px; left: auto; bottom: auto;
+            transform: translateY(-50%);
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.85em;
-            letter-spacing: 1.5px; text-transform: uppercase;
-            color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            padding: 2px 9px; border-radius: 4px; white-space: nowrap;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.6em;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
             opacity: 0; pointer-events: none; z-index: 15;
         }
         .action-label-fx.fx-smash-label {
             animation: label-glow-fade-orange 1.8s ease-out 1;
-            background: radial-gradient(ellipse at center, rgba(255,140,0,0.95), rgba(255,140,0,0.05) 85%);
+            background: rgba(255,140,0,0.95);
+            box-shadow: 0 0 10px rgba(255,140,0,0.7);
         }
         @keyframes label-glow-fade-orange {
             0% { opacity: 0; }
@@ -424,8 +428,8 @@
         }
         .action-label-fx.fx-netcord-label {
             animation: label-glow-sweep-blue 2.2s ease-out 1;
-            background: linear-gradient(100deg, rgba(0,191,255,0) 0%, rgba(0,191,255,0.95) 45%, rgba(0,191,255,0) 90%);
-            background-size: 260% 100%;
+            background: rgba(0,191,255,0.95);
+            box-shadow: 0 0 10px rgba(0,191,255,0.7);
         }
         @keyframes label-glow-sweep-blue {
             0%   { opacity: 0; background-position: 0% 0%; }
