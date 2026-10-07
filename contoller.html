@@ -167,11 +167,15 @@
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Смеш з поверненням / Dormilona (К2)</button>
             </div>
         </div>
-        <div class="switch-row" style="margin-top:2px;"><span>🎾 Анімація м'яча на табло (смеш / Por Tres / Por Cuatro / Dormilona / від сітки):</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
-        <div class="switch-row" style="margin-top:2px;"><span>🔤 Тексти-написи на табло (Смеш / Por Tres / Por Cuatro / Dormilona / Net Cord):</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
+        <div style="display:flex; gap:10px; margin-top:2px;">
+            <div class="switch-row" style="flex:1; font-size:12px;"><span>🎾 Анімація м'яча</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
+            <div class="switch-row" style="flex:1; font-size:12px;"><span>🔤 Тексти-написи</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
+        </div>
 
-        <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
-        <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button class="btn btn-orange-fault btn-large-action" style="padding:14px 6px !important; font-size:12px !important;" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол</button>
+            <button class="btn btn-gray btn-large-action" style="padding:14px 6px !important; font-size:12px !important;" onclick="undoAction()">↩️ Повернути назад</button>
+        </div>
 
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
