@@ -126,8 +126,6 @@
             </div>
         </div>
 
-        <h2>Пульт Padel Pro (Master)</h2>
-
         <div class="lock-status-badge" id="lock-status-badge">🔒 Корт зайнято іншим оператором</div>
 
         <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛО (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
@@ -156,14 +154,21 @@
         <div class="action-grid">
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш на виліт (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3 (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_cuatro')">🚀 Por Cuatro - X4 (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Смеш з поверненням / Dormilona (К1)</button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш на виліт (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3 (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_cuatro')">🚀 Por Cuatro - X4 (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Смеш з поверненням / Dormilona (К2)</button>
             </div>
         </div>
-        <div class="switch-row" style="margin-top:2px;"><span>🎾 Анімація м'яча на табло (смеш / від сітки):</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
+        <div class="switch-row" style="margin-top:2px;"><span>🎾 Анімація м'яча на табло (смеш / Por Tres / Por Cuatro / Dormilona / від сітки):</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
+        <div class="switch-row" style="margin-top:2px;"><span>🔤 Тексти-написи на табло (Смеш / Por Tres / Por Cuatro / Dormilona / Net Cord):</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
 
         <button class="btn btn-orange-fault btn-large-action" onclick="triggerServerDoubleFault()">⚠️ Дабл Фол (Команда на подачі)</button>
         <button class="btn btn-gray btn-large-action" onclick="undoAction()">↩️ Повернути назад</button>
@@ -778,6 +783,11 @@
             set(matchRef, state);
         };
 
+        window.toggleActionLabels = function(checked) {
+            state.showActionLabels = checked;
+            set(matchRef, state);
+        };
+
         window.updateServerIcon = function() {
             const type = document.getElementById('server-icon-type-selector').value;
             const color = document.getElementById('server-icon-color-input').value;
@@ -981,7 +991,7 @@
                 isProSet: false, proSetLimit: 8,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
                 activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
@@ -1669,7 +1679,7 @@
                 p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 isTiebreak: false, deuceCounter: 0,
                 activeMatchRibbon: "NONE",
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 completedGamesCount: 0, statsAutoTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [],
@@ -1697,7 +1707,7 @@
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, gamesTimeHistory: [], showLogo: false,
@@ -1892,6 +1902,9 @@
             const ballAnimCheckbox = document.getElementById('ball-anim-checkbox');
             if (ballAnimCheckbox) ballAnimCheckbox.checked = state.showBallAnimations !== false;
 
+            const actionLabelCheckbox = document.getElementById('action-label-checkbox');
+            if (actionLabelCheckbox) actionLabelCheckbox.checked = state.showActionLabels !== false;
+
             const serverIconTypeSelector = document.getElementById('server-icon-type-selector');
             const serverIconColorInput = document.getElementById('server-icon-color-input');
             const serverIconColorRow = document.getElementById('server-icon-color-row');
@@ -2042,8 +2055,39 @@
             document.getElementById('pr-name1').innerText = state.p1name || "Команда A"; document.getElementById('pr-name2').innerText = state.p2name || "Команда B";
             document.getElementById('pr-srv1').classList.toggle('active', state.currentServer === 1); document.getElementById('pr-srv2').classList.toggle('active', state.currentServer === 2);
 
-            for (let s = 1; s <= 5; s++) {
-                document.getElementById('pr-t1-s' + s).innerText = state['t1_s' + s] || 0; document.getElementById('pr-t2-s' + s).innerText = state['t2_s' + s] || 0;
+            // Табло на пульті — той самий рахунок, що й на оверлеї (гейми по сетах + очки 15/30/40/AD)
+            {
+                const pActiveSet = state.currentSet || 1;
+                const pP1 = state.p1Index || 0, pP2 = state.p2Index || 0;
+                const pShowCurSet = (!state.isAmericano && !state.isMexicano) && ((state['t1_s' + pActiveSet] || 0) > 0 || (state['t2_s' + pActiveSet] || 0) > 0 || state.isProSet || (state.isSuperTiebreak && (pP1 > 0 || pP2 > 0)));
+                let pSets = 0;
+                for (let s = pActiveSet; s >= 1; s--) {
+                    if (s === pActiveSet) { if (pShowCurSet) { pSets = s; break; } continue; }
+                    if ((state['t1_s' + s] || 0) > 0 || (state['t2_s' + s] || 0) > 0) { pSets = s; break; }
+                }
+                for (let s = 1; s <= 5; s++) {
+                    const b1 = document.getElementById('pr-t1-s' + s), b2 = document.getElementById('pr-t2-s' + s);
+                    if (s > pSets) { b1.style.display = 'none'; b2.style.display = 'none'; continue; }
+                    const isCurSuperTB = state.isSuperTiebreak && s === pActiveSet;
+                    const g1 = isCurSuperTB ? pP1 : (state['t1_s' + s] || 0), g2 = isCurSuperTB ? pP2 : (state['t2_s' + s] || 0);
+                    let tb1 = state['t1_tb_s' + s], tb2 = state['t2_tb_s' + s];
+                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9)))) {
+                        if (tb1 === undefined && tb2 === undefined && state.lastTiebreakScore1 !== undefined && state.lastTiebreakScore2 !== undefined) { tb1 = state.lastTiebreakScore1; tb2 = state.lastTiebreakScore2; }
+                    }
+                    b1.style.display = 'flex'; b2.style.display = 'flex';
+                    b1.classList.toggle('p-past', s < pActiveSet); b2.classList.toggle('p-past', s < pActiveSet);
+                    b1.innerHTML = (tb1 !== undefined && tb1 !== null && tb1 !== "") ? `${g1}<sup>${tb1}</sup>` : `${g1}`;
+                    b2.innerHTML = (tb2 !== undefined && tb2 !== null && tb2 !== "") ? `${g2}<sup>${tb2}</sup>` : `${g2}`;
+                }
+                const ptsEl1 = document.getElementById('pr-t1-pts'), ptsEl2 = document.getElementById('pr-t2-pts');
+                if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
+                    ptsEl1.innerText = pP1; ptsEl2.innerText = pP2;
+                } else {
+                    const pAdRound = (state.deuceCounter || 0) + 1;
+                    const pAdText = "AD" + ((state.deuceStyle === 'double' && pAdRound <= 2) ? pAdRound : "");
+                    ptsEl1.innerText = (pP1 === 4) ? pAdText : ((pP2 === 4) ? "" : pointSequence[pP1]);
+                    ptsEl2.innerText = (pP2 === 4) ? pAdText : ((pP1 === 4) ? "" : pointSequence[pP2]);
+                }
             }
 
             document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁 ПОКАЗАТИ ТАБЛО' : '👁 СХОВАТИ ТАБЛО';
@@ -2086,20 +2130,23 @@
             window.scorePointWithoutHistorySave(team);
         }
 
-        window.registerSmashWinner = function(team) {
+        window.registerSmashWinner = function(team, kind) {
             if (state.isMatchFinished || isControllerLocked()) return;
             if (!state.controllerLock || !state.controllerLock.sessionId) {
                 state.controllerLock = { sessionId: mySessionId, ts: Date.now() };
             }
             saveToHistory(state);
-            if (team === 1) {
-                state.p1Smashes = (state.p1Smashes || 0) + 1;
-                state.t1_smashes = state.p1Smashes;
-            } else {
-                state.p2Smashes = (state.p2Smashes || 0) + 1;
-                state.t2_smashes = state.p2Smashes;
-            }
-            state.animation = { team: team, type: "smash", ts: Date.now() };
+            // kind: undefined = звичайний смеш, 'por_tres' (X3), 'por_cuatro' (X4), 'dormilona' (смеш з поверненням)
+            const kindMap = {
+                por_tres:   { f: 'PorTres',   t: 'por_tres' },
+                por_cuatro: { f: 'PorCuatro', t: 'por_cuatro' },
+                dormilona:  { f: 'Dormilona', t: 'dormilona' }
+            };
+            const km = kindMap[kind] || { f: 'Smashes', t: 'smash' };
+            const cntKey = 'p' + team + km.f;
+            state[cntKey] = (state[cntKey] || 0) + 1;
+            if (km.t === 'smash') { state['t' + team + '_smashes'] = state[cntKey]; }
+            state.animation = { team: team, type: km.t, ts: Date.now() };
             window.scorePointWithoutHistorySave(team);
         }
 
