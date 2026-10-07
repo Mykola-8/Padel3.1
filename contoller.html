@@ -155,21 +155,22 @@
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Повернення (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3 (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_cuatro')">🚀 Por Cuatro - X4 (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Смеш з поверненням / Dormilona (К1)</button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Повернення (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3 (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_cuatro')">🚀 Por Cuatro - X4 (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Смеш з поверненням / Dormilona (К2)</button>
             </div>
         </div>
-        <div id="action-toggles-admin" style="display:flex; gap:10px; margin-top:2px;">
-            <div class="switch-row" style="flex:1; font-size:12px;"><span>🎾 Анімація м'яча</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
-            <div class="switch-row" style="flex:1; font-size:12px;"><span>🔤 Тексти-написи</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
+        <div id="action-toggles-admin" style="display:flex; gap:6px; margin-top:2px;">
+            <div class="switch-row" style="flex:1; font-size:11px;" title="Анімація м'яча команди, яка забила"><span>🎾 М'яч</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
+            <div class="switch-row" style="flex:1; font-size:11px;" title="Текст (Smash, Por Tres...) у правому куті рядка команди, яка забила"><span>🔤 Текст-напис</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
+            <div class="switch-row" style="flex:1; font-size:11px;" title="Напис на весь рядок команди (синій-електрик, 2 сек) — перекриває назву команди"><span>📺 ТАБЛО</span><input type="checkbox" id="board-flash-checkbox" onchange="toggleBoardFlash(this.checked)"></div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
@@ -798,6 +799,11 @@
 
         window.toggleBallAnimations = function(checked) {
             state.showBallAnimations = checked;
+            set(matchRef, state);
+        };
+
+        window.toggleBoardFlash = function(checked) {
+            state.showBoardFlash = checked;
             set(matchRef, state);
         };
 
@@ -1919,6 +1925,9 @@
 
             const ballAnimCheckbox = document.getElementById('ball-anim-checkbox');
             if (ballAnimCheckbox) ballAnimCheckbox.checked = state.showBallAnimations !== false;
+
+            const boardFlashCheckbox = document.getElementById('board-flash-checkbox');
+            if (boardFlashCheckbox) boardFlashCheckbox.checked = state.showBoardFlash === true;
 
             const actionLabelCheckbox = document.getElementById('action-label-checkbox');
             if (actionLabelCheckbox) actionLabelCheckbox.checked = state.showActionLabels !== false;
