@@ -420,6 +420,26 @@
             background: rgba(255,140,0,0.95);
             box-shadow: 0 0 10px rgba(255,140,0,0.7);
         }
+        /* ТАБЛО — напис-підсвітка на ВЕСЬ рядок з назвою команди (синій-електрик, 2 сек), перекриває назву команди */
+        .action-flash-fx {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.85em;
+            letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
+            /* за замовчуванням ЖОВТИЙ (Смеш, Por Tres, Por Cuatro) */
+            color: #111111; text-shadow: 0 1px 2px rgba(255,255,255,0.35);
+            background: radial-gradient(ellipse at center, rgba(255,214,0,0.98), rgba(255,214,0,0.2) 90%);
+            box-shadow: inset 0 0 18px rgba(255,214,0,0.85);
+            opacity: 0; pointer-events: none; z-index: 17;
+        }
+        /* СИНІЙ-ЕЛЕКТРИК (Dormilona, Від сітки) */
+        .action-flash-fx.flash-blue {
+            color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            background: radial-gradient(ellipse at center, rgba(0,153,255,0.98), rgba(0,153,255,0.18) 90%);
+            box-shadow: inset 0 0 18px rgba(0,153,255,0.8);
+        }
+        .action-flash-fx.run { animation: label-glow-fade-orange 2s ease-out 1; }
+
         @keyframes label-glow-fade-orange {
             0% { opacity: 0; }
             12% { opacity: 1; }
@@ -1278,6 +1298,7 @@
                             <span class="server-indicator" id="srv1">🎾</span>
                             <span class="ball-fx" id="ball-fx-1">🎾</span>
                             <div class="action-label-fx" id="action-label-1"></div>
+                            <div class="action-flash-fx" id="action-flash-1"></div>
                         </div>
                     </div>
                     <div class="team-row" id="row-team-2">
@@ -1286,6 +1307,7 @@
                             <span class="server-indicator" id="srv2">🎾</span>
                             <span class="ball-fx" id="ball-fx-2">🎾</span>
                             <div class="action-label-fx" id="action-label-2"></div>
+                            <div class="action-flash-fx" id="action-flash-2"></div>
                         </div>
                     </div>
                 </div>
@@ -1337,7 +1359,7 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
@@ -1345,9 +1367,9 @@
                         <span class="stats-broadcast-cell" id="st-df1">0</span>
                         <span class="stats-broadcast-cell" id="st-nc1">0</span>
                         <span class="stats-broadcast-cell" id="st-sm1">0</span>
+                        <span class="stats-broadcast-cell" id="st-dm1">0</span>
                         <span class="stats-broadcast-cell" id="st-p31">0</span>
                         <span class="stats-broadcast-cell" id="st-p41">0</span>
-                        <span class="stats-broadcast-cell" id="st-dm1">0</span>
                         <span class="stats-broadcast-cell" id="st-bp1">0</span>
                         <span class="stats-broadcast-cell" id="st-gp1">0</span>
                     </div>
@@ -1356,9 +1378,9 @@
                         <span class="stats-broadcast-cell" id="st-df2">0</span>
                         <span class="stats-broadcast-cell" id="st-nc2">0</span>
                         <span class="stats-broadcast-cell" id="st-sm2">0</span>
+                        <span class="stats-broadcast-cell" id="st-dm2">0</span>
                         <span class="stats-broadcast-cell" id="st-p32">0</span>
                         <span class="stats-broadcast-cell" id="st-p42">0</span>
-                        <span class="stats-broadcast-cell" id="st-dm2">0</span>
                         <span class="stats-broadcast-cell" id="st-bp2">0</span>
                         <span class="stats-broadcast-cell" id="st-gp2">0</span>
                     </div>
@@ -1380,9 +1402,9 @@
             <div class="sm-row"><div class="sm-val" id="stm-df1">0</div><div class="sm-label" id="stm-lbl-doublefaults">Дабл фоли</div><div class="sm-val" id="stm-df2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-nc1">0</div><div class="sm-label" id="stm-lbl-netcords">Від сітки (Net Cord)</div><div class="sm-val" id="stm-nc2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-sm1">0</div><div class="sm-label" id="stm-lbl-smashes">Смеш</div><div class="sm-val" id="stm-sm2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-dm1">0</div><div class="sm-label" id="stm-lbl-dormilona">Dormilona</div><div class="sm-val" id="stm-dm2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-p31">0</div><div class="sm-label" id="stm-lbl-portres">Por Tres - X3</div><div class="sm-val" id="stm-p32">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-p41">0</div><div class="sm-label" id="stm-lbl-porcuatro">Por Cuatro - X4</div><div class="sm-val" id="stm-p42">0</div></div>
-            <div class="sm-row"><div class="sm-val" id="stm-dm1">0</div><div class="sm-label" id="stm-lbl-dormilona">Dormilona</div><div class="sm-val" id="stm-dm2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Голден-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
@@ -1482,7 +1504,7 @@
             smashes: { en: 'Smash', ua: 'Смеш' },
             portres: { en: 'Por Tres - X3', ua: 'Por Tres - X3' },
             porcuatro: { en: 'Por Cuatro - X4', ua: 'Por Cuatro - X4' },
-            dormilona: { en: 'Dormilona', ua: 'Смеш з поверненням' },
+            dormilona: { en: 'Dormilona', ua: 'Повернення' },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
@@ -2358,9 +2380,9 @@
                             { label: 'col-lbl-df', cells: ['st-df1', 'st-df2'], width: '40px', val: (state.p1DoubleFaults || 0) + (state.p2DoubleFaults || 0) },
                             { label: 'col-lbl-nc', cells: ['st-nc1', 'st-nc2'], width: '40px', val: (state.p1NetCords || 0) + (state.p2NetCords || 0) },
                             { label: 'col-lbl-sm', cells: ['st-sm1', 'st-sm2'], width: '50px', val: (state.p1Smashes || 0) + (state.p2Smashes || 0) },
+                            { label: 'col-lbl-dm', cells: ['st-dm1', 'st-dm2'], width: '55px', val: (state.p1Dormilona || 0) + (state.p2Dormilona || 0) },
                             { label: 'col-lbl-p3', cells: ['st-p31', 'st-p32'], width: '40px', val: (state.p1PorTres || 0) + (state.p2PorTres || 0) },
                             { label: 'col-lbl-p4', cells: ['st-p41', 'st-p42'], width: '40px', val: (state.p1PorCuatro || 0) + (state.p2PorCuatro || 0) },
-                            { label: 'col-lbl-dm', cells: ['st-dm1', 'st-dm2'], width: '55px', val: (state.p1Dormilona || 0) + (state.p2Dormilona || 0) },
                             { label: 'col-lbl-bp', cells: ['st-bp1', 'st-bp2'], width: '55px', val: (state.p1BreakPoints || 0) + (state.p2BreakPoints || 0) },
                             { label: 'col-lbl-gp', cells: ['st-gp1', 'st-gp2'], width: '55px', val: (state.p1GoldenPoints || 0) + (state.p2GoldenPoints || 0) }
                         ];
@@ -2498,6 +2520,17 @@
                                 void labelEl.offsetWidth; // форсуємо перезапуск CSS-анімації
                                 labelEl.innerText = labelTexts[aType];
                                 labelEl.classList.add(aType === 'net_cord' ? 'fx-netcord-label' : 'fx-smash-label');
+                            }
+
+                            // ТАБЛО — напис на весь рядок команди (окремий перемикач, вимкнено за замовчуванням)
+                            const flashEl = document.getElementById(`action-flash-${state.animation.team}`);
+                            if (flashEl && state.showBoardFlash === true) {
+                                flashEl.classList.remove('run', 'flash-blue');
+                                void flashEl.offsetWidth;
+                                flashEl.innerText = labelTexts[aType];
+                                // Dormilona і Від сітки — синій-електрик; Смеш / Por Tres / Por Cuatro — жовтий
+                                if (aType === 'dormilona' || aType === 'net_cord') flashEl.classList.add('flash-blue');
+                                flashEl.classList.add('run');
                             }
 
                             // АНІМАЦІЯ М'ЯЧА — окрема функція (вмикається чекбоксом "Анімація м'яча", не залежить від тексту)
