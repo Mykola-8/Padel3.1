@@ -548,7 +548,7 @@
         .points-cell.ad-active { background: linear-gradient(to bottom, #fff0c0, #e8c96a); color: #3a2a00; font-size: 19px; letter-spacing: 0; }
         
         /* ПАНЕЛЬ МАТЧ ЗАВЕРШЕНО */
-        .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(calc(0.85 * var(--stats-scale, 1))) translateY(-40px); width: 960px; background: rgba(8, 8, 8, 0.9); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 40px 48px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
+        .match-finished-board { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(calc(0.85 * var(--stats-scale, 1))) translateY(-40px); width: 960px; background: rgba(8, 8, 8, 0.75); border: 1px solid rgba(198, 159, 102, 0.45); border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.65); backdrop-filter: blur(14px); font-family: 'Montserrat', sans-serif; color: #fff; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 40px 48px; box-sizing: border-box; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2), visibility 0.5s; }
         .match-finished-board.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(var(--stats-scale, 1)) translateY(0); pointer-events: auto; }
         .match-finished-board.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(calc(0.92 * var(--stats-scale, 1))) translateY(-10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
         .mfb-header { text-align: center; font-size: 24px; font-weight: 800; color: #c69f66; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 24px; text-shadow: 0 1px 6px rgba(0,0,0,0.95); }
@@ -617,17 +617,17 @@
         .stats-broadcast-logo-caption { font-size: 7px; color: #c9c9cc; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ===== РУЧНА СТАТИСТИКА ===== */
-        .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 900px; background: rgba(8, 8, 8, 0.9); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 36px 40px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(calc(0.7 * var(--stats-scale, 1))); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
+        .statistics-overlay-manual { position: fixed; top: 50%; left: 50%; width: 680px; background: rgba(8, 8, 8, 0.75); border: 1px solid rgba(198, 159, 102, 0.35); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: white; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; padding: 28px 28px; box-sizing: border-box; backdrop-filter: blur(10px); transform: translate(-50%, -50%) scale(calc(0.7 * var(--stats-scale, 1))); transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.45s; }
         .statistics-overlay-manual.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(var(--stats-scale, 1)); pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s; }
         .statistics-overlay-manual.fading-out { opacity: 0; visibility: visible; transform: translate(-50%, -50%) scale(calc(0.94 * var(--stats-scale, 1))); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; }
-        .sm-header { text-align: center; font-size: 28px; font-weight: 800; color: #c69f66; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 26px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
-        .sm-table { width: 100%; display: flex; flex-direction: column; gap: 16px; }
-        .sm-row { display: grid; grid-template-columns: 1fr 250px 1fr; align-items: center; text-align: center; }
-        .sm-team-left { text-align: left; font-weight: 800; font-size: 30px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .sm-team-right { text-align: right; font-weight: 800; font-size: 30px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .sm-label { font-size: 17px; font-weight: 700; color: #e6e6e6; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-        .sm-val { font-size: 38px; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
-        .sm-val.gold { color: #c69f66; font-size: 26px; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .sm-header { text-align: center; font-size: calc(28px * var(--stats-text-k, 1)); font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 22px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
+        .sm-table { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+        .sm-row { display: grid; grid-template-columns: 1fr 240px 1fr; align-items: center; text-align: center; column-gap: 8px; }
+        .sm-team-left { text-align: left; font-weight: 800; font-size: calc(28px * var(--stats-text-k, 1)); line-height: 1.12; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .sm-team-right { text-align: right; font-weight: 800; font-size: calc(28px * var(--stats-text-k, 1)); line-height: 1.12; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .sm-label { font-size: calc(22px * var(--stats-text-k, 1)); line-height: 1.1; font-weight: 800; color: #f0f0f0; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .sm-val { font-size: calc(38px * var(--stats-text-k, 1)); font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .sm-val.gold { color: #c69f66; font-size: calc(26px * var(--stats-text-k, 1)); letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
         .history-sets-container { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; margin-top: 5px; }
         .history-set-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .history-set-row:last-child { border-bottom: none; padding-bottom: 0; }
@@ -1501,9 +1501,11 @@
 
         // Фон (непрозорість) і масштаб для РУЧНОЇ статистики та табла завершення матчу
         function applyStatsBoardLook(st) {
-            const op = Math.max(0, Math.min(100, st.statsBgOpacity !== undefined ? parseInt(st.statsBgOpacity) : 90)) / 100;
-            const sc = Math.max(0.3, Math.min(3, (st.statsBoardScale !== undefined ? parseInt(st.statsBoardScale) : 100) / 100));
+            const op = Math.max(0, Math.min(100, st.statsBgOpacity !== undefined ? parseInt(st.statsBgOpacity) : 75)) / 100;
+            const sc = Math.max(0.3, Math.min(3, (st.statsBoardScale !== undefined ? parseInt(st.statsBoardScale) : 75) / 100));
             document.documentElement.style.setProperty('--stats-scale', sc);
+            // при зменшенні масштабу — збільшуємо шрифти ручної статистики, щоб текст лишався читабельним (при збільшенні — навпаки зменшуємо)
+            document.documentElement.style.setProperty('--stats-text-k', Math.max(0.7, Math.min(1.8, Math.pow(1 / sc, 0.7))).toFixed(3));
             // беремо колір фону поточної теми (--panel-bg) і підміняємо лише прозорість
             const cs = getComputedStyle(document.documentElement).getPropertyValue('--panel-bg') || '';
             const m = cs.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
@@ -1512,6 +1514,18 @@
                 const el = document.getElementById(id);
                 if (el) el.style.background = `rgba(${rgb}, ${op})`;
             });
+        }
+
+        // Ім'я команди у ручній статистиці: двоє гравців через "/" або " - " — кожен з нового рядка
+        function setStatsTeamName(elId, name) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const parts = String(name || '').split(/\s*\/\s*|\s+[-–—]\s+/).map(p => p.trim()).filter(p => p.length > 0);
+            const sig = parts.join('\u0001');
+            if (el.dataset.sig === sig) return;
+            el.dataset.sig = sig;
+            el.textContent = '';
+            parts.forEach((p, i) => { if (i > 0) el.appendChild(document.createElement('br')); el.appendChild(document.createTextNode(p)); });
         }
 
         function renderTeamNamePlayers(elId, name, isServingTeam, serverSlot) {
@@ -2397,7 +2411,7 @@
                 }
 
                 if (state.showStatsOverlay) {
-                    document.getElementById('stm-name1').innerText = state.p1name || getStatsLabel('team1Fallback', state); document.getElementById('stm-name2').innerText = state.p2name || getStatsLabel('team2Fallback', state);
+                    setStatsTeamName('stm-name1', state.p1name || getStatsLabel('team1Fallback', state)); setStatsTeamName('stm-name2', state.p2name || getStatsLabel('team2Fallback', state));
 
                     const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
                     document.getElementById('stm-df1').innerText = df1; document.getElementById('stm-df2').innerText = df2;
