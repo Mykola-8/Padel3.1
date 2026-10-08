@@ -438,6 +438,24 @@
             background: radial-gradient(ellipse at center, rgba(0,153,255,0.98), rgba(0,153,255,0.18) 90%);
             box-shadow: inset 0 0 18px rgba(0,153,255,0.8);
         }
+        /* ПЛАШКА — суцільна плашка на весь рядок команди: виїжджає зліва направо, повністю перекриває назву команди (2.5 сек) і ховається вправо */
+        .action-plate-fx {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.85em;
+            letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
+            color: #111111; background: #FFD600;
+            box-shadow: inset 0 0 14px rgba(255,255,255,0.35);
+            transform: translateX(-101%); opacity: 0; pointer-events: none; z-index: 18;
+        }
+        .action-plate-fx.plate-blue { color: #ffffff; background: #0099FF; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+        .action-plate-fx.run { animation: plate-slide 2.5s cubic-bezier(0.22, 0.8, 0.3, 1) 1 both; }
+        @keyframes plate-slide {
+            0%   { transform: translateX(-101%); opacity: 1; }
+            20%  { transform: translateX(0);     opacity: 1; }
+            80%  { transform: translateX(0);     opacity: 1; }
+            100% { transform: translateX(101%);  opacity: 1; }
+        }
         .action-flash-fx.run { animation: label-glow-fade-orange 2s ease-out 1; }
 
         @keyframes label-glow-fade-orange {
@@ -1299,6 +1317,7 @@
                             <span class="ball-fx" id="ball-fx-1">🎾</span>
                             <div class="action-label-fx" id="action-label-1"></div>
                             <div class="action-flash-fx" id="action-flash-1"></div>
+                            <div class="action-plate-fx" id="action-plate-1"></div>
                         </div>
                     </div>
                     <div class="team-row" id="row-team-2">
@@ -1308,6 +1327,7 @@
                             <span class="ball-fx" id="ball-fx-2">🎾</span>
                             <div class="action-label-fx" id="action-label-2"></div>
                             <div class="action-flash-fx" id="action-flash-2"></div>
+                            <div class="action-plate-fx" id="action-plate-2"></div>
                         </div>
                     </div>
                 </div>
@@ -1359,7 +1379,7 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">GOLDEN</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">STAR</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
@@ -1406,7 +1426,7 @@
             <div class="sm-row"><div class="sm-val" id="stm-p31">0</div><div class="sm-label" id="stm-lbl-portres">Por Tres - X3</div><div class="sm-val" id="stm-p32">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-p41">0</div><div class="sm-label" id="stm-lbl-porcuatro">Por Cuatro - X4</div><div class="sm-val" id="stm-p42">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
-            <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Голден-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Стар-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
             <div class="sm-row">
                 <div style="text-align:center;"><div class="sm-val gold" id="stm-time-set">00:00</div><div class="sm-label" id="stm-lbl-set-time">Час сету</div></div>
@@ -1488,7 +1508,7 @@
             matchpoint: { en: 'MATCH POINT', ua: 'МАТЧ ПОІНТ' },
             setpoint: { en: 'SET POINT', ua: 'СЕТ ПОІНТ' },
             breakpoint: { en: 'BREAK POINT', ua: 'БРЕЙК ПОІНТ' },
-            goldenpoint: { en: 'GOLDEN POINT', ua: 'ГОЛДЕН ПОІНТ' },
+            goldenpoint: { en: 'STAR POINT', ua: 'СТАР ПОІНТ' },
             gamepoint: { en: 'GAME POINT', ua: 'ГЕЙМ ПОІНТ' },
             doublefault: { en: 'DOUBLE FAULT', ua: 'ДАБЛ ФОЛ' }
         };
@@ -1498,7 +1518,7 @@
             teams: { en: 'Teams', ua: 'Команди' },
             gamesSet: { en: 'Games (total)', ua: 'Гейми (всього)' },
             breakpoints: { en: 'Break Points', ua: 'Брейк-поінти' },
-            goldenpoints: { en: 'Golden Points', ua: 'Голден-поінти' },
+            goldenpoints: { en: 'Star Points', ua: 'Стар-поінти' },
             doublefaults: { en: 'Double Faults', ua: 'Дабл фоли' },
             netcords: { en: 'Net Cords', ua: 'Від сітки (Net Cord)' },
             smashes: { en: 'Smash', ua: 'Смеш' },
@@ -2026,9 +2046,10 @@
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
                         document.getElementById('advantage-callout').classList.remove('visible');
                     } else {
-                        const isDoubleStyleAd = state.deuceStyle === 'double';
+                        // Golden [3] (double): 2 переваги; Golden [2] (golden-2): 1 перевага
+                        const adMax = state.deuceStyle === 'double' ? 2 : (state.deuceStyle === 'golden-2' ? 1 : 0);
                         const adRound = (state.deuceCounter || 0) + 1;
-                        const adText = "AD" + ((isDoubleStyleAd && adRound <= 2) ? adRound : "");
+                        const adText = "AD" + ((adMax > 0 && adRound <= adMax) ? adRound : "");
 
                         pbT1.innerText = (p1 === 4) ? adText : ((p2 === 4) ? "" : pointSequence[p1]);
                         pbT2.innerText = (p2 === 4) ? adText : ((p1 === 4) ? "" : pointSequence[p2]);
@@ -2036,17 +2057,17 @@
                         pbT2.classList.toggle('ad-active', p2 === 4);
 
                         const advCallout = document.getElementById('advantage-callout');
-                        const isDoubleStyle = state.deuceStyle === 'double';
+                        const isDoubleStyle = adMax > 0;
                         const atDeuce = p1 === 3 && p2 === 3;
                         const isAdvantageHeld = p1 === 4 || p2 === 4;
 
                         if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
                             const round = (state.deuceCounter || 0) + 1;
-                            if (round <= 2) {
+                            if (round <= adMax) {
                                 advCallout.innerText = "ADVANTAGE " + round;
                                 advCallout.classList.add('visible');
                             } else {
-                                advCallout.innerText = "GOLDEN POINT";
+                                advCallout.innerText = "STAR POINT";
                                 advCallout.classList.add('visible');
                             }
                         } else {
@@ -2531,6 +2552,16 @@
                                 // Dormilona і Від сітки — синій-електрик; Смеш / Por Tres / Por Cuatro — жовтий
                                 if (aType === 'dormilona' || aType === 'net_cord') flashEl.classList.add('flash-blue');
                                 flashEl.classList.add('run');
+                            }
+
+                            // ПЛАШКА — виїжджає зліва направо на весь рядок команди, 2.5 сек (окремий перемикач, вимкнено за замовчуванням)
+                            const plateEl = document.getElementById(`action-plate-${state.animation.team}`);
+                            if (plateEl && state.showBoardPlate === true) {
+                                plateEl.classList.remove('run', 'plate-blue');
+                                void plateEl.offsetWidth;
+                                plateEl.innerText = labelTexts[aType];
+                                if (aType === 'dormilona' || aType === 'net_cord') plateEl.classList.add('plate-blue');
+                                plateEl.classList.add('run');
                             }
 
                             // АНІМАЦІЯ М'ЯЧА — окрема функція (вмикається чекбоксом "Анімація м'яча", не залежить від тексту)
