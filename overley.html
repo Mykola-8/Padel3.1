@@ -301,6 +301,10 @@
             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: var(--board-opacity, 1); visibility: visible; will-change: transform;
         }
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
+        /* Коли табло сховане — не показуємо й плашки поза ним: зліва внизу (Break Point, хто подає в команді), банер "Подає", бейдж стадії */
+        body.board-hidden .corner-slide-wrapper,
+        body.board-hidden .server-change-banner,
+        body.board-hidden .stage-badge-wrapper { opacity: 0 !important; visibility: hidden !important; }
 
         .logo-panel { transform: translateX(100%); opacity: 0; height: 96px; width: 120px; background: rgba(0, 0, 0, 0.55); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-sizing: border-box; order: 1; padding: 0 !important; margin: 0 !important; }
 
@@ -1895,6 +1899,7 @@
             if (lastKnownState.showMainBoard === false || statsHidingBoard || setOverlayLocalActive || isBreakActive) {
                 bw.classList.add('hidden');
             } else { bw.classList.remove('hidden'); }
+            document.body.classList.toggle('board-hidden', bw.classList.contains('hidden'));
         }
         let totalSeconds = 0, setSeconds = 0, gameSeconds = 0, lastGamesCountTracked = 0, lastSetTracked = 1, isMatchFinishedCurrently = false, isBreakActive = false;
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
