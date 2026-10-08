@@ -378,6 +378,33 @@
             opacity: 0;
         }
 
+        /* ===== ТАБЛО «ХТО ГРАЄ» (match intro) ===== */
+        #match-intro-wrap { position: fixed; left: 50%; top: 82%; transform: translate(-50%, -50%); z-index: 10001; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
+        #match-intro-wrap.visible { opacity: 1; visibility: visible; }
+        /* поки показано табло «Хто грає» — автоматична статистика між геймами (нижня плашка) не показується і не перекриває його */
+        body.mi-active #statistics-panel { display: none !important; }
+        #match-intro-board { container-type: size; width: 62vw; height: 28vh; display: flex; flex-direction: column; border-radius: 0.9vw; overflow: hidden; border: 1px solid rgba(255,255,255,0.55); background: #0a0a0a; box-shadow: 0 10px 40px rgba(0,0,0,0.6); font-family: 'Montserrat', sans-serif; transform: translateY(40px); transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1); }
+        #match-intro-wrap.visible #match-intro-board { transform: translateY(0); }
+        .mi-head { height: 17%; flex: none; display: flex; align-items: center; gap: 1.2cqw; padding: 0 2cqw; background: linear-gradient(#f6f6f6, #cdcdcd); color: #111; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: min(2.5cqw, 10cqh); }
+        .mi-head img { height: 72%; max-width: 12cqw; object-fit: contain; display: none; }
+        .mi-title, .mi-court { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mi-spacer { flex: 1; }
+        .mi-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 24cqw minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); background: radial-gradient(ellipse at center, #1c1c1c, #050505); }
+        .mi-team { display: flex; align-items: stretch; gap: 1.4cqw; padding: 0 1.8cqw; min-width: 0; min-height: 0; overflow: hidden; }
+        .mi-photo { display: none; align-self: center; height: 62%; max-width: 13cqw; aspect-ratio: 1; object-fit: cover; border-radius: 1cqw; border: 2px solid rgba(255,255,255,0.35); flex: none; }
+        .mi-players { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .mi-pl { flex: 1; display: flex; align-items: center; gap: 1.2cqw; min-height: 0; min-width: 0; }
+        .mi-pl + .mi-pl { border-top: 1px solid rgba(255,255,255,0.14); }
+        .mi-right .mi-pl { flex-direction: row-reverse; text-align: right; }
+        .mi-flag { height: min(3.2cqw, 12cqh); width: auto; display: none; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,0.25); flex: none; }
+        .mi-nm { min-width: 0; line-height: 1.05; }
+        .mi-first { font-size: min(1.6cqw, 6.6cqh); color: #e9e9e9; text-transform: uppercase; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mi-last { font-size: min(3cqw, 12cqh); color: #fff; text-transform: uppercase; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mi-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqh; min-width: 0; }
+        .mi-round { font-size: min(1.5cqw, 6.2cqh); font-style: italic; font-weight: 800; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .mi-vs { width: 80%; height: 46%; display: flex; align-items: center; justify-content: center; border: 2px solid #7a7a7a; border-radius: min(1cqw, 4cqh); background: linear-gradient(#232323, #0d0d0d); color: #fff; font-weight: 900; font-size: min(5.4cqw, 22cqh); line-height: 1; overflow: hidden; white-space: nowrap; }
+        .mi-date { font-size: min(1.4cqw, 5.6cqh); color: #cfcfcf; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
         /* DORMILONA (смеш з поверненням) — м'яч зигзагом летить вправо до "скла" і повертається назад */
         .ball-fx.fx-dormilona {
             animation: ball-dormilona 2.8s ease-in-out 1 both;
@@ -1356,6 +1383,35 @@
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
 
+    <div id="match-intro-wrap">
+        <div id="match-intro-board">
+            <div class="mi-head">
+                <img id="mi-logo-l" alt=""><span class="mi-title" id="mi-title"></span><span class="mi-spacer"></span><span class="mi-court" id="mi-court"></span><img id="mi-logo-r" alt="">
+            </div>
+            <div class="mi-body">
+                <div class="mi-team mi-left">
+                    <img class="mi-photo" id="mi-t1-photo" alt="">
+                    <div class="mi-players">
+                        <div class="mi-pl"><img class="mi-flag" id="mi-t1p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p1-f"></div><div class="mi-last" id="mi-t1p1-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-flag" id="mi-t1p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p2-f"></div><div class="mi-last" id="mi-t1p2-l"></div></div></div>
+                    </div>
+                </div>
+                <div class="mi-center">
+                    <div class="mi-round" id="mi-round"></div>
+                    <div class="mi-vs" id="mi-vs">VS</div>
+                    <div class="mi-date" id="mi-date"></div>
+                </div>
+                <div class="mi-team mi-right">
+                    <div class="mi-players">
+                        <div class="mi-pl"><img class="mi-flag" id="mi-t2p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p1-f"></div><div class="mi-last" id="mi-t2p1-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-flag" id="mi-t2p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p2-f"></div><div class="mi-last" id="mi-t2p2-l"></div></div></div>
+                    </div>
+                    <img class="mi-photo" id="mi-t2-photo" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="match-finished-board" id="match-finished-board">
         <div class="mfb-header" id="mfb-header">КОРТ 1 • МАТЧ ЗАВЕРШЕНО</div>
         <div class="mfb-winner" id="mfb-winner"><span class="trophy">🏆</span><span id="mfb-winner-name">Команда A</span></div>
@@ -1540,6 +1596,51 @@
             team1Fallback: { en: 'Team A', ua: 'Команда A' },
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
+
+        // ===== ТАБЛО «ХТО ГРАЄ» =====
+        function renderMatchIntro(st) {
+            const wrap = document.getElementById('match-intro-wrap');
+            if (!wrap) return;
+            const mi = st.matchIntro || {};
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const board = document.getElementById('match-intro-board');
+            wrap.style.left = g(mi.x, 50) + '%';
+            wrap.style.top = g(mi.y, 82) + '%';
+            wrap.style.transform = `translate(-50%, -50%) scale(${g(mi.scale, 100) / 100})`;
+            board.style.width = g(mi.w, 62) + 'vw';
+            board.style.height = g(mi.h, 28) + 'vh';
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el && el.textContent !== (v || '')) el.textContent = v || ''; };
+            const setImg = (id, src, cc) => {
+                const el = document.getElementById(id); if (!el) return;
+                const key = src || '';
+                if (el.getAttribute('data-src') !== key) {
+                    el.setAttribute('data-src', key);
+                    if (key) { el.src = key; } else { el.removeAttribute('src'); }
+                }
+                // якщо картинка не завантажилась (немає мережі / невірний код) — ховаємо її і не показуємо знову
+                el.onerror = function () { this.setAttribute('data-fail', this.getAttribute('data-src') || ''); this.style.display = 'none'; };
+                el.style.display = (key && el.getAttribute('data-fail') !== key) ? 'block' : 'none';
+            };
+            setTxt('mi-title', mi.title); setTxt('mi-court', mi.court);
+            setTxt('mi-round', mi.round); setTxt('mi-vs', g(mi.vs, 'VS')); setTxt('mi-date', mi.date);
+            document.getElementById('mi-round').style.display = mi.round ? '' : 'none';
+            document.getElementById('mi-date').style.display = mi.date ? '' : 'none';
+            setImg('mi-logo-l', mi.logoL); setImg('mi-logo-r', mi.logoR);
+            ['t1', 't2'].forEach(t => {
+                const team = mi[t] || {};
+                setImg('mi-' + t + '-photo', team.photo);
+                ['p1', 'p2'].forEach((p, idx) => {
+                    const pl = team[p] || {};
+                    const base = 'mi-' + t + 'p' + (idx + 1);
+                    setTxt(base + '-f', pl.f); setTxt(base + '-l', pl.l);
+                    const cc = String(pl.c || '').trim().toLowerCase();
+                    setImg(base + '-flag', /^[a-z]{2,3}(-[a-z]{2,3})?$/.test(cc) ? 'https://flagcdn.com/w80/' + cc + '.png' : '');
+                });
+            });
+            wrap.classList.toggle('visible', !!mi.show);
+            document.body.classList.toggle('mi-active', !!mi.show);
+            if (mi.show && typeof statsAutoActive !== 'undefined' && statsAutoActive && typeof forceCloseStatsPanel === 'function') forceCloseStatsPanel();
+        }
 
         // Фон (непрозорість) і масштаб для РУЧНОЇ статистики та табла завершення матчу
         function applyStatsBoardLook(st) {
@@ -1829,6 +1930,8 @@
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
+                // Табло «Хто грає» рендеримо одразу і окремо, щоб воно не залежало від решти коду оновлення
+                try { renderMatchIntro(state); } catch (miErr) { console.error("matchIntro render error:", miErr); }
 
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
