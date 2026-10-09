@@ -398,6 +398,41 @@
                 <input type="file" accept=".txt,.csv,text/plain" style="font-size:11px; max-width:170px;" onchange="rkLoadFile(this)">
                 <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkClear()">🗑 Очистити</button>
             </div>
+                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:11px; font-weight:700; color:#e0b878;">Шапка, логотипи, кольори і шрифт</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:11px; color:#ccc; min-width:130px;">🏷 Лого зліва (перед заголовком):</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="rkUpload('logoL', this)">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="rkClearLogo('logoL')">✖</button>
+                    <span id="rk-st-logoL" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:11px; color:#ccc; min-width:130px;">🏷 Лого справа 1:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="rkUpload('logoR1', this)">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="rkClearLogo('logoR1')">✖</button>
+                    <span id="rk-st-logoR1" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:11px; color:#ccc; min-width:130px;">🏷 Лого справа 2:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="rkUpload('logoR2', this)">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="rkClearLogo('logoR2')">✖</button>
+                    <span id="rk-st-logoR2" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:11px; color:#ccc; min-width:130px;">🏷 Лого внизу (по центру):</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="rkUpload('logoF', this)">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="rkClearLogo('logoF')">✖</button>
+                    <span id="rk-st-logoF" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір шапки <input type="color" data-rk="headColor" value="#0f1f3d" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+                    <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір заголовка <input type="color" data-rk="titleColor" value="#ffffff" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+                    <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір тексту <input type="color" data-rk="textColor" value="#ffffff" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+                    <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір номерів <input type="color" data-rk="numColor" value="#c69f66" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+                    </div>
+                    <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="nameStyle" onchange="rkInput(this)"> Ім'я — тонким, прізвище — жирним (як на фото)</label>
+                    <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="upper" onchange="rkInput(this)"> ВЕЛИКІ ЛІТЕРИ в назвах</label>
+                </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="rk-val-x" style="color:#e0b878;">50</b></span><input type="range" data-rk="x" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="rk-val-y" style="color:#e0b878;">50</b></span><input type="range" data-rk="y" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
@@ -1888,7 +1923,7 @@
         }
 
         // ===== РЕЙТИНГ КОМАНД =====
-        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, bgColor: "#080808", bgOpacity: 80, teams: [] };
+        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
         let rkRowsSig = null, rkSaveTimer = null;
         function rkEnsure() {
             if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
@@ -1908,6 +1943,27 @@
             else rk[k] = el.value;
             rkSave(false);
         };
+        window.rkUpload = function(key, input) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const st = document.getElementById('rk-st-' + key); if (st) st.innerText = '⏳';
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(320 / img.width, 120 / img.height, 1);
+                    const cv = document.createElement('canvas');
+                    cv.width = Math.max(1, Math.round(img.width * sc)); cv.height = Math.max(1, Math.round(img.height * sc));
+                    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                    rkEnsure()[key] = cv.toDataURL('image/png');
+                    if (st) st.innerText = '✅'; input.value = '';
+                    rkSave(true);
+                };
+                img.onerror = function() { if (st) st.innerText = '❌'; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        window.rkClearLogo = function(key) { rkEnsure()[key] = ''; const st = document.getElementById('rk-st-' + key); if (st) st.innerText = ''; rkSave(true); };
         window.rkToggle = function() { const rk = rkEnsure(); rk.show = !rk.show; rkSave(true); };
         function rkRebuildRows() {
             const box = document.getElementById('rk-rows'); if (!box) return;
@@ -1972,6 +2028,10 @@
             const rows = document.getElementById('rk-rows');
             const teams = Array.isArray(rk.teams) ? rk.teams : (rk.teams && typeof rk.teams === 'object' ? Object.values(rk.teams) : []);
             if (rows && rkRowsSig !== rkSig(teams) && !rows.contains(document.activeElement)) { if (!state.teamRanking) state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = teams; rkRebuildRows(); }
+            ['logoL', 'logoR1', 'logoR2', 'logoF'].forEach(k => {
+                const st = document.getElementById('rk-st-' + k);
+                if (st && st.innerText !== '⏳') st.innerText = (state.teamRanking && state.teamRanking[k]) ? '✅ є' : '';
+            });
             const btn = document.getElementById('btn-rk-toggle');
             if (btn) btn.innerText = (state.teamRanking && state.teamRanking.show) ? '🛑 СХОВАТИ РЕЙТИНГ КОМАНД' : '🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД';
         }
