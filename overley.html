@@ -383,6 +383,21 @@
             opacity: 0;
         }
 
+        /* ===== PLAY-OFF (верхня / нижня сітка) ===== */
+        .po-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: 'Montserrat', sans-serif; }
+        .po-wrap.visible { opacity: 1; visibility: visible; }
+        body.po-active #statistics-panel { display: none !important; }
+        .po-bg { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: linear-gradient(135deg, var(--po-bg1, #0c1c45), var(--po-bg2, #1c3d78)); }
+        .po-lines { position: absolute; left: 0; top: 0; }
+        .po-m { position: absolute; width: 381px; height: 76px; }
+        .po-n { position: absolute; left: 0; top: 0; width: 231px; height: 76px; background: var(--po-frame, #f5c542); }
+        .po-s { position: absolute; left: 236px; top: 0; width: 145px; height: 76px; background: var(--po-score, #e8b52c); }
+        .po-t { height: 38px; box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; font-size: 22px; font-weight: 700; color: var(--po-text, #10213f); white-space: nowrap; overflow: hidden; }
+        .po-t + .po-t { border-top: 1px solid rgba(0,0,0,0.28); }
+        .po-s .po-t { justify-content: center; font-size: 26px; font-weight: 800; padding: 0 6px; }
+        .po-h { position: absolute; transform: translateX(-50%); height: 32px; line-height: 32px; font-size: 24px; font-weight: 800; color: var(--po-head, #9fb3dd); white-space: nowrap; }
+        .po-title { position: absolute; left: 50px; top: 26px; height: 70px; line-height: 70px; font-size: 54px; font-weight: 900; color: var(--po-title, #fff); text-transform: uppercase; white-space: nowrap; }
+
         /* ===== ТАБЛО «РЕЙТИНГ КОМАНД» ===== */
         #team-ranking-wrap { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
         #team-ranking-wrap.visible { opacity: 1; visibility: visible; }
@@ -1413,6 +1428,9 @@
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
 
+    <div class="po-wrap" id="po-wrap-upper"></div>
+    <div class="po-wrap" id="po-wrap-lower"></div>
+
     <div id="team-ranking-wrap"><div id="rk-boards"></div></div>
 
     <div id="match-intro-wrap">
@@ -1628,6 +1646,80 @@
             team1Fallback: { en: 'Team A', ua: 'Команда A' },
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
+
+        // ===== PLAY-OFF: верхня / нижня сітка =====
+        const PO_NS = 'http://www.w3.org/2000/svg';
+        const PO_L = (() => {
+            const H = 76, W = 381, c16 = [], step = (942 - 181) / 7;
+            for (let i = 0; i < 8; i++) c16.push(181 + H / 2 + i * step);
+            const avg = (a, i) => (a[2 * i] + a[2 * i + 1]) / 2;
+            const cQF = [0, 1, 2, 3].map(i => avg(c16, i)), cSF = [0, 1].map(i => avg(cQF, i)), cF = (cSF[0] + cSF[1]) / 2;
+            return { H, W, c16, cQF, cSF, cF, cThird: 790, x: { r16: 50, qf: 530, sf: 1010, f: 1490 } };
+        })();
+        const poKeyCache = {};
+        function poText(v) { return (v === undefined || v === null) ? '' : String(v); }
+        function poBuild(wrap, cfg) {
+            wrap.innerHTML = '';
+            const bg = document.createElement('div'); bg.className = 'po-bg'; wrap.appendChild(bg);
+            const svg = document.createElementNS(PO_NS, 'svg'); svg.setAttribute('class', 'po-lines'); svg.setAttribute('width', 1920); svg.setAttribute('height', 1080);
+            const line = (x1, y1, x2, y2) => { const l = document.createElementNS(PO_NS, 'line'); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.style.stroke = 'var(--po-line, #f5c542)'; l.style.strokeWidth = '2'; svg.appendChild(l); };
+            const link = (src, dst, srcX, dstX) => {
+                const right = srcX + PO_L.W, elbow = right + 49;
+                dst.forEach((cy, i) => { line(right, src[2 * i], elbow, src[2 * i]); line(right, src[2 * i + 1], elbow, src[2 * i + 1]); line(elbow, src[2 * i], elbow, src[2 * i + 1]); line(elbow, cy, dstX, cy); });
+            };
+            link(PO_L.c16, PO_L.cQF, PO_L.x.r16, PO_L.x.qf);
+            link(PO_L.cQF, PO_L.cSF, PO_L.x.qf, PO_L.x.sf);
+            link(PO_L.cSF, [PO_L.cF], PO_L.x.sf, PO_L.x.f);
+            wrap.appendChild(svg);
+            const lb = Object.assign({ r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, cfg.labels || {});
+            const head = (txt, cx, y) => { if (!txt) return; const h = document.createElement('div'); h.className = 'po-h'; h.style.left = cx + 'px'; h.style.top = (y - 16) + 'px'; h.textContent = txt; wrap.appendChild(h); };
+            const half = PO_L.W / 2;
+            head(lb.r16, PO_L.x.r16 + half, 133); head(lb.qf, PO_L.x.qf + half, 133); head(lb.sf, PO_L.x.sf + half, 133);
+            head(lb.f, PO_L.x.f + half, PO_L.cF - 38 - 21);
+            if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - 38 - 20);
+            const box = (x, cy, m) => {
+                m = m || {};
+                const d = document.createElement('div'); d.className = 'po-m'; d.style.left = x + 'px'; d.style.top = (cy - PO_L.H / 2) + 'px';
+                const n = document.createElement('div'); n.className = 'po-n'; const s = document.createElement('div'); s.className = 'po-s';
+                [[m.a, m.sa], [m.b, m.sb]].forEach(p => {
+                    const t = document.createElement('div'); t.className = 'po-t'; t.textContent = poText(p[0]); n.appendChild(t);
+                    const u = document.createElement('div'); u.className = 'po-t'; u.textContent = poText(p[1]); s.appendChild(u);
+                });
+                d.appendChild(n); d.appendChild(s); wrap.appendChild(d);
+            };
+            const M = cfg.m || {};
+            PO_L.c16.forEach((cy, i) => box(PO_L.x.r16, cy, (M.r16 || [])[i]));
+            PO_L.cQF.forEach((cy, i) => box(PO_L.x.qf, cy, (M.qf || [])[i]));
+            PO_L.cSF.forEach((cy, i) => box(PO_L.x.sf, cy, (M.sf || [])[i]));
+            box(PO_L.x.f, PO_L.cF, (M.f || [])[0]);
+            if (cfg.third) box(PO_L.x.f, PO_L.cThird, (M.third || [])[0]);
+            if (cfg.title) { const t = document.createElement('div'); t.className = 'po-title'; t.textContent = cfg.title; wrap.appendChild(t); }
+            // довгі назви — зменшуємо шрифт, щоб вміщались у клітинку
+            wrap.querySelectorAll('.po-t').forEach(t => {
+                let fs = parseFloat(getComputedStyle(t).fontSize);
+                while (t.scrollWidth > t.clientWidth && fs > 12) { fs -= 1; t.style.fontSize = fs + 'px'; }
+            });
+        }
+        function renderPlayoff(st) {
+            const po = st.playoff || {}; let anyVisible = false;
+            ['upper', 'lower'].forEach(key => {
+                const wrap = document.getElementById('po-wrap-' + key); if (!wrap) return;
+                const cfg = po[key] || {};
+                const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+                wrap.style.setProperty('--po-bg1', g(cfg.bg1, '#0c1c45')); wrap.style.setProperty('--po-bg2', g(cfg.bg2, '#1c3d78'));
+                wrap.style.setProperty('--po-frame', g(cfg.frame, '#f5c542')); wrap.style.setProperty('--po-score', g(cfg.score, '#e8b52c'));
+                wrap.style.setProperty('--po-line', g(cfg.line, '#f5c542')); wrap.style.setProperty('--po-text', g(cfg.text, '#10213f'));
+                wrap.style.setProperty('--po-head', g(cfg.head, '#9fb3dd')); wrap.style.setProperty('--po-title', g(cfg.titleColor, '#ffffff'));
+                const bgEl = wrap.querySelector('.po-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
+                const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
+                wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
+                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m]);
+                if (poKeyCache[key] !== keyStr || !wrap.firstChild) { poKeyCache[key] = keyStr; poBuild(wrap, cfg); if (bgEl === null) { const nb = wrap.querySelector('.po-bg'); if (nb) nb.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100; } }
+                const vis = !!cfg.show; wrap.classList.toggle('visible', vis); if (vis) anyVisible = true;
+            });
+            document.body.classList.toggle('po-active', anyVisible);
+        }
+        window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} } });
 
         // ===== ТАБЛО «РЕЙТИНГ КОМАНД» =====
         let rkPage = 0, rkTimer = null, rkTimerMs = 0, rkKey = '', rkLast = null, rkGroups = 1;
@@ -2072,6 +2164,7 @@
                 // Табло «Хто грає» рендеримо одразу і окремо, щоб воно не залежало від решти коду оновлення
                 try { renderMatchIntro(state); } catch (miErr) { console.error("matchIntro render error:", miErr); }
                 try { renderTeamRanking(state); } catch (rkErr) { console.error("teamRanking render error:", rkErr); }
+                try { renderPlayoff(state); } catch (poErr) { console.error("playoff render error:", poErr); }
 
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
