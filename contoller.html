@@ -490,6 +490,44 @@
             </div>
 
             <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:11px; font-weight:700;">🏆 Рейтинг гравців / команд (OBS):</div>
+                <button class="btn" id="btn-rk-toggle" onclick="rkToggle()">🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД</button>
+                <div style="font-size:11px; color:#ccc;">Заголовок таблиці</div>
+                <input type="text" data-rk="title" placeholder="РЕЙТИНГ КОМАНД" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" oninput="rkInput(this)">
+                <div style="font-size:11px; color:#ccc;">Якщо команд більше 10 — режим показу</div>
+                <select data-rk="mode" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" onchange="rkInput(this)">
+                    <option value="alt">1. Анімація: по черзі, по 10 команд на таблі</option>
+                    <option value="side">2. Два табла одночасно поруч (по 10 команд)</option>
+                </select>
+                <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="sort" onchange="rkInput(this)"> Сортувати за рейтингом (від більшого до меншого)</label>
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Зміна сторінок, кожні (сек): <b id="rk-val-interval" style="color:#e0b878;">15</b></span><input type="range" data-rk="interval" min="5" max="60" step="1" value="15" oninput="rkInput(this)"></label>
+
+                <div style="border-top:1px dashed #444; padding-top:6px; font-size:11px; font-weight:700; color:#e0b878;">Команди — місце · назва · рейтинг</div>
+                <div id="rk-rows" style="display:flex; flex-direction:column; gap:5px;"></div>
+                <div style="display:grid; grid-template-columns:1fr 70px auto; gap:5px;">
+                    <input type="text" id="rk-new-name" placeholder="Назва команди" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                    <input type="number" id="rk-new-rating" placeholder="0" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                    <button class="btn" style="width:auto; padding:4px 10px !important; font-size:12px !important;" onclick="rkAddTeam()">+ Додати</button>
+                </div>
+                <div style="font-size:11px; color:#ccc;">Або вставте список (кожна команда з нового рядка; рейтинг через TAB, «;» або « - » в кінці):</div>
+                <textarea id="rk-paste" rows="4" placeholder="Команда 1; 1500&#10;Команда 2; 1320&#10;Команда 3" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"></textarea>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                    <button class="btn" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkAddList()">+ Додати список</button>
+                    <input type="file" accept=".txt,.csv,text/plain" style="font-size:11px; max-width:170px;" onchange="rkLoadFile(this)">
+                    <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkClear()">🗑 Очистити</button>
+                </div>
+                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="rk-val-x" style="color:#e0b878;">50</b></span><input type="range" data-rk="x" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="rk-val-y" style="color:#e0b878;">50</b></span><input type="range" data-rk="y" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="rk-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-rk="scale" min="30" max="200" step="1" value="100" oninput="rkInput(this)"></label>
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🌫 Розмиття фону (px): <b id="rk-val-blur" style="color:#e0b878;">12</b></span><input type="range" data-rk="blur" min="0" max="40" step="1" value="12" oninput="rkInput(this)"></label>
+                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Непрозорість фону (%): <b id="rk-val-bgOpacity" style="color:#e0b878;">80</b></span><input type="range" data-rk="bgOpacity" min="0" max="100" step="1" value="80" oninput="rkInput(this)"></label>
+
+                    <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір фону табла: <input type="color" data-rk="bgColor" value="#080808" oninput="rkInput(this)" style="width:46px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+                </div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:8px;">
                 <div style="font-size:11px; font-weight:700;">📊 Статистика (ручна) в OBS:</div>
             <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
             <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
@@ -1826,6 +1864,7 @@
                 sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0, sponsorLogoPosY: state.sponsorLogoPosY || 0,
                 showBoardPromoPanel: state.showBoardPromoPanel || false,
                 matchIntro: state.matchIntro || null,
+                teamRanking: state.teamRanking || null,
                 showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
                 boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false, 
@@ -1835,6 +1874,95 @@
                 t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
                 animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
+        }
+
+        // ===== РЕЙТИНГ КОМАНД =====
+        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, bgColor: "#080808", bgOpacity: 80, teams: [] };
+        let rkRowsSig = null, rkSaveTimer = null;
+        function rkEnsure() {
+            if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
+            const rk = state.teamRanking;
+            if (!Array.isArray(rk.teams)) rk.teams = rk.teams && typeof rk.teams === 'object' ? Object.values(rk.teams) : [];
+            return rk;
+        }
+        function rkSave(immediate) {
+            if (immediate) { clearTimeout(rkSaveTimer); set(matchRef, state); return; }
+            clearTimeout(rkSaveTimer); rkSaveTimer = setTimeout(() => set(matchRef, state), 250);
+        }
+        function rkSig(teams) { return JSON.stringify((teams || []).map(t => [t.n, t.r])); }
+        window.rkInput = function(el) {
+            const rk = rkEnsure(); const k = el.getAttribute('data-rk');
+            if (el.type === 'checkbox') rk[k] = el.checked;
+            else if (el.type === 'range') { rk[k] = parseInt(el.value); const l = document.getElementById('rk-val-' + k); if (l) l.innerText = rk[k]; }
+            else rk[k] = el.value;
+            rkSave(false);
+        };
+        window.rkToggle = function() { const rk = rkEnsure(); rk.show = !rk.show; rkSave(true); };
+        function rkRebuildRows() {
+            const box = document.getElementById('rk-rows'); if (!box) return;
+            const teams = (state.teamRanking && Array.isArray(state.teamRanking.teams)) ? state.teamRanking.teams : [];
+            box.innerHTML = '';
+            teams.forEach((t, i) => {
+                const row = document.createElement('div'); row.style.cssText = 'display:grid; grid-template-columns:26px 1fr 70px 28px; gap:5px; align-items:center;';
+                const no = document.createElement('div'); no.textContent = String(i + 1); no.style.cssText = 'font-size:12px; color:#e0b878; text-align:center; font-weight:700;';
+                const nm = document.createElement('input'); nm.type = 'text'; nm.value = t.n || ''; nm.placeholder = 'Назва';
+                const rt = document.createElement('input'); rt.type = 'number'; rt.value = (t.r === undefined || t.r === null) ? 0 : t.r;
+                [nm, rt].forEach(inp => inp.style.cssText = 'width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;');
+                nm.oninput = () => { rkEnsure().teams[i].n = nm.value; rkRowsSig = rkSig(state.teamRanking.teams); rkSave(false); };
+                rt.oninput = () => { rkEnsure().teams[i].r = Number(rt.value) || 0; rkRowsSig = rkSig(state.teamRanking.teams); rkSave(false); };
+                const del = document.createElement('button'); del.textContent = '✕'; del.className = 'btn btn-gray'; del.style.cssText = 'padding:2px 0 !important; font-size:12px !important; width:100%;';
+                del.onclick = () => { rkEnsure().teams.splice(i, 1); rkRebuildRows(); rkSave(true); };
+                row.appendChild(no); row.appendChild(nm); row.appendChild(rt); row.appendChild(del); box.appendChild(row);
+            });
+            rkRowsSig = rkSig(teams);
+        }
+        function rkParseList(text) {
+            const out = [];
+            String(text || '').split(/\r?\n/).forEach(line => {
+                let s = line.trim(); if (!s) return;
+                s = s.replace(/^\d+[.)]\s+/, '');
+                let name = s, rating = 0, m;
+                if ((m = s.match(/^(.*?)[\t;|]\s*(-?\d+(?:[.,]\d+)?)\s*$/))) { name = m[1]; rating = parseFloat(m[2].replace(',', '.')); }
+                else if ((m = s.match(/^(.*?)\s+[-–—]\s+(-?\d+(?:[.,]\d+)?)\s*$/))) { name = m[1]; rating = parseFloat(m[2].replace(',', '.')); }
+                name = name.trim(); if (name) out.push({ n: name, r: rating || 0 });
+            });
+            return out;
+        }
+        window.rkAddTeam = function() {
+            const n = document.getElementById('rk-new-name'), r = document.getElementById('rk-new-rating');
+            const name = (n.value || '').trim(); if (!name) return;
+            rkEnsure().teams.push({ n: name, r: Number(r.value) || 0 }); n.value = ''; r.value = '';
+            rkRebuildRows(); rkSave(true);
+        };
+        window.rkAddList = function() {
+            const ta = document.getElementById('rk-paste'); const items = rkParseList(ta.value); if (!items.length) return;
+            const rk = rkEnsure(); items.forEach(it => rk.teams.push(it)); ta.value = '';
+            rkRebuildRows(); rkSave(true);
+        };
+        window.rkLoadFile = function(input) {
+            const f = input.files && input.files[0]; if (!f) return;
+            const reader = new FileReader();
+            reader.onload = e => { const items = rkParseList(e.target.result); const rk = rkEnsure(); items.forEach(it => rk.teams.push(it)); input.value = ''; rkRebuildRows(); rkSave(true); };
+            reader.readAsText(f, 'utf-8');
+        };
+        window.rkClear = function() {
+            if (!confirm('Очистити весь список команд рейтингу?')) return;
+            rkEnsure().teams = []; rkRebuildRows(); rkSave(true);
+        };
+        function renderRankingUI() {
+            const rk = state.teamRanking || RK_DEFAULT;
+            document.querySelectorAll('[data-rk]').forEach(el => {
+                if (document.activeElement === el) return;
+                const k = el.getAttribute('data-rk'); const v = (rk[k] === undefined || rk[k] === null) ? RK_DEFAULT[k] : rk[k];
+                if (el.type === 'checkbox') el.checked = v !== false;
+                else if (el.type === 'range') { el.value = v; const l = document.getElementById('rk-val-' + k); if (l) l.innerText = v; }
+                else if (el.value !== String(v)) el.value = v;
+            });
+            const rows = document.getElementById('rk-rows');
+            const teams = Array.isArray(rk.teams) ? rk.teams : (rk.teams && typeof rk.teams === 'object' ? Object.values(rk.teams) : []);
+            if (rows && rkRowsSig !== rkSig(teams) && !rows.contains(document.activeElement)) { if (!state.teamRanking) state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = teams; rkRebuildRows(); }
+            const btn = document.getElementById('btn-rk-toggle');
+            if (btn) btn.innerText = (state.teamRanking && state.teamRanking.show) ? '🛑 СХОВАТИ РЕЙТИНГ КОМАНД' : '🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД';
         }
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
@@ -1928,6 +2056,7 @@
 
         function renderUI() {
             renderMatchIntroUI();
+            renderRankingUI();
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
