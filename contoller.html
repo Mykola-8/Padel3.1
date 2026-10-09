@@ -2633,6 +2633,7 @@
                     if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9)))) {
                         if (tb1 === undefined && tb2 === undefined && state.lastTiebreakScore1 !== undefined && state.lastTiebreakScore2 !== undefined) { tb1 = state.lastTiebreakScore1; tb2 = state.lastTiebreakScore2; }
                     }
+                    if (state['stb_s' + s] || isCurSuperTB) { tb1 = undefined; tb2 = undefined; }
                     b1.style.display = 'flex'; b2.style.display = 'flex';
                     b1.classList.toggle('p-past', s < pActiveSet); b2.classList.toggle('p-past', s < pActiveSet);
                     b1.innerHTML = (tb1 !== undefined && tb1 !== null && tb1 !== "") ? `${g1}<sup>${tb1}</sup>` : `${g1}`;
@@ -2718,8 +2719,7 @@
                 if ((state.p1Index >= lim && (state.p1Index - state.p2Index >= 2)) || (state.p2Index >= lim && (state.p2Index - state.p1Index >= 2))) { 
                     state['t1_s'+state.currentSet] = state.p1Index; 
                     state['t2_s'+state.currentSet] = state.p2Index; 
-                    state[`t1_tb_s${state.currentSet}`] = state.p1Index;
-                    state[`t2_tb_s${state.currentSet}`] = state.p2Index;
+                    state['stb_s'+state.currentSet] = true;
                     state.lastTiebreakScore1 = state.p1Index;
                     state.lastTiebreakScore2 = state.p2Index;
                     state.p1Index = 0; state.p2Index = 0; state.currentSet++; 
@@ -2919,7 +2919,19 @@
         window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); }
         window.toggleProSetMode = function(c) { state.isProSet = c; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleSuperTiebreakMode = function(c) { state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleSuperTiebreakMode = function(c) {
+            if (c && !state.isSuperTiebreak) {
+                // Перемикання посеред сету: зіграні гейми лишаємо на табло як окремий (незавершений) сет,
+                // супер-тайбрейк йде в новій колонці
+                const cs = state.currentSet || 1;
+                if ((state['t1_s' + cs] || 0) > 0 || (state['t2_s' + cs] || 0) > 0) {
+                    state['int_s' + cs] = true;
+                    state.currentSet = cs + 1;
+                    state.p1BreakPoints = 0; state.p2BreakPoints = 0; state.gamesTimeHistory = [];
+                }
+                state.isTiebreak = false; state.deuceCounter = 0;
+            }
+            state.isSuperTiebreak = c; if(c){state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
         window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
         window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
         window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v)||10; set(matchRef, state); }
@@ -3035,7 +3047,8 @@
                     let s2 = state[`t2_s${i}`] || 0; 
                     let tb1 = state[`t1_tb_s${i}`];
                     let tb2 = state[`t2_tb_s${i}`];
-                    if(s1 > 0 || s2 > 0) {
+                    if ((s1 > 0 || s2 > 0) && state['stb_s' + i]) { scoreLines.push(`СТБ ${s1}:${s2}`); }
+                    else if(s1 > 0 || s2 > 0) {
                         let str1 = (tb1 !== undefined && tb1 !== null && tb1 !== "") ? `${s1}(${tb1})` : `${s1}`;
                         let str2 = (tb2 !== undefined && tb2 !== null && tb2 !== "") ? `${s2}(${tb2})` : `${s2}`;
                         scoreLines.push(`${str1}:${str2}`);
