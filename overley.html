@@ -1643,6 +1643,7 @@
             tie: { en: 'Tie', ua: 'Нічия' },
             teamColumn: { en: 'Team', ua: 'Команда' },
             setColumn: { en: 'Set', ua: 'Сет' },
+            superTbColumn: { en: 'Super TB', ua: 'Супер ТБ' },
             team1Fallback: { en: 'Team A', ua: 'Команда A' },
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
@@ -2474,6 +2475,7 @@
                     box1.style.display = 'flex'; box1.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     box2.style.display = 'flex'; box2.className = s < activeSet ? 'score-box set-past' : 'score-box set-current';
                     
+                    if (state[`stb_s${s}`] || isCurSuperTB) { tbVal1 = undefined; tbVal2 = undefined; }
                     box1.innerHTML = (tbVal1 !== undefined && tbVal1 !== null && tbVal1 !== "") ? `${g1}<sup>${tbVal1}</sup>` : `${g1}`;
                     box2.innerHTML = (tbVal2 !== undefined && tbVal2 !== null && tbVal2 !== "") ? `${g2}<sup>${tbVal2}</sup>` : `${g2}`;
                 }
@@ -2496,13 +2498,13 @@
                     for (let i = 1; i <= (state.currentSet||1); i++) {
                         let g1 = state[`t1_s${i}`]||0, g2 = state[`t2_s${i}`]||0;
                         let tb1 = state[`t1_tb_s${i}`], tb2 = state[`t2_tb_s${i}`];
-                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2, tb1, tb2});
+                        if (g1>0 || g2>0 || (i===state.currentSet && (p1>0||p2>0))) playedSets.push({set: i, g1, g2, tb1, tb2, stb: !!state[`stb_s${i}`], inter: !!state[`int_s${i}`]});
                     }
-                    let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
+                    let setsWon1 = 0, setsWon2 = 0; playedSets.forEach(s => { if (s.inter) return; if (s.g1 > s.g2) setsWon1++; else if (s.g2 > s.g1) setsWon2++; });
                     document.getElementById('mfb-winner-name').innerText = setsWon1 > setsWon2 ? (state.p1name||getStatsLabel('team1Fallback', state)) : (setsWon2 > setsWon1 ? (state.p2name||getStatsLabel('team2Fallback', state)) : getStatsLabel('tie', state));
 
                     let headRow = document.getElementById('mfb-head-row'); headRow.innerHTML = `<th>${getStatsLabel('teamColumn', state)}</th>`;
-                    playedSets.forEach(s => { headRow.innerHTML += `<th>${getStatsLabel('setColumn', state)} ${s.set}</th>`; });
+                    playedSets.forEach(s => { headRow.innerHTML += s.stb ? `<th>${getStatsLabel('superTbColumn', state)}</th>` : `<th>${getStatsLabel('setColumn', state)} ${s.set}</th>`; });
 
                     let body = document.getElementById('mfb-body'); body.innerHTML = '';
                     let r1 = document.createElement('tr'), r2 = document.createElement('tr');
@@ -2510,10 +2512,10 @@
 
                     let h1 = `<td class="mfb-team-name">${state.p1name||getStatsLabel('team1Fallback', state)}</td>`, h2 = `<td class="mfb-team-name">${state.p2name||getStatsLabel('team2Fallback', state)}</td>`;
                     playedSets.forEach(s => { 
-                        let str1 = (s.tb1 !== undefined && s.tb1 !== null) ? `${s.g1}<sup>${s.tb1}</sup>` : `${s.g1}`;
-                        let str2 = (s.tb2 !== undefined && s.tb2 !== null) ? `${s.g2}<sup>${s.tb2}</sup>` : `${s.g2}`;
-                        h1 += `<td class="${s.g1>s.g2?'mfb-set-win':''}">${str1}</td>`; 
-                        h2 += `<td class="${s.g2>s.g1?'mfb-set-win':''}">${str2}</td>`; 
+                        let str1 = (!s.stb && s.tb1 !== undefined && s.tb1 !== null) ? `${s.g1}<sup>${s.tb1}</sup>` : `${s.g1}`;
+                        let str2 = (!s.stb && s.tb2 !== undefined && s.tb2 !== null) ? `${s.g2}<sup>${s.tb2}</sup>` : `${s.g2}`;
+                        h1 += `<td class="${!s.inter&&s.g1>s.g2?'mfb-set-win':''}">${str1}</td>`; 
+                        h2 += `<td class="${!s.inter&&s.g2>s.g1?'mfb-set-win':''}">${str2}</td>`; 
                     });
                     r1.innerHTML = h1; r2.innerHTML = h2; body.appendChild(r1); body.appendChild(r2);
 
