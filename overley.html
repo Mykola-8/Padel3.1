@@ -382,6 +382,22 @@
             opacity: 0;
         }
 
+        /* ===== ТАБЛО «РЕЙТИНГ КОМАНД» ===== */
+        #team-ranking-wrap { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
+        #team-ranking-wrap.visible { opacity: 1; visibility: visible; }
+        body.rk-active #statistics-panel { display: none !important; }
+        #rk-boards { display: flex; gap: 28px; align-items: flex-start; justify-content: center; transition: opacity 0.4s ease; }
+        #rk-boards.fading { opacity: 0; }
+        .rk-board { width: 620px; box-sizing: border-box; border-radius: 18px; padding: 22px 28px 16px; color: #fff; font-family: 'Montserrat', sans-serif; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 50px rgba(0,0,0,0.55); }
+        .rk-title { text-align: center; font-weight: 800; font-size: 32px; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.7); line-height: 1.15; }
+        .rk-row { display: grid; grid-template-columns: 70px 1fr 120px; align-items: center; height: 54px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 28px; font-weight: 700; }
+        .rk-row.rk-head { height: 30px; border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #bdbdbd; font-weight: 700; }
+        .rk-num { text-align: center; color: #c69f66; font-weight: 800; }
+        .rk-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px; }
+        .rk-pts { text-align: right; font-weight: 800; }
+        .rk-head .rk-pts { font-weight: 700; }
+        .rk-foot { text-align: center; font-size: 14px; letter-spacing: 2px; color: #9a9a9a; margin-top: 10px; text-transform: uppercase; }
+
         /* ===== ТАБЛО «ХТО ГРАЄ» (match intro) ===== */
         #match-intro-wrap { position: fixed; left: 50%; top: 82%; transform: translate(-50%, -50%); z-index: 10001; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
         #match-intro-wrap.visible { opacity: 1; visibility: visible; }
@@ -1387,6 +1403,8 @@
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
 
+    <div id="team-ranking-wrap"><div id="rk-boards"></div></div>
+
     <div id="match-intro-wrap">
         <div id="match-intro-board">
             <div class="mi-head">
@@ -1600,6 +1618,81 @@
             team1Fallback: { en: 'Team A', ua: 'Команда A' },
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
+
+        // ===== ТАБЛО «РЕЙТИНГ КОМАНД» =====
+        let rkPage = 0, rkTimer = null, rkTimerMs = 0, rkKey = '', rkLast = null, rkGroups = 1;
+        function rkHexToRgba(hex, op) {
+            const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(hex || '#080808'));
+            const r = m ? parseInt(m[1], 16) : 8, g = m ? parseInt(m[2], 16) : 8, b = m ? parseInt(m[3], 16) : 8;
+            return `rgba(${r}, ${g}, ${b}, ${op})`;
+        }
+        function rkSortedTeams(rk) {
+            let teams = Array.isArray(rk.teams) ? rk.teams.slice() : (rk.teams && typeof rk.teams === 'object' ? Object.values(rk.teams) : []);
+            teams = teams.filter(t => t && String(t.n || '').trim() !== '').map((t, i) => ({ n: String(t.n), r: Number(t.r) || 0, i }));
+            if (rk.sort !== false) teams.sort((a, b) => (b.r - a.r) || (a.i - b.i));
+            return teams;
+        }
+        function rkBuildBoard(rk, items, startNo, pageNo, pagesTotal) {
+            const b = document.createElement('div'); b.className = 'rk-board';
+            const t = document.createElement('div'); t.className = 'rk-title'; t.textContent = rk.title || ''; if (!rk.title) t.style.display = 'none'; b.appendChild(t);
+            const h = document.createElement('div'); h.className = 'rk-row rk-head';
+            ['№', 'Команда', 'Рейтинг'].forEach((x, k) => { const d = document.createElement('div'); d.className = ['rk-num', 'rk-name', 'rk-pts'][k]; d.textContent = x; h.appendChild(d); });
+            b.appendChild(h);
+            items.forEach((it, k) => {
+                const r = document.createElement('div'); r.className = 'rk-row';
+                const a = document.createElement('div'); a.className = 'rk-num'; a.textContent = String(startNo + k);
+                const n = document.createElement('div'); n.className = 'rk-name'; n.textContent = it.n;
+                const p = document.createElement('div'); p.className = 'rk-pts'; p.textContent = String(it.r);
+                r.appendChild(a); r.appendChild(n); r.appendChild(p); b.appendChild(r);
+            });
+            if (pagesTotal > 1) { const f = document.createElement('div'); f.className = 'rk-foot'; f.textContent = 'Сторінка ' + pageNo + ' / ' + pagesTotal; b.appendChild(f); }
+            return b;
+        }
+        function rkApplyStyle(rk) {
+            const op = Math.max(0, Math.min(100, rk.bgOpacity !== undefined ? parseInt(rk.bgOpacity) : 80)) / 100;
+            const blur = Math.max(0, Math.min(60, rk.blur !== undefined ? parseInt(rk.blur) : 12));
+            document.querySelectorAll('#rk-boards .rk-board').forEach(b => {
+                b.style.background = rkHexToRgba(rk.bgColor, op);
+                b.style.backdropFilter = 'blur(' + blur + 'px)';
+                b.style.webkitBackdropFilter = 'blur(' + blur + 'px)';
+            });
+        }
+        function rkRender(animated) {
+            const rk = rkLast || {}; const box = document.getElementById('rk-boards'); if (!box) return;
+            const teams = rkSortedTeams(rk); const PER = 10;
+            const pages = []; for (let i = 0; i < teams.length; i += PER) pages.push(teams.slice(i, i + PER));
+            const side = rk.mode === 'side';
+            rkGroups = Math.max(1, side ? Math.ceil(pages.length / 2) : pages.length);
+            if (rkPage >= rkGroups) rkPage = 0;
+            const build = () => {
+                box.innerHTML = '';
+                const idxs = side ? [rkPage * 2, rkPage * 2 + 1] : [rkPage];
+                idxs.forEach(pi => { if (pages[pi]) box.appendChild(rkBuildBoard(rk, pages[pi], pi * PER + 1, pi + 1, pages.length)); });
+                rkApplyStyle(rk);
+            };
+            if (animated) { box.classList.add('fading'); setTimeout(() => { build(); box.classList.remove('fading'); }, 400); }
+            else build();
+        }
+        function renderTeamRanking(st) {
+            const wrap = document.getElementById('team-ranking-wrap'); if (!wrap) return;
+            const rk = st.teamRanking || {}; rkLast = rk;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            wrap.style.left = g(rk.x, 50) + '%'; wrap.style.top = g(rk.y, 50) + '%';
+            wrap.style.transform = `translate(-50%, -50%) scale(${g(rk.scale, 100) / 100})`;
+            const teams = rkSortedTeams(rk);
+            const key = JSON.stringify([rk.title, rk.mode, rk.sort, teams]);
+            if (key !== rkKey) { rkKey = key; rkPage = 0; rkRender(false); } else { rkApplyStyle(rk); }
+            const ms = Math.max(3, Math.min(120, parseInt(g(rk.interval, 15)))) * 1000;
+            if (rk.show && rkGroups > 1) {
+                if (!rkTimer || rkTimerMs !== ms) {
+                    clearInterval(rkTimer); rkTimerMs = ms;
+                    rkTimer = setInterval(() => { if (rkGroups > 1) { rkPage = (rkPage + 1) % rkGroups; rkRender(true); } }, ms);
+                }
+            } else if (rkTimer) { clearInterval(rkTimer); rkTimer = null; }
+            const visible = !!rk.show && teams.length > 0;
+            wrap.classList.toggle('visible', visible);
+            document.body.classList.toggle('rk-active', visible);
+        }
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         function renderMatchIntro(st) {
@@ -1937,6 +2030,7 @@
                 lastKnownState = state;
                 // Табло «Хто грає» рендеримо одразу і окремо, щоб воно не залежало від решти коду оновлення
                 try { renderMatchIntro(state); } catch (miErr) { console.error("matchIntro render error:", miErr); }
+                try { renderTeamRanking(state); } catch (rkErr) { console.error("teamRanking render error:", rkErr); }
 
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
