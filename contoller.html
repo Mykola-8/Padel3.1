@@ -81,6 +81,15 @@
         .modal-overlay .card, .modal-overlay .match-card, .modal-overlay .switch-row { flex-shrink: 0; }
         .modal-overlay input[type="range"] { touch-action: none; }
         body.modal-lock { overflow: hidden; }
+        /* Екран налаштувань зафіксований: лише прокрутка вгору/вниз — без горизонтального руху і масштабування жестами */
+        .modal-overlay { overflow-x: hidden !important; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; max-width: 100vw; }
+        .modal-overlay > div, .modal-overlay .card { max-width: 100%; min-width: 0; }
+        .modal-overlay input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), .modal-overlay select, .modal-overlay textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
+        .modal-overlay input[type="file"] { max-width: 100%; }
+        .modal-overlay .row, .modal-overlay .switch-row { flex-wrap: wrap; min-width: 0; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
+        #tab-tournament { touch-action: pan-y; min-width: 0; }
+        #tab-tournament .card { min-width: 0; max-width: 100%; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
         .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
@@ -114,7 +123,7 @@
 
     <nav class="nav-tabs">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
-        <button class="nav-btn" onclick="switchTab('tab-history')"><span>📜</span>Історія</button>
+        <button class="nav-btn" onclick="switchTab('tab-tournament')"><span>🏆</span>Tournament</button>
         <button class="nav-btn" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
         <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
     </nav>
@@ -191,6 +200,8 @@
             <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
             <button class="btn" id="btn-break" style="flex:1; padding:14px; background:#7c3aed;" onclick="toggleBreak()">☕ ПЕРЕРВА</button>
         </div>
+
+        <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:14px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
 
         <!-- ===== БЛОКИ ADMIN ===== -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
@@ -286,8 +297,119 @@
         </div>
     </div>
 
-    <div id="tab-history" class="tab-content">
-        <h2>📜 Історія матчів</h2>
+    <div id="tab-tournament" class="tab-content">
+        <h2>🏆 Tournament</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:11px; font-weight:700;">🎬 Табло «Хто грає» (OBS):</div>
+            <button class="btn" id="btn-mi-toggle" onclick="miToggle()">🎬 ПОКАЗАТИ ТАБЛО «ХТО ГРАЄ»</button>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                <input type="text" data-mi="title" placeholder="Назва турніру" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                <input type="text" data-mi="court" placeholder="Корт / місце" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                <input type="text" data-mi="round" placeholder="Категорія — раунд" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                <input type="text" data-mi="date" placeholder="Дата / час" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+            </div>
+            <div style="display:grid; grid-template-columns:90px 1fr; gap:5px; align-items:center;">
+                <span style="font-size:11px; color:#ccc;">Текст у центрі:</span><input type="text" data-mi="vs" placeholder="VS" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span style="font-size:11px; color:#ccc;">🏷 Лого зліва:</span>
+                <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('logoL', this, 300, 120, 'image/png')">
+                <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('logoL')">✖</button>
+                <span id="mi-st-logoL" style="font-size:11px; color:#8c8;"></span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span style="font-size:11px; color:#ccc;">🏷 Лого справа:</span>
+                <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('logoR', this, 300, 120, 'image/png')">
+                <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('logoR')">✖</button>
+                <span id="mi-st-logoR" style="font-size:11px; color:#8c8;"></span>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+                <div style="font-size:11px; font-weight:700; color:#e0b878;">Команда ліворуч</div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото команди:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t1.photo', this, 360, 360, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t1.photo')">✖ без фото</button>
+                    <span id="mi-st-t1.photo" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
+                    <input type="text" data-mi="t1.p1.f" placeholder="Ім'я 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t1.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t1.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
+                    <input type="text" data-mi="t1.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t1.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t1.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
+                </div>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+                <div style="font-size:11px; font-weight:700; color:#e0b878;">Команда праворуч</div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото команди:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t2.photo', this, 360, 360, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t2.photo')">✖ без фото</button>
+                    <span id="mi-st-t2.photo" style="font-size:11px; color:#8c8;"></span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
+                    <input type="text" data-mi="t2.p1.f" placeholder="Ім'я 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t2.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t2.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
+                    <input type="text" data-mi="t2.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t2.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
+                    <input type="text" data-mi="t2.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
+                </div>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="mi-val-x" style="color:#e0b878;">50</b></span><input type="range" data-mi="x" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="mi-val-y" style="color:#e0b878;">82</b></span><input type="range" data-mi="y" min="0" max="100" step="1" value="82" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="mi-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-mi="scale" min="30" max="200" step="1" value="100" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇔ Ширина табло (% екрана): <b id="mi-val-w" style="color:#e0b878;">62</b></span><input type="range" data-mi="w" min="30" max="100" step="1" value="62" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇕ Висота табло (% екрана): <b id="mi-val-h" style="color:#e0b878;">28</b></span><input type="range" data-mi="h" min="10" max="60" step="1" value="28" oninput="miInput(this)"></label>
+            </div>
+            <button class="btn btn-gray" style="font-size:11px !important;" onclick="miResetLayout()">↺ Скинути позицію і розмір</button>
+        </div>
+
+        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:11px; font-weight:700;">🏆 Рейтинг гравців / команд (OBS):</div>
+            <button class="btn" id="btn-rk-toggle" onclick="rkToggle()">🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД</button>
+            <div style="font-size:11px; color:#ccc;">Заголовок таблиці</div>
+            <input type="text" data-rk="title" placeholder="РЕЙТИНГ КОМАНД" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" oninput="rkInput(this)">
+            <div style="font-size:11px; color:#ccc;">Якщо команд більше 10 — режим показу</div>
+            <select data-rk="mode" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" onchange="rkInput(this)">
+                <option value="alt">1. Анімація: по черзі, по 10 команд на таблі</option>
+                <option value="side">2. Два табла одночасно поруч (по 10 команд)</option>
+            </select>
+            <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="sort" onchange="rkInput(this)"> Сортувати за рейтингом (від більшого до меншого)</label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Зміна сторінок, кожні (сек): <b id="rk-val-interval" style="color:#e0b878;">15</b></span><input type="range" data-rk="interval" min="5" max="60" step="1" value="15" oninput="rkInput(this)"></label>
+
+            <div style="border-top:1px dashed #444; padding-top:6px; font-size:11px; font-weight:700; color:#e0b878;">Команди — місце · назва · рейтинг</div>
+            <div id="rk-rows" style="display:flex; flex-direction:column; gap:5px;"></div>
+            <div style="display:grid; grid-template-columns:1fr 70px auto; gap:5px;">
+                <input type="text" id="rk-new-name" placeholder="Назва команди" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                <input type="number" id="rk-new-rating" placeholder="0" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                <button class="btn" style="width:auto; padding:4px 10px !important; font-size:12px !important;" onclick="rkAddTeam()">+ Додати</button>
+            </div>
+            <div style="font-size:11px; color:#ccc;">Або вставте список (кожна команда з нового рядка; рейтинг через TAB, «;» або « - » в кінці):</div>
+            <textarea id="rk-paste" rows="4" placeholder="Команда 1; 1500&#10;Команда 2; 1320&#10;Команда 3" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"></textarea>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <button class="btn" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkAddList()">+ Додати список</button>
+                <input type="file" accept=".txt,.csv,text/plain" style="font-size:11px; max-width:170px;" onchange="rkLoadFile(this)">
+                <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkClear()">🗑 Очистити</button>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="rk-val-x" style="color:#e0b878;">50</b></span><input type="range" data-rk="x" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="rk-val-y" style="color:#e0b878;">50</b></span><input type="range" data-rk="y" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="rk-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-rk="scale" min="30" max="200" step="1" value="100" oninput="rkInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🌫 Розмиття фону (px): <b id="rk-val-blur" style="color:#e0b878;">12</b></span><input type="range" data-rk="blur" min="0" max="40" step="1" value="12" oninput="rkInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Непрозорість фону (%): <b id="rk-val-bgOpacity" style="color:#e0b878;">80</b></span><input type="range" data-rk="bgOpacity" min="0" max="100" step="1" value="80" oninput="rkInput(this)"></label>
+
+                <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір фону табла: <input type="color" data-rk="bgColor" value="#080808" oninput="rkInput(this)" style="width:46px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
+            </div>
+        </div>
+
+        <h2 style="margin-top:10px;">📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
             <div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія матчів завантажується...</div>
         </div>
@@ -418,118 +540,7 @@
             </div>
 
             <div class="card" style="display:flex; flex-direction:column; gap:8px;">
-                <div style="font-size:11px; font-weight:700;">🎬 Табло «Хто грає» (OBS):</div>
-                <button class="btn" id="btn-mi-toggle" onclick="miToggle()">🎬 ПОКАЗАТИ ТАБЛО «ХТО ГРАЄ»</button>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-                    <input type="text" data-mi="title" placeholder="Назва турніру" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                    <input type="text" data-mi="court" placeholder="Корт / місце" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                    <input type="text" data-mi="round" placeholder="Категорія — раунд" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                    <input type="text" data-mi="date" placeholder="Дата / час" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                </div>
-                <div style="display:grid; grid-template-columns:90px 1fr; gap:5px; align-items:center;">
-                    <span style="font-size:11px; color:#ccc;">Текст у центрі:</span><input type="text" data-mi="vs" placeholder="VS" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                </div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <span style="font-size:11px; color:#ccc;">🏷 Лого зліва:</span>
-                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('logoL', this, 300, 120, 'image/png')">
-                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('logoL')">✖</button>
-                    <span id="mi-st-logoL" style="font-size:11px; color:#8c8;"></span>
-                </div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <span style="font-size:11px; color:#ccc;">🏷 Лого справа:</span>
-                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('logoR', this, 300, 120, 'image/png')">
-                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('logoR')">✖</button>
-                    <span id="mi-st-logoR" style="font-size:11px; color:#8c8;"></span>
-                </div>
-                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
-                    <div style="font-size:11px; font-weight:700; color:#e0b878;">Команда ліворуч</div>
-                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                        <span style="font-size:11px; color:#ccc;">📷 Фото команди:</span>
-                        <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t1.photo', this, 360, 360, 'image/jpeg')">
-                        <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t1.photo')">✖ без фото</button>
-                        <span id="mi-st-t1.photo" style="font-size:11px; color:#8c8;"></span>
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
-                        <input type="text" data-mi="t1.p1.f" placeholder="Ім'я 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t1.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t1.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
-                        <input type="text" data-mi="t1.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t1.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t1.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
-                    </div>
-                </div>
-                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
-                    <div style="font-size:11px; font-weight:700; color:#e0b878;">Команда праворуч</div>
-                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                        <span style="font-size:11px; color:#ccc;">📷 Фото команди:</span>
-                        <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t2.photo', this, 360, 360, 'image/jpeg')">
-                        <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t2.photo')">✖ без фото</button>
-                        <span id="mi-st-t2.photo" style="font-size:11px; color:#8c8;"></span>
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
-                        <input type="text" data-mi="t2.p1.f" placeholder="Ім'я 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t2.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t2.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
-                        <input type="text" data-mi="t2.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t2.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
-                        <input type="text" data-mi="t2.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
-                    </div>
-                </div>
-                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="mi-val-x" style="color:#e0b878;">50</b></span><input type="range" data-mi="x" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="mi-val-y" style="color:#e0b878;">82</b></span><input type="range" data-mi="y" min="0" max="100" step="1" value="82" oninput="miInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="mi-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-mi="scale" min="30" max="200" step="1" value="100" oninput="miInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇔ Ширина табло (% екрана): <b id="mi-val-w" style="color:#e0b878;">62</b></span><input type="range" data-mi="w" min="30" max="100" step="1" value="62" oninput="miInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇕ Висота табло (% екрана): <b id="mi-val-h" style="color:#e0b878;">28</b></span><input type="range" data-mi="h" min="10" max="60" step="1" value="28" oninput="miInput(this)"></label>
-                </div>
-                <button class="btn btn-gray" style="font-size:11px !important;" onclick="miResetLayout()">↺ Скинути позицію і розмір</button>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:8px;">
-                <div style="font-size:11px; font-weight:700;">🏆 Рейтинг гравців / команд (OBS):</div>
-                <button class="btn" id="btn-rk-toggle" onclick="rkToggle()">🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД</button>
-                <div style="font-size:11px; color:#ccc;">Заголовок таблиці</div>
-                <input type="text" data-rk="title" placeholder="РЕЙТИНГ КОМАНД" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" oninput="rkInput(this)">
-                <div style="font-size:11px; color:#ccc;">Якщо команд більше 10 — режим показу</div>
-                <select data-rk="mode" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" onchange="rkInput(this)">
-                    <option value="alt">1. Анімація: по черзі, по 10 команд на таблі</option>
-                    <option value="side">2. Два табла одночасно поруч (по 10 команд)</option>
-                </select>
-                <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="sort" onchange="rkInput(this)"> Сортувати за рейтингом (від більшого до меншого)</label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Зміна сторінок, кожні (сек): <b id="rk-val-interval" style="color:#e0b878;">15</b></span><input type="range" data-rk="interval" min="5" max="60" step="1" value="15" oninput="rkInput(this)"></label>
-
-                <div style="border-top:1px dashed #444; padding-top:6px; font-size:11px; font-weight:700; color:#e0b878;">Команди — місце · назва · рейтинг</div>
-                <div id="rk-rows" style="display:flex; flex-direction:column; gap:5px;"></div>
-                <div style="display:grid; grid-template-columns:1fr 70px auto; gap:5px;">
-                    <input type="text" id="rk-new-name" placeholder="Назва команди" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
-                    <input type="number" id="rk-new-rating" placeholder="0" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
-                    <button class="btn" style="width:auto; padding:4px 10px !important; font-size:12px !important;" onclick="rkAddTeam()">+ Додати</button>
-                </div>
-                <div style="font-size:11px; color:#ccc;">Або вставте список (кожна команда з нового рядка; рейтинг через TAB, «;» або « - » в кінці):</div>
-                <textarea id="rk-paste" rows="4" placeholder="Команда 1; 1500&#10;Команда 2; 1320&#10;Команда 3" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"></textarea>
-                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                    <button class="btn" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkAddList()">+ Додати список</button>
-                    <input type="file" accept=".txt,.csv,text/plain" style="font-size:11px; max-width:170px;" onchange="rkLoadFile(this)">
-                    <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="rkClear()">🗑 Очистити</button>
-                </div>
-                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="rk-val-x" style="color:#e0b878;">50</b></span><input type="range" data-rk="x" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="rk-val-y" style="color:#e0b878;">50</b></span><input type="range" data-rk="y" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="rk-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-rk="scale" min="30" max="200" step="1" value="100" oninput="rkInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🌫 Розмиття фону (px): <b id="rk-val-blur" style="color:#e0b878;">12</b></span><input type="range" data-rk="blur" min="0" max="40" step="1" value="12" oninput="rkInput(this)"></label>
-                <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Непрозорість фону (%): <b id="rk-val-bgOpacity" style="color:#e0b878;">80</b></span><input type="range" data-rk="bgOpacity" min="0" max="100" step="1" value="80" oninput="rkInput(this)"></label>
-
-                    <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір фону табла: <input type="color" data-rk="bgColor" value="#080808" oninput="rkInput(this)" style="width:46px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
-                </div>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:8px;">
                 <div style="font-size:11px; font-weight:700;">📊 Статистика (ручна) в OBS:</div>
-            <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:10px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
             <label style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
                 <span style="font-size:11px; color:#ccc;">Чіткість фону статистики (ручна + кінець матчу): <b id="stats-bg-value" style="color:#e0b878;">75%</b> <span style="color:#888;">(прозорість <span id="stats-bg-transp">25</span>%)</span></span>
                 <input type="range" id="stats-bg-slider" min="0" max="100" step="5" value="75" oninput="updateStatsBgOpacity(this.value)">
