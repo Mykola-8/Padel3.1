@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Overlay</title>
     <!-- Підключено спортивний акцентний шрифт Teko для яскравого вигляду таймерів та написів перерви -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗМІННІ ТЕМИ ТАБЛА ===== */
@@ -388,15 +389,24 @@
         body.rk-active #statistics-panel { display: none !important; }
         #rk-boards { display: flex; gap: 28px; align-items: flex-start; justify-content: center; transition: opacity 0.4s ease; }
         #rk-boards.fading { opacity: 0; }
-        .rk-board { width: 620px; box-sizing: border-box; border-radius: 18px; padding: 22px 28px 16px; color: #fff; font-family: 'Montserrat', sans-serif; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 50px rgba(0,0,0,0.55); }
-        .rk-title { text-align: center; font-weight: 800; font-size: 32px; letter-spacing: 3px; text-transform: uppercase; color: #c69f66; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.7); line-height: 1.15; }
-        .rk-row { display: grid; grid-template-columns: 70px 1fr 120px; align-items: center; height: 54px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 28px; font-weight: 700; }
-        .rk-row.rk-head { height: 30px; border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #bdbdbd; font-weight: 700; }
-        .rk-num { text-align: center; color: #c69f66; font-weight: 800; }
+        .rk-board { width: 620px; box-sizing: border-box; border-radius: 18px; overflow: hidden; padding: 0 0 14px; color: var(--rk-text, #fff); font-family: 'Montserrat', sans-serif; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 50px rgba(0,0,0,0.55); }
+        .rk-headbar { display: flex; align-items: center; gap: 16px; padding: 14px 28px; min-height: 64px; box-sizing: border-box; background: var(--rk-head, #0f1f3d); margin-bottom: 6px; }
+        .rk-headbar.rk-center { justify-content: center; }
+        .rk-title { flex: 1; min-width: 0; font-weight: 800; font-size: 32px; letter-spacing: 2px; text-transform: uppercase; color: var(--rk-title, #fff); line-height: 1.1; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+        .rk-center .rk-title { flex: 0 1 auto; text-align: center; }
+        .rk-hlogo { height: 48px; max-width: 160px; object-fit: contain; flex: none; }
+        .rk-body { padding: 0 28px; }
+        .rk-row { display: grid; grid-template-columns: 70px 1fr 120px; align-items: center; height: 54px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 28px; font-weight: 700; color: var(--rk-text, #fff); }
+        .rk-row.rk-head { height: 30px; border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; font-weight: 700; }
+        .rk-num { text-align: center; color: var(--rk-num, #c69f66); font-weight: 800; }
         .rk-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px; }
+        .rk-name.rk-upper { text-transform: uppercase; }
+        .rk-fn { font-weight: 300; }   /* ім'я — тонко */
+        .rk-ln { font-weight: 800; }   /* прізвище — жирно */
         .rk-pts { text-align: right; font-weight: 800; }
         .rk-head .rk-pts { font-weight: 700; }
-        .rk-foot { text-align: center; font-size: 14px; letter-spacing: 2px; color: #9a9a9a; margin-top: 10px; text-transform: uppercase; }
+        .rk-foot { text-align: center; font-size: 14px; letter-spacing: 2px; opacity: 0.6; margin-top: 10px; text-transform: uppercase; }
+        .rk-footlogo { display: block; margin: 12px auto 0; height: 44px; max-width: 220px; object-fit: contain; }
 
         /* ===== ТАБЛО «ХТО ГРАЄ» (match intro) ===== */
         #match-intro-wrap { position: fixed; left: 50%; top: 82%; transform: translate(-50%, -50%); z-index: 10001; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
@@ -1632,20 +1642,46 @@
             if (rk.sort !== false) teams.sort((a, b) => (b.r - a.r) || (a.i - b.i));
             return teams;
         }
+        function rkFillName(el, name, styled) {
+            if (!styled) { el.textContent = name; return; }
+            // кожен гравець/частина (розділення "/"): усі слова крім останнього — тонко, останнє (прізвище) — жирно
+            String(name).split(/\s*\/\s*/).forEach((part, pi) => {
+                if (pi > 0) el.appendChild(document.createTextNode(' / '));
+                const words = part.trim().split(/\s+/).filter(Boolean);
+                if (!words.length) return;
+                if (words.length > 1) {
+                    const fn = document.createElement('span'); fn.className = 'rk-fn'; fn.textContent = words.slice(0, -1).join(' ') + ' '; el.appendChild(fn);
+                }
+                const ln = document.createElement('span'); ln.className = 'rk-ln'; ln.textContent = words[words.length - 1]; el.appendChild(ln);
+            });
+        }
+        function rkLogoImg(src, cls) { const i = document.createElement('img'); i.className = cls; i.alt = ''; i.src = src; return i; }
         function rkBuildBoard(rk, items, startNo, pageNo, pagesTotal) {
             const b = document.createElement('div'); b.className = 'rk-board';
-            const t = document.createElement('div'); t.className = 'rk-title'; t.textContent = rk.title || ''; if (!rk.title) t.style.display = 'none'; b.appendChild(t);
+            const logos = [rk.logoL, rk.logoR1, rk.logoR2].filter(Boolean);
+            if (rk.title || logos.length) {
+                const hb = document.createElement('div'); hb.className = 'rk-headbar' + (logos.length ? '' : ' rk-center');
+                if (rk.logoL) hb.appendChild(rkLogoImg(rk.logoL, 'rk-hlogo'));
+                const t = document.createElement('div'); t.className = 'rk-title'; t.textContent = rk.title || ''; hb.appendChild(t);
+                if (rk.logoR1) hb.appendChild(rkLogoImg(rk.logoR1, 'rk-hlogo'));
+                if (rk.logoR2) hb.appendChild(rkLogoImg(rk.logoR2, 'rk-hlogo'));
+                b.appendChild(hb);
+            }
+            const body = document.createElement('div'); body.className = 'rk-body';
             const h = document.createElement('div'); h.className = 'rk-row rk-head';
             ['№', 'Команда', 'Рейтинг'].forEach((x, k) => { const d = document.createElement('div'); d.className = ['rk-num', 'rk-name', 'rk-pts'][k]; d.textContent = x; h.appendChild(d); });
-            b.appendChild(h);
+            body.appendChild(h);
+            const styled = rk.nameStyle !== false, upper = rk.upper !== false;
             items.forEach((it, k) => {
                 const r = document.createElement('div'); r.className = 'rk-row';
                 const a = document.createElement('div'); a.className = 'rk-num'; a.textContent = String(startNo + k);
-                const n = document.createElement('div'); n.className = 'rk-name'; n.textContent = it.n;
+                const n = document.createElement('div'); n.className = 'rk-name' + (upper ? ' rk-upper' : ''); rkFillName(n, it.n, styled);
                 const p = document.createElement('div'); p.className = 'rk-pts'; p.textContent = String(it.r);
-                r.appendChild(a); r.appendChild(n); r.appendChild(p); b.appendChild(r);
+                r.appendChild(a); r.appendChild(n); r.appendChild(p); body.appendChild(r);
             });
-            if (pagesTotal > 1) { const f = document.createElement('div'); f.className = 'rk-foot'; f.textContent = 'Сторінка ' + pageNo + ' / ' + pagesTotal; b.appendChild(f); }
+            if (pagesTotal > 1) { const f = document.createElement('div'); f.className = 'rk-foot'; f.textContent = 'Сторінка ' + pageNo + ' / ' + pagesTotal; body.appendChild(f); }
+            b.appendChild(body);
+            if (rk.logoF) b.appendChild(rkLogoImg(rk.logoF, 'rk-footlogo'));
             return b;
         }
         function rkApplyStyle(rk) {
@@ -1677,10 +1713,15 @@
             const wrap = document.getElementById('team-ranking-wrap'); if (!wrap) return;
             const rk = st.teamRanking || {}; rkLast = rk;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            wrap.style.setProperty('--rk-head', g(rk.headColor, '#0f1f3d'));
+            wrap.style.setProperty('--rk-title', g(rk.titleColor, '#ffffff'));
+            wrap.style.setProperty('--rk-text', g(rk.textColor, '#ffffff'));
+            wrap.style.setProperty('--rk-num', g(rk.numColor, '#c69f66'));
             wrap.style.left = g(rk.x, 50) + '%'; wrap.style.top = g(rk.y, 50) + '%';
             wrap.style.transform = `translate(-50%, -50%) scale(${g(rk.scale, 100) / 100})`;
             const teams = rkSortedTeams(rk);
-            const key = JSON.stringify([rk.title, rk.mode, rk.sort, teams]);
+            const lg = s => (s || '').length + ':' + (s || '').slice(-24);
+            const key = JSON.stringify([rk.title, rk.mode, rk.sort, rk.nameStyle, rk.upper, lg(rk.logoL), lg(rk.logoR1), lg(rk.logoR2), lg(rk.logoF), teams]);
             if (key !== rkKey) { rkKey = key; rkPage = 0; rkRender(false); } else { rkApplyStyle(rk); }
             const ms = Math.max(3, Math.min(120, parseInt(g(rk.interval, 15)))) * 1000;
             if (rk.show && rkGroups > 1) {
