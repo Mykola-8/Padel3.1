@@ -444,6 +444,10 @@
             </div>
         </div>
 
+        <datalist id="po-names"></datalist>
+        <div class="card" id="po-ui-upper" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="card" id="po-ui-lower" style="display:flex; flex-direction:column; gap:8px;"></div>
+
         <h2 style="margin-top:10px;">📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
             <div style="text-align:center; color:#aaa; font-size:13px; padding:20px;">Історія матчів завантажується...</div>
@@ -1911,6 +1915,7 @@
                 showBoardPromoPanel: state.showBoardPromoPanel || false,
                 matchIntro: state.matchIntro || null,
                 teamRanking: state.teamRanking || null,
+                playoff: state.playoff || null,
                 showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
                 boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false, 
@@ -1920,6 +1925,134 @@
                 t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
                 animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
+        }
+
+        // ===== PLAY-OFF (верхня / нижня сітка) =====
+        const PO_ROUNDS = [['r16', 8, '1/8'], ['qf', 4, '1/4'], ['sf', 2, '1/2'], ['f', 1, 'FINAL'], ['third', 1, '3RD PLACE']];
+        const PO_NEXT = { r16: 'qf', qf: 'sf', sf: 'f' };
+        const PO_EMPTY = () => ({ a: '', b: '', sa: '', sb: '' });
+        function poDefault(key) {
+            const m = {}; PO_ROUNDS.forEach(([r, n]) => { m[r] = Array.from({ length: n }, PO_EMPTY); });
+            return { show: false, title: key === 'lower' ? 'НИЖНЯ СІТКА' : '', third: key !== 'lower', scale: 100, bgOpacity: 100,
+                bg1: '#0c1c45', bg2: '#1c3d78', frame: '#f5c542', score: '#e8b52c', line: '#f5c542', text: '#10213f', head: '#9fb3dd', titleColor: '#ffffff',
+                labels: { r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, m };
+        }
+        function poEnsure(key) {
+            if (!state.playoff || typeof state.playoff !== 'object') state.playoff = {};
+            const d = poDefault(key); let c = state.playoff[key];
+            if (!c || typeof c !== 'object') { state.playoff[key] = d; return d; }
+            Object.keys(d).forEach(k => { if (c[k] === undefined) c[k] = d[k]; });
+            c.labels = Object.assign({}, d.labels, c.labels || {});
+            if (!c.m || typeof c.m !== 'object') c.m = {};
+            PO_ROUNDS.forEach(([r, n]) => {
+                let arr = c.m[r]; if (!Array.isArray(arr)) arr = (arr && typeof arr === 'object') ? Object.values(arr) : [];
+                while (arr.length < n) arr.push(PO_EMPTY());
+                for (let i = 0; i < arr.length; i++) arr[i] = Object.assign(PO_EMPTY(), arr[i] || {});
+                c.m[r] = arr;
+            });
+            return c;
+        }
+        function poGet(o, path) { return path.split('.').reduce((x, k) => (x === undefined || x === null) ? undefined : x[k], o); }
+        function poSet(o, path, val) { const k = path.split('.'); let x = o; for (let i = 0; i < k.length - 1; i++) x = x[k[i]]; x[k[k.length - 1]] = val; }
+        let poTimer = null;
+        function poSave(immediate) { clearTimeout(poTimer); if (immediate) { set(matchRef, state); return; } poTimer = setTimeout(() => set(matchRef, state), 250); }
+        window.poInput = function(el) {
+            const key = el.getAttribute('data-po'), path = el.getAttribute('data-path'), c = poEnsure(key);
+            const v = el.type === 'checkbox' ? el.checked : (el.type === 'range' ? parseInt(el.value) : el.value);
+            poSet(c, path, v);
+            if (el.type === 'range') { const l = document.getElementById('po-val-' + key + '-' + path); if (l) l.innerText = v; }
+            poSave(false);
+        };
+        window.poToggle = function(key) {
+            const c = poEnsure(key); c.show = !c.show;
+            if (c.show) poEnsure(key === 'upper' ? 'lower' : 'upper').show = false;   // обидві сітки на весь екран — показуємо одну
+            poSave(true); poRefreshUI();
+        };
+        window.poAdvance = function(key, round, idx, side) {
+            const c = poEnsure(key), m = c.m[round][idx], name = side === 'a' ? m.a : m.b, nxt = PO_NEXT[round]; if (!nxt || !name) return;
+            c.m[nxt][Math.floor(idx / 2)][idx % 2 === 0 ? 'a' : 'b'] = name; poRefreshUI(); poSave(true);
+        };
+        function poRankingTeams() {
+            const rk = state.teamRanking || {};
+            let teams = Array.isArray(rk.teams) ? rk.teams.slice() : Object.values(rk.teams || {});
+            teams = teams.filter(t => t && String(t.n || '').trim()).map((t, i) => ({ n: String(t.n), r: Number(t.r) || 0, i }));
+            if (rk.sort !== false) teams.sort((a, b) => (b.r - a.r) || (a.i - b.i));
+            return teams;
+        }
+        window.poFillFromRanking = function(key) {
+            const teams = poRankingTeams();
+            if (!teams.length) { alert('У рейтингу немає команд — спершу додайте їх у блоці «Рейтинг гравців / команд».'); return; }
+            if (!confirm('Заповнити 1/8 за рейтингом (сід 1–16)? Поточні назви й рахунок у 1/8 буде замінено.')) return;
+            const seeds = [[1, 16], [8, 9], [4, 13], [5, 12], [2, 15], [7, 10], [3, 14], [6, 11]], c = poEnsure(key);
+            seeds.forEach((p, i) => { c.m.r16[i] = { a: (teams[p[0] - 1] || {}).n || '', b: (teams[p[1] - 1] || {}).n || '', sa: '', sb: '' }; });
+            poRefreshUI(); poSave(true);
+        };
+        window.poClear = function(key) {
+            if (!confirm('Очистити всі назви команд і рахунок у цій сітці? Налаштування кольорів лишаться.')) return;
+            const c = poEnsure(key); c.m = poDefault(key).m; poRefreshUI(); poSave(true);
+        };
+        function poBuildUI() {
+            const IN = 'style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"';
+            ['upper', 'lower'].forEach(K => {
+                const host = document.getElementById('po-ui-' + K); if (!host || host.getAttribute('data-built')) return; host.setAttribute('data-built', '1');
+                const slider = (p, lbl, mn, mx, val) => `<label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">${lbl}: <b id="po-val-${K}-${p}" style="color:#e0b878;">${val}</b></span><input type="range" data-po="${K}" data-path="${p}" min="${mn}" max="${mx}" step="1" value="${val}" oninput="poInput(this)"></label>`;
+                const color = (p, lbl, val) => `<label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">${lbl} <input type="color" data-po="${K}" data-path="${p}" value="${val}" oninput="poInput(this)" style="width:40px; height:24px; padding:0; border:1px solid #444; background:none;"></label>`;
+                const d = poDefault(K);
+                const rounds = PO_ROUNDS.map(([r, n, lbl]) => {
+                    const rows = Array.from({ length: n }, (_, i) => {
+                        const line = (side, sc) => `<div style="display:grid; grid-template-columns:1fr 64px ${PO_NEXT[r] ? '30px' : ''}; gap:4px;">
+                            <input type="text" list="po-names" data-po="${K}" data-path="m.${r}.${i}.${side}" placeholder="Команда" ${IN} oninput="poInput(this)">
+                            <input type="text" data-po="${K}" data-path="m.${r}.${i}.${sc}" placeholder="рах." ${IN} oninput="poInput(this)" style="text-align:center; width:100%; padding:5px 2px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                            ${PO_NEXT[r] ? `<button class="btn btn-gray" title="Перенести цю команду в наступний раунд" style="padding:2px 0 !important; font-size:12px !important; width:100%;" onclick="poAdvance('${K}','${r}',${i},'${side}')">⬆</button>` : ''}</div>`;
+                        return `<div style="background:#161616; border:1px solid #333; border-radius:6px; padding:5px; display:flex; flex-direction:column; gap:4px;"><div style="font-size:10px; color:#e0b878;">${lbl} · матч ${i + 1}</div>${line('a', 'sa')}${line('b', 'sb')}</div>`;
+                    }).join('');
+                    return `<details ${r === 'r16' ? 'open' : ''} id="po-d-${K}-${r}" ${r === 'third' ? `data-third="1"` : ''}><summary style="font-size:12px; font-weight:700; color:#ccc; cursor:pointer; padding:4px 0;">${lbl} (${n})</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">${rows}</div></details>`;
+                }).join('');
+                host.innerHTML = `
+                    <div style="font-size:11px; font-weight:700;">🏆 Play-off: ${K === 'upper' ? 'ВЕРХНЯ СІТКА' : 'НИЖНЯ СІТКА'} (OBS)</div>
+                    <button class="btn" id="po-btn-${K}" onclick="poToggle('${K}')">ПОКАЗАТИ</button>
+                    <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+                        <input type="text" data-po="${K}" data-path="title" placeholder="Заголовок сітки (необов'язково)" ${IN} oninput="poInput(this)">
+                        <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-po="${K}" data-path="third" onchange="poInput(this)"> 3 місце</label>
+                    </div>
+                    ${slider('scale', '🔍 Масштаб (%)', 30, 150, 100)}
+                    ${slider('bgOpacity', '◐ Непрозорість фону (%)', 0, 100, 100)}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                        ${color('bg1', '🎨 Фон: початок', d.bg1)}${color('bg2', '🎨 Фон: кінець', d.bg2)}
+                        ${color('frame', '🎨 Рамки команд', d.frame)}${color('score', '🎨 Клітинки рахунку', d.score)}
+                        ${color('line', '🎨 Лінії', d.line)}${color('text', '🎨 Текст', d.text)}
+                        ${color('head', '🎨 Підписи раундів', d.head)}${color('titleColor', '🎨 Заголовок', d.titleColor)}
+                    </div>
+                    <details><summary style="font-size:11px; color:#ccc; cursor:pointer;">Підписи раундів</summary>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">${PO_ROUNDS.map(([r, n, l]) => `<input type="text" data-po="${K}" data-path="labels.${r}" placeholder="${l}" ${IN} oninput="poInput(this)">`).join('')}</div>
+                    </details>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button class="btn" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="poFillFromRanking('${K}')">⬇ Заповнити 1/8 з рейтингу</button>
+                        <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="poClear('${K}')">🗑 Очистити сітку</button>
+                    </div>
+                    <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:6px;">${rounds}</div>`;
+            });
+        }
+        let poNamesSig = '';
+        function poRefreshUI() {
+            poBuildUI();
+            ['upper', 'lower'].forEach(K => {
+                const c = poEnsure(K);
+                document.querySelectorAll('[data-po="' + K + '"]').forEach(el => {
+                    if (document.activeElement === el) return;
+                    const v = poGet(c, el.getAttribute('data-path'));
+                    if (el.type === 'checkbox') el.checked = !!v;
+                    else if (el.type === 'range') { el.value = v; const l = document.getElementById('po-val-' + K + '-' + el.getAttribute('data-path')); if (l) l.innerText = v; }
+                    else { const s = (v === undefined || v === null) ? '' : String(v); if (el.value !== s) el.value = s; }
+                });
+                const btn = document.getElementById('po-btn-' + K); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🏆 ПОКАЗАТИ';
+                const d3 = document.getElementById('po-d-' + K + '-third'); if (d3) d3.style.display = c.third ? '' : 'none';
+            });
+            const names = []; const seen = {};
+            poRankingTeams().forEach(t => { if (!seen[t.n]) { seen[t.n] = 1; names.push(t.n); } });
+            Object.values(allPlayersData || {}).forEach(p => { const n = p && p.name; if (n && !seen[n]) { seen[n] = 1; names.push(n); } });
+            const sig = names.join('\u0001');
+            if (sig !== poNamesSig) { poNamesSig = sig; const dl = document.getElementById('po-names'); if (dl) { dl.innerHTML = ''; names.forEach(n => { const op = document.createElement('option'); op.value = n; dl.appendChild(op); }); } }
         }
 
         // ===== РЕЙТИНГ КОМАНД =====
@@ -2128,6 +2261,7 @@
         function renderUI() {
             renderMatchIntroUI();
             renderRankingUI();
+            poRefreshUI();
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
