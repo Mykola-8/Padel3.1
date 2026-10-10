@@ -630,6 +630,7 @@
             </div>
 
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:10px; color:#9bd; margin-bottom:6px;">🌐 Показ, посилання й опис QR-коду — спільні для ВСІХ кортів. Розмір і позиція — окремо для кожного корту.</div>
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
 
                 <div style="font-size:11px; font-weight:700;">Збережені посилання:</div>
@@ -1086,6 +1087,21 @@
         function saveBars() { saveBarsGlobal(); set(matchRef, state); }
         onValue(ref(db, 'padel/bars'), (snap) => { globalBars = snap.val(); if (globalBars && typeof state === 'object' && state) { mergeGlobalBars(); try { renderUI(); try { renderAdBarSlidesList(); } catch (e) {} } catch (e) {} } });
 
+        // ===== СПІЛЬНИЙ QR-КОД для всіх кортів: padel/qr (розмір і позиції — окремо для корту) =====
+        let globalQr = null;
+        function mergeGlobalQr() {
+            if (!globalQr || typeof state !== 'object' || !state) return;
+            if (globalQr.show !== undefined) state.showQrCode = !!globalQr.show;
+            if (globalQr.url !== undefined) state.qrCodeUrl = globalQr.url;
+            if (globalQr.desc !== undefined) state.qrCodeDescription = globalQr.desc;
+            const l = globalQr.links; state.qrLinks = Array.isArray(l) ? l.slice() : (l && typeof l === 'object' ? Object.values(l) : []);
+        }
+        function saveQrGlobal() {
+            const obj = { show: !!state.showQrCode, url: state.qrCodeUrl || 'https://google.com', desc: state.qrCodeDescription || 'SCAN ME', links: Array.isArray(state.qrLinks) ? JSON.parse(JSON.stringify(state.qrLinks)) : [] };
+            globalQr = obj; set(ref(db, 'padel/qr'), obj); set(matchRef, state);
+        }
+        onValue(ref(db, 'padel/qr'), (snap) => { globalQr = snap.val(); if (globalQr && typeof state === 'object' && state) { mergeGlobalQr(); try { renderUI(); } catch (e) {} } });
+
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
             const obj = { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' };
@@ -1103,7 +1119,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2029,7 +2045,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
-                    saveBarsGlobal();
+                    saveBarsGlobal(); saveQrGlobal();
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
@@ -3201,9 +3217,9 @@
         window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
         window.updateSuperTiebreakLimit = function(v) { state.superTiebreakLimit = parseInt(v)||10; set(matchRef, state); }
         window.changeDeuceStyle = function(s) { state.deuceStyle = s; set(matchRef, state); }
-        window.toggleQrCodeVisibility = function(c) { state.showQrCode = c; set(matchRef, state); }
-        window.updateQrCodeUrl = function(v) { state.qrCodeUrl = v; set(matchRef, state); }
-        window.updateQrDescription = function(v) { state.qrCodeDescription = v; set(matchRef, state); }
+        window.toggleQrCodeVisibility = function(c) { state.showQrCode = c; saveQrGlobal(); }
+        window.updateQrCodeUrl = function(v) { state.qrCodeUrl = v; saveQrGlobal(); }
+        window.updateQrDescription = function(v) { state.qrCodeDescription = v; saveQrGlobal(); }
 
         function renderQrLinksList() {
             const listEl = document.getElementById('qr-links-list');
@@ -3234,7 +3250,7 @@
             // Одразу активуємо щойно додане посилання
             state.qrCodeUrl = url;
             state.qrCodeDescription = desc || "SCAN ME";
-            set(matchRef, state);
+            saveQrGlobal();
             document.getElementById('qr-new-link-url').value = '';
             document.getElementById('qr-new-link-desc').value = '';
             setTimeout(renderQrLinksList, 200);
@@ -3246,14 +3262,14 @@
             if (!link) return;
             state.qrCodeUrl = link.url;
             state.qrCodeDescription = link.desc;
-            set(matchRef, state);
+            saveQrGlobal();
             setTimeout(renderQrLinksList, 200);
         };
 
         window.removeQrLink = function(i) {
             if (!Array.isArray(state.qrLinks)) return;
             state.qrLinks.splice(i, 1);
-            set(matchRef, state);
+            saveQrGlobal();
             setTimeout(renderQrLinksList, 200);
         };
 
