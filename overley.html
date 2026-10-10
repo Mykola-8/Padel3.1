@@ -6,6 +6,7 @@
     <title>Padel Overlay</title>
     <!-- Підключено спортивний акцентний шрифт Teko для яскравого вигляду таймерів та написів перерви -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700;800&family=Bebas+Neue&family=Inter:wght@400;600;700;800;900&family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=600;700;800;900&family=Roboto:wght=700;900&family=Teko:wght=600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗМІННІ ТЕМИ ТАБЛА ===== */
@@ -382,6 +383,26 @@
             transform: translate(calc(-50% + 55vw), calc(-50% - 120vh)) scale(0.4);
             opacity: 0;
         }
+
+        /* ===== ГРУПОВИЙ ЕТАП ===== */
+        .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
+        .gr-wrap.visible { opacity: 1; visibility: visible; }
+        body.gr-active #statistics-panel { display: none !important; }
+        .gr-bg { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--gr-bg, #0b1220); }
+        .gr-tour { position: absolute; left: 50px; top: 26px; font-size: 24px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; color: var(--gr-accent, #d4f542); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; }
+        .gr-title { position: absolute; left: 50px; top: 56px; font-size: 92px; line-height: 1.05; font-weight: 900; text-transform: uppercase; color: var(--gr-title, #fff); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; white-space: nowrap; }
+        .gr-sub { position: absolute; right: 50px; top: 112px; font-size: 26px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: var(--gr-num, #8fa0c4); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; }
+        .gr-card { position: absolute; background: var(--gr-card, #131c33); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); box-sizing: border-box; }
+        .gr-ch { display: flex; align-items: center; background: var(--gr-head, #1b2644); gap: 14px; padding: 0 18px; box-sizing: border-box; font-family: var(--gr-fonth, 'Montserrat'), sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--gr-title, #fff); }
+        .gr-badge { display: flex; align-items: center; justify-content: center; background: var(--gr-accent, #d4f542); color: #10151f; border-radius: 8px; font-weight: 900; flex: 0 0 auto; }
+        .gr-row { display: flex; align-items: center; gap: 0; padding: 0 18px; box-sizing: border-box; border-top: 1px solid rgba(255,255,255,0.07); }
+        .gr-num { color: var(--gr-num, #8fa0c4); font-weight: 800; flex: 0 0 auto; text-align: left; }
+        .gr-sub-row { display: flex; align-items: center; padding: 0 18px; box-sizing: border-box; background: rgba(255,255,255,0.04); color: var(--gr-num, #8fa0c4); font-weight: 800; border-top: 1px solid rgba(255,255,255,0.07); }
+        .gr-cell { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; height: 100%; font-weight: 800; white-space: nowrap; overflow: hidden; box-sizing: border-box; border-left: 1px solid rgba(255,255,255,0.07); }
+        .gr-cell.diag { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 6px, transparent 6px 12px); }
+        .gr-cell.win { background: color-mix(in srgb, var(--gr-accent, #d4f542) 20%, transparent); }
+        .gr-cell.tot { color: var(--gr-accent, #d4f542); font-weight: 900; }
+        .gr-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
 
         /* ===== PLAY-OFF (верхня / нижня сітка) ===== */
         .po-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: 'Montserrat', sans-serif; }
@@ -1428,6 +1449,7 @@
         <div class="board-promo-line" id="board-promo-line-5"></div>
     </div>
 
+    <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="po-wrap" id="po-wrap-upper"></div>
     <div class="po-wrap" id="po-wrap-lower"></div>
 
@@ -1720,7 +1742,106 @@
             });
             document.body.classList.toggle('po-active', anyVisible);
         }
-        window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} } });
+        window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} try { renderGroups(lastKnownState); } catch (e) {} } });
+
+        // ===== ГРУПОВИЙ ЕТАП =====
+        let grKeyCache = '';
+        function renderGroups(st) {
+            const cfg = st.groups || {}, wrap = document.getElementById('gr-wrap'); if (!wrap) return;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const st2 = wrap.style;
+            st2.setProperty('--gr-bg', g(cfg.bgColor, '#0b1220')); st2.setProperty('--gr-card', g(cfg.cardColor, '#131c33')); st2.setProperty('--gr-head', g(cfg.headColor, '#1b2644'));
+            st2.setProperty('--gr-accent', g(cfg.accent, '#d4f542')); st2.setProperty('--gr-text', g(cfg.textColor, '#ffffff')); st2.setProperty('--gr-num', g(cfg.numColor, '#8fa0c4'));
+            st2.setProperty('--gr-title', g(cfg.titleColor, '#ffffff'));
+            st2.setProperty('--gr-font', "'" + g(cfg.font, 'Montserrat') + "'"); st2.setProperty('--gr-fonth', "'" + g(cfg.fontHead, 'Montserrat') + "'");
+            const bgEl = wrap.querySelector('.gr-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
+            const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
+            st2.transform = 'translate(-50%, -50%) scale(' + k + ')';
+            const keyStr = JSON.stringify([cfg.count, cfg.mode, cfg.single, cfg.teamsPer, cfg.textSize, cfg.tournament, cfg.title, cfg.subtitle, cfg.prefix, cfg.g, cfg.font, cfg.fontHead, cfg.cross, cfg.winPts, cfg.lossPts, cfg.drawPts, cfg.sortRows, cfg.lblDiff, cfg.lblPts]);
+            if (keyStr !== grKeyCache || !wrap.querySelector('.gr-inner').firstChild) {
+                grKeyCache = keyStr;
+                const count = Math.max(1, Math.min(10, parseInt(g(cfg.count, 6)) || 6)), tp = Math.max(2, Math.min(8, parseInt(g(cfg.teamsPer, 5)) || 5));
+                const ts = Math.max(40, Math.min(160, parseInt(g(cfg.textSize, 100)))) / 100;
+                const arr = a => Array.isArray(a) ? a : (a && typeof a === 'object' ? Object.values(a) : []);
+                const gl = arr(cfg.g);
+                const L = 'ABCDEFGHIJ';
+                const grp = i => { const x = gl[i] || {}; const nm = String(g(x.name, L[i])); return { nm, t: arr(x.t), res: (x.res && typeof x.res === 'object') ? x.res : {} }; };
+                const cross = !!cfg.cross;
+                const mode = cfg.mode === 'one' ? 'one' : 'all';
+                const idx = mode === 'one' ? [Math.max(0, Math.min(count - 1, parseInt(g(cfg.single, 0)) || 0))] : Array.from({ length: count }, (_, i) => i);
+                let filled = 0; for (let i = 0; i < count; i++) grp(i).t.slice(0, tp).forEach(n => { if (String(n || '').trim()) filled++; });
+                const total = filled > 0 ? filled : count * tp;
+                const prefix = g(cfg.prefix, 'ГРУПА');
+                const sub = g(cfg.subtitle, count + ' ГРУП · ' + total + ' КОМАНД');
+                let h = '<div class="gr-tour">' + esc(g(cfg.tournament, 'НАЗВА ТУРНІРУ')) + '</div><div class="gr-title">' + esc(g(cfg.title, 'ГРУПОВИЙ ЕТАП')) + '</div>' + (sub ? '<div class="gr-sub">' + esc(sub) + '</div>' : '');
+                const top = 205, bottom = 1040, areaH = bottom - top, areaW = 1820, gap = 20;
+                let cols, rows, cardW, cardH;
+                if (mode === 'one') { cols = 1; rows = 1; cardW = cross ? 1500 : 1000; cardH = areaH; }
+                else {
+                    const n = idx.length; cols = n <= 1 ? 1 : n === 2 ? 2 : n === 3 ? 3 : n === 4 ? 2 : n <= 6 ? 3 : n <= 8 ? 4 : n === 9 ? 3 : 5;
+                    if (cross) { const need = 150 + tp * 46 + 150; while (cols > 1 && (areaW - gap * (cols - 1)) / cols < need) cols--; }
+                    rows = Math.ceil(n / cols); cardW = (areaW - gap * (cols - 1)) / cols; cardH = (areaH - gap * (rows - 1)) / rows;
+                    if (n === 1) cardW = cross ? 1500 : 1000;
+                }
+                const headH = Math.min(mode === 'one' ? 96 : 70, Math.max(36, cardH * 0.2));
+                const subFactor = cross ? 0.55 : 0;
+                const rh = Math.min(mode === 'one' ? 100 : 72, (cardH - headH) / (tp + subFactor));
+                const subH = rh * subFactor;
+                const realH = headH + subH + rh * tp;
+                const fsN = Math.max(11, rh * 0.42 * ts), fsNum = Math.max(10, rh * 0.34 * ts), fsH = Math.max(14, headH * 0.46 * ts), badge = headH * 0.62;
+                const totalW = cols * cardW + gap * (cols - 1), left0 = (1920 - totalW) / 2, totalH = rows * realH + gap * (rows - 1);
+                const top0 = mode === 'one' || idx.length === 1 ? top + Math.max(0, (areaH - totalH) / 2) : top;
+                idx.forEach((gi, p) => {
+                    const c = p % cols, r = Math.floor(p / cols), x = left0 + c * (cardW + gap), y = top0 + r * (realH + gap), G = grp(gi);
+                    let rowsHtml = '';
+                    if (!cross) {
+                        for (let j = 0; j < tp; j++) rowsHtml += '<div class="gr-row" style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (j + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px;">' + esc(G.t[j]) + '</span></div>';
+                    } else {
+                        const wP = Math.max(0, parseInt(g(cfg.winPts, 2)) || 0), lP = parseInt(g(cfg.lossPts, 0)) || 0, dP = parseInt(g(cfg.drawPts, 1)) || 0;
+                        const parse = s => { const out = []; String(s == null ? '' : s).replace(/(\d+)\s*[:\-–—]\s*(\d+)/g, (m, a, b) => { out.push([parseInt(a), parseInt(b)]); return m; }); return out; };
+                        const pair = (i, j) => { if (i === j) return null; const a = Math.min(i, j), b = Math.max(i, j); const p = parse(G.res[a + '_' + b]); if (!p.length) return null; return i < j ? p : p.map(x => [x[1], x[0]]); };
+                        const stats = [];
+                        for (let i = 0; i < tp; i++) {
+                            const S = { i, gf: 0, ga: 0, pts: 0, pl: 0, w: 0 };
+                            for (let j = 0; j < tp; j++) {
+                                const p = pair(i, j); if (!p) continue;
+                                let gf = 0, ga = 0, sw = 0, sl = 0; p.forEach(x => { gf += x[0]; ga += x[1]; if (x[0] > x[1]) sw++; else if (x[1] > x[0]) sl++; });
+                                S.gf += gf; S.ga += ga; S.pl++;
+                                const a = p.length > 1 ? sw : gf, b = p.length > 1 ? sl : ga;
+                                if (a > b) { S.pts += wP; S.w++; } else if (a < b) S.pts += lP; else S.pts += dP;
+                            }
+                            S.diff = S.gf - S.ga; stats.push(S);
+                        }
+                        const order = stats.slice(); if (cfg.sortRows) order.sort((x, y) => (y.pts - x.pts) || (y.diff - x.diff) || (y.gf - x.gf) || (x.i - y.i));
+                        const nameMin = 140, wD = rh * 1.45, wP2 = rh * 1.1;
+                        let cw = Math.max(26, Math.min(rh * 1.5, (cardW - 36 - nameMin - wD - wP2 - fsNum * 2.6) / tp));
+                        const fsC = Math.max(9, Math.min(rh * 0.36, cw * 0.34) * ts);
+                        let hh = '<div class="gr-sub-row" style="height:' + subH + 'px; font-size:' + Math.max(9, subH * 0.5 * ts) + 'px;"><span style="width:' + (fsNum * 2.6) + 'px;">№</span><span style="flex:1 1 auto;"></span>';
+                        for (let j = 0; j < tp; j++) hh += '<span style="width:' + cw + 'px; text-align:center;">' + (j + 1) + '</span>';
+                        hh += '<span style="width:' + wD + 'px; text-align:center;">' + esc(g(cfg.lblDiff, 'РІЗН')) + '</span><span style="width:' + wP2 + 'px; text-align:center;">' + esc(g(cfg.lblPts, 'ОЧК')) + '</span></div>';
+                        rowsHtml = hh;
+                        order.forEach(S => {
+                            const i = S.i; let r = '<div class="gr-row" style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (i + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px; min-width:' + nameMin * 0.6 + 'px;">' + esc(G.t[i]) + '</span>';
+                            for (let j = 0; j < tp; j++) {
+                                if (i === j) { r += '<span class="gr-cell diag" style="width:' + cw + 'px;"></span>'; continue; }
+                                const p = pair(i, j); let txt = '', cls = '';
+                                if (p) { txt = p.map(x => x[0] + ':' + x[1]).join(' '); let a = 0, b = 0; p.forEach(x => { a += x[0]; b += x[1]; if (p.length > 1) { if (x[0] > x[1]) a += 0; } }); if (p.length > 1) { a = p.filter(x => x[0] > x[1]).length; b = p.filter(x => x[1] > x[0]).length; } if (a > b) cls = ' win'; }
+                                r += '<span class="gr-cell' + cls + '" style="width:' + cw + 'px; font-size:' + fsC + 'px;">' + esc(txt) + '</span>';
+                            }
+                            const anyRes = S.pl > 0;
+                            r += '<span class="gr-cell tot" style="width:' + wD + 'px; font-size:' + fsN * 0.9 + 'px;">' + (anyRes ? (S.diff > 0 ? '+' + S.diff : S.diff) : '') + '</span><span class="gr-cell tot" style="width:' + wP2 + 'px; font-size:' + fsN + 'px; color:var(--gr-text);">' + (anyRes ? S.pts : '') + '</span></div>';
+                            rowsHtml += r;
+                        });
+                    }
+                    h += '<div class="gr-card" style="left:' + x + 'px; top:' + y + 'px; width:' + cardW + 'px; height:' + realH + 'px;"><div class="gr-ch" style="height:' + headH + 'px; font-size:' + fsH + 'px;"><span class="gr-badge" style="width:' + badge + 'px; height:' + badge + 'px; font-size:' + (badge * 0.62) + 'px;">' + esc(G.nm.charAt(0)) + '</span><span>' + esc(prefix) + ' ' + esc(G.nm) + '</span></div>' + rowsHtml + '</div>';
+                });
+                const inner = wrap.querySelector('.gr-inner'); inner.innerHTML = h;
+                inner.querySelectorAll('.gr-cell').forEach(t => { let fs = parseFloat(t.style.fontSize); if (!fs) return; while (t.scrollWidth > t.clientWidth && fs > 7) { fs -= 1; t.style.fontSize = fs + 'px'; } });
+                inner.querySelectorAll('.gr-name').forEach(t => { let fs = parseFloat(t.style.fontSize); while (t.scrollWidth > t.clientWidth && fs > 9) { fs -= 1; t.style.fontSize = fs + 'px'; } });
+            }
+            const vis = !!cfg.show; wrap.classList.toggle('visible', vis); document.body.classList.toggle('gr-active', vis);
+        }
 
         // ===== ТАБЛО «РЕЙТИНГ КОМАНД» =====
         let rkPage = 0, rkTimer = null, rkTimerMs = 0, rkKey = '', rkLast = null, rkGroups = 1;
@@ -2158,7 +2279,24 @@
             if(document.getElementById('stm-time-match')) document.getElementById('stm-time-match').innerText = formatTime(totalSeconds);
         }, 1000);
 
-        onValue(ref(db, databasePath), (snapshot) => {
+        // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
+        let __globalSp = null, __lastSnap = null;
+        function __mergeSp(s) {
+            if (!s || !__globalSp) return s;
+            const m = Object.assign({}, s), gs = __globalSp;
+            if (gs.show !== undefined) m.showSponsorLogos = !!gs.show;
+            if (gs.logos !== undefined) m.sponsorLogos = Array.isArray(gs.logos) ? gs.logos : Object.values(gs.logos || {});
+            if (gs.mode !== undefined) m.sponsorLogoDisplayMode = gs.mode;
+            if (gs.intervalSec !== undefined) m.sponsorLogoIntervalSec = gs.intervalSec;
+            if (gs.anim !== undefined) m.sponsorLogoAnimStyle = gs.anim;
+            return m;
+        }
+        function __courtOnValue(cb) {
+            const wrap = snap => ({ val: () => __mergeSp(snap.val()) });
+            onValue(ref(db, databasePath), (snap) => { __lastSnap = snap; cb(wrap(snap)); });
+            onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+        }
+        __courtOnValue((snapshot) => {
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
@@ -2166,6 +2304,7 @@
                 try { renderMatchIntro(state); } catch (miErr) { console.error("matchIntro render error:", miErr); }
                 try { renderTeamRanking(state); } catch (rkErr) { console.error("teamRanking render error:", rkErr); }
                 try { renderPlayoff(state); } catch (poErr) { console.error("playoff render error:", poErr); }
+                try { renderGroups(state); } catch (grErr) { console.error("groups render error:", grErr); }
 
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
