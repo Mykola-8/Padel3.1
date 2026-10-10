@@ -425,15 +425,15 @@
         body.rk-active #statistics-panel { display: none !important; }
         #rk-boards { display: flex; gap: 28px; align-items: flex-start; justify-content: center; transition: opacity 0.4s ease; }
         #rk-boards.fading { opacity: 0; }
-        .rk-board { width: 620px; box-sizing: border-box; border-radius: 18px; overflow: hidden; padding: 0 0 14px; color: var(--rk-text, #fff); font-family: 'Montserrat', sans-serif; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 50px rgba(0,0,0,0.55); }
+        .rk-board { width: max-content; min-width: calc(620px + var(--rk-extra, 0px)); max-width: 98vw; box-sizing: border-box; border-radius: 18px; overflow: hidden; padding: 0 0 14px; color: var(--rk-text, #fff); font-family: 'Montserrat', sans-serif; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 50px rgba(0,0,0,0.55); }
         .rk-headbar { display: flex; align-items: center; gap: 16px; padding: 14px 28px; min-height: 64px; box-sizing: border-box; background: var(--rk-head, #0f1f3d); margin-bottom: 6px; }
         .rk-headbar.rk-center { justify-content: center; }
         .rk-title { flex: 1; min-width: 0; font-weight: 800; font-size: 32px; letter-spacing: 2px; text-transform: uppercase; color: var(--rk-title, #fff); line-height: 1.1; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
         .rk-center .rk-title { flex: 0 1 auto; text-align: center; }
         .rk-hlogo { height: 48px; max-width: 160px; object-fit: contain; flex: none; }
         .rk-body { padding: 0 28px; }
-        .rk-row { display: grid; grid-template-columns: 70px 1fr 120px; align-items: center; height: 54px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 28px; font-weight: 700; color: var(--rk-text, #fff); }
-        .rk-row.rk-head { height: 30px; border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; font-weight: 700; }
+        .rk-row { display: grid; grid-template-columns: calc(70px * var(--rk-ts, 1)) 1fr calc(120px * var(--rk-ts, 1)); align-items: center; height: calc(54px * var(--rk-ts, 1)); border-top: 1px solid rgba(255,255,255,0.1); font-size: calc(28px * var(--rk-ts, 1)); font-weight: 700; color: var(--rk-text, #fff); }
+        .rk-row.rk-head { height: calc(30px * var(--rk-ts, 1)); border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: calc(15px * var(--rk-ts, 1)); letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; font-weight: 700; }
         .rk-num { text-align: center; color: var(--rk-num, #c69f66); font-weight: 800; }
         .rk-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px; }
         .rk-name.rk-upper { text-transform: uppercase; }
@@ -1931,6 +1931,8 @@
             wrap.style.setProperty('--rk-title', g(rk.titleColor, '#ffffff'));
             wrap.style.setProperty('--rk-text', g(rk.textColor, '#ffffff'));
             wrap.style.setProperty('--rk-num', g(rk.numColor, '#c69f66'));
+            wrap.style.setProperty('--rk-ts', Math.max(0.4, Math.min(3, parseInt(g(rk.textSize, 100)) / 100)));
+            wrap.style.setProperty('--rk-extra', Math.max(0, Math.min(2000, parseInt(g(rk.widthExtra, 0)))) + 'px');
             wrap.style.left = g(rk.x, 50) + '%'; wrap.style.top = g(rk.y, 50) + '%';
             wrap.style.transform = `translate(-50%, -50%) scale(${g(rk.scale, 100) / 100})`;
             const teams = rkSortedTeams(rk);
