@@ -447,6 +447,7 @@
         <datalist id="po-names"></datalist>
         <div class="card" id="po-ui-upper" style="display:flex; flex-direction:column; gap:8px;"></div>
         <div class="card" id="po-ui-lower" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="card" id="gr-ui" style="display:flex; flex-direction:column; gap:8px;"></div>
 
         <h2 style="margin-top:10px;">📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
@@ -684,6 +685,7 @@
 
             <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель, зверху над табло)</div>
+                <div style="font-size:10px; color:#9bd; margin:-4px 0 8px;">🌐 Логотипи, вмикання, режим, інтервал та анімація — спільні для ВСІХ кортів. Масштаб і позиції — окремо для кожного корту.</div>
                 <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
                     <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
                     <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
@@ -1042,6 +1044,25 @@
             event.currentTarget.classList.add('active');
         }
 
+        // ===== СПІЛЬНІ СПОНСОРИ (для всіх кортів): padel/sponsors =====
+        let globalSponsors = null;
+        function mergeGlobalSponsors() {
+            if (!globalSponsors || typeof state !== 'object' || !state) return;
+            const gs = globalSponsors;
+            if (gs.show !== undefined) state.showSponsorLogos = !!gs.show;
+            if (gs.logos !== undefined) { let a = Array.isArray(gs.logos) ? gs.logos.slice() : Object.values(gs.logos || {}); while (a.length < 10) a.push(""); state.sponsorLogos = a; }
+            if (gs.mode !== undefined) state.sponsorLogoDisplayMode = gs.mode;
+            if (gs.intervalSec !== undefined) state.sponsorLogoIntervalSec = gs.intervalSec;
+            if (gs.anim !== undefined) state.sponsorLogoAnimStyle = gs.anim;
+        }
+        function saveSponsorsGlobal() {
+            ensureSponsorLogosArray();
+            const obj = { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' };
+            globalSponsors = obj;
+            set(ref(db, 'padel/sponsors'), obj);
+        }
+        onValue(ref(db, 'padel/sponsors'), (snap) => { globalSponsors = snap.val(); if (globalSponsors && typeof state === 'object' && state) { mergeGlobalSponsors(); try { renderUI(); } catch (e) {} } });
+
         window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
 
@@ -1051,7 +1072,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -1379,7 +1400,7 @@
             reader.readAsDataURL(file);
         };
 
-        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
+        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; saveSponsorsGlobal(); };
 
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
 
@@ -1787,9 +1808,9 @@
             if (lbl) lbl.innerText = state.tickerOffsetY + 'px';
             set(matchRef, state);
         };
-        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
-        window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; set(matchRef, state); };
-        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
+        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; saveSponsorsGlobal(); };
+        window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; saveSponsorsGlobal(); };
+        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; saveSponsorsGlobal(); };
 
         function ensureSponsorLogosArray() {
             if (!Array.isArray(state.sponsorLogos) || state.sponsorLogos.length < 10) {
@@ -1819,7 +1840,7 @@
         window.updateSponsorLogoUrl = function(i, url) {
             ensureSponsorLogosArray();
             state.sponsorLogos[i - 1] = url;
-            set(matchRef, state);
+            saveSponsorsGlobal();
         };
 
         window.clearSponsorLogo = function(i) {
@@ -1827,7 +1848,7 @@
             state.sponsorLogos[i - 1] = "";
             const urlInput = document.getElementById('sponsor-logo-url-' + i);
             if (urlInput) urlInput.value = "";
-            set(matchRef, state);
+            saveSponsorsGlobal();
         };
 
         window.uploadSponsorLogoFile = function(i, e) {
@@ -1852,7 +1873,7 @@
                     const urlInput = document.getElementById('sponsor-logo-url-' + i);
                     if (urlInput) urlInput.value = "";
                     if (statusEl) statusEl.innerText = "✅";
-                    set(matchRef, state);
+                    saveSponsorsGlobal();
                 };
                 img.onerror = function() { if (statusEl) statusEl.innerText = "❌"; };
                 img.src = evt.target.result;
@@ -1916,6 +1937,7 @@
                 matchIntro: state.matchIntro || null,
                 teamRanking: state.teamRanking || null,
                 playoff: state.playoff || null,
+                groups: state.groups || null,
                 showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
                 boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false, 
@@ -1965,7 +1987,7 @@
         };
         window.poToggle = function(key) {
             const c = poEnsure(key); c.show = !c.show;
-            if (c.show) poEnsure(key === 'upper' ? 'lower' : 'upper').show = false;   // обидві сітки на весь екран — показуємо одну
+            if (c.show) { poEnsure(key === 'upper' ? 'lower' : 'upper').show = false; if (state.groups) state.groups.show = false; }   // сітки на весь екран — показуємо одну
             poSave(true); poRefreshUI();
         };
         window.poAdvance = function(key, round, idx, side) {
@@ -2053,6 +2075,148 @@
             Object.values(allPlayersData || {}).forEach(p => { const n = p && p.name; if (n && !seen[n]) { seen[n] = 1; names.push(n); } });
             const sig = names.join('\u0001');
             if (sig !== poNamesSig) { poNamesSig = sig; const dl = document.getElementById('po-names'); if (dl) { dl.innerHTML = ''; names.forEach(n => { const op = document.createElement('option'); op.value = n; dl.appendChild(op); }); } }
+        }
+
+        // ===== ГРУПОВИЙ ЕТАП =====
+        const GR_FONTS = ['Montserrat', 'Oswald', 'Barlow Condensed', 'Roboto Condensed', 'Bebas Neue', 'Anton', 'Inter', 'Rubik', 'Teko', 'Roboto', 'Arial'];
+        function grDefault() {
+            return { show: false, count: 6, mode: 'all', single: 0, teamsPer: 5, scale: 100, textSize: 100, bgOpacity: 100,
+                bgColor: '#0b1220', cardColor: '#131c33', headColor: '#1b2644', accent: '#d4f542', textColor: '#ffffff', numColor: '#8fa0c4', titleColor: '#ffffff',
+                cross: false, sortRows: false, winPts: 2, lossPts: 0, drawPts: 1, lblDiff: 'РІЗН', lblPts: 'ОЧК', font: 'Montserrat', fontHead: 'Montserrat', tournament: 'НАЗВА ТУРНІРУ', title: 'ГРУПОВИЙ ЕТАП', subtitle: '', prefix: 'ГРУПА',
+                g: Array.from({ length: 10 }, (_, i) => ({ name: 'ABCDEFGHIJ'[i], t: ['', '', '', '', '', '', '', ''] })) };
+        }
+        function grEnsure() {
+            const d = grDefault(); let c = state.groups;
+            if (!c || typeof c !== 'object') { state.groups = d; return d; }
+            Object.keys(d).forEach(k => { if (c[k] === undefined) c[k] = d[k]; });
+            let a = Array.isArray(c.g) ? c.g : (c.g && typeof c.g === 'object' ? Object.values(c.g) : []);
+            for (let i = 0; i < 10; i++) {
+                const x = Object.assign({ name: 'ABCDEFGHIJ'[i], t: [] }, a[i] || {});
+                if (!x.res || typeof x.res !== 'object') x.res = {};
+                let t = Array.isArray(x.t) ? x.t.slice() : (x.t && typeof x.t === 'object' ? Object.values(x.t) : []);
+                while (t.length < 8) t.push('');
+                x.t = t; a[i] = x;
+            }
+            c.g = a; return c;
+        }
+        let grTimer = null;
+        function grSave(immediate) { clearTimeout(grTimer); if (immediate) { set(matchRef, state); return; } grTimer = setTimeout(() => set(matchRef, state), 250); }
+        window.grInput = function(el) {
+            const path = el.getAttribute('data-path'), c = grEnsure();
+            let v = el.type === 'range' ? parseInt(el.value) : el.value;
+            if (el.type === 'checkbox') v = el.checked; else if (el.type === 'number') v = parseInt(el.value) || 0; else if (el.tagName === 'SELECT' && /^(count|single|teamsPer)$/.test(path)) v = parseInt(el.value) || 0;
+            poSet(c, path, v);
+            if (el.type === 'range') { const l = document.getElementById('gr-val-' + path); if (l) l.innerText = v; }
+            if (path === 'count' && c.single >= v) c.single = Math.max(0, v - 1);
+            grSave(false); if (el.tagName === 'SELECT' || el.type === 'checkbox') grRefreshUI();
+        };
+        window.grToggle = function() {
+            const c = grEnsure(); c.show = !c.show;
+            if (c.show) { poEnsure('upper').show = false; poEnsure('lower').show = false; }
+            grSave(true); grRefreshUI(); poRefreshUI();
+        };
+        window.grStep = function(d) {
+            const c = grEnsure(), n = Math.max(1, c.count); c.single = ((c.single || 0) + d + n) % n; c.mode = 'one'; grSave(true); grRefreshUI();
+        };
+        window.grFillFromRanking = function() {
+            const teams = poRankingTeams();
+            if (!teams.length) { alert('У рейтингу немає команд — спершу додайте їх у блоці «Рейтинг гравців / команд».'); return; }
+            if (!confirm('Розподілити команди з рейтингу по групах «змійкою» (1→A, 2→B …)? Поточні назви буде замінено.')) return;
+            const c = grEnsure(), n = c.count, tp = c.teamsPer;
+            for (let i = 0; i < 10; i++) c.g[i].t = ['', '', '', '', '', '', '', ''];
+            const slot = new Array(n).fill(0);
+            teams.slice(0, n * tp).forEach((t, i) => { const round = Math.floor(i / n), pos = i % n, gi = round % 2 === 0 ? pos : n - 1 - pos; c.g[gi].t[slot[gi]++] = t.n; });
+            grRefreshUI(); grSave(true);
+        };
+        window.grClear = function() {
+            if (!confirm('Очистити всі назви команд і результати в групах? Налаштування лишаться.')) return;
+            const c = grEnsure(); for (let i = 0; i < 10; i++) { c.g[i].t = ['', '', '', '', '', '', '', '']; c.g[i].res = {}; } grRefreshUI(); grSave(true);
+        };
+        function grBuildUI() {
+            const host = document.getElementById('gr-ui'); if (!host || host.getAttribute('data-built')) return; host.setAttribute('data-built', '1');
+            const IN = 'style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"';
+            const d = grDefault();
+            const slider = (p, lbl, mn, mx, val) => `<label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">${lbl}: <b id="gr-val-${p}" style="color:#e0b878;">${val}</b></span><input type="range" data-gr data-path="${p}" min="${mn}" max="${mx}" step="1" value="${val}" oninput="grInput(this)"></label>`;
+            const color = (p, lbl, val) => `<label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">${lbl} <input type="color" data-gr data-path="${p}" value="${val}" oninput="grInput(this)" style="width:40px; height:24px; padding:0; border:1px solid #444; background:none;"></label>`;
+            const sel = (p, lbl, opts) => `<label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">${lbl}<select data-gr data-path="${p}" onchange="grInput(this)" ${IN}>${opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select></label>`;
+            const txt = (p, ph) => `<input type="text" data-gr data-path="${p}" placeholder="${ph}" ${IN} oninput="grInput(this)">`;
+            const fonts = GR_FONTS.map(f => [f, f]);
+            const groups = Array.from({ length: 10 }, (_, i) => `<details id="gr-d-${i}"><summary style="font-size:12px; font-weight:700; color:#ccc; cursor:pointer; padding:4px 0;">Група <span id="gr-dn-${i}">${'ABCDEFGHIJ'[i]}</span></summary>
+                <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+                    <input type="text" data-gr data-path="g.${i}.name" placeholder="Назва групи (літера)" ${IN} oninput="grInput(this)">
+                    ${Array.from({ length: 8 }, (_, j) => `<input type="text" list="po-names" data-gr data-path="g.${i}.t.${j}" data-slot="${j}" placeholder="Команда ${j + 1}" ${IN} oninput="grInput(this)">`).join('')}
+                    <div data-crossblock style="border-top:1px dashed #444; margin-top:4px; padding-top:4px; display:flex; flex-direction:column; gap:4px;">
+                        <div style="font-size:10px; color:#e0b878;">Результати матчів (для шахового рахунку)</div>
+                        ${(() => { let h = ''; for (let a = 0; a < 8; a++) for (let b = a + 1; b < 8; b++) h += `<div data-pair="${a}_${b}" data-gi="${i}" style="display:grid; grid-template-columns:1fr 90px; gap:4px; align-items:center;"><span data-pl style="font-size:11px; color:#ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a + 1} — ${b + 1}</span><input type="text" data-gr data-path="g.${i}.res.${a}_${b}" placeholder="6:3" ${IN} style="text-align:center; width:100%; padding:5px 2px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" oninput="grInput(this)"></div>`; return h; })()}
+                    </div>
+                </div></details>`).join('');
+            host.innerHTML = `
+                <div style="font-size:11px; font-weight:700;">👥 Груповий етап (OBS)</div>
+                <button class="btn" id="gr-btn-show" onclick="grToggle()">ПОКАЗАТИ</button>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    ${sel('count', 'Кількість груп (1–10)', Array.from({ length: 10 }, (_, i) => [i + 1, i + 1]))}
+                    ${sel('teamsPer', 'Команд у групі', Array.from({ length: 7 }, (_, i) => [i + 2, i + 2]))}
+                    ${sel('mode', 'Показ', [['all', 'Всі групи'], ['one', 'По одній']])}
+                    ${sel('single', 'Яка група', Array.from({ length: 10 }, (_, i) => [i, 'ABCDEFGHIJ'[i] + ' (' + (i + 1) + ')']))}
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn btn-gray" style="padding:5px 10px !important; font-size:12px !important;" onclick="grStep(-1)">◀ Попередня</button>
+                    <button class="btn btn-gray" style="padding:5px 10px !important; font-size:12px !important;" onclick="grStep(1)">Наступна ▶</button>
+                </div>
+                ${txt('tournament', 'Назва турніру')}${txt('title', 'Заголовок (ГРУПОВИЙ ЕТАП)')}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${txt('subtitle', 'Праворуч (порожньо = авто)')}${txt('prefix', 'Слово «ГРУПА»')}</div>
+                ${slider('scale', '🔍 Масштаб (%)', 30, 150, 100)}
+                ${slider('textSize', '🔤 Розмір тексту (%)', 50, 150, 100)}
+                ${slider('bgOpacity', '◐ Непрозорість фону (%)', 0, 100, 100)}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${sel('font', '🔤 Шрифт тексту', fonts)}${sel('fontHead', '🔤 Шрифт заголовків', fonts)}</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    ${color('bgColor', '🎨 Фон табла', d.bgColor)}${color('cardColor', '🎨 Картки', d.cardColor)}
+                    ${color('headColor', '🎨 Шапка групи', d.headColor)}${color('accent', '🎨 Літера-бейдж', d.accent)}
+                    ${color('textColor', '🎨 Текст', d.textColor)}${color('numColor', '🎨 Номери', d.numColor)}
+                    ${color('titleColor', '🎨 Заголовки', d.titleColor)}
+                </div>
+                <div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
+                    <label style="display:flex; gap:6px; align-items:center; font-size:12px; color:#e0b878; font-weight:700;"><input type="checkbox" data-gr data-path="cross" onchange="grInput(this)"> ♟ Шаховий рахунок (таблиця результатів)</label>
+                    <div id="gr-cross-opts" style="display:flex; flex-direction:column; gap:6px;">
+                        <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-gr data-path="sortRows" onchange="grInput(this)"> Сортувати рядки за місцем (очки → різниця геймів)</label>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+                            <label style="font-size:10px; color:#ccc;">Очки за перемогу<input type="number" data-gr data-path="winPts" ${IN} oninput="grInput(this)"></label>
+                            <label style="font-size:10px; color:#ccc;">За поразку<input type="number" data-gr data-path="lossPts" ${IN} oninput="grInput(this)"></label>
+                            <label style="font-size:10px; color:#ccc;">За нічию<input type="number" data-gr data-path="drawPts" ${IN} oninput="grInput(this)"></label>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${txt('lblDiff', 'Підпис: різниця (РІЗН)')}${txt('lblPts', 'Підпис: очки (ОЧК)')}</div>
+                        <div style="font-size:10px; color:#999;">Результат пишіть так: 6:3 (дзеркальна клітинка 3:6 заповниться сама). Кілька сетів: 6:3 4:6 10:7. Різниця геймів і очки рахуються автоматично.</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="btn" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="grFillFromRanking()">⬇ Розподілити з рейтингу</button>
+                    <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="grClear()">🗑 Очистити команди</button>
+                </div>
+                <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:4px;">${groups}</div>`;
+        }
+        function grRefreshUI() {
+            grBuildUI(); const c = grEnsure();
+            document.querySelectorAll('[data-gr]').forEach(el => {
+                if (document.activeElement === el) return;
+                const v = poGet(c, el.getAttribute('data-path'));
+                if (el.type === 'range') { el.value = v; const l = document.getElementById('gr-val-' + el.getAttribute('data-path')); if (l) l.innerText = v; }
+                else { const s = (v === undefined || v === null) ? '' : String(v); if (el.value !== s) el.value = s; }
+                if (el.type === 'checkbox') el.checked = !!v;
+                const sl = el.getAttribute('data-slot'); if (sl !== null) el.style.display = parseInt(sl) < c.teamsPer ? '' : 'none';
+            });
+            for (let i = 0; i < 10; i++) {
+                const d = document.getElementById('gr-d-' + i); if (d) d.style.display = i < c.count ? '' : 'none';
+                const n = document.getElementById('gr-dn-' + i); if (n) n.innerText = c.g[i].name || 'ABCDEFGHIJ'[i];
+            }
+            const co = document.getElementById('gr-cross-opts'); if (co) co.style.display = c.cross ? 'flex' : 'none';
+            document.querySelectorAll('[data-crossblock]').forEach(b => { b.style.display = c.cross ? 'flex' : 'none'; });
+            document.querySelectorAll('#gr-ui [data-pair]').forEach(pr => {
+                const [a, b] = pr.getAttribute('data-pair').split('_').map(Number), gi = parseInt(pr.getAttribute('data-gi'));
+                pr.style.display = (a < c.teamsPer && b < c.teamsPer) ? 'grid' : 'none';
+                const nm = n => (c.g[gi].t[n] || '').trim() || '—';
+                const sp = pr.querySelector('[data-pl]'); const t = (a + 1) + ' ' + nm(a) + '  —  ' + (b + 1) + ' ' + nm(b); if (sp.innerText !== t) sp.innerText = t;
+            });
+            const btn = document.getElementById('gr-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '👥 ПОКАЗАТИ';
         }
 
         // ===== РЕЙТИНГ КОМАНД =====
@@ -2262,6 +2426,7 @@
             renderMatchIntroUI();
             renderRankingUI();
             poRefreshUI();
+            try { grRefreshUI(); } catch (e) { console.error(e); }
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
