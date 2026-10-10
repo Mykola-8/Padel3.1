@@ -2280,9 +2280,12 @@
         }, 1000);
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
-        let __globalSp = null, __lastSnap = null;
+        let __globalSp = null, __globalBars = null, __lastSnap = null;
+        const __BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
-            if (!s || !__globalSp) return s;
+            if (!s) return s;
+            if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
+            if (!__globalSp) return s;
             const m = Object.assign({}, s), gs = __globalSp;
             if (gs.show !== undefined) m.showSponsorLogos = !!gs.show;
             if (gs.logos !== undefined) m.sponsorLogos = Array.isArray(gs.logos) ? gs.logos : Object.values(gs.logos || {});
@@ -2295,6 +2298,7 @@
             const wrap = snap => ({ val: () => __mergeSp(snap.val()) });
             onValue(ref(db, databasePath), (snap) => { __lastSnap = snap; cb(wrap(snap)); });
             onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/bars'), (snap) => { __globalBars = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
         }
         __courtOnValue((snapshot) => {
             const state = snapshot.val();
