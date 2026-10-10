@@ -299,6 +299,18 @@
 
     <div id="tab-tournament" class="tab-content">
         <h2>🏆 Tournament</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:8px; border:2px solid #22c55e;">
+            <div style="font-size:12px; font-weight:800; color:#4ade80; text-transform:uppercase;">💾 Збереження турніру (файл)</div>
+            <div style="font-size:10px; color:#9a9;">У файл потрапляють: усі логотипи (спонсори, заставки, рейтинг, «хто грає»), назви команд, табло «Хто грає», рейтинг, play-off, групи та шаховий рахунок, масштаби/позиції/кольори, база гравців. Рахунок поточного матчу не зберігається.</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn" style="width:auto; padding:8px 12px !important; font-size:12px !important;" onclick="tsExport()">⬇ Завантажити турнір у файл</button>
+                <button class="btn btn-gray" style="width:auto; padding:8px 12px !important; font-size:12px !important;" onclick="document.getElementById('ts-file').click()">⬆ Завантажити з файлу</button>
+                <input type="file" id="ts-file" accept=".json,application/json" style="display:none" onchange="tsImport(event)">
+            </div>
+            <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" id="ts-opt-all"> При відкритті файлу застосувати вміст турніру (рейтинг, групи, play-off, «хто грає») до ВСІХ 10 кортів</label>
+            <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" id="ts-opt-players" checked> Відновити базу гравців (додати/оновити)</label>
+            <div id="ts-status" style="font-size:11px; color:#9bd;"></div>
+        </div>
         <div class="card" style="display:flex; flex-direction:column; gap:8px;">
             <div style="font-size:11px; font-weight:700;">🎬 Табло «Хто грає» (OBS):</div>
             <button class="btn" id="btn-mi-toggle" onclick="miToggle()">🎬 ПОКАЗАТИ ТАБЛО «ХТО ГРАЄ»</button>
@@ -1948,6 +1960,74 @@
                 animation: { team: 0, type: "", ts: 0 }
             }).then(() => closeModalSettings());
         }
+
+        // ===== ЗБЕРЕЖЕННЯ / ЗАВАНТАЖЕННЯ ТУРНІРУ (файл JSON) =====
+        const TS_CONTENT_KEYS = ['matchIntro', 'teamRanking', 'playoff', 'groups'];
+        const TS_SETTING_KEYS = ['scale', 'posX', 'posY', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'boardTheme', 'cornerSlideLang', 'deuceStyle',
+            'tournamentStage', 'stageTextColor', 'stageOffsetX', 'stageOffsetY', 'stageFontSize', 'stageBgColor',
+            'statsBgOpacity', 'statsBoardScale', 'statsTextScale', 'showStatsBetweenGames',
+            'logoUrl', 'logoSrc', 'customLogoText', 'showLogo', 'showStatsLeftLogo', 'statsLeftLogoUrl', 'statsLeftLogoSrc',
+            'sponsorLogoScale', 'sponsorLogoPosX', 'sponsorLogoPosY', 'showBoardPromoPanel', 'boardPromoLines',
+            'qrCodeUrl', 'qrCodeDescription', 'qrLinks', 'qrScale', 'qrOffsetX', 'qrOffsetY',
+            'adBarSlides', 'adBarEnabled', 'adBarTextColor', 'adBarRemoveBg', 'adBarOffsetY', 'adBarHeight', 'adBarGap', 'adBarBgColor', 'adBarBgAlpha', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration',
+            'tickerEnabled', 'tickerTextColor', 'tickerSpeed', 'tickerOffsetY', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerContentHTML', 'tickerBgColor', 'tickerBgAlpha',
+            'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
+            'americanoLimit', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit'];
+        function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
+        window.tsExport = function() {
+            try {
+                const court = {}; TS_CONTENT_KEYS.concat(TS_SETTING_KEYS).forEach(k => { if (state[k] !== undefined) court[k] = JSON.parse(JSON.stringify(state[k])); });
+                ensureSponsorLogosArray();
+                const data = {
+                    app: 'padel-tournament', version: 1, exportedAt: new Date().toISOString(), courtId: courtId,
+                    global: { sponsors: { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
+                    court: court,
+                    players: allPlayersData || {}
+                };
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const a = document.createElement('a'); const d = new Date(), p2 = n => String(n).padStart(2, '0');
+                a.href = URL.createObjectURL(blob); a.download = 'padel-tournament-' + d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + '-court' + courtId + '.json';
+                document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+                tsMsg('✅ Файл збережено (' + Math.round(blob.size / 1024) + ' КБ). Корт ' + courtId + ', гравців: ' + Object.keys(data.players).length);
+            } catch (e) { console.error(e); tsMsg('❌ Не вдалося створити файл: ' + e.message, false); }
+        };
+        window.tsImport = function(ev) {
+            const file = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!file) return;
+            const rdr = new FileReader();
+            rdr.onload = async () => {
+                try {
+                    const data = JSON.parse(rdr.result);
+                    if (!data || data.app !== 'padel-tournament' || typeof data.court !== 'object') throw new Error('Це не файл турніру');
+                    const toAll = document.getElementById('ts-opt-all').checked, withPlayers = document.getElementById('ts-opt-players').checked;
+                    const nPl = data.players ? Object.keys(data.players).length : 0;
+                    if (!confirm('Завантажити турнір з файлу (збережено ' + (data.exportedAt || '').slice(0, 10) + ', корт ' + (data.courtId || '?') + ')?\n\n• Налаштування й вміст буде застосовано до корту ' + courtId + (toAll ? ' та вміст турніру — до всіх кортів' : '') + '\n• Логотипи спонсорів — спільні для всіх кортів' + (withPlayers ? '\n• Гравців у файлі: ' + nPl : '') + '\n\nПоточний рахунок матчу не зміниться.')) return;
+                    const allowed = TS_CONTENT_KEYS.concat(TS_SETTING_KEYS);
+                    Object.keys(data.court).forEach(k => { if (allowed.indexOf(k) >= 0) state[k] = data.court[k]; });
+                    const sp = data.global && data.global.sponsors;
+                    if (sp) {
+                        let a = Array.isArray(sp.logos) ? sp.logos.slice() : Object.values(sp.logos || {}); while (a.length < 10) a.push('');
+                        state.sponsorLogos = a.slice(0, 10); state.showSponsorLogos = !!sp.show; state.sponsorLogoDisplayMode = sp.mode || 'carousel';
+                        state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
+                        saveSponsorsGlobal();
+                    }
+                    await set(matchRef, state);
+                    if (toAll) {
+                        const writes = [];
+                        for (let i = 1; i <= 10; i++) {
+                            if (String(i) === String(courtId)) continue;
+                            const r = ref(db, 'padel/courts/court_' + i);
+                            writes.push(get(r).then(snap => { const s = snap.val(); if (!s) return; TS_CONTENT_KEYS.forEach(k => { if (data.court[k] !== undefined) s[k] = data.court[k]; }); return set(r, s); }));
+                        }
+                        await Promise.all(writes);
+                    }
+                    if (withPlayers && data.players && nPl) await set(ref(db, 'padel/courts/players'), Object.assign({}, allPlayersData || {}, data.players));
+                    tsMsg('✅ Турнір завантажено з файлу' + (toAll ? ' (вміст — на всі корти)' : '') + (withPlayers ? ', гравців: ' + nPl : ''));
+                    try { renderUI(); } catch (e) {}
+                } catch (e) { console.error(e); tsMsg('❌ Помилка: ' + e.message, false); }
+            };
+            rdr.onerror = () => tsMsg('❌ Не вдалося прочитати файл', false);
+            rdr.readAsText(file);
+        };
 
         // ===== PLAY-OFF (верхня / нижня сітка) =====
         const PO_ROUNDS = [['r16', 8, '1/8'], ['qf', 4, '1/4'], ['sf', 2, '1/2'], ['f', 1, 'FINAL'], ['third', 1, '3RD PLACE']];
