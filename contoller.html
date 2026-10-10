@@ -727,6 +727,7 @@
 
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Бігучий рядок (внизу екрана):</div>
+                <div style="font-size:10px; color:#9bd; margin-bottom:6px;">🌐 Увімкнення, текст/лого та стиль рядків — спільні для ВСІХ кортів. Позиція по вертикалі — окремо для кожного корту.</div>
                 <div class="switch-row"><span>Увімкнути бігучий рядок:</span><input type="checkbox" id="ticker-enabled-checkbox" onchange="updateTickerEnabled(this.checked)"></div>
                 <div id="ticker-content-editable" contenteditable="true" data-placeholder="Вставте текст або скопійований логотип (Ctrl+V)..." style="width:100%; box-sizing:border-box; margin-top:6px; min-height:60px; max-height:120px; overflow-y:auto; background:#1c1c1c; border:1px solid #444; border-radius:6px; padding:8px 10px; color:#eee; font-family:inherit; font-size:13px; line-height:1.5;" onpaste="handleTickerPaste(event)" oninput="saveTickerContent()"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Можна вставити (Ctrl+V) скопійований текст — шрифт залишиться однаковим, або скопійоване зображення/логотип — воно автоматично стиснеться і покажеться в рядку в зменшеному вигляді.</div>
@@ -761,7 +762,7 @@
                 </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="ticker-offsety-value" style="color:#e0b878;">0px</b></span>
-                    <input type="range" id="ticker-offsety-slider" min="-400" max="400" step="5" value="0" oninput="updateTickerOffsetY(this.value)">
+                    <input type="range" id="ticker-offsety-slider" min="-400" max="1000" step="5" value="0" oninput="updateTickerOffsetY(this.value)">
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Швидкість руху тексту (менше — швидше): <b id="ticker-speed-value" style="color:#e0b878;">20с</b></span>
@@ -804,7 +805,7 @@
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="adbar-offsety-value" style="color:#e0b878;">90px</b></span>
-                    <input type="range" id="adbar-offsety-slider" min="-400" max="600" step="5" value="90" oninput="updateAdBarOffsetY(this.value)">
+                    <input type="range" id="adbar-offsety-slider" min="-400" max="1000" step="5" value="90" oninput="updateAdBarOffsetY(this.value)">
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Прозорість фону: <b id="adbar-alpha-value" style="color:#e0b878;">85%</b></span>
@@ -1067,6 +1068,22 @@
             if (gs.intervalSec !== undefined) state.sponsorLogoIntervalSec = gs.intervalSec;
             if (gs.anim !== undefined) state.sponsorLogoAnimStyle = gs.anim;
         }
+        // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
+        const BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
+        let globalBars = null;
+        function mergeGlobalBars() {
+            if (!globalBars || typeof state !== 'object' || !state) return;
+            BARS_KEYS.forEach(k => { if (globalBars[k] !== undefined) state[k] = globalBars[k]; });
+            const sl = globalBars.adBarSlides; state.adBarSlides = Array.isArray(sl) ? sl.slice() : (sl && typeof sl === 'object' ? Object.values(sl) : []);
+        }
+        function saveBarsGlobal() {
+            const obj = {}; BARS_KEYS.forEach(k => { if (state[k] !== undefined) obj[k] = JSON.parse(JSON.stringify(state[k])); });
+            if (!Array.isArray(obj.adBarSlides)) obj.adBarSlides = [];
+            globalBars = obj; set(ref(db, 'padel/bars'), obj);
+        }
+        function saveBars() { saveBarsGlobal(); set(matchRef, state); }
+        onValue(ref(db, 'padel/bars'), (snap) => { globalBars = snap.val(); if (globalBars && typeof state === 'object' && state) { mergeGlobalBars(); try { renderUI(); try { renderAdBarSlidesList(); } catch (e) {} } catch (e) {} } });
+
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
             const obj = { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' };
@@ -1084,7 +1101,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -1470,7 +1487,7 @@
         window.updateSponsorLogoPosX = function(v) { state.sponsorLogoPosX = parseInt(v) || 0; set(matchRef, state); };
         window.updateSponsorLogoPosY = function(v) { state.sponsorLogoPosY = parseInt(v) || 0; set(matchRef, state); };
 
-        window.updateTickerEnabled = function(checked) { saveToHistory(state); state.tickerEnabled = checked; set(matchRef, state); };
+        window.updateTickerEnabled = function(checked) { saveToHistory(state); state.tickerEnabled = checked; saveBars(); };
 
         // Дозволяємо в бігучому рядку текст зі збереженим форматуванням (шрифт, жирність, курсив, регістр, колір) + <img src="data:...">
         const TICKER_ALLOWED_STYLE_PROPS = ["font-family", "font-weight", "font-style", "font-size", "color", "text-decoration", "text-transform", "letter-spacing"];
@@ -1548,7 +1565,7 @@
             tickerTextTimeout = setTimeout(() => {
                 const box = document.getElementById('ticker-content-editable');
                 state.tickerContentHTML = sanitizeTickerHTML(box);
-                set(matchRef, state);
+                saveBars();
             }, 400);
         };
 
@@ -1619,12 +1636,12 @@
         window.updateAdBarEnabled = function(checked) {
             saveToHistory(state);
             state.adBarEnabled = checked;
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarRemoveBg = function(checked) {
             state.adBarRemoveBg = checked;
-            set(matchRef, state);
+            saveBars();
         };
 
         function renderAdBarSlidesList() {
@@ -1643,14 +1660,14 @@
         window.addAdBarSlide = function() {
             if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
             state.adBarSlides.push({ type: 'text', content: '' });
-            set(matchRef, state);
+            saveBars();
             setTimeout(renderAdBarSlidesList, 200);
         };
 
         window.removeAdBarSlide = function(i) {
             if (!Array.isArray(state.adBarSlides)) return;
             state.adBarSlides.splice(i, 1);
-            set(matchRef, state);
+            saveBars();
             setTimeout(renderAdBarSlidesList, 200);
         };
 
@@ -1666,7 +1683,7 @@
                 } else {
                     state.adBarSlides[i] = { type: 'text', content: sanitizeTickerHTML(el) };
                 }
-                set(matchRef, state);
+                saveBars();
             }, 400);
         };
 
@@ -1683,7 +1700,7 @@
                         compressImageForTicker(ev.target.result, function(compressedDataUrl) {
                             if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
                             state.adBarSlides[i] = { type: 'logo', content: compressedDataUrl };
-                            set(matchRef, state);
+                            saveBars();
                             renderAdBarSlidesList();
                         }, !!state.adBarRemoveBg);
                     };
@@ -1720,7 +1737,7 @@
                 }
                 if (!Array.isArray(state.adBarSlides)) state.adBarSlides = [];
                 state.adBarSlides[i] = { type: 'text', content: sanitizeTickerHTML(targetEl) };
-                set(matchRef, state);
+                saveBars();
             }
         };
 
@@ -1728,97 +1745,97 @@
             state.adBarDuration = parseInt(v) || 15;
             const lbl = document.getElementById('adbar-duration-value');
             if (lbl) lbl.innerText = state.adBarDuration + 'с';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarAnimation = function(v) {
             state.adBarAnimation = v;
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarAnimateBg = function(checked) {
             state.adBarAnimateBg = checked;
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarHeight = function(v) {
             state.adBarHeight = parseInt(v) || 60;
             const lbl = document.getElementById('adbar-height-value');
             if (lbl) lbl.innerText = state.adBarHeight + 'px';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarGap = function(v) {
             state.adBarGap = parseInt(v);
             const lbl = document.getElementById('adbar-gap-value');
             if (lbl) lbl.innerText = state.adBarGap + 'px';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarOffsetY = function(v) {
             state.adBarOffsetY = parseInt(v);
             const lbl = document.getElementById('adbar-offsety-value');
             if (lbl) lbl.innerText = state.adBarOffsetY + 'px';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarAlpha = function(v) {
             state.adBarBgAlpha = parseInt(v);
             const lbl = document.getElementById('adbar-alpha-value');
             if (lbl) lbl.innerText = state.adBarBgAlpha + '%';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateAdBarColors = function() {
             state.adBarBgColor = document.getElementById('adbar-bgcolor-input').value || '#141414';
             state.adBarTextColor = document.getElementById('adbar-textcolor-input').value || '#ffffff';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerColors = function() {
             state.tickerBgColor = document.getElementById('ticker-bgcolor-input').value || '#141414';
             state.tickerTextColor = document.getElementById('ticker-textcolor-input').value || '#ffffff';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerSpeed = function(v) {
             state.tickerSpeed = parseInt(v) || 20;
             const lbl = document.getElementById('ticker-speed-value');
             if (lbl) lbl.innerText = state.tickerSpeed + 'с';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerAlpha = function(v) {
             state.tickerBgAlpha = parseInt(v);
             const lbl = document.getElementById('ticker-alpha-value');
             if (lbl) lbl.innerText = state.tickerBgAlpha + '%';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerHeight = function(v) {
             state.tickerHeight = parseInt(v) || 34;
             const lbl = document.getElementById('ticker-height-value');
             if (lbl) lbl.innerText = state.tickerHeight + 'px';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerFontScale = function(v) {
             state.tickerFontScale = parseInt(v) || 100;
             const lbl = document.getElementById('ticker-fontscale-value');
             if (lbl) lbl.innerText = state.tickerFontScale + '%';
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerDirection = function(v) {
             state.tickerDirection = v;
-            set(matchRef, state);
+            saveBars();
         };
 
         window.updateTickerOffsetY = function(v) {
             state.tickerOffsetY = parseInt(v) || 0;
             const lbl = document.getElementById('ticker-offsety-value');
             if (lbl) lbl.innerText = state.tickerOffsetY + 'px';
-            set(matchRef, state);
+            saveBars();
         };
         window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; saveSponsorsGlobal(); };
         window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; saveSponsorsGlobal(); };
@@ -2010,6 +2027,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
+                    saveBarsGlobal();
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
