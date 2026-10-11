@@ -707,7 +707,7 @@
 
             <div class="card" style="border: 2px solid #38bdf8; background: #0f1c24;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#7dd3fc; text-transform:uppercase;">🖼️ Логотипи спонсорів (карусель, зверху над табло)</div>
-                <div style="font-size:10px; color:#9bd; margin:-4px 0 8px;">🌐 Логотипи, вмикання, режим, інтервал та анімація — спільні для ВСІХ кортів. Масштаб і позиції — окремо для кожного корту.</div>
+                <div style="font-size:10px; color:#9bd; margin:-4px 0 8px;">🌐 Список логотипів — спільний для ВСІХ кортів (завантажується з будь-якого). Показ (галочка), режим, інтервал, анімація, масштаб і позиції — окремо для кожного корту.</div>
                 <div class="switch-row" style="background: rgba(56,189,248,0.15); padding:8px; border-radius:6px; margin-bottom:12px;">
                     <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
                     <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
@@ -1072,11 +1072,7 @@
         function mergeGlobalSponsors() {
             if (!globalSponsors || typeof state !== 'object' || !state) return;
             const gs = globalSponsors;
-            if (gs.show !== undefined) state.showSponsorLogos = !!gs.show;
             if (gs.logos !== undefined) { let a = Array.isArray(gs.logos) ? gs.logos.slice() : Object.values(gs.logos || {}); while (a.length < 10) a.push(""); state.sponsorLogos = a; }
-            if (gs.mode !== undefined) state.sponsorLogoDisplayMode = gs.mode;
-            if (gs.intervalSec !== undefined) state.sponsorLogoIntervalSec = gs.intervalSec;
-            if (gs.anim !== undefined) state.sponsorLogoAnimStyle = gs.anim;
         }
         // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
         const BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
@@ -1131,11 +1127,41 @@
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
-            const obj = { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' };
+            const obj = { logos: state.sponsorLogos.slice(0, 10) };
             globalSponsors = obj;
-            set(ref(db, 'padel/sponsors'), obj);
+            set(ref(db, 'padel/sponsors'), obj); set(matchRef, state);
         }
         onValue(ref(db, 'padel/sponsors'), (snap) => { globalSponsors = snap.val(); if (globalSponsors && typeof state === 'object' && state) { mergeGlobalSponsors(); try { renderUI(); } catch (e) {} } });
+
+
+        // ===== СПІЛЬНИЙ ВМІСТ ТУРНІРУ (групи, плей-офф): padel/groups, padel/playoff. Показ, масштаб, кольори, режими — окремо для корту =====
+        const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts'];
+        const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third'];
+        let globalGroups = null, globalPlayoff = null, lastGrSig = null, lastPoSig = null;
+        function grContent() { const c = grEnsure(), o = {}; GR_GLOBAL_KEYS.forEach(k => { o[k] = JSON.parse(JSON.stringify(c[k])); }); return o; }
+        function poContent() { const o = {}; ['upper', 'lower'].forEach(key => { const c = poEnsure(key), x = {}; PO_GLOBAL_KEYS.forEach(k => { x[k] = JSON.parse(JSON.stringify(c[k])); }); o[key] = x; }); return o; }
+        function mergeGlobalGroups() {
+            if (typeof state !== 'object' || !state) return;
+            if (globalGroups) { const c = grEnsure(); GR_GLOBAL_KEYS.forEach(k => { if (globalGroups[k] !== undefined) c[k] = JSON.parse(JSON.stringify(globalGroups[k])); }); grEnsure(); }
+            lastGrSig = JSON.stringify(state.groups ? grContent() : null);
+        }
+        function mergeGlobalPlayoff() {
+            if (typeof state !== 'object' || !state) return;
+            if (globalPlayoff) ['upper', 'lower'].forEach(key => { const g = globalPlayoff[key]; if (!g || typeof g !== 'object') return; const c = poEnsure(key); PO_GLOBAL_KEYS.forEach(k => { if (g[k] !== undefined) c[k] = JSON.parse(JSON.stringify(g[k])); }); poEnsure(key); });
+            lastPoSig = JSON.stringify(state.playoff ? poContent() : null);
+        }
+        function syncGroupsGlobal(force) {
+            if (typeof state !== 'object' || !state) return;
+            const o = grContent(), sig = JSON.stringify(o); if (!force && sig === lastGrSig) return;
+            lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, 'padel/groups'), o);
+        }
+        function syncPlayoffGlobal(force) {
+            if (typeof state !== 'object' || !state) return;
+            const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
+            lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, 'padel/playoff'), o);
+        }
+        onValue(ref(db, 'padel/groups'), (snap) => { globalGroups = snap.val(); if (globalGroups && typeof state === 'object' && state) { mergeGlobalGroups(); try { renderUI(); } catch (e) {} } });
+        onValue(ref(db, 'padel/playoff'), (snap) => { globalPlayoff = snap.val(); if (globalPlayoff && typeof state === 'object' && state) { mergeGlobalPlayoff(); try { renderUI(); } catch (e) {} } });
 
         window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
@@ -1146,7 +1172,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -1474,7 +1500,7 @@
             reader.readAsDataURL(file);
         };
 
-        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; saveSponsorsGlobal(); };
+        window.toggleSponsorLogos = function(c) { state.showSponsorLogos = c; set(matchRef, state); };
 
         window.toggleBoardPromoPanel = function(c) { state.showBoardPromoPanel = c; set(matchRef, state); };
 
@@ -1882,9 +1908,9 @@
             if (lbl) lbl.innerText = state.tickerOffsetY + 'px';
             saveBars();
         };
-        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; saveSponsorsGlobal(); };
-        window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; saveSponsorsGlobal(); };
-        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; saveSponsorsGlobal(); };
+        window.updateSponsorLogoInterval = function(v) { state.sponsorLogoIntervalSec = parseInt(v) || 4; set(matchRef, state); };
+        window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; set(matchRef, state); };
+        window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
         function ensureSponsorLogosArray() {
             if (!Array.isArray(state.sponsorLogos) || state.sponsorLogos.length < 10) {
@@ -2042,7 +2068,7 @@
                 ensureSponsorLogosArray();
                 const data = {
                     app: 'padel-tournament', version: 1, exportedAt: new Date().toISOString(), courtId: courtId,
-                    global: { sponsors: { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
+                    global: { sponsors: { logos: state.sponsorLogos.slice(0, 10), show: !!state.showSponsorLogos, mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
                     court: court,
                     players: allPlayersData || {}
                 };
@@ -2062,7 +2088,7 @@
                     if (!data || data.app !== 'padel-tournament' || typeof data.court !== 'object') throw new Error('Це не файл турніру');
                     const toAll = document.getElementById('ts-opt-all').checked, withPlayers = document.getElementById('ts-opt-players').checked;
                     const nPl = data.players ? Object.keys(data.players).length : 0;
-                    if (!confirm('Завантажити турнір з файлу (збережено ' + (data.exportedAt || '').slice(0, 10) + ', корт ' + (data.courtId || '?') + ')?\n\n• Налаштування й вміст буде застосовано до корту ' + courtId + (toAll ? ' та вміст турніру — до всіх кортів' : '') + '\n• Логотипи спонсорів — спільні для всіх кортів' + (withPlayers ? '\n• Гравців у файлі: ' + nPl : '') + '\n\nПоточний рахунок матчу не зміниться.')) return;
+                    if (!confirm('Завантажити турнір з файлу (збережено ' + (data.exportedAt || '').slice(0, 10) + ', корт ' + (data.courtId || '?') + ')?\n\n• Налаштування й вміст буде застосовано до корту ' + courtId + (toAll ? ' та вміст турніру — до всіх кортів' : '') + '\n• Логотипи спонсорів, групи, плей-офф, рейтинг — спільні для всіх кортів' + (withPlayers ? '\n• Гравців у файлі: ' + nPl : '') + '\n\nПоточний рахунок матчу не зміниться.')) return;
                     const allowed = TS_CONTENT_KEYS.concat(TS_SETTING_KEYS);
                     Object.keys(data.court).forEach(k => { if (allowed.indexOf(k) >= 0) state[k] = data.court[k]; });
                     const sp = data.global && data.global.sponsors;
@@ -2072,7 +2098,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
-                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true);
+                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true);
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
@@ -2120,7 +2146,7 @@
         function poGet(o, path) { return path.split('.').reduce((x, k) => (x === undefined || x === null) ? undefined : x[k], o); }
         function poSet(o, path, val) { const k = path.split('.'); let x = o; for (let i = 0; i < k.length - 1; i++) x = x[k[i]]; x[k[k.length - 1]] = val; }
         let poTimer = null;
-        function poSave(immediate) { clearTimeout(poTimer); if (immediate) { set(matchRef, state); return; } poTimer = setTimeout(() => set(matchRef, state), 250); }
+        function poSave(immediate) { clearTimeout(poTimer); if (immediate) { syncPlayoffGlobal(); set(matchRef, state); return; } poTimer = setTimeout(() => { syncPlayoffGlobal(); set(matchRef, state); }, 250); }
         window.poInput = function(el) {
             const key = el.getAttribute('data-po'), path = el.getAttribute('data-path'), c = poEnsure(key);
             const v = el.type === 'checkbox' ? el.checked : (el.type === 'range' ? parseInt(el.value) : el.value);
@@ -2243,7 +2269,7 @@
             c.g = a; return c;
         }
         let grTimer = null;
-        function grSave(immediate) { clearTimeout(grTimer); if (immediate) { set(matchRef, state); return; } grTimer = setTimeout(() => set(matchRef, state), 250); }
+        function grSave(immediate) { clearTimeout(grTimer); if (immediate) { syncGroupsGlobal(); set(matchRef, state); return; } grTimer = setTimeout(() => { syncGroupsGlobal(); set(matchRef, state); }, 250); }
         window.grInput = function(el) {
             const path = el.getAttribute('data-path'), c = grEnsure();
             let v = el.type === 'range' ? parseInt(el.value) : el.value;
