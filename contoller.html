@@ -449,6 +449,13 @@
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="rk-val-x" style="color:#e0b878;">50</b></span><input type="range" data-rk="x" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="rk-val-y" style="color:#e0b878;">50</b></span><input type="range" data-rk="y" min="0" max="100" step="1" value="50" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="rk-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-rk="scale" min="30" max="200" step="1" value="100" oninput="rkInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🎞 Поява команд на табло
+                <select data-rk="reveal" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" onchange="rkInput(this)">
+                    <option value="none">Звичайна (всі одразу)</option>
+                    <option value="rtl">Варіант 1: по черзі справа наліво (≈3 с)</option>
+                    <option value="ttb">Варіант 2: зверху вниз по одному (≈1,5 с)</option>
+                </select></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Затримка між командами: <b id="rk-val-revealDelay" style="color:#e0b878;">3.0 с</b></span><input type="range" data-rk="revealDelay" min="5" max="100" step="5" value="30" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔤 Розмір тексту (%) — табло саме розтягується, якщо текст не вміщається: <b id="rk-val-textSize" style="color:#e0b878;">100</b></span><input type="range" data-rk="textSize" min="50" max="250" step="1" value="100" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Розтягнути табло по горизонталі (+px): <b id="rk-val-widthExtra" style="color:#e0b878;">0</b></span><input type="range" data-rk="widthExtra" min="0" max="1200" step="10" value="0" oninput="rkInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🌫 Розмиття фону (px): <b id="rk-val-blur" style="color:#e0b878;">12</b></span><input type="range" data-rk="blur" min="0" max="40" step="1" value="12" oninput="rkInput(this)"></label>
@@ -2336,7 +2343,7 @@
         }
 
         // ===== РЕЙТИНГ КОМАНД =====
-        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
+        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, reveal: "none", revealDelay: 30, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
         let rkRowsSig = null, rkSaveTimer = null;
         function rkEnsure() {
             if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
@@ -2352,8 +2359,8 @@
         window.rkInput = function(el) {
             const rk = rkEnsure(); const k = el.getAttribute('data-rk');
             if (el.type === 'checkbox') rk[k] = el.checked;
-            else if (el.type === 'range') { rk[k] = parseInt(el.value); const l = document.getElementById('rk-val-' + k); if (l) l.innerText = rk[k]; }
-            else rk[k] = el.value;
+            else if (el.type === 'range') { rk[k] = parseInt(el.value); const l = document.getElementById('rk-val-' + k); if (l) l.innerText = (k === 'revealDelay') ? (rk[k] / 10).toFixed(1) + ' с' : rk[k]; }
+            else { rk[k] = el.value; if (k === 'reveal') { if (el.value === 'rtl') rk.revealDelay = 30; else if (el.value === 'ttb') rk.revealDelay = 15; } }
             rkSave(false);
         };
         window.rkUpload = function(key, input) {
@@ -2435,7 +2442,7 @@
                 if (document.activeElement === el) return;
                 const k = el.getAttribute('data-rk'); const v = (rk[k] === undefined || rk[k] === null) ? RK_DEFAULT[k] : rk[k];
                 if (el.type === 'checkbox') el.checked = v !== false;
-                else if (el.type === 'range') { el.value = v; const l = document.getElementById('rk-val-' + k); if (l) l.innerText = v; }
+                else if (el.type === 'range') { el.value = v; const l = document.getElementById('rk-val-' + k); if (l) l.innerText = (k === 'revealDelay') ? (v / 10).toFixed(1) + ' с' : v; }
                 else if (el.value !== String(v)) el.value = v;
             });
             const rows = document.getElementById('rk-rows');
