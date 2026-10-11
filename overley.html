@@ -2308,20 +2308,35 @@
         }, 1000);
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
-        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __lastSnap = null;
+        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __lastSnap = null;
         const __BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
             if (__globalRk) { s = Object.assign({}, s); const t = __globalRk.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
             if (__globalQr) { s = Object.assign({}, s); if (__globalQr.show !== undefined) s.showQrCode = !!__globalQr.show; if (__globalQr.url !== undefined) s.qrCodeUrl = __globalQr.url; if (__globalQr.desc !== undefined) s.qrCodeDescription = __globalQr.desc; }
+            const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            if (__globalGr) {
+                s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
+                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
+                if (__globalGr.g !== undefined) g.g = __arr(__globalGr.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
+                s.groups = g;
+            }
+            if (__globalPo) {
+                s = Object.assign({}, s); const p = Object.assign({}, s.playoff || {});
+                ['upper', 'lower'].forEach(key => {
+                    const gp = __globalPo[key]; if (!gp || typeof gp !== 'object') return;
+                    const c = Object.assign({}, p[key] || {});
+                    ['title', 'third'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
+                    if (gp.labels) c.labels = Object.assign({}, c.labels || {}, gp.labels);
+                    if (gp.m) { const m = {}; Object.keys(gp.m).forEach(r => { m[r] = __arr(gp.m[r]); }); c.m = m; }
+                    p[key] = c;
+                });
+                s.playoff = p;
+            }
             if (!__globalSp) return s;
             const m = Object.assign({}, s), gs = __globalSp;
-            if (gs.show !== undefined) m.showSponsorLogos = !!gs.show;
             if (gs.logos !== undefined) m.sponsorLogos = Array.isArray(gs.logos) ? gs.logos : Object.values(gs.logos || {});
-            if (gs.mode !== undefined) m.sponsorLogoDisplayMode = gs.mode;
-            if (gs.intervalSec !== undefined) m.sponsorLogoIntervalSec = gs.intervalSec;
-            if (gs.anim !== undefined) m.sponsorLogoAnimStyle = gs.anim;
             return m;
         }
         function __courtOnValue(cb) {
@@ -2331,6 +2346,8 @@
             onValue(ref(db, 'padel/bars'), (snap) => { __globalBars = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/qr'), (snap) => { __globalQr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/ranking'), (snap) => { __globalRk = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/groups'), (snap) => { __globalGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/playoff'), (snap) => { __globalPo = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
         }
         __courtOnValue((snapshot) => {
             const state = snapshot.val();
