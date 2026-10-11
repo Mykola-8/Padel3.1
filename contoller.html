@@ -1109,6 +1109,26 @@
         }
         onValue(ref(db, 'padel/qr'), (snap) => { globalQr = snap.val(); if (globalQr && typeof state === 'object' && state) { mergeGlobalQr(); try { renderUI(); } catch (e) {} } });
 
+        // ===== СПІЛЬНИЙ РЕЙТИНГ ГРАВЦІВ/КОМАНД для всіх кортів: padel/ranking (список; показ, позиція, стиль — окремо для корту) =====
+        let globalRanking = null, lastRkTeamsSig = null;
+        function rkTeamsArr(t) { return Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : []); }
+        function mergeGlobalRanking() {
+            if (typeof state !== 'object' || !state) return;
+            if (globalRanking) {
+                if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
+                state.teamRanking.teams = rkTeamsArr(globalRanking.teams).filter(t => t && typeof t === 'object');
+            }
+            lastRkTeamsSig = rkSig(state.teamRanking ? rkTeamsArr(state.teamRanking.teams) : []);
+        }
+        function saveRankingGlobal(force) {
+            const teams = state.teamRanking ? rkTeamsArr(state.teamRanking.teams) : [];
+            const sig = rkSig(teams); if (!force && sig === lastRkTeamsSig) return;
+            lastRkTeamsSig = sig;
+            globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
+            set(ref(db, 'padel/ranking'), globalRanking);
+        }
+        onValue(ref(db, 'padel/ranking'), (snap) => { globalRanking = snap.val(); if (globalRanking && typeof state === 'object' && state) { mergeGlobalRanking(); try { renderUI(); } catch (e) {} } });
+
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
             const obj = { show: !!state.showSponsorLogos, logos: state.sponsorLogos.slice(0, 10), mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' };
@@ -1126,7 +1146,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2052,7 +2072,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
-                    saveBarsGlobal(); saveQrGlobal();
+                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true);
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
@@ -2352,8 +2372,8 @@
             return rk;
         }
         function rkSave(immediate) {
-            if (immediate) { clearTimeout(rkSaveTimer); set(matchRef, state); return; }
-            clearTimeout(rkSaveTimer); rkSaveTimer = setTimeout(() => set(matchRef, state), 250);
+            if (immediate) { clearTimeout(rkSaveTimer); saveRankingGlobal(); set(matchRef, state); return; }
+            clearTimeout(rkSaveTimer); rkSaveTimer = setTimeout(() => { saveRankingGlobal(); set(matchRef, state); }, 250);
         }
         function rkSig(teams) { return JSON.stringify((teams || []).map(t => [t.n, t.r])); }
         window.rkInput = function(el) {
