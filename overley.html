@@ -437,6 +437,10 @@
         .rk-num { text-align: center; color: var(--rk-num, #c69f66); font-weight: 800; }
         .rk-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px; }
         .rk-name.rk-upper { text-transform: uppercase; }
+        .rk-board.rk-nopts .rk-row { grid-template-columns: calc(70px * var(--rk-ts, 1)) 1fr; }
+        .rk-row.rk-rv { transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .rk-row.rk-rv-hide-rtl { opacity: 0; transform: translateX(110%); }
+        .rk-row.rk-rv-hide-ttb { opacity: 0; transform: translateY(-26px); }
         .rk-fn { font-weight: 300; }   /* ім'я — тонко */
         .rk-ln { font-weight: 800; }   /* прізвище — жирно */
         .rk-pts { text-align: right; font-weight: 800; }
@@ -1872,6 +1876,7 @@
         function rkLogoImg(src, cls) { const i = document.createElement('img'); i.className = cls; i.alt = ''; i.src = src; return i; }
         function rkBuildBoard(rk, items, startNo, pageNo, pagesTotal) {
             const b = document.createElement('div'); b.className = 'rk-board';
+            const hasPts = rkSortedTeams(rk).some(t => t.r > 0); if (!hasPts) b.classList.add('rk-nopts');
             const logos = [rk.logoL, rk.logoR1, rk.logoR2].filter(Boolean);
             if (rk.title || logos.length) {
                 const hb = document.createElement('div'); hb.className = 'rk-headbar' + (logos.length ? '' : ' rk-center');
@@ -1883,15 +1888,16 @@
             }
             const body = document.createElement('div'); body.className = 'rk-body';
             const h = document.createElement('div'); h.className = 'rk-row rk-head';
-            ['№', 'Команда', 'Рейтинг'].forEach((x, k) => { const d = document.createElement('div'); d.className = ['rk-num', 'rk-name', 'rk-pts'][k]; d.textContent = x; h.appendChild(d); });
+            ['№', 'Команда', 'Рейтинг'].forEach((x, k) => { if (k === 2 && !hasPts) return; const d = document.createElement('div'); d.className = ['rk-num', 'rk-name', 'rk-pts'][k]; d.textContent = x; h.appendChild(d); });
             body.appendChild(h);
             const styled = rk.nameStyle !== false, upper = rk.upper !== false;
             items.forEach((it, k) => {
                 const r = document.createElement('div'); r.className = 'rk-row';
                 const a = document.createElement('div'); a.className = 'rk-num'; a.textContent = String(startNo + k);
                 const n = document.createElement('div'); n.className = 'rk-name' + (upper ? ' rk-upper' : ''); rkFillName(n, it.n, styled);
-                const p = document.createElement('div'); p.className = 'rk-pts'; p.textContent = String(it.r);
-                r.appendChild(a); r.appendChild(n); r.appendChild(p); body.appendChild(r);
+                r.appendChild(a); r.appendChild(n);
+                if (hasPts) { const p = document.createElement('div'); p.className = 'rk-pts'; p.textContent = it.r > 0 ? String(it.r) : ''; r.appendChild(p); }
+                body.appendChild(r);
             });
             if (pagesTotal > 1) { const f = document.createElement('div'); f.className = 'rk-foot'; f.textContent = 'Сторінка ' + pageNo + ' / ' + pagesTotal; body.appendChild(f); }
             b.appendChild(body);
@@ -1907,6 +1913,21 @@
                 b.style.webkitBackdropFilter = 'blur(' + blur + 'px)';
             });
         }
+        // Поява команд слайдами: rtl — по черзі справа наліво (за замовч. 3 с), ttb — зверху вниз (за замовч. 1,5 с)
+        let rkRevealTimers = [], rkRevealDone = true, rkRevealDoneAt = 0, rkWasVisible = false;
+        function rkStartReveal(rk, box) {
+            rkRevealTimers.forEach(t => clearTimeout(t)); rkRevealTimers = [];
+            const mode = rk.reveal === 'rtl' || rk.reveal === 'ttb' ? rk.reveal : 'none';
+            if (mode === 'none') { rkRevealDone = true; rkRevealDoneAt = Date.now(); return; }
+            const d10 = parseInt(rk.revealDelay); const delay = Math.max(300, ((d10 > 0 ? d10 / 10 : (mode === 'rtl' ? 3 : 1.5))) * 1000);
+            const rows = Array.from(box.querySelectorAll('.rk-row:not(.rk-head)'));
+            rkRevealDone = false;
+            rows.forEach(r => { r.classList.add('rk-rv', 'rk-rv-hide-' + mode); });
+            rows.forEach((r, i) => {
+                rkRevealTimers.push(setTimeout(() => { r.classList.remove('rk-rv-hide-' + mode); }, 500 + i * delay));
+            });
+            rkRevealTimers.push(setTimeout(() => { rkRevealDone = true; rkRevealDoneAt = Date.now(); }, 500 + rows.length * delay));
+        }
         function rkRender(animated) {
             const rk = rkLast || {}; const box = document.getElementById('rk-boards'); if (!box) return;
             const teams = rkSortedTeams(rk); const PER = 10;
@@ -1919,6 +1940,7 @@
                 const idxs = side ? [rkPage * 2, rkPage * 2 + 1] : [rkPage];
                 idxs.forEach(pi => { if (pages[pi]) box.appendChild(rkBuildBoard(rk, pages[pi], pi * PER + 1, pi + 1, pages.length)); });
                 rkApplyStyle(rk);
+                rkStartReveal(rk, box);
             };
             if (animated) { box.classList.add('fading'); setTimeout(() => { build(); box.classList.remove('fading'); }, 400); }
             else build();
@@ -1938,12 +1960,16 @@
             const teams = rkSortedTeams(rk);
             const lg = s => (s || '').length + ':' + (s || '').slice(-24);
             const key = JSON.stringify([rk.title, rk.mode, rk.sort, rk.nameStyle, rk.upper, lg(rk.logoL), lg(rk.logoR1), lg(rk.logoR2), lg(rk.logoF), teams]);
-            if (key !== rkKey) { rkKey = key; rkPage = 0; rkRender(false); } else { rkApplyStyle(rk); }
+            const willShow = !!rk.show && teams.length > 0, hasReveal = rk.reveal === 'rtl' || rk.reveal === 'ttb';
+            if (key !== rkKey) { rkKey = key; rkPage = 0; rkRender(false); }
+            else if (hasReveal && willShow && !rkWasVisible) { rkPage = 0; rkRender(false); }
+            else { rkApplyStyle(rk); }
+            rkWasVisible = willShow;
             const ms = Math.max(3, Math.min(120, parseInt(g(rk.interval, 15)))) * 1000;
             if (rk.show && rkGroups > 1) {
                 if (!rkTimer || rkTimerMs !== ms) {
                     clearInterval(rkTimer); rkTimerMs = ms;
-                    rkTimer = setInterval(() => { if (rkGroups > 1) { rkPage = (rkPage + 1) % rkGroups; rkRender(true); } }, ms);
+                    rkTimer = setInterval(() => { if (rkGroups > 1 && rkRevealDone && Date.now() - rkRevealDoneAt >= Math.min(ms, 6000) - 300) { rkPage = (rkPage + 1) % rkGroups; rkRender(true); } }, ms);
                 }
             } else if (rkTimer) { clearInterval(rkTimer); rkTimer = null; }
             const visible = !!rk.show && teams.length > 0;
