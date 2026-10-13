@@ -381,6 +381,20 @@
                 </div>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+            <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">✨ Анімація виходу / зникнення табла
+                <select data-mi="anim" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                    <option value="slide">Виїзд знизу (стандартна)</option>
+                    <option value="centerSides">Центр → команди з-під центра вліво і вправо</option>
+                    <option value="sides">Команди влітають з країв, центр проявляється</option>
+                    <option value="wipe">Розкриття від центру</option>
+                    <option value="zoom">Збільшення</option>
+                    <option value="flip">Переворот</option>
+                    <option value="fade">Плавно (fade)</option>
+                    <option value="none">Без анімації</option>
+                </select></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Тривалість анімації: <b id="mi-val-animDur" style="color:#e0b878;">0.6 с</b></span><input type="range" data-mi="animDur" min="1" max="30" step="1" value="6" oninput="miInput(this)"></label>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="mi-val-x" style="color:#e0b878;">50</b></span><input type="range" data-mi="x" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="mi-val-y" style="color:#e0b878;">82</b></span><input type="range" data-mi="y" min="0" max="100" step="1" value="82" oninput="miInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="mi-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-mi="scale" min="30" max="200" step="1" value="100" oninput="miInput(this)"></label>
@@ -2671,7 +2685,7 @@
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
             show: false, title: "FIP PLATINUM LYON 2026", court: "PISTE CENTRALE", round: "MEN - FINAL", vs: "VS", date: "",
-            x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "",
+            x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "", anim: "slide", animDur: 6,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
         };
@@ -2696,7 +2710,7 @@
             const mi = miEnsure(); const path = el.getAttribute('data-mi');
             if (el.type === 'range') {
                 const v = parseInt(el.value); miSetPath(mi, path, v);
-                const lbl = document.getElementById('mi-val-' + path); if (lbl) lbl.innerText = v;
+                const lbl = document.getElementById('mi-val-' + path); if (lbl) lbl.innerText = (path === 'animDur') ? (v / 10).toFixed(1) + ' с' : v;
             } else {
                 miSetPath(mi, path, el.getAttribute('maxlength') === '3' ? el.value.trim() : el.value);
             }
@@ -2738,7 +2752,7 @@
                 if (document.activeElement === el) return;
                 const v = miGetPath(mi, el.getAttribute('data-mi'));
                 const val = (v === undefined || v === null) ? (miGetPath(MI_DEFAULT, el.getAttribute('data-mi')) ?? "") : v;
-                if (el.type === 'range') { el.value = val; const l = document.getElementById('mi-val-' + el.getAttribute('data-mi')); if (l) l.innerText = val; }
+                if (el.type === 'range') { el.value = val; const l = document.getElementById('mi-val-' + el.getAttribute('data-mi')); if (l) l.innerText = (el.getAttribute('data-mi') === 'animDur') ? (val / 10).toFixed(1) + ' с' : val; }
                 else if (el.value !== String(val)) el.value = val;
             });
             ['t1.photo', 't2.photo', 'logoL', 'logoR'].forEach(p => {
