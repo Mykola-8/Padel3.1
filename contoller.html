@@ -469,6 +469,7 @@
         <div class="card" id="po-ui-upper" style="display:flex; flex-direction:column; gap:8px;"></div>
         <div class="card" id="po-ui-lower" style="display:flex; flex-direction:column; gap:8px;"></div>
         <div class="card" id="gr-ui" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="card" id="ic-ui" style="display:flex; flex-direction:column; gap:8px;"></div>
 
         <h2 style="margin-top:10px;">📜 Історія матчів</h2>
         <div id="history-container" style="display:flex; flex-direction:column; gap:10px;">
@@ -1172,7 +1173,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2038,6 +2039,7 @@
                 teamRanking: state.teamRanking || null,
                 playoff: state.playoff || null,
                 groups: state.groups || null,
+                introCard: state.introCard || null,
                 showStatsLeftLogo: state.showStatsLeftLogo || false, statsLeftLogoUrl: state.statsLeftLogoUrl || "", statsLeftLogoSrc: state.statsLeftLogoSrc || "",
                 boardPromoLines: Array.isArray(state.boardPromoLines) ? state.boardPromoLines : new Array(5).fill(null).map(() => ({ text: "", size: 16, color: "#ffffff", bg: "" })),
                 showMainBoard: true, showBreak: false, showQrCode: false, 
@@ -2050,7 +2052,7 @@
         }
 
         // ===== ЗБЕРЕЖЕННЯ / ЗАВАНТАЖЕННЯ ТУРНІРУ (файл JSON) =====
-        const TS_CONTENT_KEYS = ['matchIntro', 'teamRanking', 'playoff', 'groups'];
+        const TS_CONTENT_KEYS = ['matchIntro', 'teamRanking', 'playoff', 'groups', 'introCard'];
         const TS_SETTING_KEYS = ['scale', 'posX', 'posY', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'boardTheme', 'cornerSlideLang', 'deuceStyle',
             'tournamentStage', 'stageTextColor', 'stageOffsetX', 'stageOffsetY', 'stageFontSize', 'stageBgColor',
             'statsBgOpacity', 'statsBoardScale', 'statsTextScale', 'showStatsBetweenGames',
@@ -2098,7 +2100,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
-                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true);
+                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true); syncIntroGlobal(true);
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
@@ -2388,6 +2390,114 @@
             const btn = document.getElementById('gr-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '👥 ПОКАЗАТИ';
         }
 
+
+        // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
+        const IC_GLOBAL_KEYS = ['topText', 'logo', 'city', 'line3', 'footText'];
+        function icDefault() {
+            return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
+                topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
+        }
+        function icEnsure() {
+            const d = icDefault();
+            if (!state.introCard || typeof state.introCard !== 'object') { state.introCard = d; return d; }
+            Object.keys(d).forEach(k => { if (state.introCard[k] === undefined) state.introCard[k] = d[k]; });
+            return state.introCard;
+        }
+        let globalIntro = null, lastIcSig = null, icTimer = null;
+        function icContent() { const c = icEnsure(), o = {}; IC_GLOBAL_KEYS.forEach(k => { o[k] = c[k] === undefined ? '' : c[k]; }); return o; }
+        function mergeGlobalIntro() {
+            if (typeof state !== 'object' || !state) return;
+            if (globalIntro) { const c = icEnsure(); IC_GLOBAL_KEYS.forEach(k => { if (globalIntro[k] !== undefined) c[k] = globalIntro[k]; }); }
+            lastIcSig = JSON.stringify(state.introCard ? icContent() : null);
+        }
+        function syncIntroGlobal(force) {
+            if (typeof state !== 'object' || !state) return;
+            const o = icContent(), sig = JSON.stringify(o); if (!force && sig === lastIcSig) return;
+            lastIcSig = sig; o.ts = Date.now(); globalIntro = o; set(ref(db, 'padel/introCard'), o);
+        }
+        onValue(ref(db, 'padel/introCard'), (snap) => { globalIntro = snap.val(); if (globalIntro && typeof state === 'object' && state) { mergeGlobalIntro(); try { icRefreshUI(); } catch (e) {} } });
+        function icSave(immediate) {
+            clearTimeout(icTimer);
+            if (immediate) { syncIntroGlobal(); set(matchRef, state); return; }
+            icTimer = setTimeout(() => { syncIntroGlobal(); set(matchRef, state); }, 250);
+        }
+        window.icInput = function(el) {
+            const k = el.getAttribute('data-path'), c = icEnsure();
+            if (el.type === 'range') { c[k] = parseInt(el.value); const l = document.getElementById('ic-val-' + k); if (l) l.innerText = (k === 'animDur') ? (c[k] / 10).toFixed(1) + ' с' : c[k]; }
+            else c[k] = el.value;
+            icSave(false);
+        };
+        window.icToggle = function() { const c = icEnsure(); c.show = !c.show; icRefreshUI(); icSave(true); };
+        window.icLogoUrl = function(v) { icEnsure().logo = (v || '').trim(); icRefreshUI(); icSave(true); };
+        window.icLogoClear = function() { icEnsure().logo = ''; icRefreshUI(); icSave(true); };
+        window.icLogoUpload = function(input) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const st = document.getElementById('ic-logo-st'); if (st) st.innerText = '⏳';
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(1100 / img.width, 450 / img.height, 1);
+                    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+                    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                    icEnsure().logo = cv.toDataURL('image/png'); icRefreshUI(); icSave(true); input.value = '';
+                };
+                img.onerror = () => { if (st) st.innerText = '❌'; };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        function icBuildUI() {
+            const host = document.getElementById('ic-ui'); if (!host || host.getAttribute('data-built')) return; host.setAttribute('data-built', '1');
+            const IN = 'style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"';
+            const d = icDefault();
+            const slider = (p, lbl, mn, mx, val) => `<label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">${lbl}: <b id="ic-val-${p}" style="color:#e0b878;">${val}</b></span><input type="range" data-ic data-path="${p}" min="${mn}" max="${mx}" step="1" value="${val}" oninput="icInput(this)"></label>`;
+            const color = (p, lbl, val) => `<label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">${lbl} <input type="color" data-ic data-path="${p}" value="${val}" oninput="icInput(this)" style="width:40px; height:24px; padding:0; border:none; background:none;"></label>`;
+            const sel = (p, lbl, opts) => `<label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">${lbl}<select data-ic data-path="${p}" onchange="icInput(this)" ${IN}>${opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select></label>`;
+            const txt = (p, ph) => `<input type="text" data-ic data-path="${p}" placeholder="${ph}" ${IN} oninput="icInput(this)">`;
+            host.innerHTML = `
+                <div style="font-size:11px; font-weight:700;">🎬 Вступне табло (титульна картка)</div>
+                <div style="font-size:10px; color:#9bd;">🌐 Логотип і тексти — спільні для ВСІХ кортів. Показ, масштаб, шрифт, кольори й анімація — окремо для кожного корту.</div>
+                <button class="btn" id="ic-btn-show" onclick="icToggle()">🎬 ПОКАЗАТИ</button>
+                ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
+                ${txt('city', 'Місто / підзаголовок (Perugia)')}
+                ${txt('line3', 'Назва турніру (під містом; без логотипу — великим)')}
+                ${txt('footText', 'Текст у нижній смузі (необов’язково)')}
+                <div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:11px; color:#e0b878; font-weight:700;">🖼 Логотип <span id="ic-logo-st" style="color:#8f8;"></span></div>
+                    <input type="text" id="ic-logo-url" placeholder="URL логотипу (або завантажте файл)" ${IN} onchange="icLogoUrl(this.value)">
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="file" accept="image/*" onchange="icLogoUpload(this)" style="font-size:11px; color:#ccc; flex:1; min-width:0;">
+                        <button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="icLogoClear()">✖</button>
+                    </div>
+                    ${slider('logoSize', 'Розмір логотипу (%)', 30, 150, 100)}
+                </div>
+                ${slider('scale', '🔍 Масштаб табла (%)', 30, 150, 100)}
+                ${sel('font', '🔤 Шрифт', GR_FONTS.map(f => [f, f]))}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    ${color('topColor', '🎨 Шапка (верх)', d.topColor)}${color('topTextColor', '🎨 Текст шапки', d.topTextColor)}
+                    ${color('bottomColor', '🎨 Низ (смуга)', d.bottomColor)}${color('footTextColor', '🎨 Текст низу', d.footTextColor)}
+                    ${color('bgColor', '🎨 Фон (верх)', d.bgColor)}${color('bgColor2', '🎨 Фон (низ)', d.bgColor2)}
+                    ${color('textColor', '🎨 Текст', d.textColor)}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    ${sel('anim', '✨ Анімація появи/зникнення', [['fade', 'Плавно (fade)'], ['zoom', 'Збільшення'], ['slideUp', 'Знизу вгору'], ['slideDown', 'Зверху вниз'], ['slideLeft', 'Зліва'], ['slideRight', 'Справа'], ['wipe', 'Розкриття від центру'], ['flip', 'Переворот'], ['none', 'Без анімації']])}
+                    ${slider('animDur', '⏱ Тривалість анімації', 1, 30, 6)}
+                </div>`;
+        }
+        function icRefreshUI() {
+            icBuildUI(); const c = icEnsure();
+            document.querySelectorAll('#ic-ui [data-ic]').forEach(el => {
+                if (document.activeElement === el) return;
+                const k = el.getAttribute('data-path'), v = c[k];
+                if (el.type === 'range') { el.value = v; const l = document.getElementById('ic-val-' + k); if (l) l.innerText = (k === 'animDur') ? (v / 10).toFixed(1) + ' с' : v; }
+                else { const s = (v === undefined || v === null) ? '' : String(v); if (el.value !== s) el.value = s; }
+            });
+            const u = document.getElementById('ic-logo-url'); if (u && document.activeElement !== u) u.value = (c.logo && c.logo.indexOf('data:') !== 0) ? c.logo : '';
+            const st = document.getElementById('ic-logo-st'); if (st) st.innerText = c.logo ? '✅ є' : '';
+            const btn = document.getElementById('ic-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🎬 ПОКАЗАТИ';
+        }
+
         // ===== РЕЙТИНГ КОМАНД =====
         const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, reveal: "none", revealDelay: 30, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
         let rkRowsSig = null, rkSaveTimer = null;
@@ -2596,6 +2706,7 @@
             renderRankingUI();
             poRefreshUI();
             try { grRefreshUI(); } catch (e) { console.error(e); }
+            try { icRefreshUI(); } catch (e) { console.error(e); }
             document.getElementById('lbl-p1').innerText = state.p1name || "Команда A"; document.getElementById('lbl-p2').innerText = state.p2name || "Команда B";
             renderServerSlotPickers();
             document.getElementById('mode-americano-checkbox').checked = !!state.isAmericano; document.getElementById('mode-proset-checkbox').checked = !!state.isProSet;
