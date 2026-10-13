@@ -384,6 +384,29 @@
             opacity: 0;
         }
 
+
+        /* ===== ВСТУПНЕ ТАБЛО ===== */
+        .ic-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10004; pointer-events: none; visibility: hidden; transition: visibility 0s linear var(--ic-d, 0.6s); font-family: var(--ic-font, 'Montserrat'), sans-serif; }
+        .ic-wrap.visible { visibility: visible; transition-delay: 0s; }
+        body.ic-active #statistics-panel { display: none !important; }
+        .ic-panel { position: absolute; left: 370px; top: 170px; width: 1180px; height: 740px; display: flex; flex-direction: column; background: linear-gradient(180deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); box-shadow: 0 24px 70px rgba(0,0,0,.55); clip-path: inset(0 0 0 0); transform: none; opacity: 1; transition: opacity var(--ic-d, 0.6s) ease, transform var(--ic-d, 0.6s) cubic-bezier(.2,.8,.2,1), clip-path var(--ic-d, 0.6s) ease; }
+        .ic-wrap:not(.visible) .ic-panel { opacity: 0; }
+        .ic-wrap[data-anim=none] .ic-panel { transition: none !important; }
+        .ic-wrap[data-anim=zoom]:not(.visible) .ic-panel { transform: scale(.55); }
+        .ic-wrap[data-anim=slideUp]:not(.visible) .ic-panel { transform: translateY(520px); }
+        .ic-wrap[data-anim=slideDown]:not(.visible) .ic-panel { transform: translateY(-520px); }
+        .ic-wrap[data-anim=slideLeft]:not(.visible) .ic-panel { transform: translateX(-1100px); }
+        .ic-wrap[data-anim=slideRight]:not(.visible) .ic-panel { transform: translateX(1100px); }
+        .ic-wrap[data-anim=wipe]:not(.visible) .ic-panel { clip-path: inset(0 50% 0 50%); }
+        .ic-wrap[data-anim=flip]:not(.visible) .ic-panel { transform: perspective(1400px) rotateX(90deg); }
+        .ic-top { height: 86px; flex: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.08)), var(--ic-top, #7e93b8); color: var(--ic-toptext, #fff); font-size: 42px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; }
+        .ic-body { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ic-text, #fff); text-align: center; padding: 20px 60px; gap: 0; }
+        .ic-logo { max-width: 1000px; max-height: 330px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+        .ic-bigtext { font-size: 120px; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,.4); }
+        .ic-city { font-size: 46px; font-weight: 700; margin-top: 90px; }
+        .ic-line3 { font-size: 42px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin-top: 26px; }
+        .ic-foot { height: 52px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--ic-bottom, #f2f4f8); color: var(--ic-foottext, #10213f); font-size: 26px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1454,6 +1477,7 @@
     </div>
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
+    <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
     <div class="po-wrap" id="po-wrap-upper"></div>
     <div class="po-wrap" id="po-wrap-lower"></div>
 
@@ -1746,7 +1770,37 @@
             });
             document.body.classList.toggle('po-active', anyVisible);
         }
-        window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} try { renderGroups(lastKnownState); } catch (e) {} } });
+        window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} try { renderGroups(lastKnownState); } catch (e) {} try { renderIntroCard(lastKnownState); } catch (e) {} } });
+
+
+        // ===== ВСТУПНЕ ТАБЛО =====
+        let icKeyCache = '';
+        function renderIntroCard(st) {
+            const cfg = st.introCard || {}, wrap = document.getElementById('ic-wrap'), panel = document.getElementById('ic-panel'); if (!wrap || !panel) return;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const s = wrap.style, dur = Math.max(0.1, Math.min(3, (parseInt(g(cfg.animDur, 6)) || 6) / 10));
+            s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
+            s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
+            s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-d', dur + 's');
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom'));
+            const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
+            s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.footText, cfg.logoSize]);
+            if (key !== icKeyCache || !panel.firstChild) {
+                icKeyCache = key;
+                const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
+                const logo = String(cfg.logo || '').trim();
+                let h = '<div class="ic-top">' + esc(cfg.topText) + '</div><div class="ic-body">';
+                if (logo) h += '<img class="ic-logo" style="max-width:' + Math.round(1000 * ls) + 'px; max-height:' + Math.round(330 * ls) + 'px;" src="' + esc(logo) + '">';
+                else if (cfg.line3) h += '<div class="ic-bigtext" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
+                if (cfg.city) h += '<div class="ic-city"' + (logo || cfg.line3 ? '' : ' style="margin-top:0"') + '>' + esc(cfg.city) + '</div>';
+                if (cfg.line3 && logo) h += '<div class="ic-line3">' + esc(cfg.line3) + '</div>';
+                h += '</div><div class="ic-foot">' + esc(cfg.footText) + '</div>';
+                panel.innerHTML = h;
+            }
+            const vis = !!cfg.show; wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
+        }
 
         // ===== ГРУПОВИЙ ЕТАП =====
         let grKeyCache = '';
@@ -2308,13 +2362,14 @@
         }, 1000);
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
-        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __lastSnap = null;
+        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalIc = null, __lastSnap = null;
         const __BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
             if (__globalRk) { s = Object.assign({}, s); const t = __globalRk.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
             if (__globalQr) { s = Object.assign({}, s); if (__globalQr.show !== undefined) s.showQrCode = !!__globalQr.show; if (__globalQr.url !== undefined) s.qrCodeUrl = __globalQr.url; if (__globalQr.desc !== undefined) s.qrCodeDescription = __globalQr.desc; }
+            if (__globalIc) { s = Object.assign({}, s); const ic = Object.assign({}, s.introCard || {}); ['topText', 'logo', 'city', 'line3', 'footText'].forEach(k => { if (__globalIc[k] !== undefined) ic[k] = __globalIc[k]; }); s.introCard = ic; }
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             if (__globalGr) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
@@ -2346,6 +2401,7 @@
             onValue(ref(db, 'padel/bars'), (snap) => { __globalBars = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/qr'), (snap) => { __globalQr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/ranking'), (snap) => { __globalRk = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/introCard'), (snap) => { __globalIc = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/groups'), (snap) => { __globalGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/playoff'), (snap) => { __globalPo = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
         }
@@ -2358,6 +2414,7 @@
                 try { renderTeamRanking(state); } catch (rkErr) { console.error("teamRanking render error:", rkErr); }
                 try { renderPlayoff(state); } catch (poErr) { console.error("playoff render error:", poErr); }
                 try { renderGroups(state); } catch (grErr) { console.error("groups render error:", grErr); }
+                try { renderIntroCard(state); } catch (icErr) { console.error("introCard render error:", icErr); }
 
                 let activeServer = state.currentServer;
                 let activeP1Slot = state.p1ServerSlot || 1;
