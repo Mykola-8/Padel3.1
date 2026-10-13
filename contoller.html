@@ -93,6 +93,7 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid #333; padding: 12px 20px 10px; margin: -20px -20px 15px; position: sticky; top: -20px; z-index: 50; background: #0a0a0a; box-shadow: 0 4px 10px rgba(0,0,0,.6); }
         .modal-court-badge { background: #15803d; color: #fff; font-weight: 800; font-size: 13px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; }
         .tcol-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #222; color: #e0b878; border: 1px solid #333; border-left: 4px solid #c69f66; border-radius: 6px; padding: 11px 12px; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer; margin: 6px 0 0; }
+        #settings-modal .tcol-head { margin: 0; }
         .tcol-head .tcol-arrow { transition: transform .2s; }
         .tcol-head.open .tcol-arrow { transform: rotate(90deg); }
         .tcol-tools { display: flex; gap: 6px; margin: 4px 0 2px; }
@@ -2506,6 +2507,30 @@
             const btn = document.getElementById('ic-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🎬 ПОКАЗАТИ';
         }
 
+
+
+        // ===== Згортання блоків у меню налаштувань пульта =====
+        (function smcolInit() {
+            const modal = document.getElementById('settings-modal'); if (!modal) return;
+            const inner = Array.from(modal.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
+            const cards = Array.from(inner.children).filter(el => el.classList && el.classList.contains('card'));
+            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка'];
+            let saved = {}; try { saved = JSON.parse(localStorage.getItem('smcolState') || '{}') || {}; } catch (e) {}
+            const heads = [];
+            const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
+            const persist = () => { try { localStorage.setItem('smcolState', JSON.stringify(saved)); } catch (e) {} };
+            cards.forEach((card, i) => {
+                const h = document.createElement('button'); h.type = 'button'; h.className = 'tcol-head';
+                h.innerHTML = '<span>' + (titles[i] || ('Блок ' + (i + 1))) + '</span><span class="tcol-arrow">▸</span>';
+                inner.insertBefore(h, card); heads.push(h);
+                h.onclick = () => { apply(i, card.style.display === 'none'); persist(); };
+            });
+            cards.forEach((_, i) => apply(i, saved[i] === true));
+            const tools = document.createElement('div'); tools.className = 'tcol-tools';
+            tools.innerHTML = '<button type="button" data-a="open">▾ Розгорнути всі</button><button type="button" data-a="close">▴ Згорнути всі</button>';
+            tools.onclick = (e) => { const a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return; cards.forEach((_, i) => apply(i, a === 'open')); persist(); };
+            inner.insertBefore(tools, inner.firstChild);
+        })();
 
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
