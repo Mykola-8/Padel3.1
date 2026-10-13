@@ -90,7 +90,13 @@
         html, body { overflow-x: hidden; max-width: 100vw; }
         #tab-tournament { touch-action: pan-y; min-width: 0; }
         #tab-tournament .card { min-width: 0; max-width: 100%; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid #333; padding: 12px 20px 10px; margin: -20px -20px 15px; position: sticky; top: -20px; z-index: 50; background: #0a0a0a; box-shadow: 0 4px 10px rgba(0,0,0,.6); }
+        .modal-court-badge { background: #15803d; color: #fff; font-weight: 800; font-size: 13px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; }
+        .tcol-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #222; color: #e0b878; border: 1px solid #333; border-left: 4px solid #c69f66; border-radius: 6px; padding: 11px 12px; font-size: 14px; font-weight: 800; text-align: left; cursor: pointer; margin: 6px 0 0; }
+        .tcol-head .tcol-arrow { transition: transform .2s; }
+        .tcol-head.open .tcol-arrow { transform: rotate(90deg); }
+        .tcol-tools { display: flex; gap: 6px; margin: 4px 0 2px; }
+        .tcol-tools button { flex: 1; background: #2a2a2a; color: #ccc; border: 1px solid #444; border-radius: 6px; padding: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .modal-title { font-size: 18px; font-weight: 800; color: #c69f66; text-transform: uppercase; }
         .modal-close-btn { background: #b91c1c; color: white; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .match-card { background: #222; border-left: 4px solid #c69f66; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
@@ -528,7 +534,8 @@
 
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-header">
-            <div class="modal-title">⚙️ Налаштування корту</div>
+            <div class="modal-title" style="flex:1; min-width:0;">⚙️ Налаштування</div>
+            <div class="modal-court-badge" id="modal-court-badge">Корт №1</div>
             <button class="modal-close-btn" onclick="closeModalSettings()">Закрити</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:14px;">
@@ -1164,12 +1171,13 @@
         onValue(ref(db, 'padel/groups'), (snap) => { globalGroups = snap.val(); if (globalGroups && typeof state === 'object' && state) { mergeGlobalGroups(); try { renderUI(); } catch (e) {} } });
         onValue(ref(db, 'padel/playoff'), (snap) => { globalPlayoff = snap.val(); if (globalPlayoff && typeof state === 'object' && state) { mergeGlobalPlayoff(); try { renderUI(); } catch (e) {} } });
 
-        window.openModalSettings = function() { document.getElementById('settings-modal').classList.add('open'); }
+        function updateModalCourtBadge() { const b = document.getElementById('modal-court-badge'); if (b) b.innerText = 'Корт №' + (typeof courtId !== 'undefined' ? courtId : '1'); }
+        window.openModalSettings = function() { updateModalCourtBadge(); document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
 
         function initCourtConnection() {
             const urlParams = new URLSearchParams(window.location.search); courtId = urlParams.get('court') || "1";
-            document.getElementById('court-selector').value = courtId; databasePath = `padel/courts/court_${courtId}`;
+            document.getElementById('court-selector').value = courtId; try { updateModalCourtBadge(); } catch (e) {} databasePath = `padel/courts/court_${courtId}`;
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
@@ -2497,6 +2505,29 @@
             const st = document.getElementById('ic-logo-st'); if (st) st.innerText = c.logo ? '✅ є' : '';
             const btn = document.getElementById('ic-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🎬 ПОКАЗАТИ';
         }
+
+
+        // ===== Згортання блоків вкладки Tournament =====
+        (function tcolInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
+            const titles = ['💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло'];
+            let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
+            const heads = [];
+            const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
+            const persist = () => { try { localStorage.setItem('tcolState', JSON.stringify(saved)); } catch (e) {} };
+            cards.forEach((card, i) => {
+                const h = document.createElement('button'); h.type = 'button'; h.className = 'tcol-head';
+                h.innerHTML = '<span>' + (titles[i] || ('Блок ' + (i + 1))) + '</span><span class="tcol-arrow">▸</span>';
+                card.parentNode.insertBefore(h, card); heads.push(h);
+                h.onclick = () => { apply(i, card.style.display === 'none'); persist(); if (card.style.display !== 'none') h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+            });
+            cards.forEach((_, i) => apply(i, saved[i] === true));
+            const tools = document.createElement('div'); tools.className = 'tcol-tools';
+            tools.innerHTML = '<button type="button" data-a="open">▾ Розгорнути всі</button><button type="button" data-a="close">▴ Згорнути всі</button>';
+            tools.onclick = (e) => { const a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return; cards.forEach((_, i) => apply(i, a === 'open')); persist(); };
+            const h2 = tab.querySelector('h2'); if (h2) h2.parentNode.insertBefore(tools, h2.nextSibling);
+        })();
 
         // ===== РЕЙТИНГ КОМАНД =====
         const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, reveal: "none", revealDelay: 30, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
