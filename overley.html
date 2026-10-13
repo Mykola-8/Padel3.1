@@ -478,6 +478,36 @@
         body.mi-active #statistics-panel { display: none !important; }
         #match-intro-board { container-type: size; width: 62vw; height: 28vh; display: flex; flex-direction: column; border-radius: 0.9vw; overflow: hidden; border: 1px solid rgba(255,255,255,0.55); background: #0a0a0a; box-shadow: 0 10px 40px rgba(0,0,0,0.6); font-family: 'Montserrat', sans-serif; transform: translateY(40px); transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1); }
         #match-intro-wrap.visible #match-intro-board { transform: translateY(0); }
+
+        /* --- анімації табла «Хто грає» (data-anim на #match-intro-wrap) --- */
+        #match-intro-wrap { --mi-d: 0.6s; --mi-step: 0.5s; transition: opacity calc(var(--mi-d) * 0.8) ease, visibility 0s linear var(--mi-d); }
+        #match-intro-wrap.visible { transition-delay: 0s, 0s; }
+        #match-intro-board { transition: transform var(--mi-d) cubic-bezier(0.2, 0.9, 0.3, 1.1), clip-path var(--mi-d) ease, opacity var(--mi-d) ease; clip-path: inset(-80px -80px -80px -80px); }
+        .mi-team { transition: transform var(--mi-d) cubic-bezier(0.2, 0.8, 0.2, 1), clip-path var(--mi-d) ease, opacity var(--mi-d) ease; clip-path: inset(0 0 0 0); }
+        .mi-center { transition: transform var(--mi-d) cubic-bezier(0.2, 0.8, 0.2, 1), opacity var(--mi-d) ease; }
+        #match-intro-wrap[data-anim=none], #match-intro-wrap[data-anim=none] * { transition: none !important; }
+        #match-intro-wrap[data-anim=fade] #match-intro-board { transform: none; }
+        #match-intro-wrap[data-anim=zoom] #match-intro-board { transform: scale(0.6); opacity: 0; }
+        #match-intro-wrap[data-anim=zoom].visible #match-intro-board { transform: none; opacity: 1; }
+        #match-intro-wrap[data-anim=flip] #match-intro-board { transform: perspective(1400px) rotateX(90deg); opacity: 0; }
+        #match-intro-wrap[data-anim=flip].visible #match-intro-board { transform: none; opacity: 1; }
+        #match-intro-wrap[data-anim=wipe] #match-intro-board { transform: none; clip-path: inset(-80px 50% -80px 50%); }
+        #match-intro-wrap[data-anim=wipe].visible #match-intro-board { clip-path: inset(-80px -80px -80px -80px); }
+        /* команди влітають з країв, центр проявляється */
+        #match-intro-wrap[data-anim=sides] #match-intro-board { transform: none; }
+        #match-intro-wrap[data-anim=sides] .mi-left { transform: translateX(-160%); opacity: 0; }
+        #match-intro-wrap[data-anim=sides] .mi-right { transform: translateX(160%); opacity: 0; }
+        #match-intro-wrap[data-anim=sides] .mi-center { transform: scale(0.7); opacity: 0; }
+        #match-intro-wrap[data-anim=sides].visible .mi-left, #match-intro-wrap[data-anim=sides].visible .mi-right { transform: none; opacity: 1; }
+        #match-intro-wrap[data-anim=sides].visible .mi-center { transform: none; opacity: 1; }
+        /* спочатку центр (VS, раунд), потім команди виїжджають з-під центра вліво і вправо */
+        #match-intro-wrap[data-anim=centerSides] #match-intro-board { transform: none; clip-path: inset(-80px 38% -80px 38%); transition-delay: var(--mi-step), 0s; }
+        #match-intro-wrap[data-anim=centerSides] .mi-left { transform: translateX(100%); clip-path: inset(0 100% 0 0); }
+        #match-intro-wrap[data-anim=centerSides] .mi-right { transform: translateX(-100%); clip-path: inset(0 0 0 100%); }
+        #match-intro-wrap[data-anim=centerSides].visible #match-intro-board { clip-path: inset(-80px -80px -80px -80px); transition-delay: var(--mi-step), var(--mi-step); }
+        #match-intro-wrap[data-anim=centerSides].visible .mi-left, #match-intro-wrap[data-anim=centerSides].visible .mi-right { transform: none; clip-path: inset(0 0 0 0); transition-delay: var(--mi-step); }
+        #match-intro-wrap[data-anim=centerSides] { transition-delay: calc(var(--mi-step) + var(--mi-d) * 0.3), calc(var(--mi-step) + var(--mi-d)); }
+        #match-intro-wrap[data-anim=centerSides].visible { transition-delay: 0s, 0s; }
         .mi-head { height: 17%; flex: none; display: flex; align-items: center; gap: 1.2cqw; padding: 0 2cqw; background: linear-gradient(#f6f6f6, #cdcdcd); color: #111; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: min(2.5cqw, 10cqh); }
         .mi-head img { height: 72%; max-width: 12cqw; object-fit: contain; display: none; }
         .mi-title, .mi-court { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2071,6 +2101,9 @@
                     setImg(base + '-flag', /^[a-z]{2,3}(-[a-z]{2,3})?$/.test(cc) ? 'https://flagcdn.com/w80/' + cc + '.png' : '');
                 });
             });
+            const miDur = Math.max(0.1, Math.min(3, (parseInt(g(mi.animDur, 6)) || 6) / 10));
+            wrap.setAttribute('data-anim', g(mi.anim, 'slide'));
+            wrap.style.setProperty('--mi-d', miDur + 's'); wrap.style.setProperty('--mi-step', (miDur * 0.85) + 's');
             wrap.classList.toggle('visible', !!mi.show);
             document.body.classList.toggle('mi-active', !!mi.show);
             if (mi.show && typeof statsAutoActive !== 'undefined' && statsAutoActive && typeof forceCloseStatsPanel === 'function') forceCloseStatsPanel();
