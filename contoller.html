@@ -754,6 +754,18 @@
                         <option value="zoom-far">Ефект "здалеку" (наближення, розмиття)</option>
                     </select>
                 </div>
+                <div style="border:1px solid #1e5a78; border-radius:6px; padding:8px; margin:8px 0; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:11px; font-weight:800; color:#7dd3fc;">ℹ️ Інфо-табло спонсора (висувається з лівого боку логотипа, лише в режимі «Карусель»)</div>
+                    <div class="switch-row" style="background: rgba(56,189,248,0.10); padding:6px 8px; border-radius:6px;">
+                        <span style="font-size:12px; font-weight:700; color:#7dd3fc;">Показувати інформацію про спонсора:</span>
+                        <input type="checkbox" id="sponsor-info-show-checkbox" style="width:22px; height:22px;" onchange="toggleSponsorInfo(this.checked)">
+                    </div>
+                    <div class="row"><span>Розмір логотипа: <b id="sponsor-logo-size-val" style="color:#e0b878;">100%</b></span><input type="range" id="sponsor-logo-size-slider" min="30" max="250" step="5" value="100" oninput="updateSponsorInfoNum('sponsorLogoSize', this.value, 'sponsor-logo-size-val', '%')"></div>
+                    <div class="row"><span>Ширина інфо-табла: <b id="sponsor-info-width-val" style="color:#e0b878;">420px</b></span><input type="range" id="sponsor-info-width-slider" min="120" max="1200" step="10" value="420" oninput="updateSponsorInfoNum('sponsorInfoWidth', this.value, 'sponsor-info-width-val', 'px')"></div>
+                    <div class="row"><span>Макс. розмір тексту: <b id="sponsor-info-font-val" style="color:#e0b878;">26px</b></span><input type="range" id="sponsor-info-font-slider" min="10" max="80" step="1" value="26" oninput="updateSponsorInfoNum('sponsorInfoFont', this.value, 'sponsor-info-font-val', 'px')"></div>
+                    <div class="row"><span>Колір фону / тексту:</span><span style="display:flex; gap:8px;"><input type="color" id="sponsor-info-bg-input" value="#0c1c45" oninput="updateSponsorInfoColor('sponsorInfoBg', this.value)" style="width:40px; height:26px; padding:0; border:none; background:none;"><input type="color" id="sponsor-info-color-input" value="#ffffff" oninput="updateSponsorInfoColor('sponsorInfoColor', this.value)" style="width:40px; height:26px; padding:0; border:none; background:none;"></span></div>
+                    <div style="font-size:10px; color:#888;">Текст автоматично зменшується, щоб вміститися в табло — розтягуйте ширину, щоб довгий текст був крупнішим. Текст для кожного логотипа пишіть у списку нижче (замість URL; логотип завантажується кнопкою 📁).</div>
+                </div>
                 <div style="font-size:10px; color:#888; margin:6px 0;">Розташовується по центру зверху екрана, окремо від табла рахунку — щоб не перекривати його, тримайте табло в звичному кутку (не по центру зверху).</div>
                 <div id="sponsor-logos-list" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
@@ -1096,6 +1108,7 @@
             if (!globalSponsors || typeof state !== 'object' || !state) return;
             const gs = globalSponsors;
             if (gs.logos !== undefined) { let a = Array.isArray(gs.logos) ? gs.logos.slice() : Object.values(gs.logos || {}); while (a.length < 10) a.push(""); state.sponsorLogos = a; }
+            if (gs.infos !== undefined) { let a = Array.isArray(gs.infos) ? gs.infos.slice() : Object.values(gs.infos || {}); while (a.length < 10) a.push(""); state.sponsorInfos = a.slice(0, 10); }
         }
         // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
         const BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
@@ -1150,7 +1163,8 @@
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
-            const obj = { logos: state.sponsorLogos.slice(0, 10) };
+            ensureSponsorInfosArray();
+            const obj = { logos: state.sponsorLogos.slice(0, 10), infos: state.sponsorInfos.slice(0, 10) };
             globalSponsors = obj;
             set(ref(db, 'padel/sponsors'), obj); set(matchRef, state);
         }
@@ -1936,6 +1950,19 @@
         window.updateSponsorLogoAnimStyle = function(v) { state.sponsorLogoAnimStyle = v; set(matchRef, state); };
         window.updateSponsorLogoMode = function(v) { state.sponsorLogoDisplayMode = v; set(matchRef, state); };
 
+        function ensureSponsorInfosArray() {
+            const arr = Array.isArray(state.sponsorInfos) ? state.sponsorInfos.slice() : [];
+            while (arr.length < 10) arr.push("");
+            state.sponsorInfos = arr.slice(0, 10).map(x => (x === undefined || x === null) ? "" : String(x));
+        }
+        window.toggleSponsorInfo = function(v) { state.sponsorInfoShow = !!v; set(matchRef, state); };
+        window.updateSponsorInfoNum = function(key, v, lblId, suffix) { state[key] = parseInt(v) || 0; const l = document.getElementById(lblId); if (l) l.innerText = state[key] + (suffix || ''); set(matchRef, state); };
+        window.updateSponsorInfoColor = function(key, v) { state[key] = v; set(matchRef, state); };
+        let sponsorInfoTimer = null;
+        window.updateSponsorInfoText = function(i, v) {
+            ensureSponsorInfosArray(); state.sponsorInfos[i - 1] = v;
+            clearTimeout(sponsorInfoTimer); sponsorInfoTimer = setTimeout(() => saveSponsorsGlobal(), 400);
+        };
         function ensureSponsorLogosArray() {
             if (!Array.isArray(state.sponsorLogos) || state.sponsorLogos.length < 10) {
                 const arr = Array.isArray(state.sponsorLogos) ? state.sponsorLogos.slice() : [];
@@ -1951,7 +1978,7 @@
             for (let i = 1; i <= 10; i++) {
                 html += '<div style="display:flex; gap:6px; align-items:center;">' +
                     '<span style="font-size:10px; color:#999; width:16px; flex-shrink:0;">' + i + '.</span>' +
-                    '<input type="text" id="sponsor-logo-url-' + i + '" placeholder="URL логотипу ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" onchange="updateSponsorLogoUrl(' + i + ', this.value)">' +
+                    '<input type="text" id="sponsor-logo-info-' + i + '" placeholder="Інформація про спонсора ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" oninput="updateSponsorInfoText(' + i + ', this.value)">' +
                     '<button type="button" class="btn" style="padding:6px 8px; font-size:10px; background:#444; flex-shrink:0;" onclick="document.getElementById(\'sponsor-logo-file-' + i + '\').click()">📁</button>' +
                     '<input type="file" id="sponsor-logo-file-' + i + '" accept="image/*" style="display:none" onchange="uploadSponsorLogoFile(' + i + ', event)">' +
                     '<span id="sponsor-logo-status-' + i + '" style="width:16px; flex-shrink:0; font-size:11px;"></span>' +
@@ -1970,8 +1997,7 @@
         window.clearSponsorLogo = function(i) {
             ensureSponsorLogosArray();
             state.sponsorLogos[i - 1] = "";
-            const urlInput = document.getElementById('sponsor-logo-url-' + i);
-            if (urlInput) urlInput.value = "";
+            const stEl = document.getElementById('sponsor-logo-status-' + i); if (stEl) stEl.innerHTML = "";
             saveSponsorsGlobal();
         };
 
@@ -1994,8 +2020,6 @@
                     const compressedBase64 = canvas.toDataURL('image/png');
                     ensureSponsorLogosArray();
                     state.sponsorLogos[i - 1] = compressedBase64;
-                    const urlInput = document.getElementById('sponsor-logo-url-' + i);
-                    if (urlInput) urlInput.value = "";
                     if (statusEl) statusEl.innerText = "✅";
                     saveSponsorsGlobal();
                 };
@@ -2056,7 +2080,7 @@
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
                 showSponsorLogos: state.showSponsorLogos || false, sponsorLogoScale: state.sponsorLogoScale || 1,
                 sponsorLogoIntervalSec: state.sponsorLogoIntervalSec || 4, sponsorLogos: Array.isArray(state.sponsorLogos) ? state.sponsorLogos : new Array(10).fill(""),
-                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorLogoPosX: state.sponsorLogoPosX || 0, sponsorLogoPosY: state.sponsorLogoPosY || 0,
+                sponsorLogoDisplayMode: state.sponsorLogoDisplayMode || "carousel", sponsorInfoShow: state.sponsorInfoShow || false, sponsorLogoSize: state.sponsorLogoSize || 100, sponsorInfoWidth: state.sponsorInfoWidth || 420, sponsorInfoFont: state.sponsorInfoFont || 26, sponsorInfoBg: state.sponsorInfoBg || '#0c1c45', sponsorInfoColor: state.sponsorInfoColor || '#ffffff', sponsorInfos: Array.isArray(state.sponsorInfos) ? state.sponsorInfos : new Array(10).fill(""), sponsorLogoPosX: state.sponsorLogoPosX || 0, sponsorLogoPosY: state.sponsorLogoPosY || 0,
                 showBoardPromoPanel: state.showBoardPromoPanel || false,
                 matchIntro: state.matchIntro || null,
                 teamRanking: state.teamRanking || null,
@@ -2080,7 +2104,7 @@
             'tournamentStage', 'stageTextColor', 'stageOffsetX', 'stageOffsetY', 'stageFontSize', 'stageBgColor',
             'statsBgOpacity', 'statsBoardScale', 'statsTextScale', 'showStatsBetweenGames',
             'logoUrl', 'logoSrc', 'customLogoText', 'showLogo', 'showStatsLeftLogo', 'statsLeftLogoUrl', 'statsLeftLogoSrc',
-            'sponsorLogoScale', 'sponsorLogoPosX', 'sponsorLogoPosY', 'showBoardPromoPanel', 'boardPromoLines',
+            'sponsorLogoScale', 'sponsorLogoPosX', 'sponsorLogoPosY', 'sponsorInfoShow', 'sponsorLogoSize', 'sponsorInfoWidth', 'sponsorInfoFont', 'sponsorInfoBg', 'sponsorInfoColor', 'showBoardPromoPanel', 'boardPromoLines',
             'qrCodeUrl', 'qrCodeDescription', 'qrLinks', 'qrScale', 'qrOffsetX', 'qrOffsetY',
             'adBarSlides', 'adBarEnabled', 'adBarTextColor', 'adBarRemoveBg', 'adBarOffsetY', 'adBarHeight', 'adBarGap', 'adBarBgColor', 'adBarBgAlpha', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration',
             'tickerEnabled', 'tickerTextColor', 'tickerSpeed', 'tickerOffsetY', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerContentHTML', 'tickerBgColor', 'tickerBgAlpha',
@@ -2093,7 +2117,7 @@
                 ensureSponsorLogosArray();
                 const data = {
                     app: 'padel-tournament', version: 1, exportedAt: new Date().toISOString(), courtId: courtId,
-                    global: { sponsors: { logos: state.sponsorLogos.slice(0, 10), show: !!state.showSponsorLogos, mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
+                    global: { sponsors: { logos: state.sponsorLogos.slice(0, 10), infos: (Array.isArray(state.sponsorInfos) ? state.sponsorInfos : []).slice(0, 10), show: !!state.showSponsorLogos, mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
                     court: court,
                     players: allPlayersData || {}
                 };
@@ -2119,7 +2143,7 @@
                     const sp = data.global && data.global.sponsors;
                     if (sp) {
                         let a = Array.isArray(sp.logos) ? sp.logos.slice() : Object.values(sp.logos || {}); while (a.length < 10) a.push('');
-                        state.sponsorLogos = a.slice(0, 10); state.showSponsorLogos = !!sp.show; state.sponsorLogoDisplayMode = sp.mode || 'carousel';
+                        state.sponsorLogos = a.slice(0, 10); if (sp.infos) { state.sponsorInfos = Array.isArray(sp.infos) ? sp.infos.slice(0, 10) : Object.values(sp.infos); } state.showSponsorLogos = !!sp.show; state.sponsorLogoDisplayMode = sp.mode || 'carousel';
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
@@ -3007,12 +3031,18 @@
                 document.getElementById('sponsor-logo-interval-row').style.display = (currentMode === 'all') ? 'none' : 'flex';
                 const logos = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : [];
                 for (let i = 1; i <= 10; i++) {
-                    const urlInput = document.getElementById('sponsor-logo-url-' + i);
                     const val = logos[i - 1] || "";
-                    if (urlInput && document.activeElement !== urlInput && !val.startsWith('data:')) { urlInput.value = val; }
+                    const infoInput = document.getElementById('sponsor-logo-info-' + i);
+                    const infoVal = (Array.isArray(state.sponsorInfos) ? state.sponsorInfos[i - 1] : "") || "";
+                    if (infoInput && document.activeElement !== infoInput && infoInput.value !== infoVal) infoInput.value = infoVal;
                     const statusEl = document.getElementById('sponsor-logo-status-' + i);
-                    if (statusEl && val.startsWith('data:')) { statusEl.innerText = "✅"; }
+                    if (statusEl && statusEl.innerText !== '⏳') statusEl.innerText = val ? "✅" : "";
                 }
+                const sv = (id, v) => { const e = document.getElementById(id); if (e && document.activeElement !== e) e.value = v; };
+                const ck = document.getElementById('sponsor-info-show-checkbox'); if (ck) ck.checked = !!state.sponsorInfoShow;
+                sv('sponsor-logo-size-slider', state.sponsorLogoSize || 100); sv('sponsor-info-width-slider', state.sponsorInfoWidth || 420); sv('sponsor-info-font-slider', state.sponsorInfoFont || 26);
+                sv('sponsor-info-bg-input', state.sponsorInfoBg || '#0c1c45'); sv('sponsor-info-color-input', state.sponsorInfoColor || '#ffffff');
+                [['sponsor-logo-size-val', (state.sponsorLogoSize || 100) + '%'], ['sponsor-info-width-val', (state.sponsorInfoWidth || 420) + 'px'], ['sponsor-info-font-val', (state.sponsorInfoFont || 26) + 'px']].forEach(([id, t]) => { const e = document.getElementById(id); if (e) e.innerText = t; });
             }
 
             if (document.getElementById('board-promo-visibility-checkbox')) {
