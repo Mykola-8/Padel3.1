@@ -954,9 +954,9 @@
         .sponsor-info-wrap { position: fixed; top: 20px; left: 50%; z-index: 9499; transform-origin: top center; width: var(--sl-w, 220px); height: var(--sl-h, 90px); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s; }
         .sponsor-info-wrap.visible { opacity: 1; visibility: visible; }
         .si-clip { position: absolute; right: 100%; top: 0; height: 100%; overflow: hidden; width: var(--si-w, 420px); }
-        .si-panel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 18px; background: var(--si-bg, #0c1c45); color: var(--si-color, #fff); border-radius: 10px 0 0 10px; border: 2px solid rgba(255,255,255,0.35); border-right: none; font-family: 'Montserrat', sans-serif; font-weight: 800; text-align: center; transform: translateX(105%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.8, 0.4); }
+        .si-panel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 18px; background: var(--si-bg, #0c1c45); color: var(--si-color, #fff); border-radius: 10px 0 0 10px; border: 2px solid var(--si-border, rgba(255,255,255,0.35)); border-right: none; font-family: var(--si-font, 'Montserrat'), sans-serif; font-weight: 800; text-align: center; transform: translateX(105%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.8, 0.4); }
         .si-panel.in { transform: translateX(0); transition: transform 1.5s cubic-bezier(0.22, 0.7, 0.2, 1); }
-        .si-text { white-space: normal; line-height: 1.12; max-width: 100%; overflow-wrap: anywhere; }
+        .si-text { text-shadow: 0 1px 3px rgba(0,0,0,0.55); white-space: normal; line-height: 1.12; max-width: 100%; overflow-wrap: anywhere; }
 
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
@@ -2930,11 +2930,14 @@
                             const on = !!state.sponsorInfoShow && !!state.showSponsorLogos && !showAllMode;
                             infoWrap.style.setProperty('--sl-w', Math.round(220 * __ls) + 'px'); infoWrap.style.setProperty('--sl-h', Math.round(90 * __ls) + 'px');
                             infoWrap.style.setProperty('--si-w', (parseInt(state.sponsorInfoWidth) || 420) + 'px');
-                            infoWrap.style.setProperty('--si-bg', state.sponsorInfoBg || '#0c1c45'); infoWrap.style.setProperty('--si-color', state.sponsorInfoColor || '#ffffff');
+                            { const hx = String(state.sponsorInfoBg || '#0c1c45').replace('#', ''), rr = parseInt(hx.substring(0, 2), 16) || 0, gg = parseInt(hx.substring(2, 4), 16) || 0, bb = parseInt(hx.substring(4, 6), 16) || 0;
+                              const op = Math.max(0, Math.min(100, state.sponsorInfoBgOpacity === undefined ? 100 : parseInt(state.sponsorInfoBgOpacity))) / 100;
+                              infoWrap.style.setProperty('--si-bg', 'rgba(' + rr + ',' + gg + ',' + bb + ',' + op + ')'); infoWrap.style.setProperty('--si-border', 'rgba(255,255,255,' + (0.35 * op) + ')');
+                              infoWrap.style.setProperty('--si-font', "'" + (state.sponsorInfoFontFamily || 'Montserrat') + "'"); } infoWrap.style.setProperty('--si-color', state.sponsorInfoColor || '#ffffff');
                             infoWrap.style.transform = scaleTransform; infoWrap.style.top = topPx;
                             const mf = String(parseInt(state.sponsorInfoFont) || 26);
-                            const styleChanged = infoPanel.getAttribute('data-maxfont') !== mf || infoPanel.getAttribute('data-w') !== String(state.sponsorInfoWidth) || infoPanel.getAttribute('data-h') !== String(__ls);
-                            infoPanel.setAttribute('data-maxfont', mf); infoPanel.setAttribute('data-w', String(state.sponsorInfoWidth)); infoPanel.setAttribute('data-h', String(__ls));
+                            const styleChanged = infoPanel.getAttribute('data-maxfont') !== mf || infoPanel.getAttribute('data-ff') !== String(state.sponsorInfoFontFamily) || infoPanel.getAttribute('data-w') !== String(state.sponsorInfoWidth) || infoPanel.getAttribute('data-h') !== String(__ls);
+                            infoPanel.setAttribute('data-maxfont', mf); infoPanel.setAttribute('data-ff', String(state.sponsorInfoFontFamily)); infoPanel.setAttribute('data-w', String(state.sponsorInfoWidth)); infoPanel.setAttribute('data-h', String(__ls));
                             infoWrap.classList.toggle('visible', on);
                             const prevOn = sponsorInfoOn; sponsorInfoOn = on; sponsorInfoList = validInfos;
                             if (on !== prevOn || !on) { if (!on) { infoPanel.classList.remove('in'); sponsorInfoShownIdx = -2; clearTimeout(sponsorInfoDelayTimer); sponsorInfoPending = false; } else sponsorInfoShowFor(sponsorLogoIndex); }
