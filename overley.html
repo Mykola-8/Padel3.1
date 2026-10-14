@@ -2454,7 +2454,11 @@
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
             if (__globalRk) { s = Object.assign({}, s); const t = __globalRk.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
             if (__globalQr) { s = Object.assign({}, s); if (__globalQr.show !== undefined) s.showQrCode = !!__globalQr.show; if (__globalQr.url !== undefined) s.qrCodeUrl = __globalQr.url; if (__globalQr.desc !== undefined) s.qrCodeDescription = __globalQr.desc; }
-            if (__globalIc) { s = Object.assign({}, s); const ic = Object.assign({}, s.introCard || {}); ['topText', 'logo', 'city', 'line3', 'footText'].forEach(k => { if (__globalIc[k] !== undefined) ic[k] = __globalIc[k]; }); s.introCard = ic; }
+            if (__globalIc && !/court_1$/.test(String(databasePath)) && !(s.introCard && s.introCard.own)) {
+                s = Object.assign({}, s); const ic = {};
+                Object.keys(__globalIc).forEach(k => { if (k !== 'ts' && k !== 'v' && k !== 'show' && k !== 'own') ic[k] = __globalIc[k]; });
+                ic.show = !!(s.introCard && s.introCard.show); s.introCard = ic;
+            }
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             if (__globalGr) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
