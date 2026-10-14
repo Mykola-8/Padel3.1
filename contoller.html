@@ -1115,6 +1115,7 @@
         }
 
         // ===== СПІЛЬНІ СПОНСОРИ (для всіх кортів): padel/sponsors =====
+        const gLoaded = { rk: false, sp: false, gr: false, po: false };
         let globalSponsors = null;
         function mergeGlobalSponsors() {
             if (!globalSponsors || typeof state !== 'object' || !state) return;
@@ -1171,7 +1172,7 @@
             globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
             set(ref(db, 'padel/ranking'), globalRanking);
         }
-        onValue(ref(db, 'padel/ranking'), (snap) => { globalRanking = snap.val(); if (globalRanking && typeof state === 'object' && state) { mergeGlobalRanking(); try { renderUI(); } catch (e) {} } });
+        onValue(ref(db, 'padel/ranking'), (snap) => { globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (globalRanking && typeof state === 'object' && state) { mergeGlobalRanking(); try { renderUI(); } catch (e) {} } });
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
@@ -1180,7 +1181,7 @@
             globalSponsors = obj;
             set(ref(db, 'padel/sponsors'), obj); set(matchRef, state);
         }
-        onValue(ref(db, 'padel/sponsors'), (snap) => { globalSponsors = snap.val(); if (globalSponsors && typeof state === 'object' && state) { mergeGlobalSponsors(); try { renderUI(); } catch (e) {} } });
+        onValue(ref(db, 'padel/sponsors'), (snap) => { globalSponsors = snap.val(); gLoaded.sp = true; try { bootGlobals(); } catch (e) {} if (globalSponsors && typeof state === 'object' && state) { mergeGlobalSponsors(); try { renderUI(); } catch (e) {} } });
 
 
         // ===== СПІЛЬНИЙ ВМІСТ ТУРНІРУ (групи, плей-офф): padel/groups, padel/playoff. Показ, масштаб, кольори, режими — окремо для корту =====
@@ -1209,10 +1210,21 @@
             const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
             lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, 'padel/playoff'), o);
         }
-        onValue(ref(db, 'padel/groups'), (snap) => { globalGroups = snap.val(); if (globalGroups && typeof state === 'object' && state) { mergeGlobalGroups(); try { renderUI(); } catch (e) {} } });
-        onValue(ref(db, 'padel/playoff'), (snap) => { globalPlayoff = snap.val(); if (globalPlayoff && typeof state === 'object' && state) { mergeGlobalPlayoff(); try { renderUI(); } catch (e) {} } });
+        onValue(ref(db, 'padel/groups'), (snap) => { globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (globalGroups && typeof state === 'object' && state) { mergeGlobalGroups(); try { renderUI(); } catch (e) {} } });
+        onValue(ref(db, 'padel/playoff'), (snap) => { globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (globalPlayoff && typeof state === 'object' && state) { mergeGlobalPlayoff(); try { renderUI(); } catch (e) {} } });
 
         function updateModalCourtBadge() { const b = document.getElementById('modal-court-badge'); if (b) b.innerText = 'Корт №' + (typeof courtId !== 'undefined' ? courtId : '1'); }
+
+        // Корт №1 — джерело спільного вмісту. Якщо в базі спільного блоку ще немає (турнір налаштували раніше) — заливаємо з корту №1,
+        // інакше інші корти показували б порожні табла.
+        function bootGlobals() {
+            if (typeof state !== 'object' || !state || String(courtId) !== '1') return;
+            if (gLoaded.gr && !globalGroups && state.groups) syncGroupsGlobal(true);
+            if (gLoaded.po && !globalPlayoff && state.playoff) syncPlayoffGlobal(true);
+            if (gLoaded.rk && !globalRanking && state.teamRanking && rkTeamsArr(state.teamRanking.teams).length) saveRankingGlobal(true);
+            if (gLoaded.sp && !globalSponsors && Array.isArray(state.sponsorLogos) && state.sponsorLogos.some(Boolean)) saveSponsorsGlobal();
+        }
+
         window.openModalSettings = function() { updateModalCourtBadge(); document.getElementById('settings-modal').classList.add('open'); }
         window.closeModalSettings = function() { document.getElementById('settings-modal').classList.remove('open'); }
 
@@ -1222,7 +1234,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} } else { resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2481,7 +2493,8 @@
             if (!c.own && globalIntro) IC_GLOBAL_KEYS.forEach(k => { if (globalIntro[k] !== undefined) c[k] = globalIntro[k]; });
         }
         function syncIntroGlobal(force) {
-            if (typeof state !== 'object' || !state || !icIsMaster()) return;
+            if (typeof state !== 'object' || !state) return;
+            if (!icIsMaster() && !(force && (!globalIntro || globalIntro.v !== 2))) return;   // не-шаблонний корт пише шаблон лише якщо його ще немає
             const o = icContent(), sig = JSON.stringify(o); if (!force && sig === lastIcSig) return;
             lastIcSig = sig; o.v = 2; o.ts = Date.now(); globalIntro = o; set(ref(db, 'padel/introCard'), o);
         }
@@ -2498,6 +2511,7 @@
             const c = icEnsure(); c.own = false; mergeGlobalIntro(); set(matchRef, state); icRefreshUI();
         };
         window.icShowAll = function(v) {
+            if (v) syncIntroGlobal(true);
             for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v);
             icEnsure().show = !!v; icRefreshUI();
         };
@@ -2652,6 +2666,14 @@
             else if (kind === 'ticker') { updateTickerEnabled(v); const cb = document.getElementById('ticker-enabled-checkbox'); if (cb) cb.checked = v; return; }   // бігучий рядок і так спільний (padel/bars)
             else if (kind === 'adbar') { updateAdBarEnabled(v); const cb = document.getElementById('adbar-enabled-checkbox'); if (cb) cb.checked = v; return; }
             else return;
+            if (v) {   // спершу гарантуємо, що спільний вміст є в базі — інакше корти без власного вмісту покажуть порожнє табло
+                try {
+                    if (kind === 'rk') saveRankingGlobal(true);
+                    else if (kind === 'po-upper' || kind === 'po-lower') syncPlayoffGlobal(true);
+                    else if (kind === 'gr') syncGroupsGlobal(true);
+                    else if (kind === 'sp') { ensureSponsorLogosArray(); const o = { logos: state.sponsorLogos.slice(0, 10) }; ensureSponsorInfosArray(); o.infos = state.sponsorInfos.slice(0, 10); globalSponsors = o; set(ref(db, 'padel/sponsors'), o); }
+                } catch (e) { console.error(e); }
+            }
             for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
         };
 
