@@ -407,6 +407,7 @@
         <div class="card" style="display:flex; flex-direction:column; gap:8px;">
             <div style="font-size:11px; font-weight:700;">🏆 Рейтинг гравців / команд (OBS):</div>
             <button class="btn" id="btn-rk-toggle" onclick="rkToggle()">🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД</button>
+            <div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('rk', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('rk', false)">🛑 СХОВАТИ НА ВСІХ</button></div>
             <div style="font-size:11px; color:#ccc;">Заголовок таблиці</div>
             <input type="text" data-rk="title" placeholder="РЕЙТИНГ КОМАНД" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" oninput="rkInput(this)">
             <div style="font-size:11px; color:#ccc;">Якщо команд більше 10 — режим показу</div>
@@ -685,10 +686,6 @@
                     <input type="range" id="qr-offsety-slider" min="-800" max="800" step="5" value="0" oninput="updateQrOffsetY(this.value)">
                 </label>
 
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
             </div>
 
             <div class="card" style="border: 2px solid #c69f66; background: #201a10;">
@@ -735,6 +732,7 @@
                     <span style="font-size:13px; font-weight:800; color:#7dd3fc;">УВІМКНУТИ НА ТРАНСЛЯЦІЇ:</span>
                     <input type="checkbox" id="sponsor-logos-visibility-checkbox" style="width:24px; height:24px;" onchange="toggleSponsorLogos(this.checked)">
                 </div>
+                <div style="margin-bottom:10px;"><div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('sp', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('sp', false)">🛑 СХОВАТИ НА ВСІХ</button></div></div>
                 <div class="row"><span>Масштаб рамки:</span><input type="range" id="sponsor-logo-scale-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updateSponsorLogoScale(this.value)"></div>
                 <div class="row"><span>Позиція по горизонталі:</span><input type="range" id="sponsor-logo-posx-slider" min="-800" max="800" step="5" value="0" oninput="updateSponsorLogoPosX(this.value)"></div>
                 <div class="row"><span>Позиція по вертикалі:</span><input type="range" id="sponsor-logo-posy-slider" min="-400" max="400" step="5" value="0" oninput="updateSponsorLogoPosY(this.value)"></div>
@@ -777,6 +775,7 @@
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Бігучий рядок (внизу екрана):</div>
                 <div style="font-size:10px; color:#9bd; margin-bottom:6px;">🌐 Увімкнення, текст/лого та стиль рядків — спільні для ВСІХ кортів. Позиція по вертикалі — окремо для кожного корту.</div>
                 <div class="switch-row"><span>Увімкнути бігучий рядок:</span><input type="checkbox" id="ticker-enabled-checkbox" onchange="updateTickerEnabled(this.checked)"></div>
+                <div style="margin:6px 0;"><div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('ticker', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('ticker', false)">🛑 СХОВАТИ НА ВСІХ</button></div></div>
                 <div id="ticker-content-editable" contenteditable="true" data-placeholder="Вставте текст або скопійований логотип (Ctrl+V)..." style="width:100%; box-sizing:border-box; margin-top:6px; min-height:60px; max-height:120px; overflow-y:auto; background:#1c1c1c; border:1px solid #444; border-radius:6px; padding:8px 10px; color:#eee; font-family:inherit; font-size:13px; line-height:1.5;" onpaste="handleTickerPaste(event)" oninput="saveTickerContent()"></div>
                 <div style="font-size:9px; color:#888; margin-top:4px;">Можна вставити (Ctrl+V) скопійований текст — шрифт залишиться однаковим, або скопійоване зображення/логотип — воно автоматично стиснеться і покажеться в рядку в зменшеному вигляді.</div>
                 <div class="row" style="margin-top:8px;">
@@ -821,6 +820,7 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Рекламний рядок (стаціонарний, ефект перекидання):</div>
                 <div class="switch-row"><span>Увімкнути рекламний рядок:</span><input type="checkbox" id="adbar-enabled-checkbox" onchange="updateAdBarEnabled(this.checked)"></div>
+                <div style="margin:6px 0;"><div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('adbar', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('adbar', false)">🛑 СХОВАТИ НА ВСІХ</button></div></div>
                 <div class="switch-row" style="margin-top:6px;"><span>Прибирати фон з лого/фото (прозорий):</span><input type="checkbox" id="adbar-removebg-checkbox" onchange="updateAdBarRemoveBg(this.checked)"></div>
                 <div style="font-size:9px; color:#888; margin-top:2px;">Визначає фон по кутах зображення й робить схожі кольори прозорими. Найкраще працює з логотипами на суцільному однотонному фоні.</div>
 
@@ -964,6 +964,15 @@
                     </div>
                 </div>
             </div>
+
+            <div id="match-actions" style="display:flex; flex-direction:column; gap:8px; border:2px solid #b91c1c; border-radius:8px; padding:10px; background:#1a0f0f;">
+                <div style="font-size:12px; font-weight:800; color:#fca5a5; text-transform:uppercase;">⚠️ Матч та корт</div>
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
+                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+            </div>
+
         </div>
     </div>
 
@@ -2254,6 +2263,7 @@
                 host.innerHTML = `
                     <div style="font-size:11px; font-weight:700;">🏆 Play-off: ${K === 'upper' ? 'ВЕРХНЯ СІТКА' : 'НИЖНЯ СІТКА'} (OBS)</div>
                     <button class="btn" id="po-btn-${K}" onclick="poToggle('${K}')">ПОКАЗАТИ</button>
+                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('po-${K}', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('po-${K}', false)">🛑 СХОВАТИ НА ВСІХ</button></div>
                     <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
                         <input type="text" data-po="${K}" data-path="title" placeholder="Заголовок сітки (необов'язково)" ${IN} oninput="poInput(this)">
                         <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-po="${K}" data-path="third" onchange="poInput(this)"> 3 місце</label>
@@ -2374,6 +2384,7 @@
             host.innerHTML = `
                 <div style="font-size:11px; font-weight:700;">👥 Груповий етап (OBS)</div>
                 <button class="btn" id="gr-btn-show" onclick="grToggle()">ПОКАЗАТИ</button>
+                <div style="display:flex; gap:6px;"><button type="button" class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('gr', true)">📡 ПОКАЗАТИ НА ВСІХ КОРТАХ</button><button type="button" class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="showAllCourts('gr', false)">🛑 СХОВАТИ НА ВСІХ</button></div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                     ${sel('count', 'Кількість груп (1–10)', Array.from({ length: 10 }, (_, i) => [i + 1, i + 1]))}
                     ${sel('teamsPer', 'Команд у групі', Array.from({ length: 7 }, (_, i) => [i + 2, i + 2]))}
@@ -2623,6 +2634,26 @@
             tools.onclick = (e) => { const a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return; cards.forEach((_, i) => apply(i, a === 'open')); persist(); };
             inner.insertBefore(tools, inner.firstChild);
         })();
+
+
+        // ===== «ПОКАЗАТИ / СХОВАТИ НА ВСІХ КОРТАХ» =====
+        window.showAllCourts = function(kind, v) {
+            v = !!v;
+            const paths = [];   // [шлях усередині корту, значення]
+            if (kind === 'rk') paths.push(['teamRanking/show', v]);
+            else if (kind === 'po-upper' || kind === 'po-lower') {
+                const other = kind === 'po-upper' ? 'lower' : 'upper';
+                paths.push(['playoff/' + kind.slice(3) + '/show', v]);
+                if (v) { paths.push(['playoff/' + other + '/show', false]); paths.push(['groups/show', false]); }   // сітки й групи — на весь екран, показуємо одне
+            } else if (kind === 'gr') {
+                paths.push(['groups/show', v]);
+                if (v) { paths.push(['playoff/upper/show', false]); paths.push(['playoff/lower/show', false]); }
+            } else if (kind === 'sp') paths.push(['showSponsorLogos', v]);
+            else if (kind === 'ticker') { updateTickerEnabled(v); const cb = document.getElementById('ticker-enabled-checkbox'); if (cb) cb.checked = v; return; }   // бігучий рядок і так спільний (padel/bars)
+            else if (kind === 'adbar') { updateAdBarEnabled(v); const cb = document.getElementById('adbar-enabled-checkbox'); if (cb) cb.checked = v; return; }
+            else return;
+            for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
+        };
 
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
