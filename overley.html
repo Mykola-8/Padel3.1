@@ -404,6 +404,12 @@
         .ic-logo { max-width: 1000px; max-height: 330px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
         .ic-bigtext { font-size: 120px; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,.4); }
         .ic-city { font-size: 46px; font-weight: 700; margin-top: 90px; }
+        .ic-body.has-cd .ic-city { margin-top: 44px; }
+        .ic-cd { margin-top: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; display: flex; align-items: baseline; justify-content: center; gap: 16px; color: var(--ic-cd, #fff); font-size: var(--ic-cd-s, 34px); line-height: 1.1; text-shadow: 0 2px 6px rgba(0,0,0,.4); }
+        .ic-cd .ic-cd-l { font-size: 0.6em; font-weight: 600; opacity: .85; }
+        .ic-cd .ic-cd-t { font-variant-numeric: tabular-nums; font-weight: 800; }
+        .ic-sl { position: absolute; bottom: calc(52px + 18px); max-width: 300px; height: var(--ic-sl, 90px); width: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,.45)); }
+        .ic-sl-l { left: 34px; } .ic-sl-r { right: 34px; }
         .ic-line3 { font-size: 42px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin-top: 26px; }
         .ic-foot { height: 52px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--ic-bottom, #f2f4f8); color: var(--ic-foottext, #10213f); font-size: 26px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
 
@@ -1813,7 +1819,17 @@
 
 
         // ===== ВСТУПНЕ ТАБЛО =====
-        let icKeyCache = '';
+        let icKeyCache = '', icCd = { ts: 0, label: '', end: '', show: false };
+        function icTick() {
+            const el = document.getElementById('ic-cd-t'); if (!el) return;
+            let ms = icCd.ts - Date.now();
+            if (ms <= 0) { el.textContent = icCd.end || '00:00:00'; const l = document.querySelector('#ic-cd .ic-cd-l'); if (l) l.style.display = 'none'; return; }
+            const l = document.querySelector('#ic-cd .ic-cd-l'); if (l) l.style.display = '';
+            const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), p = n => String(n).padStart(2, '0');
+            const t = p(Math.floor(s % 86400 / 3600)) + ':' + p(Math.floor(s % 3600 / 60)) + ':' + p(s % 60);
+            el.textContent = d > 0 ? d + 'д ' + t : t;
+        }
+        setInterval(icTick, 1000);
         function renderIntroCard(st) {
             const cfg = st.introCard || {}, wrap = document.getElementById('ic-wrap'), panel = document.getElementById('ic-panel'); if (!wrap || !panel) return;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
@@ -1825,7 +1841,9 @@
             wrap.setAttribute('data-anim', g(cfg.anim, 'zoom'));
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
-            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.footText, cfg.logoSize]);
+            icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
+            s.setProperty('--ic-cd', g(cfg.cdColor, '#ffffff')); s.setProperty('--ic-cd-s', (parseInt(g(cfg.cdSize, 34)) || 34) + 'px'); s.setProperty('--ic-sl', (parseInt(g(cfg.sideLogoSize, 90)) || 90) + 'px');
+            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
             if (key !== icKeyCache || !panel.firstChild) {
                 icKeyCache = key;
                 const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
@@ -1834,10 +1852,15 @@
                 if (logo) h += '<img class="ic-logo" style="max-width:' + Math.round(1000 * ls) + 'px; max-height:' + Math.round(330 * ls) + 'px;" src="' + esc(logo) + '">';
                 else if (cfg.line3) h += '<div class="ic-bigtext" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
                 if (cfg.city) h += '<div class="ic-city"' + (logo || cfg.line3 ? '' : ' style="margin-top:0"') + '>' + esc(cfg.city) + '</div>';
+                if (icCd.show && icCd.ts) h += '<div class="ic-cd" id="ic-cd"><span class="ic-cd-l">' + esc(icCd.label) + '</span><span class="ic-cd-t" id="ic-cd-t"></span></div>';
                 if (cfg.line3 && logo) h += '<div class="ic-line3">' + esc(cfg.line3) + '</div>';
                 h += '</div><div class="ic-foot">' + esc(cfg.footText) + '</div>';
+                if (cfg.logoL) h += '<img class="ic-sl ic-sl-l" src="' + esc(String(cfg.logoL).trim()) + '">';
+                if (cfg.logoR) h += '<img class="ic-sl ic-sl-r" src="' + esc(String(cfg.logoR).trim()) + '">';
                 panel.innerHTML = h;
+                const bd = panel.querySelector('.ic-body'); if (bd && icCd.show && icCd.ts) bd.classList.add('has-cd');
             }
+            icTick();
             const vis = !!cfg.show; wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
         }
 
