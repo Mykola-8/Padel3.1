@@ -873,7 +873,7 @@
         /* ===== ЛОГОТИПИ СПОНСОРІВ ===== */
         .sponsor-logo-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
-            width: 220px; height: 90px;
+            width: var(--sl-w, 220px); height: var(--sl-h, 90px);
             transform-origin: top center;
             background: transparent;
             border: none; border-radius: 0;
@@ -949,6 +949,14 @@
             85% { opacity: 1; }
             100% { left: 140%; opacity: 0; }
         }
+
+        /* інфо-табло спонсора: висувається з лівого боку логотипа справа наліво */
+        .sponsor-info-wrap { position: fixed; top: 20px; left: 50%; z-index: 9499; transform-origin: top center; width: var(--sl-w, 220px); height: var(--sl-h, 90px); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s; }
+        .sponsor-info-wrap.visible { opacity: 1; visibility: visible; }
+        .si-clip { position: absolute; right: 100%; top: 0; height: 100%; overflow: hidden; width: var(--si-w, 420px); }
+        .si-panel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 18px; background: var(--si-bg, #0c1c45); color: var(--si-color, #fff); border-radius: 10px 0 0 10px; border: 2px solid rgba(255,255,255,0.35); border-right: none; font-family: 'Montserrat', sans-serif; font-weight: 800; text-align: center; transform: translateX(105%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.8, 0.4); }
+        .si-panel.in { transform: translateX(0); transition: transform 1.5s cubic-bezier(0.22, 0.7, 0.2, 1); }
+        .si-text { white-space: normal; line-height: 1.12; max-width: 100%; overflow-wrap: anywhere; }
 
         .sponsor-logo-all-frame {
             position: fixed; top: 20px; left: 50%; z-index: 9500;
@@ -1413,6 +1421,7 @@
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (карусель) -->
     <div class="sponsor-logo-frame" id="sponsor-logo-frame"></div>
+    <div class="sponsor-info-wrap" id="sponsor-info-wrap"><div class="si-clip"><div class="si-panel" id="sponsor-info-panel"><span class="si-text" id="sponsor-info-text"></span></div></div></div>
 
     <!-- ЛОГОТИПИ СПОНСОРІВ (всі одразу) -->
     <div class="sponsor-logo-all-frame" id="sponsor-logo-all-frame"></div>
@@ -2207,7 +2216,7 @@
         let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
         let serverChangeBannerTimer = null, serverChangeBannerDelayTimer = null, lastServerChangeTrigger = 0;
-        let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "";
+        let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "", sponsorInfoList = [], sponsorInfoOn = false, sponsorInfoDelayTimer = null, sponsorInfoPending = false, sponsorInfoShownIdx = -2;
 
         let adBarTimer = null, adBarIndex = 0, adBarSlidesActive = [], lastAdBarSignature = "";
 
@@ -2258,6 +2267,23 @@
 
         const SPONSOR_LOGO_ANIM_CLASSES = ['anim-squeeze', 'anim-right-slow', 'anim-top-down', 'anim-zoom-far', 'anim-bottom-up'];
 
+        function fitSponsorInfoText() {
+            const p = document.getElementById('sponsor-info-panel'), t = document.getElementById('sponsor-info-text'); if (!p || !t) return;
+            let size = parseInt(p.getAttribute('data-maxfont')) || 26; t.style.fontSize = size + 'px';
+            const availW = p.clientWidth - 36, availH = p.clientHeight - 10;
+            while (size > 8 && (t.scrollWidth > availW || t.offsetHeight > availH)) { size--; t.style.fontSize = size + 'px'; }
+        }
+        function sponsorInfoShowFor(idx, instantOut) {
+            const p = document.getElementById('sponsor-info-panel'), t = document.getElementById('sponsor-info-text'); if (!p || !t) return;
+            clearTimeout(sponsorInfoDelayTimer); sponsorInfoPending = false;
+            const txt = sponsorInfoOn ? String(sponsorInfoList[idx] || '').trim() : '';
+            if (sponsorInfoShownIdx === idx && p.classList.contains('in') && t.textContent === txt) return;
+            p.classList.remove('in'); sponsorInfoShownIdx = -2;
+            if (!txt) return;
+            sponsorInfoPending = true;
+            sponsorInfoDelayTimer = setTimeout(() => { sponsorInfoPending = false; t.textContent = txt; fitSponsorInfoText(); p.classList.add('in'); sponsorInfoShownIdx = idx; }, 750);
+        }
+
         function startSponsorLogoCarousel(urls, intervalSec, animStyle) {
             clearInterval(sponsorLogoTimer);
             sponsorLogoActiveUrls = urls;
@@ -2270,14 +2296,17 @@
             const shineEl = document.getElementById('sponsor-logo-shine');
             if (imgs.length === 0) return;
             imgs[0].classList.add('active', animClass);
+            sponsorInfoShowFor(0);
             if (animClass === 'anim-squeeze') replaySponsorShine(shineEl);
             if (imgs.length > 1) {
                 sponsorLogoTimer = setInterval(() => {
+                    { const pp = document.getElementById('sponsor-info-panel'); if (pp) pp.classList.remove('in'); sponsorInfoShownIdx = -2; }
                     SPONSOR_LOGO_ANIM_CLASSES.forEach(c => imgs[sponsorLogoIndex].classList.remove(c));
                     imgs[sponsorLogoIndex].classList.remove('active');
                     sponsorLogoIndex = (sponsorLogoIndex + 1) % imgs.length;
                     setTimeout(() => {
                         imgs[sponsorLogoIndex].classList.add('active', animClass);
+                        sponsorInfoShowFor(sponsorLogoIndex);
                         if (animClass === 'anim-squeeze') replaySponsorShine(shineEl);
                     }, 350);
                 }, Math.max(1, intervalSec || 4) * 1000);
@@ -2425,6 +2454,7 @@
             if (!__globalSp) return s;
             const m = Object.assign({}, s), gs = __globalSp;
             if (gs.logos !== undefined) m.sponsorLogos = Array.isArray(gs.logos) ? gs.logos : Object.values(gs.logos || {});
+            if (gs.infos !== undefined) m.sponsorInfos = Array.isArray(gs.infos) ? gs.infos : Object.values(gs.infos || {});
             return m;
         }
         function __courtOnValue(cb) {
@@ -2877,8 +2907,13 @@
                     const sponsorFrame = document.getElementById('sponsor-logo-frame');
                     const sponsorAllFrame = document.getElementById('sponsor-logo-all-frame');
                     if (sponsorFrame && sponsorAllFrame) {
-                        const validLogos = (Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []).filter(u => !!u);
+                        const __logosRaw = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : [];
+                        const __infosRaw = Array.isArray(state.sponsorInfos) ? state.sponsorInfos : (state.sponsorInfos && typeof state.sponsorInfos === 'object' ? Object.values(state.sponsorInfos) : []);
+                        const validLogos = [], validInfos = [];
+                        __logosRaw.forEach((u, i) => { if (u) { validLogos.push(u); validInfos.push(String(__infosRaw[i] || '')); } });
                         const showAllMode = state.sponsorLogoDisplayMode === 'all';
+                        const __ls = Math.max(0.3, Math.min(3, (parseInt(state.sponsorLogoSize) || 100) / 100));
+                        sponsorFrame.style.setProperty('--sl-w', Math.round(220 * __ls) + 'px'); sponsorFrame.style.setProperty('--sl-h', Math.round(90 * __ls) + 'px');
                         const scaleTransform = 'translateX(calc(-50% + ' + (state.sponsorLogoPosX || 0) + 'px)) scale(' + (state.sponsorLogoScale || 1) + ')';
                         const topPx = (20 + (state.sponsorLogoPosY || 0)) + 'px';
 
@@ -2889,6 +2924,24 @@
                         sponsorAllFrame.style.transform = scaleTransform;
                         sponsorAllFrame.style.top = topPx;
 
+                        // інфо-табло спонсора
+                        const infoWrap = document.getElementById('sponsor-info-wrap'), infoPanel = document.getElementById('sponsor-info-panel');
+                        if (infoWrap && infoPanel) {
+                            const on = !!state.sponsorInfoShow && !!state.showSponsorLogos && !showAllMode;
+                            infoWrap.style.setProperty('--sl-w', Math.round(220 * __ls) + 'px'); infoWrap.style.setProperty('--sl-h', Math.round(90 * __ls) + 'px');
+                            infoWrap.style.setProperty('--si-w', (parseInt(state.sponsorInfoWidth) || 420) + 'px');
+                            infoWrap.style.setProperty('--si-bg', state.sponsorInfoBg || '#0c1c45'); infoWrap.style.setProperty('--si-color', state.sponsorInfoColor || '#ffffff');
+                            infoWrap.style.transform = scaleTransform; infoWrap.style.top = topPx;
+                            const mf = String(parseInt(state.sponsorInfoFont) || 26);
+                            const styleChanged = infoPanel.getAttribute('data-maxfont') !== mf || infoPanel.getAttribute('data-w') !== String(state.sponsorInfoWidth) || infoPanel.getAttribute('data-h') !== String(__ls);
+                            infoPanel.setAttribute('data-maxfont', mf); infoPanel.setAttribute('data-w', String(state.sponsorInfoWidth)); infoPanel.setAttribute('data-h', String(__ls));
+                            infoWrap.classList.toggle('visible', on);
+                            const prevOn = sponsorInfoOn; sponsorInfoOn = on; sponsorInfoList = validInfos;
+                            if (on !== prevOn || !on) { if (!on) { infoPanel.classList.remove('in'); sponsorInfoShownIdx = -2; clearTimeout(sponsorInfoDelayTimer); sponsorInfoPending = false; } else sponsorInfoShowFor(sponsorLogoIndex); }
+                            else if (styleChanged) { fitSponsorInfoText(); }
+                            else if (sponsorInfoShownIdx === -2 && !sponsorInfoPending && validLogos.length === 1 && String(validInfos[0] || '').trim()) sponsorInfoShowFor(0);
+                            else if (sponsorInfoShownIdx >= 0 && !sponsorInfoPending && String(sponsorInfoList[sponsorInfoShownIdx] || '').trim() !== document.getElementById('sponsor-info-text').textContent) sponsorInfoShowFor(sponsorInfoShownIdx);
+                        }
                         const signature = validLogos.join('|') + '::' + (state.sponsorLogoIntervalSec || 4) + '::' + showAllMode + '::' + (state.sponsorLogoAnimStyle || 'squeeze');
                         if (signature !== lastSponsorLogosSignature) {
                             lastSponsorLogosSignature = signature;
