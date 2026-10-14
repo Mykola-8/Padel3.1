@@ -2150,7 +2150,7 @@
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
                         saveSponsorsGlobal();
                     }
-                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true); syncIntroGlobal(true);
+                    saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true); if (icIsMaster()) syncIntroGlobal(true); else if (state.introCard) state.introCard.own = true;
                     await set(matchRef, state);
                     if (toAll) {
                         const writes = [];
@@ -2442,7 +2442,7 @@
 
 
         // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
-        const IC_GLOBAL_KEYS = ['topText', 'logo', 'city', 'line3', 'footText', 'logoL', 'logoR', 'cdTs', 'cdLabel', 'cdEnd'];
+        let IC_GLOBAL_KEYS = [];
         function icDefault() {
             return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
                 logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
@@ -2453,31 +2453,50 @@
             Object.keys(d).forEach(k => { if (state.introCard[k] === undefined) state.introCard[k] = d[k]; });
             return state.introCard;
         }
+        IC_GLOBAL_KEYS = Object.keys(icDefault()).filter(k => k !== 'show');
+        const icIsMaster = () => String(courtId) === '1';
         let globalIntro = null, lastIcSig = null, icTimer = null;
         function icContent() { const c = icEnsure(), o = {}; IC_GLOBAL_KEYS.forEach(k => { o[k] = c[k] === undefined ? '' : c[k]; }); return o; }
+        // Вступне табло: корт №1 — ШАБЛОН (усі налаштування пишуться в padel/introCard). Інші корти наслідують шаблон,
+        // доки на них щось не змінили вручну (own = true) — після цього корт живе своїм життям. «show» завжди окремо для корту.
         function mergeGlobalIntro() {
             if (typeof state !== 'object' || !state) return;
-            if (globalIntro) { const c = icEnsure(); IC_GLOBAL_KEYS.forEach(k => { if (globalIntro[k] !== undefined) c[k] = globalIntro[k]; }); }
-            lastIcSig = JSON.stringify(state.introCard ? icContent() : null);
+            const c = icEnsure();
+            if (icIsMaster()) {
+                lastIcSig = JSON.stringify(icContent());
+                if (!globalIntro || globalIntro.v !== 2) syncIntroGlobal(true);   // перший запуск / міграція зі старого формату
+                return;
+            }
+            if (!c.own && globalIntro) IC_GLOBAL_KEYS.forEach(k => { if (globalIntro[k] !== undefined) c[k] = globalIntro[k]; });
         }
         function syncIntroGlobal(force) {
-            if (typeof state !== 'object' || !state) return;
+            if (typeof state !== 'object' || !state || !icIsMaster()) return;
             const o = icContent(), sig = JSON.stringify(o); if (!force && sig === lastIcSig) return;
-            lastIcSig = sig; o.ts = Date.now(); globalIntro = o; set(ref(db, 'padel/introCard'), o);
+            lastIcSig = sig; o.v = 2; o.ts = Date.now(); globalIntro = o; set(ref(db, 'padel/introCard'), o);
         }
         onValue(ref(db, 'padel/introCard'), (snap) => { globalIntro = snap.val(); if (globalIntro && typeof state === 'object' && state) { mergeGlobalIntro(); try { icRefreshUI(); } catch (e) {} } });
         function icSave(immediate) {
             clearTimeout(icTimer);
-            if (immediate) { syncIntroGlobal(); set(matchRef, state); return; }
+            if (!icIsMaster()) { const c = icEnsure(); c.own = true; }   // правка на іншому корті — він більше не наслідує корт №1
+            if (immediate) { syncIntroGlobal(); set(matchRef, state); try { icRefreshUI(); } catch (e) {} return; }
             icTimer = setTimeout(() => { syncIntroGlobal(); set(matchRef, state); }, 250);
         }
+        window.icResetToMaster = function() {
+            if (icIsMaster()) return;
+            if (!confirm('Повернути вступне табло цього корту до налаштувань корту №1?')) return;
+            const c = icEnsure(); c.own = false; mergeGlobalIntro(); set(matchRef, state); icRefreshUI();
+        };
+        window.icShowAll = function(v) {
+            for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v);
+            icEnsure().show = !!v; icRefreshUI();
+        };
         window.icInput = function(el) {
             const k = el.getAttribute('data-path'), c = icEnsure();
             if (el.type === 'range') { c[k] = parseInt(el.value); const l = document.getElementById('ic-val-' + k); if (l) l.innerText = (k === 'animDur') ? (c[k] / 10).toFixed(1) + ' с' : c[k]; }
             else c[k] = el.value;
             icSave(false);
         };
-        window.icToggle = function() { const c = icEnsure(); c.show = !c.show; icRefreshUI(); icSave(true); };
+        window.icToggle = function() { const c = icEnsure(); c.show = !c.show; icRefreshUI(); set(matchRef, state); };
         window.icLogoUrl = function(v, key) { icEnsure()[key || 'logo'] = (v || '').trim(); icRefreshUI(); icSave(true); };
         window.icLogoClear = function(key) { icEnsure()[key || 'logo'] = ''; icRefreshUI(); icSave(true); };
         window.icCdSet = function(v) { const t = v ? new Date(v).getTime() : 0; icEnsure().cdTs = isFinite(t) ? t : 0; icSave(true); };
@@ -2511,7 +2530,13 @@
             host.innerHTML = `
                 <div style="font-size:11px; font-weight:700;">🎬 Вступне табло (титульна картка)</div>
                 <div style="font-size:10px; color:#9bd;">🌐 Логотип і тексти — спільні для ВСІХ кортів. Показ, масштаб, шрифт, кольори й анімація — окремо для кожного корту.</div>
+                <div id="ic-own-status" style="font-size:10px; color:#9bd;"></div>
                 <button class="btn" id="ic-btn-show" onclick="icToggle()">🎬 ПОКАЗАТИ</button>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="icShowAll(true)">🎬 ПОКАЗАТИ НА ВСІХ КОРТАХ</button>
+                    <button class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="icShowAll(false)">🛑 СХОВАТИ НА ВСІХ</button>
+                </div>
+                <button class="btn btn-gray" id="ic-btn-reset" style="padding:6px !important; font-size:11px !important; display:none;" onclick="icResetToMaster()">↺ Повернути до налаштувань корту №1</button>
                 ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
                 ${txt('city', 'Місто / підзаголовок (Perugia)')}
                 ${txt('line3', 'Назва турніру (під містом; без логотипу — великим)')}
@@ -2527,7 +2552,7 @@
                 </div>
                 <div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
                     <div style="font-size:11px; color:#e0b878; font-weight:700;">⏳ Зворотний відлік до початку (під містом)</div>
-                    <label style="display:flex; gap:6px; align-items:center; font-size:12px; color:#ccc;"><input type="checkbox" id="ic-cd-show" onchange="icCdToggle(this.checked)"> Показувати відлік (на цьому корті)</label>
+                    <label style="display:flex; gap:6px; align-items:center; font-size:12px; color:#ccc;"><input type="checkbox" id="ic-cd-show" onchange="icCdToggle(this.checked)"> Показувати відлік</label>
                     <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">Дата й час початку турніру (спільно для всіх кортів)<input type="datetime-local" id="ic-cd-input" ${IN} onchange="icCdSet(this.value)"></label>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${txt('cdLabel', 'Напис перед часом')}${txt('cdEnd', 'Напис по завершенні')}</div>
                     ${slider('cdSize', 'Розмір відліку (px)', 14, 90, 34)}
@@ -2568,7 +2593,10 @@
             });
             const cs = document.getElementById('ic-cd-show'); if (cs) cs.checked = !!c.cdShow;
             const ci = document.getElementById('ic-cd-input'); if (ci && document.activeElement !== ci) { if (c.cdTs) { const d = new Date(c.cdTs), p = n => String(n).padStart(2, '0'); ci.value = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); } else ci.value = ''; }
-            const btn = document.getElementById('ic-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🎬 ПОКАЗАТИ';
+            const btn = document.getElementById('ic-btn-show'); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ (цей корт)' : '🎬 ПОКАЗАТИ (цей корт)';
+            const os = document.getElementById('ic-own-status'), rb = document.getElementById('ic-btn-reset');
+            if (os) os.innerText = icIsMaster() ? '🌐 Це шаблон: усе, що налаштуєте на корті №1, автоматично діє на всіх кортах, які ще не змінювали вручну.' : (c.own ? '✏️ Корт №' + courtId + ' має власні налаштування (не залежить від корту №1).' : '🔗 Корт №' + courtId + ' бере налаштування з корту №1. Будь-яка ваша зміна тут зробить їх власними.');
+            if (rb) rb.style.display = (!icIsMaster() && c.own) ? '' : 'none';
         }
 
 
