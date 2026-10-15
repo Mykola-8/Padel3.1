@@ -392,6 +392,7 @@
                     <option value="fade">Плавно (fade)</option>
                     <option value="none">Без анімації</option>
                 </select></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Фон табла: 0% = прозорий, 100% = суцільний: <b id="mi-val-bgOpacity" style="color:#e0b878;">100</b></span><input type="range" data-mi="bgOpacity" min="0" max="100" step="1" value="100" oninput="miInput(this)"></label>
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Тривалість анімації: <b id="mi-val-animDur" style="color:#e0b878;">0.6 с</b></span><input type="range" data-mi="animDur" min="1" max="30" step="1" value="6" oninput="miInput(this)"></label>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
@@ -808,6 +809,10 @@
                     </select>
                 </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Ширина рядка — зменшити (%% екрана): <b id="ticker-width-value" style="color:#e0b878;">100%%</b></span>
+                    <input type="range" id="ticker-width-slider" min="20" max="100" step="1" value="100" oninput="updateBarWidth('tickerWidth', this.value, 'ticker-width-value')">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="ticker-offsety-value" style="color:#e0b878;">0px</b></span>
                     <input type="range" id="ticker-offsety-slider" min="-400" max="1000" step="5" value="0" oninput="updateTickerOffsetY(this.value)">
                 </label>
@@ -850,6 +855,10 @@
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Відстань між копіями: <b id="adbar-gap-value" style="color:#e0b878;">26px</b></span>
                     <input type="range" id="adbar-gap-slider" min="0" max="200" step="2" value="26" oninput="updateAdBarGap(this.value)">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                    <span style="font-size:11px; color:#ccc;">Ширина рядка — зменшити (%% екрана): <b id="adbar-width-value" style="color:#e0b878;">100%%</b></span>
+                    <input type="range" id="adbar-width-slider" min="20" max="100" step="1" value="100" oninput="updateBarWidth('adBarWidth', this.value, 'adbar-width-value')">
                 </label>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Позиція по вертикалі: <b id="adbar-offsety-value" style="color:#e0b878;">90px</b></span>
@@ -1373,7 +1382,7 @@
                 activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
-                showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
+                showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
                 logoUrl: "", logoSrc: "", customLogoText: "",
@@ -1964,6 +1973,7 @@
             saveBars();
         };
 
+        window.updateBarWidth = function(key, v, lblId) { state[key] = Math.max(20, Math.min(100, parseInt(v) || 100)); const l = document.getElementById(lblId); if (l) l.innerText = state[key] + '%'; set(matchRef, state); };
         window.updateTickerOffsetY = function(v) {
             state.tickerOffsetY = parseInt(v) || 0;
             const lbl = document.getElementById('ticker-offsety-value');
@@ -2098,7 +2108,7 @@
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
-                p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
+                showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
@@ -2133,7 +2143,7 @@
             'adBarSlides', 'adBarEnabled', 'adBarTextColor', 'adBarRemoveBg', 'adBarOffsetY', 'adBarHeight', 'adBarGap', 'adBarBgColor', 'adBarBgAlpha', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration',
             'tickerEnabled', 'tickerTextColor', 'tickerSpeed', 'tickerOffsetY', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerContentHTML', 'tickerBgColor', 'tickerBgAlpha',
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
-            'americanoLimit', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit'];
+            'americanoLimit', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
         window.tsExport = function() {
             try {
@@ -2468,7 +2478,7 @@
         let IC_GLOBAL_KEYS = [];
         function icDefault() {
             return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
-                logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
+                logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, bgOpacity: 100, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
         }
         function icEnsure() {
             const d = icDefault();
@@ -2592,6 +2602,7 @@
                     ${slider('sideLogoSize', 'Висота бічних логотипів (px)', 30, 250, 90)}
                 </div>
                 ${slider('scale', '🔍 Масштаб табла (%)', 30, 150, 100)}
+                ${slider('bgOpacity', '◐ Фон табла: 0% = прозорий, 100% = суцільний', 0, 100, 100)}
                 ${sel('font', '🔤 Шрифт', GR_FONTS.map(f => [f, f]))}
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                     ${color('topColor', '🎨 Шапка (верх)', d.topColor)}${color('topTextColor', '🎨 Текст шапки', d.topTextColor)}
@@ -2816,7 +2827,7 @@
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
             show: false, title: "FIP PLATINUM LYON 2026", court: "PISTE CENTRALE", round: "MEN - FINAL", vs: "VS", date: "",
-            x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "", anim: "slide", animDur: 6,
+            x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "", anim: "slide", animDur: 6, bgOpacity: 100,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
         };
@@ -3069,6 +3080,7 @@
             if (tickerDirectionSelector && document.activeElement !== tickerDirectionSelector) {
                 tickerDirectionSelector.value = state.tickerDirection || 'rl';
             }
+            [['ticker-width', 'tickerWidth'], ['adbar-width', 'adBarWidth']].forEach(([id, k]) => { const s = document.getElementById(id + '-slider'), l = document.getElementById(id + '-value'); const v = state[k] || 100; if (s && document.activeElement !== s) s.value = v; if (l) l.innerText = v + '%'; });
             const tickerOffsetYSlider = document.getElementById('ticker-offsety-slider');
             const tickerOffsetYLbl = document.getElementById('ticker-offsety-value');
             if (tickerOffsetYSlider && document.activeElement !== tickerOffsetYSlider) {
