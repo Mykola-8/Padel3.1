@@ -290,6 +290,39 @@
             --slide-doublefault: rgba(220, 38, 38, 0.55);
         }
 
+
+        html.theme-skewlime {
+            --accent: #b7e23f;
+            --accent-soft: rgba(183, 226, 63, 0.45);
+            --team-bg-top: #c4ea4c;
+            --team-bg-bottom: #a6cf34;
+            --team-text: #111111;
+            --score-set-past-bg: #9cc22e;
+            --score-set-past-text: #111111;
+            --score-set-current-bg: #c4ea4c;
+            --score-set-current-text: #111111;
+            --points-team1-top: #1d1d1d;
+            --points-team1-bottom: #0c0c0c;
+            --points-team2-top: #1d1d1d;
+            --points-team2-bottom: #0c0c0c;
+            --points-text: #c4ea4c;
+            --points-ad-top: #d6f26a;
+            --points-ad-bottom: #b7e23f;
+            --points-ad-text: #111111;
+            --panel-bg: rgba(10, 14, 4, 0.78);
+            --panel-border: rgba(183, 226, 63, 0.5);
+            --panel-text: #f4ffd6;
+            --slide-gamepoint: rgba(60, 90, 10, 0.65);
+            --slide-breakpoint: rgba(150, 190, 30, 0.6);
+            --slide-setpoint: rgba(40, 60, 10, 0.7);
+            --slide-matchpoint: rgba(185, 28, 28, 0.55);
+            --slide-goldenpoint: rgba(217, 119, 6, 0.6);
+            --slide-tiebreak: rgba(20, 30, 5, 0.78);
+            --slide-deuce: rgba(91, 33, 182, 0.5);
+            --slide-doublefault: rgba(220, 38, 38, 0.55);
+            --sk: 16px;
+        }
+
         html, body {
             background: transparent !important;
             background-color: transparent !important;
@@ -1413,6 +1446,35 @@
         html.theme-stonesand .mfb-table th, html.theme-stonesand .mfb-table td, html.theme-stonesand .sm-val, html.theme-stonesand .h-set-score, html.theme-stonesand .sr-score, html.theme-stonesand .sr-team { color: var(--panel-text); }
         html.theme-stonesand .mfb-table th, html.theme-stonesand .mfb-table td { border-bottom-color: rgba(194, 112, 61, 0.25); }
         html.theme-stonesand .break-label, html.theme-stonesand .break-score-sep { color: var(--accent); }
+
+        /* ===== ТЕМА «ПАРАЛЕЛОГРАМ» (lime, косі плашки як у Pro Tour) ===== */
+        html.theme-skewlime .board-row-wrap { isolation: isolate; }
+        html.theme-skewlime .scoreboard-wrapper { filter: none; }
+        html.theme-skewlime .main-board { overflow: visible; border-radius: 0; }
+        html.theme-skewlime .team-row { height: 46px; }
+        html.theme-skewlime #row-team-1 { margin-bottom: 4px; }
+        html.theme-skewlime .team-names { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text); text-transform: uppercase; justify-content: center; padding: 0 calc(var(--sk) + 10px); clip-path: polygon(var(--sk) 0, 100% 0, calc(100% - var(--sk)) 100%, 0 100%); }
+        html.theme-skewlime .server-indicator, html.theme-skewlime .player-serving { color: #1b3300; text-shadow: none; }
+        html.theme-skewlime .server-indicator { position: absolute; right: calc(var(--sk) + 6px); margin: 0; }
+        html.theme-skewlime .score-box { min-width: 58px; margin-left: 6px; font-weight: 900; clip-path: polygon(var(--sk) 0, 100% 0, calc(100% - var(--sk)) 100%, 0 100%); }
+        @keyframes skBoxIn { from { max-width: 0; margin-left: 0; opacity: 0; } to { max-width: 80px; margin-left: 6px; opacity: 1; } }
+        html.theme-skewlime .score-box { overflow: hidden; max-width: 80px; animation: skBoxIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1); }
+        html.theme-skewlime .points-board-outer { transition: width 0.5s cubic-bezier(0.22, 0.9, 0.3, 1); }
+        html.theme-skewlime .points-board-outer.visible { width: 106px; }
+        html.theme-skewlime .points-board { width: 106px; }
+        html.theme-skewlime .set-past { background-color: var(--score-set-past-bg); color: var(--score-set-past-text); }
+        html.theme-skewlime .set-current { background-color: var(--score-set-current-bg); color: var(--score-set-current-text); }
+        html.theme-skewlime .points-board-outer { border-radius: 0; }
+        html.theme-skewlime .points-board { gap: 4px; }
+        html.theme-skewlime .points-cell { margin-left: 6px; clip-path: polygon(var(--sk) 0, 100% 0, calc(100% - var(--sk)) 100%, 0 100%); border: none !important; }
+        html.theme-skewlime .points-cell.team1 { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text); }
+        html.theme-skewlime .points-cell.team2 { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text); }
+        html.theme-skewlime .points-cell.ad-active { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text); }
+        html.theme-skewlime .match-finished-board, html.theme-skewlime .statistics-overlay, html.theme-skewlime .set-result-overlay { background: var(--panel-bg); border-color: var(--panel-border); color: var(--panel-text); }
+        html.theme-skewlime .mfb-header, html.theme-skewlime .mfb-winner, html.theme-skewlime .sr-set-label, html.theme-skewlime .sm-header, html.theme-skewlime .h-set-time, html.theme-skewlime .mfb-table td.mfb-set-win, html.theme-skewlime .mfb-table tr.mfb-winner-row td.mfb-team-name, html.theme-skewlime .sm-val.gold { color: var(--accent); }
+        html.theme-skewlime .mfb-table th, html.theme-skewlime .mfb-table td, html.theme-skewlime .sm-val, html.theme-skewlime .h-set-score, html.theme-skewlime .sr-score, html.theme-skewlime .sr-team { color: var(--panel-text); }
+        html.theme-skewlime .mfb-table th, html.theme-skewlime .mfb-table td { border-bottom-color: rgba(183, 226, 63, 0.25); }
+        html.theme-skewlime .break-label, html.theme-skewlime .break-score-sep { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -1480,7 +1542,7 @@
                 <div class="ribbon-top-item" id="ribbon-top-tiebreak">TIEBREAK</div>
             </div>
 
-            <div style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
+            <div class="board-row-wrap" style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
                 <div class="main-board" style="position:relative; z-index:2;">
                     <div class="team-row" id="row-team-1">
                         <div class="team-names" id="block-anim-1">
@@ -2595,6 +2657,7 @@
                 document.documentElement.classList.toggle('theme-championship', state.boardTheme === 'championship');
                 document.documentElement.classList.toggle('theme-mono', state.boardTheme === 'mono');
                 document.documentElement.classList.toggle('theme-stonesand', state.boardTheme === 'stonesand');
+                document.documentElement.classList.toggle('theme-skewlime', state.boardTheme === 'skewlime');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
