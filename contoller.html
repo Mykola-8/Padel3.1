@@ -1195,7 +1195,7 @@
 
         // ===== СПІЛЬНИЙ ВМІСТ ТУРНІРУ (групи, плей-офф): padel/groups, padel/playoff. Показ, масштаб, кольори, режими — окремо для корту =====
         const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts'];
-        const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third'];
+        const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third', 'logo', 'logoSize'];
         let globalGroups = null, globalPlayoff = null, lastGrSig = null, lastPoSig = null;
         function grContent() { const c = grEnsure(), o = {}; GR_GLOBAL_KEYS.forEach(k => { o[k] = JSON.parse(JSON.stringify(c[k])); }); return o; }
         function poContent() { const o = {}; ['upper', 'lower'].forEach(key => { const c = poEnsure(key), x = {}; PO_GLOBAL_KEYS.forEach(k => { x[k] = JSON.parse(JSON.stringify(c[k])); }); o[key] = x; }); return o; }
@@ -2207,7 +2207,7 @@
         const PO_EMPTY = () => ({ a: '', b: '', sa: '', sb: '' });
         function poDefault(key) {
             const m = {}; PO_ROUNDS.forEach(([r, n]) => { m[r] = Array.from({ length: n }, PO_EMPTY); });
-            return { show: false, title: key === 'lower' ? 'НИЖНЯ СІТКА' : '', third: key !== 'lower', scale: 100, bgOpacity: 100,
+            return { show: false, title: key === 'lower' ? 'НИЖНЯ СІТКА' : '', third: key !== 'lower', scale: 100, bgOpacity: 100, logo: '', logoSize: 100,
                 bg1: '#0c1c45', bg2: '#1c3d78', frame: '#f5c542', score: '#e8b52c', line: '#f5c542', text: '#10213f', head: '#9fb3dd', titleColor: '#ffffff',
                 labels: { r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, m };
         }
@@ -2237,6 +2237,22 @@
             if (el.type === 'range') { const l = document.getElementById('po-val-' + key + '-' + path); if (l) l.innerText = v; }
             poSave(false);
         };
+        window.poLogoUpload = function(input, key) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(600 / img.width, 300 / img.height, 1);
+                    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+                    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                    poEnsure(key).logo = cv.toDataURL('image/png'); poRefreshUI(); poSave(true); input.value = '';
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        window.poLogoClear = function(key) { poEnsure(key).logo = ''; poRefreshUI(); poSave(true); };
         window.poToggle = function(key) {
             const c = poEnsure(key); c.show = !c.show;
             if (c.show) { poEnsure(key === 'upper' ? 'lower' : 'upper').show = false; if (state.groups) state.groups.show = false; }   // сітки на весь екран — показуємо одну
@@ -2290,6 +2306,8 @@
                         <input type="text" data-po="${K}" data-path="title" placeholder="Заголовок сітки (необов'язково)" ${IN} oninput="poInput(this)">
                         <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-po="${K}" data-path="third" onchange="poInput(this)"> 3 місце</label>
                     </div>
+                    <div style="display:flex; gap:6px; align-items:center;"><span style="font-size:11px; color:#ccc; white-space:nowrap;">🖼 Лого (правий верхній кут):</span><input type="file" accept="image/*" onchange="poLogoUpload(this,'${K}')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><span id="po-logo-st-${K}" style="font-size:11px;"></span><button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="poLogoClear('${K}')">✖</button></div>
+                    ${slider('logoSize', '🖼 Розмір лого (%)', 30, 250, 100)}
                     ${slider('scale', '🔍 Масштаб (%)', 30, 150, 100)}
                     ${slider('bgOpacity', '◐ Непрозорість фону (%)', 0, 100, 100)}
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
@@ -2320,6 +2338,7 @@
                     else if (el.type === 'range') { el.value = v; const l = document.getElementById('po-val-' + K + '-' + el.getAttribute('data-path')); if (l) l.innerText = v; }
                     else { const s = (v === undefined || v === null) ? '' : String(v); if (el.value !== s) el.value = s; }
                 });
+                const lst = document.getElementById('po-logo-st-' + K); if (lst) lst.innerText = c.logo ? '✅' : '';
                 const btn = document.getElementById('po-btn-' + K); if (btn) btn.innerText = c.show ? '🛑 СХОВАТИ' : '🏆 ПОКАЗАТИ';
                 const d3 = document.getElementById('po-d-' + K + '-third'); if (d3) d3.style.display = c.third ? '' : 'none';
             });
