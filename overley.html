@@ -2759,9 +2759,6 @@
 
                 const boardPromoPanel = document.getElementById('board-promo-panel');
                 if (boardPromoPanel) {
-                    const stageBadgeRect = stageBadgeWrapper.getBoundingClientRect();
-                    boardPromoPanel.style.top = (stageBadgeRect.bottom + 8) + 'px';
-                    boardPromoPanel.style.left = teamNameStartX + 'px';
                     boardPromoPanel.classList.toggle('visible', !!state.showBoardPromoPanel);
                     const promoLines = Array.isArray(state.boardPromoLines) ? state.boardPromoLines : [];
                     for (let i = 1; i <= 5; i++) {
@@ -2773,6 +2770,11 @@
                         if (cfg.bg) { lineEl.style.background = cfg.bg; lineEl.classList.add('has-bg'); }
                         else { lineEl.style.background = "transparent"; lineEl.classList.remove('has-bg'); }
                     }
+                    // відкріплена від табла: позиція 0–100% по всьому екрану (X — горизонталь, Y — вертикаль)
+                    const ppx = Math.max(0, Math.min(100, state.promoPosX === undefined ? 3 : (parseFloat(state.promoPosX) || 0)));
+                    const ppy = Math.max(0, Math.min(100, state.promoPosY === undefined ? 30 : (parseFloat(state.promoPosY) || 0)));
+                    boardPromoPanel.style.left = (ppx / 100 * Math.max(0, window.innerWidth - boardPromoPanel.offsetWidth)) + 'px';
+                    boardPromoPanel.style.top = (ppy / 100 * Math.max(0, window.innerHeight - boardPromoPanel.offsetHeight)) + 'px';
                 }
 
                 const ribbonMatch = document.getElementById('ribbon-match');
