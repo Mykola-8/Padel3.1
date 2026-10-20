@@ -484,6 +484,19 @@
         .po-t + .po-t { border-top: 1px solid rgba(0,0,0,0.28); }
         .po-s .po-t { justify-content: center; font-size: 26px; font-weight: 800; padding: 0 6px; }
         .po-h { position: absolute; transform: translateX(-50%); height: 32px; line-height: 32px; font-size: 24px; font-weight: 800; color: var(--po-head, #9fb3dd); white-space: nowrap; }
+
+        /* ===== ТЕМИ ПЛЕЙ-ОФ: форма (data-pt) + кольори з пресетів ===== */
+        .po-t.win { font-weight: 800; }
+        .po-wrap[data-pt="card"] .po-m, .po-wrap[data-pt="glass"] .po-m { border-radius: 16px; background: var(--po-frame, #fff); border: 2px solid var(--po-bd, #e3e8f5); box-sizing: border-box; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
+        .po-wrap[data-pt="card"] .po-n, .po-wrap[data-pt="glass"] .po-n { background: transparent; width: 229px; height: 72px; }
+        .po-wrap[data-pt="card"] .po-s, .po-wrap[data-pt="glass"] .po-s { background: transparent; left: 229px; width: 148px; height: 72px; }
+        .po-wrap[data-pt="card"] .po-t, .po-wrap[data-pt="glass"] .po-t { height: 36px; }
+        .po-wrap[data-pt="card"] .po-t + .po-t, .po-wrap[data-pt="glass"] .po-t + .po-t { border-top: none; }
+        .po-wrap[data-pt="card"] .po-s .po-t, .po-wrap[data-pt="glass"] .po-s .po-t { color: var(--po-sc, var(--po-text, #10213f)); }
+        .po-wrap[data-pt="card"] .po-n .po-t.win, .po-wrap[data-pt="glass"] .po-n .po-t.win { background: var(--po-win, rgba(0,0,0,0.06)); border-radius: 10px 0 0 10px; }
+        .po-wrap[data-pt="card"] .po-s .po-t.win, .po-wrap[data-pt="glass"] .po-s .po-t.win { background: var(--po-win, rgba(0,0,0,0.06)); border-radius: 0 10px 10px 0; }
+        .po-wrap[data-pt="glass"] .po-m { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .po-wrap[data-pt="card"] .po-n .po-t, .po-wrap[data-pt="glass"] .po-n .po-t { padding-left: 18px; }
         .po-logo { position: absolute; right: 50px; top: 20px; max-width: 520px; object-fit: contain; background: none; border: none; box-shadow: none; }
         .po-title { position: absolute; left: 50px; top: 26px; height: 70px; line-height: 70px; font-size: 54px; font-weight: 900; color: var(--po-title, #fff); text-transform: uppercase; white-space: nowrap; }
 
@@ -1830,6 +1843,12 @@
             const cSF = [0, 1].map(i => (cQF[2 * i] + cQF[2 * i + 1]) / 2), cF = (cSF[0] + cSF[1]) / 2;
             return { H: PO_L.H, W: PO_L.W, c16: [], cQF, cSF, cF, cThird: PO_L.cThird, x: { r16: -9999, qf: 290, sf: 770, f: 1250 } };
         }
+        function poWinner(m) {
+            const tk = v => String(v === undefined || v === null ? '' : v).split(/[^0-9]+/).filter(x => x !== '').map(Number);
+            const a = tk(m.sa), b = tk(m.sb); if (!a.length || !b.length) return 0;
+            let wa = 0, wb = 0; for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x > y) wa++; else if (y > x) wb++; }
+            return wa > wb ? 1 : (wb > wa ? 2 : 0);
+        }
         const poKeyCache = {};
         function poText(v) { return (v === undefined || v === null) ? '' : String(v); }
         function poBuild(wrap, cfg) {
@@ -1856,9 +1875,10 @@
                 m = m || {};
                 const d = document.createElement('div'); d.className = 'po-m'; d.style.left = x + 'px'; d.style.top = (cy - PO_L.H / 2) + 'px';
                 const n = document.createElement('div'); n.className = 'po-n'; const s = document.createElement('div'); s.className = 'po-s';
-                [[m.a, m.sa], [m.b, m.sb]].forEach(p => {
-                    const t = document.createElement('div'); t.className = 'po-t'; t.textContent = poText(p[0]); n.appendChild(t);
-                    const u = document.createElement('div'); u.className = 'po-t'; u.textContent = poText(p[1]); s.appendChild(u);
+                const wn = poWinner(m);
+                [[m.a, m.sa], [m.b, m.sb]].forEach((p, pi) => {
+                    const t = document.createElement('div'); t.className = 'po-t' + (wn === pi + 1 ? ' win' : ''); t.textContent = poText(p[0]); n.appendChild(t);
+                    const u = document.createElement('div'); u.className = 'po-t' + (wn === pi + 1 ? ' win' : ''); u.textContent = poText(p[1]); s.appendChild(u);
                 });
                 d.appendChild(n); d.appendChild(s); wrap.appendChild(d);
             };
@@ -1886,6 +1906,7 @@
                 wrap.style.setProperty('--po-frame', g(cfg.frame, '#f5c542')); wrap.style.setProperty('--po-score', g(cfg.score, '#e8b52c'));
                 wrap.style.setProperty('--po-line', g(cfg.line, '#f5c542')); wrap.style.setProperty('--po-text', g(cfg.text, '#10213f'));
                 wrap.style.setProperty('--po-head', g(cfg.head, '#9fb3dd')); wrap.style.setProperty('--po-title', g(cfg.titleColor, '#ffffff'));
+                wrap.style.setProperty('--po-win', g(cfg.win, 'rgba(0,0,0,0.06)')); wrap.style.setProperty('--po-sc', g(cfg.sc, g(cfg.text, '#10213f'))); wrap.style.setProperty('--po-bd', g(cfg.bd, '#e3e8f5')); wrap.dataset.pt = g(cfg.shape, 'sq');
                 const bgEl = wrap.querySelector('.po-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
