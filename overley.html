@@ -477,11 +477,13 @@
         body.po-active #statistics-panel { display: none !important; }
         .po-bg { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: linear-gradient(135deg, var(--po-bg1, #0c1c45), var(--po-bg2, #1c3d78)); }
         .po-lines { position: absolute; left: 0; top: 0; }
-        .po-m { position: absolute; width: 381px; height: 76px; }
-        .po-n { position: absolute; left: 0; top: 0; width: var(--po-nw, 231px); height: 76px; background: var(--po-frame, #f5c542); }
-        .po-s { position: absolute; left: calc(var(--po-nw, 231px) + 5px); top: 0; width: 145px; height: 76px; background: var(--po-score, #e8b52c); }
-        .po-t { height: 38px; box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; font-size: 22px; font-weight: 700; color: var(--po-text, #10213f); white-space: nowrap; overflow: hidden; }
+        .po-m { position: absolute; width: 381px; height: var(--po-h, 76px); }
+        .po-n { position: absolute; left: 0; top: 0; width: var(--po-nw, 231px); height: var(--po-h, 76px); background: var(--po-frame, #f5c542); }
+        .po-s { position: absolute; left: calc(var(--po-nw, 231px) + 5px); top: 0; width: 145px; height: var(--po-h, 76px); background: var(--po-score, #e8b52c); }
+        .po-t { height: calc(var(--po-h, 76px) / 2); box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; font-size: 22px; font-weight: 700; color: var(--po-text, #10213f); white-space: nowrap; overflow: hidden; }
         .po-n .po-t { font-size: var(--po-nf, 22px); }
+        .po-n .po-t.two { flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.14; }
+        .po-n .po-t.two > div { white-space: nowrap; }
         .po-t + .po-t { border-top: 1px solid rgba(0,0,0,0.28); }
         .po-s .po-t { justify-content: center; font-size: 26px; font-weight: 800; padding: 0 6px; }
         .po-h { position: absolute; transform: translateX(-50%); height: 32px; line-height: 32px; font-size: 24px; font-weight: 800; color: var(--po-head, #9fb3dd); white-space: nowrap; }
@@ -489,9 +491,9 @@
         /* ===== ТЕМИ ПЛЕЙ-ОФ: форма (data-pt) + кольори з пресетів ===== */
         .po-t.win { font-weight: 800; }
         .po-wrap[data-pt="card"] .po-m, .po-wrap[data-pt="glass"] .po-m { border-radius: 16px; background: var(--po-frame, #fff); border: 2px solid var(--po-bd, #e3e8f5); box-sizing: border-box; overflow: hidden; box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
-        .po-wrap[data-pt="card"] .po-n, .po-wrap[data-pt="glass"] .po-n { background: transparent; width: calc(var(--po-nw, 231px) - 2px); height: 72px; }
-        .po-wrap[data-pt="card"] .po-s, .po-wrap[data-pt="glass"] .po-s { background: transparent; left: calc(var(--po-nw, 231px) - 2px); width: 148px; height: 72px; }
-        .po-wrap[data-pt="card"] .po-t, .po-wrap[data-pt="glass"] .po-t { height: 36px; }
+        .po-wrap[data-pt="card"] .po-n, .po-wrap[data-pt="glass"] .po-n { background: transparent; width: calc(var(--po-nw, 231px) - 2px); height: calc(var(--po-h, 76px) - 4px); }
+        .po-wrap[data-pt="card"] .po-s, .po-wrap[data-pt="glass"] .po-s { background: transparent; left: calc(var(--po-nw, 231px) - 2px); width: 148px; height: calc(var(--po-h, 76px) - 4px); }
+        .po-wrap[data-pt="card"] .po-t, .po-wrap[data-pt="glass"] .po-t { height: calc(var(--po-h, 76px) / 2 - 2px); }
         .po-wrap[data-pt="card"] .po-t + .po-t, .po-wrap[data-pt="glass"] .po-t + .po-t { border-top: none; }
         .po-wrap[data-pt="card"] .po-s .po-t, .po-wrap[data-pt="glass"] .po-s .po-t { color: var(--po-sc, var(--po-text, #10213f)); }
         .po-wrap[data-pt="card"] .po-n .po-t.win, .po-wrap[data-pt="glass"] .po-n .po-t.win { background: var(--po-win, rgba(0,0,0,0.06)); border-radius: 10px 0 0 10px; }
@@ -1838,8 +1840,8 @@
         })();
         // Якщо 1/8 не грається (немає жодного запису) — сітка починається з 1/4 і центрується
         function poHas16(M) { return (M && M.r16 || []).some(m => m && [m.a, m.b, m.sa, m.sb].some(v => v !== undefined && v !== null && String(v).trim() !== '')); }
-        function poLayout(has16, W) {
-            W = W || PO_L.W; const n = has16 ? 4 : 3, gap0 = 99, minGap = 60;
+        function poLayout(has16, W, H) {
+            W = W || PO_L.W; H = H || PO_L.H; const n = has16 ? 4 : 3, gap0 = 99, minGap = 60;
             let gap = gap0, total = n * W + (n - 1) * gap, fit = 1; const minGap0 = 40;
             if (total > 1821) { gap = Math.max(minGap0, (1821 - n * W) / (n - 1)); total = n * W + (n - 1) * gap; }
             if (total > 1860) fit = 1860 / total;         // дуже довгі назви — стискаємо сітку цілком, текст лишається повним
@@ -1848,19 +1850,19 @@
             let c16 = PO_L.c16, cQF, cSF, cF;
             if (has16) { cQF = PO_L.cQF; cSF = PO_L.cSF; cF = PO_L.cF; }
             else { const step = (942 - 181) / 3; cQF = [0, 1, 2, 3].map(i => 181 + PO_L.H / 2 + i * step); cSF = [0, 1].map(i => (cQF[2 * i] + cQF[2 * i + 1]) / 2); cF = (cSF[0] + cSF[1]) / 2; c16 = []; }
-            return { H: PO_L.H, W, gap, fit, c16, cQF, cSF, cF, cThird: PO_L.cThird, x };
+            return { H, W, gap, fit, c16, cQF, cSF, cF, cThird: PO_L.cThird, x };
         }
         // ширина колонки назв = найдовша назва в усій сітці (для симетрії всіх рамок)
-        function poNameWidth(M, fs) {
+        function poNameWidth(M, fs, two) {
             let w = 0; const cv = poNameWidth._cv || (poNameWidth._cv = document.createElement('canvas')), cx = cv.getContext('2d');
             cx.font = '800 ' + (fs || 22) + 'px Montserrat, Arial, sans-serif';
-            Object.keys(M || {}).forEach(r => (M[r] || []).forEach(m => { if (!m) return; [m.a, m.b].forEach(t => { if (t) w = Math.max(w, cx.measureText(String(t)).width); }); }));
+            Object.keys(M || {}).forEach(r => (M[r] || []).forEach(m => { if (!m) return; [m.a, m.b].forEach(t => { if (!t) return; (two ? String(t).split('/') : [String(t)]).forEach(x => { w = Math.max(w, cx.measureText(x.trim()).width); }); }); }));
             return Math.max(231, Math.ceil(w * 1.04 + 36));
         }
         // спершу зменшуємо шрифт назв (22→16 px), щоб усе вмістилось без стиснення сітки; потім — стискаємо сітку
-        function poPickSizing(M, has16) {
-            const n = has16 ? 4 : 3; let fs = 22, NW = poNameWidth(M, 22);
-            while (fs > 16 && n * (NW + 150) + (n - 1) * 40 > 1860) { fs--; NW = poNameWidth(M, fs); }
+        function poPickSizing(M, has16, two) {
+            const n = has16 ? 4 : 3; let fs = two ? 20 : 22, NW = poNameWidth(M, fs, two);
+            while (fs > 16 && n * (NW + 150) + (n - 1) * 40 > 1860) { fs--; NW = poNameWidth(M, fs, two); }
             return { fs, NW };
         }
         function poWinner(m) {
@@ -1872,7 +1874,8 @@
         const poKeyCache = {};
         function poText(v) { return (v === undefined || v === null) ? '' : String(v); }
         function poBuild(wrap, cfg) {
-            const has16 = poHas16((cfg.m || {})), SZ = poPickSizing(cfg.m || {}, has16), NW = SZ.NW, PO_L = poLayout(has16, NW + 150);
+            const has16 = poHas16((cfg.m || {})), TWO = !!cfg.twoLines, SZ = poPickSizing(cfg.m || {}, has16, TWO), NW = SZ.NW, PO_L = poLayout(has16, NW + 150, TWO ? 100 : 76);
+            wrap.style.setProperty('--po-h', PO_L.H + 'px');
             wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.dataset.fit = PO_L.fit;
             wrap.innerHTML = '';
             const bg = document.createElement('div'); bg.className = 'po-bg'; wrap.appendChild(bg);
@@ -1891,15 +1894,17 @@
             const head = (txt, cx, y) => { if (!txt) return; const h = document.createElement('div'); h.className = 'po-h'; h.style.left = cx + 'px'; h.style.top = (y - 16) + 'px'; h.textContent = txt; wrap.appendChild(h); };
             const half = PO_L.W / 2;
             if (has16) head(lb.r16, PO_L.x.r16 + half, 133); head(lb.qf, PO_L.x.qf + half, 133); head(lb.sf, PO_L.x.sf + half, 133);
-            head(lb.f, PO_L.x.f + half, PO_L.cF - 38 - 21);
-            if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - 38 - 20);
+            head(lb.f, PO_L.x.f + half, PO_L.cF - PO_L.H / 2 - 21);
+            if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - PO_L.H / 2 - 20);
             const box = (x, cy, m) => {
                 m = m || {};
                 const d = document.createElement('div'); d.className = 'po-m'; d.style.width = PO_L.W + 'px'; d.style.left = x + 'px'; d.style.top = (cy - PO_L.H / 2) + 'px';
                 const n = document.createElement('div'); n.className = 'po-n'; const s = document.createElement('div'); s.className = 'po-s';
                 const wn = poWinner(m);
                 [[m.a, m.sa], [m.b, m.sb]].forEach((p, pi) => {
-                    const t = document.createElement('div'); t.className = 'po-t' + (wn === pi + 1 ? ' win' : ''); t.textContent = poText(p[0]); n.appendChild(t);
+                    const t = document.createElement('div'); t.className = 'po-t' + (wn === pi + 1 ? ' win' : ''); const nmv = poText(p[0]);
+                    if (TWO && nmv.indexOf('/') >= 0) { t.classList.add('two'); nmv.split('/').slice(0, 2).forEach(part => { const ln = document.createElement('div'); ln.textContent = part.trim(); t.appendChild(ln); }); } else t.textContent = nmv;
+                    n.appendChild(t);
                     const u = document.createElement('div'); u.className = 'po-t' + (wn === pi + 1 ? ' win' : ''); u.textContent = poText(p[1]); s.appendChild(u);
                 });
                 d.appendChild(n); d.appendChild(s); wrap.appendChild(d);
@@ -1930,7 +1935,7 @@
                 wrap.style.setProperty('--po-head', g(cfg.head, '#9fb3dd')); wrap.style.setProperty('--po-title', g(cfg.titleColor, '#ffffff'));
                 wrap.style.setProperty('--po-win', g(cfg.win, 'rgba(0,0,0,0.06)')); wrap.style.setProperty('--po-sc', g(cfg.sc, g(cfg.text, '#10213f'))); wrap.style.setProperty('--po-bd', g(cfg.bd, '#e3e8f5')); wrap.dataset.pt = g(cfg.shape, 'sq');
                 const bgEl = wrap.querySelector('.po-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
-                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize]);
+                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize, cfg.twoLines]);
                 if (poKeyCache[key] !== keyStr || !wrap.firstChild) { poKeyCache[key] = keyStr; poBuild(wrap, cfg); if (bgEl === null) { const nb = wrap.querySelector('.po-bg'); if (nb) nb.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100; } }
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100) * (parseFloat(wrap.dataset.fit) || 1);
                 wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
