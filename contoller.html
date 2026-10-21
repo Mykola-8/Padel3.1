@@ -1200,8 +1200,8 @@
 
 
         // ===== СПІЛЬНИЙ ВМІСТ ТУРНІРУ (групи, плей-офф): padel/groups, padel/playoff. Показ, масштаб, кольори, режими — окремо для корту =====
-        const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo'];
-        const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third', 'logo', 'logoSize'];
+        const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo', 'bgColor', 'cardColor', 'headColor', 'accent', 'textColor', 'numColor', 'titleColor', 'bgOpacity', 'font', 'fontHead', 'pattern', 'headStyle', 'cardStyle', 'line', 'sub', 'pc', 'pc2', 'theme', 'bgImgFit', 'bgDim', 'bgLogoSize', 'bgLogoOpacity', 'bgLogoPos'];
+        const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines'];
         let globalGroups = null, globalPlayoff = null, lastGrSig = null, lastPoSig = null;
         function grContent() { const c = grEnsure(), o = {}; GR_GLOBAL_KEYS.forEach(k => { o[k] = JSON.parse(JSON.stringify(c[k])); }); return o; }
         function poContent() { const o = {}; ['upper', 'lower'].forEach(key => { const c = poEnsure(key), x = {}; PO_GLOBAL_KEYS.forEach(k => { x[k] = JSON.parse(JSON.stringify(c[k])); }); o[key] = x; }); return o; }
@@ -1237,6 +1237,9 @@
             if (typeof state !== 'object' || !state || String(courtId) !== '1') return;
             if (gLoaded.gr && !globalGroups && state.groups) syncGroupsGlobal(true);
             if (gLoaded.po && !globalPlayoff && state.playoff) syncPlayoffGlobal(true);
+            // перехід на спільний вигляд: якщо у глобальних даних ще немає стилю — публікуємо стиль корту №1
+            if (gLoaded.gr && globalGroups && globalGroups.pattern === undefined && state.groups) syncGroupsGlobal(true);
+            if (gLoaded.po && globalPlayoff && globalPlayoff.upper && globalPlayoff.upper.shape === undefined && state.playoff) syncPlayoffGlobal(true);
             if (gLoaded.rk && !globalRanking && state.teamRanking && rkTeamsArr(state.teamRanking.teams).length) saveRankingGlobal(true);
             if (gLoaded.sp && !globalSponsors && Array.isArray(state.sponsorLogos) && state.sponsorLogos.some(Boolean)) saveSponsorsGlobal();
         }
