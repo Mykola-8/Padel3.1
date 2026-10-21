@@ -814,6 +814,14 @@
                         <option value="bt">Знизу вгору (з затримкою)</option>
                     </select>
                 </div>
+                <div style="border:1px solid #333; border-radius:6px; padding:8px; margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:11px; font-weight:700; color:#e0b878;">🖼 Лого зліва та 🕒 годинник справа</div>
+                    <div style="display:flex; gap:6px; align-items:center;"><span style="font-size:11px; color:#ccc; white-space:nowrap;">Лого зліва:</span><input type="file" accept="image/*" onchange="tkLogoUpload(this)" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><span id="tk-logo-st" style="font-size:11px;"></span><button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="tkLogoClear()">✖</button></div>
+                    <div style="display:flex; gap:8px; align-items:center;"><span style="font-size:11px; color:#ccc;">Колір блоку лого:</span><input type="color" id="tk-logobg" value="#1d3fd8" oninput="tkSet('tickerLogoBg', this.value)" style="width:46px; height:26px; padding:0; border:none; background:none;"></div>
+                    <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">Ширина блоку лого: <b id="tk-logow-val" style="color:#e0b878;">120</b>px</span><input type="range" id="tk-logow" min="40" max="500" step="2" value="120" oninput="tkSet('tickerLogoW', parseInt(this.value)); document.getElementById('tk-logow-val').innerText = this.value;"></label>
+                    <label style="display:flex; gap:8px; align-items:center; font-size:12px; color:#ccc;"><input type="checkbox" id="tk-clockshow" onchange="tkSet('tickerClockShow', this.checked)"> Показувати годинник справа (час комп'ютера з OBS)</label>
+                    <div style="display:flex; gap:12px; align-items:center; font-size:11px; color:#ccc;">Фон годинника <input type="color" id="tk-clockbg" value="#ffffff" oninput="tkSet('tickerClockBg', this.value)" style="width:46px; height:26px; padding:0; border:none; background:none;"> Цифри <input type="color" id="tk-clockcolor" value="#111111" oninput="tkSet('tickerClockColor', this.value)" style="width:46px; height:26px; padding:0; border:none; background:none;"></div>
+                </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Ширина рядка — зменшити (%% екрана): <b id="ticker-width-value" style="color:#e0b878;">100%%</b></span>
                     <input type="range" id="ticker-width-slider" min="20" max="100" step="1" value="100" oninput="updateBarWidth('tickerWidth', this.value, 'ticker-width-value')">
@@ -1139,7 +1147,7 @@
             if (gs.infos !== undefined) { let a = Array.isArray(gs.infos) ? gs.infos.slice() : Object.values(gs.infos || {}); while (a.length < 10) a.push(""); state.sponsorInfos = a.slice(0, 10); }
         }
         // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
-        const BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
+        const BARS_KEYS = ['tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         let globalBars = null;
         function mergeGlobalBars() {
             if (!globalBars || typeof state !== 'object' || !state) return;
@@ -1985,6 +1993,23 @@
         };
 
         window.updateBarWidth = function(key, v, lblId) { state[key] = Math.max(20, Math.min(100, parseInt(v) || 100)); const l = document.getElementById(lblId); if (l) l.innerText = state[key] + '%'; set(matchRef, state); };
+        window.tkSet = function(key, v) { state[key] = v; saveBars(); };
+        window.tkLogoUpload = function(input) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(500 / img.width, 140 / img.height, 1);
+                    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+                    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                    state.tickerLogo = cv.toDataURL('image/png'); saveBars(); try { renderUI(); } catch (e) {} input.value = '';
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        window.tkLogoClear = function() { state.tickerLogo = ''; saveBars(); try { renderUI(); } catch (e) {} };
         window.updateTickerOffsetY = function(v) {
             state.tickerOffsetY = parseInt(v) || 0;
             const lbl = document.getElementById('ticker-offsety-value');
@@ -3145,6 +3170,11 @@
                 const newHtml = state.tickerContentHTML || '';
                 if (tickerContentBox.innerHTML !== newHtml) tickerContentBox.innerHTML = newHtml;
             }
+            { const sv = (id, v) => { const e = document.getElementById(id); if (e && document.activeElement !== e) e.value = v; };
+              sv('tk-logobg', state.tickerLogoBg || '#1d3fd8'); sv('tk-logow', state.tickerLogoW || 120); sv('tk-clockbg', state.tickerClockBg || '#ffffff'); sv('tk-clockcolor', state.tickerClockColor || '#111111');
+              const lw = document.getElementById('tk-logow-val'); if (lw) lw.innerText = state.tickerLogoW || 120;
+              const cs = document.getElementById('tk-clockshow'); if (cs) cs.checked = !!state.tickerClockShow;
+              const ls = document.getElementById('tk-logo-st'); if (ls) ls.innerText = state.tickerLogo ? '✅' : ''; }
             const tickerBgInput = document.getElementById('ticker-bgcolor-input');
             if (tickerBgInput && document.activeElement !== tickerBgInput) tickerBgInput.value = state.tickerBgColor || '#141414';
             const tickerTextColorInput = document.getElementById('ticker-textcolor-input');
