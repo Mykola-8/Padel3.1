@@ -1200,7 +1200,7 @@
 
 
         // ===== СПІЛЬНИЙ ВМІСТ ТУРНІРУ (групи, плей-офф): padel/groups, padel/playoff. Показ, масштаб, кольори, режими — окремо для корту =====
-        const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts'];
+        const GR_GLOBAL_KEYS = ['g', 'count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo'];
         const PO_GLOBAL_KEYS = ['m', 'labels', 'title', 'third', 'logo', 'logoSize'];
         let globalGroups = null, globalPlayoff = null, lastGrSig = null, lastPoSig = null;
         function grContent() { const c = grEnsure(), o = {}; GR_GLOBAL_KEYS.forEach(k => { o[k] = JSON.parse(JSON.stringify(c[k])); }); return o; }
@@ -2377,9 +2377,44 @@
 
         // ===== ГРУПОВИЙ ЕТАП =====
         const GR_FONTS = ['Montserrat', 'Oswald', 'Barlow Condensed', 'Roboto Condensed', 'Bebas Neue', 'Anton', 'Inter', 'Rubik', 'Teko', 'Roboto', 'Arial'];
+        const GR_THEMES = {
+            default: { n: 'Стандартна (темно-синя)', bgColor: '#0b1220', cardColor: '#131c33', headColor: '#1b2644', accent: '#d4f542', textColor: '#ffffff', numColor: '#8fa0c4', titleColor: '#ffffff', pattern: 'none', headStyle: 'flat', cardStyle: 'flat', line: '', sub: '', pc: '', pc2: '' },
+            ribsblue: { n: 'Ребристий синій (неонова хвиля)', bgColor: '#0a1330', cardColor: '#111b3d', headColor: '#1c2a5e', accent: '#4dd0ff', textColor: '#ffffff', numColor: '#8fb2e8', titleColor: '#ffffff', pattern: 'ribs', headStyle: 'ribs', cardStyle: 'flat', line: '', sub: '', pc: '', pc2: '' },
+            ribslime: { n: 'Ребристий чорно-лаймовий', bgColor: '#0a0a0a', cardColor: '#121212', headColor: '#1a1a1a', accent: '#c4ea4c', textColor: '#ffffff', numColor: '#9aa58a', titleColor: '#c4ea4c', pattern: 'ribs', headStyle: 'stripes', cardStyle: 'outline', line: 'rgba(196,234,76,0.18)', sub: 'rgba(196,234,76,0.06)', pc: 'rgba(255,255,255,0.05)', pc2: 'rgba(0,0,0,0.5)' },
+            court: { n: 'Корт (зелена, діагональ)', bgColor: '#0b4a2c', cardColor: '#0f5e38', headColor: '#0a3d25', accent: '#d4f542', textColor: '#ffffff', numColor: '#bfe9c8', titleColor: '#ffffff', pattern: 'diag', headStyle: 'stripes', cardStyle: 'round', line: 'rgba(255,255,255,0.12)', sub: 'rgba(0,0,0,0.14)', pc: '', pc2: '' },
+            carbon: { n: 'Карбон + золото', bgColor: '#101010', cardColor: '#171717', headColor: '#2a2210', accent: '#e8b52c', textColor: '#ffffff', numColor: '#b9a77a', titleColor: '#e8b52c', pattern: 'carbon', headStyle: 'grad', cardStyle: 'outline', line: 'rgba(232,181,44,0.2)', sub: 'rgba(232,181,44,0.06)', pc: '', pc2: '' },
+            light: { n: 'Світла (крапки, біла картка)', bgColor: '#eef2fb', cardColor: '#ffffff', headColor: '#e1e8fb', accent: '#1d3fd8', textColor: '#111827', numColor: '#6b7280', titleColor: '#0f172a', pattern: 'dots', headStyle: 'grad', cardStyle: 'round', line: 'rgba(15,23,42,0.10)', sub: 'rgba(29,63,216,0.05)', pc: 'rgba(29,63,216,0.12)', pc2: '' },
+            glassgrid: { n: 'Скло на сітці (фіолет)', bgColor: '#1b1450', cardColor: '#3a2a8a', headColor: '#4a37a8', accent: '#ff7ad9', textColor: '#ffffff', numColor: '#cbbcff', titleColor: '#ffffff', pattern: 'grid', headStyle: 'stripes', cardStyle: 'glass', line: 'rgba(255,255,255,0.16)', sub: 'rgba(255,255,255,0.07)', pc: 'rgba(255,255,255,0.08)', pc2: '' },
+            racing: { n: 'Рейсінг (чорно-червона)', bgColor: '#120808', cardColor: '#1c0f0f', headColor: '#7f1d1d', accent: '#ff4d4d', textColor: '#ffffff', numColor: '#d9a3a3', titleColor: '#ffffff', pattern: 'diag', headStyle: 'grad', cardStyle: 'flat', line: 'rgba(255,255,255,0.1)', sub: '', pc: '', pc2: '' },
+            waves: { n: 'Хвилі (бірюзова)', bgColor: '#06323a', cardColor: '#0b4651', headColor: '#0e5d6b', accent: '#5eead4', textColor: '#ffffff', numColor: '#9fe0d8', titleColor: '#ffffff', pattern: 'waves', headStyle: 'ribs', cardStyle: 'round', line: 'rgba(255,255,255,0.14)', sub: '', pc: '', pc2: '' }
+        };
+        window.grImgUpload = function(input, key) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const photo = key === 'bgImg', maxW = photo ? 1600 : 900, maxH = photo ? 900 : 600;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(maxW / img.width, maxH / img.height, 1);
+                    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+                    const cx = cv.getContext('2d'); if (photo) { cx.fillStyle = '#000'; cx.fillRect(0, 0, cv.width, cv.height); }
+                    cx.drawImage(img, 0, 0, cv.width, cv.height);
+                    grEnsure()[key] = photo ? cv.toDataURL('image/jpeg', 0.72) : cv.toDataURL('image/png'); grRefreshUI(); grSave(true); input.value = '';
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        window.grImgClear = function(key) { grEnsure()[key] = ''; grRefreshUI(); grSave(true); };
+        window.grApplyTheme = function(name) {
+            const t = GR_THEMES[name]; if (!t) return; const c = grEnsure();
+            Object.keys(t).forEach(k => { if (k !== 'n') c[k] = t[k]; }); c.theme = name;
+            grRefreshUI(); grSave(true);
+        };
         function grDefault() {
             return { show: false, count: 6, mode: 'all', single: 0, teamsPer: 5, scale: 100, textSize: 100, bgOpacity: 100,
                 bgColor: '#0b1220', cardColor: '#131c33', headColor: '#1b2644', accent: '#d4f542', textColor: '#ffffff', numColor: '#8fa0c4', titleColor: '#ffffff',
+                bgImg: '', bgImgFit: 'cover', bgDim: 35, bgLogo: '', bgLogoSize: 40, bgLogoOpacity: 20, bgLogoPos: 'center', pattern: 'none', headStyle: 'flat', cardStyle: 'flat', line: '', sub: '', pc: '', pc2: '', theme: 'default',
                 cross: false, sortRows: false, winPts: 2, lossPts: 0, drawPts: 1, lblDiff: 'РІЗН', lblPts: 'ОЧК', font: 'Montserrat', fontHead: 'Montserrat', tournament: 'НАЗВА ТУРНІРУ', title: 'ГРУПОВИЙ ЕТАП', subtitle: '', prefix: 'ГРУПА',
                 g: Array.from({ length: 10 }, (_, i) => ({ name: 'ABCDEFGHIJ'[i], t: ['', '', '', '', '', '', '', ''] })) };
         }
@@ -2468,6 +2503,21 @@
                 ${slider('textSize', '🔤 Розмір тексту (%)', 50, 150, 100)}
                 ${slider('bgOpacity', '◐ Непрозорість фону (%)', 0, 100, 100)}
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${sel('font', '🔤 Шрифт тексту', fonts)}${sel('fontHead', '🔤 Шрифт заголовків', fonts)}</div>
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🎨 Тема груп (кольори + візерунок фону + вставки; нижче можна підкоригувати):
+                    <select data-gr data-path="theme" onchange="grApplyTheme(this.value)" ${IN}>${Object.keys(GR_THEMES).map(k => `<option value="${k}">${GR_THEMES[k].n}</option>`).join('')}</select>
+                </label>
+                <div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:11px; font-weight:700; color:#e0b878;">🖼 Власний фон груп</div>
+                    <div style="display:flex; gap:6px; align-items:center;"><span style="font-size:11px; color:#ccc; white-space:nowrap;">Фото:</span><input type="file" accept="image/*" onchange="grImgUpload(this,'bgImg')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><span id="gr-img-st-bgImg" style="font-size:11px;"></span><button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="grImgClear('bgImg')">✖</button></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; align-items:end;">${sel('bgImgFit', 'Розмір фото', [['cover', 'Заповнити екран'], ['contain', 'Вмістити повністю']])}${slider('bgDim', '◑ Затемнення фото (%)', 0, 90, 35)}</div>
+                    <div style="display:flex; gap:6px; align-items:center;"><span style="font-size:11px; color:#ccc; white-space:nowrap;">Логотип:</span><input type="file" accept="image/*" onchange="grImgUpload(this,'bgLogo')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><span id="gr-img-st-bgLogo" style="font-size:11px;"></span><button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="grImgClear('bgLogo')">✖</button></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; align-items:end;">${slider('bgLogoSize', '📏 Розмір лого (%)', 10, 100, 40)}${slider('bgLogoOpacity', '◐ Прозорість лого (%)', 0, 100, 20)}${sel('bgLogoPos', 'Місце лого', [['center', 'Центр'], ['tl', 'Лівий верх'], ['tr', 'Правий верх'], ['bl', 'Лівий низ'], ['br', 'Правий низ']])}</div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                    ${sel('pattern', 'Візерунок фону', [['none', 'Без'], ['ribs', 'Ребристий'], ['diag', 'Діагональ'], ['dots', 'Крапки'], ['grid', 'Сітка'], ['waves', 'Хвилі'], ['carbon', 'Карбон']])}
+                    ${sel('headStyle', 'Вставка шапки', [['flat', 'Однотонна'], ['stripes', 'Смуги'], ['ribs', 'Ребриста'], ['grad', 'Градієнт']])}
+                    ${sel('cardStyle', 'Картки', [['flat', 'Прості'], ['outline', 'З обводкою'], ['round', 'Круглі'], ['glass', 'Скло']])}
+                </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                     ${color('bgColor', '🎨 Фон табла', d.bgColor)}${color('cardColor', '🎨 Картки', d.cardColor)}
                     ${color('headColor', '🎨 Шапка групи', d.headColor)}${color('accent', '🎨 Літера-бейдж', d.accent)}
@@ -2495,6 +2545,7 @@
         }
         function grRefreshUI() {
             grBuildUI(); const c = grEnsure();
+            ['bgImg', 'bgLogo'].forEach(k => { const e = document.getElementById('gr-img-st-' + k); if (e) e.innerText = c[k] ? '✅' : ''; });
             document.querySelectorAll('[data-gr]').forEach(el => {
                 if (document.activeElement === el) return;
                 const v = poGet(c, el.getAttribute('data-path'));
