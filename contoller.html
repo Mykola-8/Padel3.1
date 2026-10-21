@@ -2229,7 +2229,7 @@
         };
         function poDefault(key) {
             const m = {}; PO_ROUNDS.forEach(([r, n]) => { m[r] = Array.from({ length: n }, PO_EMPTY); });
-            return { show: false, title: key === 'lower' ? 'НИЖНЯ СІТКА' : '', third: key !== 'lower', scale: 100, bgOpacity: 100, logo: '', logoSize: 100, shape: 'sq', win: '#fff3c4', sc: '#10213f', bd: '#e3e8f5', theme: 'classic',
+            return { show: false, title: key === 'lower' ? 'НИЖНЯ СІТКА' : '', third: key !== 'lower', scale: 100, bgOpacity: 100, logo: '', logoSize: 100, twoLines: false, shape: 'sq', win: '#fff3c4', sc: '#10213f', bd: '#e3e8f5', theme: 'classic',
                 bg1: '#0c1c45', bg2: '#1c3d78', frame: '#f5c542', score: '#e8b52c', line: '#f5c542', text: '#10213f', head: '#9fb3dd', titleColor: '#ffffff',
                 labels: { r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, m };
         }
@@ -2330,6 +2330,7 @@
                     <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
                         <input type="text" data-po="${K}" data-path="title" placeholder="Заголовок сітки (необов'язково)" ${IN} oninput="poInput(this)">
                         <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-po="${K}" data-path="third" onchange="poInput(this)"> 3 місце</label>
+                        <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc; grid-column:1 / -1;"><input type="checkbox" data-po="${K}" data-path="twoLines" onchange="poInput(this)"> Імена гравців у два рядки (команда «Гравець1 / Гравець2» ділиться по «/», рамка стає вищою)</label>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center;"><span style="font-size:11px; color:#ccc; white-space:nowrap;">🖼 Лого (правий верхній кут):</span><input type="file" accept="image/*" onchange="poLogoUpload(this,'${K}')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><span id="po-logo-st-${K}" style="font-size:11px;"></span><button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="poLogoClear('${K}')">✖</button></div>
                     ${slider('logoSize', '🖼 Розмір лого (%)', 30, 250, 100)}
