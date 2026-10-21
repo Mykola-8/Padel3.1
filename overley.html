@@ -1066,6 +1066,10 @@
             transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
         }
         .ticker-bar.visible { opacity: 1; visibility: visible; }
+        .tk-left, .tk-right { position: absolute; top: 0; bottom: 0; display: none; align-items: center; justify-content: center; z-index: 3; box-sizing: border-box; }
+        .tk-left { left: 0; padding: 0 8px; }
+        .tk-left img { height: 82%; width: auto; max-width: 100%; object-fit: contain; display: block; }
+        .tk-right { right: 0; padding: 0 16px; font-family: 'Montserrat', sans-serif; font-weight: 800; letter-spacing: 0.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
         .ticker-track {
             position: absolute; top: 0; left: 0; height: 100%; width: 100%;
             display: flex; align-items: center; white-space: nowrap;
@@ -1540,6 +1544,8 @@
         <div class="ticker-track" id="ticker-track">
             <span id="ticker-text-1"></span>
         </div>
+        <div class="tk-left" id="tk-left"><img id="tk-logo" alt=""></div>
+        <div class="tk-right" id="tk-right"><span id="tk-clock"></span></div>
     </div>
 
     <!-- РЕКЛАМНИЙ РЯДОК (стаціонарний, ефект перекидання) -->
@@ -1845,6 +1851,14 @@
             team1Fallback: { en: 'Team A', ua: 'Команда A' },
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
+
+        // ===== ГОДИННИК У БІГУЧОМУ РЯДКУ =====
+        function tkClockTick() {
+            const el = document.getElementById('tk-clock'); if (!el || !window.__tkClockOn) return;
+            const d = new Date(), p = n => String(n).padStart(2, '0'), t = p(d.getHours()) + ':' + p(d.getMinutes());
+            if (el.textContent !== t) el.textContent = t;
+        }
+        setInterval(tkClockTick, 1000);
 
         // ===== PLAY-OFF: верхня / нижня сітка =====
         const PO_NS = 'http://www.w3.org/2000/svg';
@@ -2613,7 +2627,7 @@
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
         let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalIc = null, __lastSnap = null;
-        const __BARS_KEYS = ['tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
+        const __BARS_KEYS = ['tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
@@ -3167,6 +3181,24 @@
                         tickerBar.style.height = (state.tickerHeight || 34) + 'px';
                         tickerBar.style.bottom = (state.tickerOffsetY || 0) + 'px';
                         { const tw = Math.max(20, Math.min(100, parseInt(state.tickerWidth) || 100)), tm = ((100 - tw) / 2) + '%'; tickerBar.style.left = tm; tickerBar.style.right = tm; }
+                        {
+                            const tkL = document.getElementById('tk-left'), tkR = document.getElementById('tk-right'), tkI = document.getElementById('tk-logo');
+                            const hh = state.tickerHeight || 34;
+                            if (tkL) {
+                                const lg = state.tickerLogo || '';
+                                tkL.style.display = lg ? 'flex' : 'none';
+                                if (lg && tkI.dataset.src !== lg) { tkI.dataset.src = lg; tkI.src = lg; }
+                                tkL.style.background = state.tickerLogoBg || '#1d3fd8';
+                                tkL.style.width = Math.max(40, Math.min(500, parseInt(state.tickerLogoW) || 120)) + 'px';
+                            }
+                            if (tkR) {
+                                tkR.style.display = state.tickerClockShow ? 'flex' : 'none';
+                                tkR.style.background = state.tickerClockBg || '#ffffff';
+                                tkR.style.color = state.tickerClockColor || '#111111';
+                                tkR.style.fontSize = Math.round(hh * 0.58) + 'px';
+                                window.__tkClockOn = !!state.tickerClockShow; tkClockTick();
+                            }
+                        }
                         const tbHeight = state.tickerHeight || 34;
                         const tickerScale = tbHeight / 34;
                         const tickerFontMult = (state.tickerFontScale !== undefined ? state.tickerFontScale : 100) / 100;
