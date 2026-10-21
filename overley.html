@@ -2627,7 +2627,7 @@
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             if (__globalGr) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
-                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
+                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo', 'bgColor', 'cardColor', 'headColor', 'accent', 'textColor', 'numColor', 'titleColor', 'bgOpacity', 'font', 'fontHead', 'pattern', 'headStyle', 'cardStyle', 'line', 'sub', 'pc', 'pc2', 'theme', 'bgImgFit', 'bgDim', 'bgLogoSize', 'bgLogoOpacity', 'bgLogoPos'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
                 if (__globalGr.g !== undefined) g.g = __arr(__globalGr.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
                 s.groups = g;
             }
@@ -2636,7 +2636,7 @@
                 ['upper', 'lower'].forEach(key => {
                     const gp = __globalPo[key]; if (!gp || typeof gp !== 'object') return;
                     const c = Object.assign({}, p[key] || {});
-                    ['title', 'third', 'logo', 'logoSize'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
+                    ['title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
                     if (gp.labels) c.labels = Object.assign({}, c.labels || {}, gp.labels);
                     if (gp.m) { const m = {}; Object.keys(gp.m).forEach(r => { m[r] = __arr(gp.m[r]); }); c.m = m; }
                     p[key] = c;
