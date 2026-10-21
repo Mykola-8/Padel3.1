@@ -459,13 +459,30 @@
         .gr-tour { position: absolute; left: 50px; top: 26px; font-size: 24px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; color: var(--gr-accent, #d4f542); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; }
         .gr-title { position: absolute; left: 50px; top: 56px; font-size: 92px; line-height: 1.05; font-weight: 900; text-transform: uppercase; color: var(--gr-title, #fff); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; white-space: nowrap; }
         .gr-sub { position: absolute; right: 50px; top: 112px; font-size: 26px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: var(--gr-num, #8fa0c4); font-family: var(--gr-fonth, 'Montserrat'), sans-serif; }
-        .gr-card { position: absolute; background: var(--gr-card, #131c33); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); box-sizing: border-box; }
+        .gr-card { position: absolute; background: var(--gr-card, #131c33); border-radius: 12px; overflow: hidden; border: 1px solid var(--gr-line, rgba(255,255,255,0.06)); box-sizing: border-box; }
         .gr-ch { display: flex; align-items: center; background: var(--gr-head, #1b2644); gap: 14px; padding: 0 18px; box-sizing: border-box; font-family: var(--gr-fonth, 'Montserrat'), sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--gr-title, #fff); }
-        .gr-badge { display: flex; align-items: center; justify-content: center; background: var(--gr-accent, #d4f542); color: #10151f; border-radius: 8px; font-weight: 900; flex: 0 0 auto; }
-        .gr-row { display: flex; align-items: center; gap: 0; padding: 0 18px; box-sizing: border-box; border-top: 1px solid rgba(255,255,255,0.07); }
+
+        /* ===== ТЕМИ ГРУП: візерунок фону / вставка шапки / стиль карток ===== */
+        .gr-bgimg, .gr-bgdim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-repeat: no-repeat; background-position: center; }
+        .gr-bglogo { position: absolute; object-fit: contain; pointer-events: none; }
+        .gr-bg::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+        .gr-wrap[data-pat="ribs"] .gr-bg::after { background: repeating-linear-gradient(90deg, var(--gr-pc, rgba(255,255,255,0.06)) 0 4px, var(--gr-pc2, rgba(0,0,0,0.24)) 4px 12px); }
+        .gr-wrap[data-pat="diag"] .gr-bg::after { background: repeating-linear-gradient(135deg, var(--gr-pc, rgba(255,255,255,0.06)) 0 12px, transparent 12px 24px); }
+        .gr-wrap[data-pat="dots"] .gr-bg::after { background: radial-gradient(var(--gr-pc, rgba(255,255,255,0.14)) 2px, transparent 2.5px) 0 0 / 28px 28px; }
+        .gr-wrap[data-pat="grid"] .gr-bg::after { background: linear-gradient(var(--gr-pc, rgba(255,255,255,0.07)) 1px, transparent 1px) 0 0 / 44px 44px, linear-gradient(90deg, var(--gr-pc, rgba(255,255,255,0.07)) 1px, transparent 1px) 0 0 / 44px 44px; }
+        .gr-wrap[data-pat="waves"] .gr-bg::after { background: repeating-radial-gradient(circle at 0 100%, transparent 0 34px, var(--gr-pc, rgba(255,255,255,0.07)) 35px 37px); }
+        .gr-wrap[data-pat="carbon"] .gr-bg::after { background: linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px / 10px 10px, linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0 / 10px 10px, linear-gradient(27deg, #222 5px, transparent 5px) 0 10px / 10px 10px, linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px / 10px 10px, linear-gradient(90deg, #1b1b1b 10px, transparent 10px), linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424); background-color: #131313; }
+        .gr-wrap[data-hd="stripes"] .gr-ch { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.09) 0 8px, transparent 8px 16px); }
+        .gr-wrap[data-hd="ribs"] .gr-ch { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.10) 0 3px, rgba(0,0,0,0.20) 3px 9px); }
+        .gr-wrap[data-hd="grad"] .gr-ch { background-image: linear-gradient(90deg, transparent 20%, color-mix(in srgb, var(--gr-accent, #d4f542) 38%, transparent)); }
+        .gr-wrap[data-cs="outline"] .gr-card { border: 2px solid color-mix(in srgb, var(--gr-accent, #d4f542) 70%, transparent); }
+        .gr-wrap[data-cs="round"] .gr-card { border-radius: 28px; }
+        .gr-wrap[data-cs="glass"] .gr-card { background: color-mix(in srgb, var(--gr-card, #131c33) 55%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.28); }
+        .gr-badge { display: flex; align-items: center; justify-content: center; background: var(--gr-accent, #d4f542); color: var(--gr-badgetx, #10151f); border-radius: 8px; font-weight: 900; flex: 0 0 auto; }
+        .gr-row { display: flex; align-items: center; gap: 0; padding: 0 18px; box-sizing: border-box; border-top: 1px solid var(--gr-line, rgba(255,255,255,0.07)); }
         .gr-num { color: var(--gr-num, #8fa0c4); font-weight: 800; flex: 0 0 auto; text-align: left; }
-        .gr-sub-row { display: flex; align-items: center; padding: 0 18px; box-sizing: border-box; background: rgba(255,255,255,0.04); color: var(--gr-num, #8fa0c4); font-weight: 800; border-top: 1px solid rgba(255,255,255,0.07); }
-        .gr-cell { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; height: 100%; font-weight: 800; white-space: nowrap; overflow: hidden; box-sizing: border-box; border-left: 1px solid rgba(255,255,255,0.07); }
+        .gr-sub-row { display: flex; align-items: center; padding: 0 18px; box-sizing: border-box; background: var(--gr-sub, rgba(255,255,255,0.04)); color: var(--gr-num, #8fa0c4); font-weight: 800; border-top: 1px solid var(--gr-line, rgba(255,255,255,0.07)); }
+        .gr-cell { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; height: 100%; font-weight: 800; white-space: nowrap; overflow: hidden; box-sizing: border-box; border-left: 1px solid var(--gr-line, rgba(255,255,255,0.07)); }
         .gr-cell.diag { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 6px, transparent 6px 12px); }
         .gr-cell.win { background: color-mix(in srgb, var(--gr-accent, #d4f542) 20%, transparent); }
         .gr-cell.tot { color: var(--gr-accent, #d4f542); font-weight: 900; }
@@ -2002,8 +2019,27 @@
             st2.setProperty('--gr-bg', g(cfg.bgColor, '#0b1220')); st2.setProperty('--gr-card', g(cfg.cardColor, '#131c33')); st2.setProperty('--gr-head', g(cfg.headColor, '#1b2644'));
             st2.setProperty('--gr-accent', g(cfg.accent, '#d4f542')); st2.setProperty('--gr-text', g(cfg.textColor, '#ffffff')); st2.setProperty('--gr-num', g(cfg.numColor, '#8fa0c4'));
             st2.setProperty('--gr-title', g(cfg.titleColor, '#ffffff'));
+            ['line', 'sub', 'pc', 'pc2'].forEach(k => { const v = cfg[k]; const nm = { line: '--gr-line', sub: '--gr-sub', pc: '--gr-pc', pc2: '--gr-pc2' }[k]; if (v) st2.setProperty(nm, v); else st2.removeProperty(nm); });
+            { const hx = String(g(cfg.accent, '#d4f542')).replace('#', ''); const n = parseInt(hx.length === 3 ? hx.split('').map(x => x + x).join('') : hx.slice(0, 6), 16) || 0; const L = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; st2.setProperty('--gr-badgetx', L > 0.55 ? '#10151f' : '#ffffff'); }
+            wrap.dataset.pat = g(cfg.pattern, 'none'); wrap.dataset.hd = g(cfg.headStyle, 'flat'); wrap.dataset.cs = g(cfg.cardStyle, 'flat');
             st2.setProperty('--gr-font', "'" + g(cfg.font, 'Montserrat') + "'"); st2.setProperty('--gr-fonth', "'" + g(cfg.fontHead, 'Montserrat') + "'");
             const bgEl = wrap.querySelector('.gr-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
+            if (bgEl) {
+                let bi = bgEl.querySelector('.gr-bgimg'), bd = bgEl.querySelector('.gr-bgdim'), bl = bgEl.querySelector('.gr-bglogo');
+                if (!bi) { bi = document.createElement('div'); bi.className = 'gr-bgimg'; bd = document.createElement('div'); bd.className = 'gr-bgdim'; bl = document.createElement('img'); bl.className = 'gr-bglogo'; bgEl.appendChild(bi); bgEl.appendChild(bd); bgEl.appendChild(bl); }
+                const src = cfg.bgImg || '';
+                if (bi.dataset.src !== src) { bi.dataset.src = src; bi.style.backgroundImage = src ? 'url("' + src + '")' : 'none'; }
+                bi.style.backgroundSize = cfg.bgImgFit === 'contain' ? 'contain' : 'cover'; bi.style.display = src ? '' : 'none';
+                bd.style.background = 'rgba(0,0,0,' + (Math.max(0, Math.min(90, parseInt(g(cfg.bgDim, 35)))) / 100) + ')'; bd.style.display = src ? '' : 'none';
+                const ls = cfg.bgLogo || '';
+                if (bl.dataset.src !== ls) { bl.dataset.src = ls; if (ls) bl.src = ls; else bl.removeAttribute('src'); }
+                bl.style.display = ls ? '' : 'none';
+                const lsz = Math.max(10, Math.min(100, parseInt(g(cfg.bgLogoSize, 40)))), lop = Math.max(0, Math.min(100, parseInt(g(cfg.bgLogoOpacity, 20)))) / 100, lp = g(cfg.bgLogoPos, 'center');
+                bl.style.height = (1080 * lsz / 100) + 'px'; bl.style.width = 'auto'; bl.style.maxWidth = '1820px'; bl.style.opacity = lop;
+                bl.style.left = bl.style.right = bl.style.top = bl.style.bottom = 'auto'; bl.style.transform = '';
+                if (lp === 'center') { bl.style.left = '50%'; bl.style.top = '50%'; bl.style.transform = 'translate(-50%, -50%)'; }
+                else { if (lp.indexOf('t') === 0) bl.style.top = '30px'; else bl.style.bottom = '30px'; if (lp.slice(-1) === 'l') bl.style.left = '40px'; else bl.style.right = '40px'; }
+            }
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             st2.transform = 'translate(-50%, -50%) scale(' + k + ')';
             const keyStr = JSON.stringify([cfg.count, cfg.mode, cfg.single, cfg.teamsPer, cfg.textSize, cfg.tournament, cfg.title, cfg.subtitle, cfg.prefix, cfg.g, cfg.font, cfg.fontHead, cfg.cross, cfg.winPts, cfg.lossPts, cfg.drawPts, cfg.sortRows, cfg.lblDiff, cfg.lblPts]);
@@ -2591,7 +2627,7 @@
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             if (__globalGr) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
-                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
+                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
                 if (__globalGr.g !== undefined) g.g = __arr(__globalGr.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
                 s.groups = g;
             }
