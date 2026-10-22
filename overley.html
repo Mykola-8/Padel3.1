@@ -368,6 +368,16 @@
         #tv-led .tl-a .tl-name, #tv-led .tl-a .tl-cell { color: var(--tl-a, #ff4040); text-shadow: 0 0 2.2vh var(--tl-a, #ff4040); }
         #tv-led .tl-b .tl-name, #tv-led .tl-b .tl-cell { color: var(--tl-b, #3dff6b); text-shadow: 0 0 2.2vh var(--tl-b, #3dff6b); }
         #tv-led .tl-cell.dim { opacity: 0.55; }
+        /* стиль «як тема табла»: кольори беремо зі змінних обраної теми кольорів (--team-bg-*, --points-*, --score-set-*) */
+        #tv-led.themed .tl-name { background: linear-gradient(to bottom, var(--team-bg-top), var(--team-bg-bottom)); color: var(--team-text) !important; text-shadow: none !important; padding: 0 2vw; border-radius: 1.2vh; margin-top: 0.6vh; }
+        #tv-led.themed .tl-score { align-items: stretch; margin-top: 0.8vh; margin-bottom: 0.6vh; }
+        #tv-led.themed .tl-cell { align-self: stretch; display: flex; align-items: center; justify-content: center; border-radius: 1.2vh; text-shadow: none !important; }
+        #tv-led.themed .tl-a .tl-cell.pt { background: linear-gradient(to bottom, var(--points-team1-top), var(--points-team1-bottom)); color: var(--points-text) !important; }
+        #tv-led.themed .tl-b .tl-cell.pt { background: linear-gradient(to bottom, var(--points-team2-top), var(--points-team2-bottom)); color: var(--points-text) !important; }
+        #tv-led.themed .tl-cell.pt.ad { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text) !important; }
+        #tv-led.themed .tl-cell.sc.cur { background: var(--score-set-current-bg); color: var(--score-set-current-text) !important; opacity: 1; }
+        #tv-led.themed .tl-cell.sc.dim { background: var(--score-set-past-bg); color: var(--score-set-past-text) !important; opacity: 1; }
+        #tv-led.themed .tl-sep { background: transparent; }
         #tv-led .tl-sep { flex: 0 0 0.4vh; background: #222; margin: 0.6vh 0; }
         /* ?tv=1: очки (15/30/40/AD) і гейми/сети — крупними цифрами (висота рядка табла та сама, тож усе влазить у рамки теми) */
         html.tv .points-board-outer.visible, html.tv .points-board { width: 150px !important; }
@@ -2727,7 +2737,7 @@
                 if (ok) plate = rb.textContent.trim();
             }
             const showSrv = cfg.showServer !== false;
-            const bgSig = [cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
+            const bgSig = [cfg.style, document.documentElement.className, cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
             const sig = JSON.stringify([txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
@@ -2736,13 +2746,14 @@
                 const dim = Math.max(0, Math.min(90, parseInt(cfg.bgDim) || 0)) / 100;
                 bg.style.backgroundImage = cfg.bgImg ? 'linear-gradient(rgba(0,0,0,' + dim + '),rgba(0,0,0,' + dim + ')),url("' + cfg.bgImg + '")' : 'none';
             }
+            root.classList.toggle('themed', cfg.style !== 'led');
             root.style.setProperty('--tl-a', cfg.teamAColor || '#ff4040'); root.style.setProperty('--tl-b', cfg.teamBColor || '#3dff6b');
             root.style.setProperty('--sp-h', (parseInt(cfg.spH) || 14) + 'vh');
             root.style.setProperty('--n', sets.length);
             let h = '<div class="tl-row tl-head"><div>ОЧКИ<small>У ГЕЙМІ</small></div>' + sets.map(x => '<div class="' + (x.cur ? 'cur' : '') + '">СЕТ ' + x.n + '<small>ГЕЙМИ</small></div>').join('') + '</div>';
             const team = (k, name, pts, srv, key) => '<div class="tl-' + k + '" style="display:contents">' +
                 '<div class="tl-name">' + (srv && showSrv ? '<i>🎾</i>' : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span></div>' +
-                '<div class="tl-row tl-score tl-' + k + '">' + cell(pts === '' ? '&nbsp;' : pts, isAd(pts) ? 'ad' : '') + sets.map(x => cell(x[key], x.cur ? '' : 'dim')).join('') + '</div></div>';
+                '<div class="tl-row tl-score tl-' + k + '">' + cell(pts === '' ? '&nbsp;' : pts, 'pt' + (isAd(pts) ? ' ad' : '')) + sets.map(x => cell(x[key], 'sc ' + (x.cur ? 'cur' : 'dim'))).join('') + '</div></div>';
             const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
             h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
             if (logos.length) h += '<div class="tl-spons">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
