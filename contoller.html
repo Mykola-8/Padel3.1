@@ -1013,9 +1013,11 @@
                     <div class="switch-row"><span>🟠 Плашки SET POINT / MATCH POINT</span><input type="checkbox" id="tv-showSetMatch" onchange="tvSet('showSetMatch', this.checked)"></div>
                     <div class="switch-row"><span>⚪ Плашка GAME POINT</span><input type="checkbox" id="tv-showGame" onchange="tvSet('showGame', this.checked)"></div>
                     <div style="font-size:11px; font-weight:700; margin-top:4px;">Логотипи спонсорів (внизу екрана):</div>
+                    <div id="tv-save-st" style="font-size:11px;"></div>
                     <div id="tv-sp-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
                     <label class="btn" style="padding:7px !important; font-size:11px !important; cursor:pointer; text-align:center;">➕ Додати логотипи (можна кілька)<input type="file" accept="image/*" multiple style="display:none" onchange="tvSpAdd(this)"></label>
                     <div class="row"><span>Режим:</span><select id="tv-spMode" onchange="tvSet('spMode', this.value)"><option value="carousel">Карусель (по одному)</option><option value="row">Всі одразу в ряд</option></select></div>
+                    <div class="row"><span>Анімація:</span><select id="tv-spAnim" onchange="tvSet('spAnim', this.value)"><option value="fade">Поява знизу (fade)</option><option value="slide">Виїзд справа</option><option value="zoom">Збільшення</option><option value="flip">Переворот</option></select></div>
                     <div class="row"><span>Зміна кожні: <b id="tv-spSec-v">5 с</b></span><input type="range" id="tv-spSec" min="2" max="30" step="1" oninput="tvSet('spSec', parseInt(this.value))" style="width:55%"></div>
                     <div class="row"><span>Висота смуги: <b id="tv-spH-v">14%</b></span><input type="range" id="tv-spH" min="8" max="30" step="1" oninput="tvSet('spH', parseInt(this.value))" style="width:55%"></div>
                 </div>
@@ -1198,13 +1200,14 @@
 
 
         // ===== ТВ-ТАБЛО (overlay ?tv=1): спільні налаштування padel/tv для всіх кортів =====
-        const TV_DEF = { style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
+        const TV_DEF = { spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
         let tvCfg = JSON.parse(JSON.stringify(TV_DEF));
-        function tvSave() { set(ref(db, 'padel/tv'), tvCfg); }
+        function tvStatus(ok, msg) { const e = document.getElementById('tv-save-st'); if (e) { e.innerText = ok ? '☁️ Збережено в базі ✅' : '⚠️ Не збережено: ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
+        function tvSave() { try { set(ref(db, 'padel/tv'), tvCfg).then(() => tvStatus(true), (e) => tvStatus(false, (e && e.message) || e)); } catch (e) { tvStatus(false, e.message); } }
         window.tvSet = function(k, v) { tvCfg[k] = v; tvSave(); tvUiRefresh(); };
         function tvUiRefresh() {
             const g = id => document.getElementById(id); if (!g('tv-card')) return;
-            ['style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
+            ['spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
             ['showServer', 'showBreak', 'showGolden', 'showSetMatch', 'showGame'].forEach(k => { const e = g('tv-' + k); if (e) e.checked = !!tvCfg[k]; });
             if (g('tv-bgDim-v')) g('tv-bgDim-v').innerText = (tvCfg.bgDim || 0) + '%';
             if (g('tv-spSec-v')) g('tv-spSec-v').innerText = tvCfg.spSec + ' с';
