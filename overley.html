@@ -341,7 +341,15 @@
         html.tv .scoreboard-wrapper { transition: opacity 0.2s ease, visibility 0.4s; }
         /* ?tv=1 — «світлове табло» для телевізора: Команда A, під нею рахунок, під ним Команда B і її рахунок; колонки СЕТ 1..N (гейми) + ОЧКИ */
         #tv-led { display: none; }
+        html.tvled .corner-slide-wrapper, html.tvled .server-change-banner, html.tvled .stage-badge-wrapper { display: none !important; }   /* у ТВ-табло власні плашки */
         html.tvled, html.tvled body { background: #000 !important; background-color: #000 !important; }
+        #tv-bg { display: none; }
+        html.tvled #tv-bg { display: block; position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; background-color: #000; background-size: cover; background-position: center; }
+        #tv-led .tl-spons { flex: 0 0 var(--sp-h, 14vh); display: flex; align-items: center; justify-content: center; gap: 3vw; padding-top: 1vh; }
+        #tv-led .tl-spons img { max-height: 100%; max-width: 40vw; object-fit: contain; animation: tlFade 0.8s ease; }
+        @keyframes tlFade { from { opacity: 0; transform: translateY(1.5vh); } to { opacity: 1; transform: none; } }
+        #tv-led .tl-sep { position: relative; overflow: visible; }
+        #tv-led .tl-plate { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; padding: 0.7vh 2.6vw; border-radius: 99px; font-weight: 900; font-size: min(3.6vh, 2.4vw); letter-spacing: 0.12em; color: #fff; white-space: nowrap; box-shadow: 0 0 2vh rgba(0,0,0,0.7); animation: tlFade 0.5s ease; }
         html.tvled .scoreboard-wrapper { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
         html.tvled #tv-led { display: flex; flex-direction: column; position: fixed; left: 3vw; top: 3vh; width: 94vw; height: 94vh; z-index: 5; font-family: 'Montserrat', sans-serif; color: #fff; transition: opacity 0.3s; }
         #tv-led.hidden { opacity: 0; }
@@ -357,8 +365,8 @@
         #tv-led .tl-cell.ad { font-size: min(17vh, 9vw); }
         #tv-led .tl-cell sup { font-size: 0.34em; vertical-align: top; position: relative; top: 0.12em; }
         #tv-led .tl-cell.off { opacity: 0.18; }
-        #tv-led .tl-a .tl-name, #tv-led .tl-a .tl-cell { color: #ff4040; text-shadow: 0 0 2.2vh rgba(255, 40, 40, 0.65); }
-        #tv-led .tl-b .tl-name, #tv-led .tl-b .tl-cell { color: #3dff6b; text-shadow: 0 0 2.2vh rgba(40, 255, 90, 0.6); }
+        #tv-led .tl-a .tl-name, #tv-led .tl-a .tl-cell { color: var(--tl-a, #ff4040); text-shadow: 0 0 2.2vh var(--tl-a, #ff4040); }
+        #tv-led .tl-b .tl-name, #tv-led .tl-b .tl-cell { color: var(--tl-b, #3dff6b); text-shadow: 0 0 2.2vh var(--tl-b, #3dff6b); }
         #tv-led .tl-cell.dim { opacity: 0.55; }
         #tv-led .tl-sep { flex: 0 0 0.4vh; background: #222; margin: 0.6vh 0; }
         /* ?tv=1: очки (15/30/40/AD) і гейми/сети — крупними цифрами (висота рядка табла та сама, тож усе влазить у рамки теми) */
@@ -1676,6 +1684,7 @@
         </div>
     </div>
 
+    <div id="tv-bg"></div>
     <div id="tv-led"></div>
 
     <div class="stage-badge-wrapper" id="stage-badge-wrapper"><div class="stage-badge-plate" id="stage-badge-plate"></div></div>
@@ -2705,14 +2714,38 @@
             const s1 = srv1 && srv1.classList.contains('active'), s2 = srv2 && srv2.classList.contains('active');
             const isAd = v => /^AD/.test(v);
             const cell = (h, cls) => '<div class="tl-cell ' + (cls || '') + '">' + h + '</div>';
-            const sig = JSON.stringify([txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets]);
+            const cfg = window.__tvCfg || {};
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const logos = arr(cfg.spLogos).filter(x => x && typeof x === 'string');
+            const spSec = Math.max(2, parseInt(cfg.spSec) || 5), spRow = cfg.spMode === 'row';
+            const spIdx = (logos.length && !spRow) ? Math.floor(Date.now() / (spSec * 1000)) % logos.length : 0;
+            const rb = document.getElementById('ribbon-match'), st = window.__tvState || {};
+            let plate = '', plateType = '';
+            if (rb && rb.classList.contains('visible')) {
+                plateType = st.activeMatchRibbon || '';
+                const ok = plateType === 'BREAK_POINT' ? cfg.showBreak !== false : plateType === 'GOLDEN_POINT' ? cfg.showGolden !== false : (plateType === 'SET_POINT' || plateType === 'MATCH_POINT') ? cfg.showSetMatch !== false : plateType === 'GAME_POINT' ? cfg.showGame === true : false;
+                if (ok) plate = rb.textContent.trim();
+            }
+            const showSrv = cfg.showServer !== false;
+            const bgSig = [cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
+            const sig = JSON.stringify([txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
             if (root.__sig === sig) return; root.__sig = sig;
+            const bg = document.getElementById('tv-bg');
+            if (bg) {
+                bg.style.backgroundColor = cfg.bgColor || '#000';
+                const dim = Math.max(0, Math.min(90, parseInt(cfg.bgDim) || 0)) / 100;
+                bg.style.backgroundImage = cfg.bgImg ? 'linear-gradient(rgba(0,0,0,' + dim + '),rgba(0,0,0,' + dim + ')),url("' + cfg.bgImg + '")' : 'none';
+            }
+            root.style.setProperty('--tl-a', cfg.teamAColor || '#ff4040'); root.style.setProperty('--tl-b', cfg.teamBColor || '#3dff6b');
+            root.style.setProperty('--sp-h', (parseInt(cfg.spH) || 14) + 'vh');
             root.style.setProperty('--n', sets.length);
             let h = '<div class="tl-row tl-head"><div>ОЧКИ<small>У ГЕЙМІ</small></div>' + sets.map(x => '<div class="' + (x.cur ? 'cur' : '') + '">СЕТ ' + x.n + '<small>ГЕЙМИ</small></div>').join('') + '</div>';
             const team = (k, name, pts, srv, key) => '<div class="tl-' + k + '" style="display:contents">' +
-                '<div class="tl-name">' + (srv ? '<i>🎾</i>' : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span></div>' +
+                '<div class="tl-name">' + (srv && showSrv ? '<i>🎾</i>' : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span></div>' +
                 '<div class="tl-row tl-score tl-' + k + '">' + cell(pts === '' ? '&nbsp;' : pts, isAd(pts) ? 'ad' : '') + sets.map(x => cell(x[key], x.cur ? '' : 'dim')).join('') + '</div></div>';
-            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep"></div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
+            const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
+            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
+            if (logos.length) h += '<div class="tl-spons">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
             root.innerHTML = h;
         }
         function tvLayout() {
@@ -2725,7 +2758,7 @@
         }
         window.addEventListener('resize', () => { try { tvLayout(); } catch (e) {} });
         if (TV_MODE) setInterval(() => { try { tvLayout(); } catch (e) {} }, 400);
-        if (TV_LED) setInterval(() => { try { tvLedRender(); } catch (e) {} }, 250);   // табло змінює ширину (цифри, анімації) — перераховуємо масштаб
+        if (TV_LED) { setInterval(() => { try { tvLedRender(); } catch (e) {} }, 250); onValue(ref(db, 'padel/tv'), (snap) => { window.__tvCfg = snap.val() || {}; try { tvLedRender(); } catch (e) {} }); }   // табло змінює ширину (цифри, анімації) — перераховуємо масштаб
         const databasePath = `padel/courts/court_${courtId}`;
         const formatTime = (sec) => { return Math.floor(sec / 60).toString().padStart(2, '0') + ":" + (sec % 60).toString().padStart(2, '0'); };
 
@@ -2954,7 +2987,7 @@
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (TV_MODE) tvLayout();
-                if (TV_LED) setTimeout(() => { try { tvLedRender(); } catch (e) {} }, 60);
+                if (TV_LED) { window.__tvState = state; setTimeout(() => { try { tvLedRender(); } catch (e) {} }, 60); }
                 boardWrapper.style.setProperty('--board-opacity', (state.boardOpacity !== undefined ? state.boardOpacity : 100) / 100);
                 if (document.querySelector('.main-board')) document.querySelector('.main-board').style.transform = `scaleX(${state.scaleX || 1})`;
 
