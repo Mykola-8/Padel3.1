@@ -2693,6 +2693,8 @@
         };
         window.icShowAll = function(v) {
             if (v) syncIntroGlobal(true);
+            // «Показати на всіх» з корту №1: усі корти знову наслідують шаблон (знімаємо «own»), щоб не треба було нічого чіпати на інших кортах
+            if (v && icIsMaster()) for (let i = 2; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/own'), false);
             for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v);
             icEnsure().show = !!v; icRefreshUI();
         };
