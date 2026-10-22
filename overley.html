@@ -414,7 +414,7 @@
 
         /* ===== ПІДПИС "ADVANTAGE N" ПІД ТАБЛОМ ===== */
         .advantage-callout {
-            position: absolute; top: 100%; left: calc(120px + var(--team-name-width, 320px) - 70px); margin-top: 2px;
+            position: absolute; top: 100%; right: 0; margin-top: 2px; white-space: nowrap;
             background: #ffffff; color: #111;
             font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px;
             letter-spacing: 0.5px; text-transform: uppercase;
@@ -1647,8 +1647,6 @@
             <img id="logo-img-node" src="" style="display:none;">
         </div>
 
-        <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
-
         <div class="scoreboard-container">
             <!-- 3 ПЛАШКИ ЧІТКО НАД ТАБЛОМ (БІЛИЙ ФОН, ЧОРНИЙ ТЕКСТ) -->
             <div class="ribbons-top-container">
@@ -1657,6 +1655,7 @@
             </div>
 
             <div class="board-row-wrap" style="position:relative; display:flex; flex-direction:row; align-items:stretch;">
+                <div class="advantage-callout" id="advantage-callout">ADVANTAGE 1</div>
                 <div class="main-board" style="position:relative; z-index:2;">
                     <div class="team-row" id="row-team-1">
                         <div class="team-names" id="block-anim-1">
@@ -2513,7 +2512,8 @@
 
         const pointSequence = ['0', '15', '30', '40', 'AD'];
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
-        let lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
+        const GOLD_STYLES = ['one-golden', 'golden-2', 'double'];
+        let lastCalloutTxt = '', lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
         let serverChangeBannerTimer = null, serverChangeBannerDelayTimer = null, lastServerChangeTrigger = 0;
         let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "", sponsorInfoList = [], sponsorInfoOn = false, sponsorInfoDelayTimer = null, sponsorInfoPending = false, sponsorInfoShownIdx = -2;
@@ -2736,6 +2736,8 @@
                 const ok = plateType === 'BREAK_POINT' ? cfg.showBreak !== false : plateType === 'GOLDEN_POINT' ? cfg.showGolden !== false : (plateType === 'SET_POINT' || plateType === 'MATCH_POINT') ? cfg.showSetMatch !== false : plateType === 'GAME_POINT' ? cfg.showGame === true : false;
                 if (ok) plate = rb.textContent.trim();
             }
+            const co = document.getElementById('advantage-callout');
+            if (co && co.classList.contains('visible') && cfg.showGolden !== false) { plate = co.textContent.trim(); plateType = 'GOLDEN_POINT'; }   // DEUCE n / ADVANTAGE n / STAR POINT
             const showSrv = cfg.showServer !== false;
             const bgSig = [cfg.style, document.documentElement.className, cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
             const sig = JSON.stringify([txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
@@ -3050,7 +3052,7 @@
 
                 const ribbonMatch = document.getElementById('ribbon-match');
                 if (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE" && state.activeMatchRibbon !== "TIEBREAK_POINT" && !state.isAmericano && !state.isMexicano && !state.isSuperTiebreak && !(state.isProSet && state.activeMatchRibbon === "MATCH_POINT")) {
-                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' '); ribbonMatch.className = "ribbon visible";
+                    ribbonMatch.innerText = state.activeMatchRibbon.replace('_', ' '); ribbonMatch.className = state.activeMatchRibbon === 'GOLDEN_POINT' ? "ribbon" : "ribbon visible";   // GOLDEN POINT зліва прибрано — замість нього STAR POINT під рахунком
                     if (state.activeMatchRibbon === "MATCH_POINT") ribbonMatch.classList.add('ribbon-matchpoint');
                     else if (state.activeMatchRibbon === "SET_POINT") ribbonMatch.classList.add('ribbon-setpoint');
                     else if (state.activeMatchRibbon === "BREAK_POINT") ribbonMatch.classList.add('ribbon-breakpoint');
@@ -3061,8 +3063,8 @@
                 if (!state.isMatchFinished && !state.showStatsOverlay && !state.showSetOverlayTrigger) {
                     const curRibbon = (state.activeMatchRibbon && state.activeMatchRibbon !== "NONE") ? state.activeMatchRibbon : null;
                     if (!!state.isTiebreak && !lastCornerTiebreak) showCornerSlide(getCornerSlideText('tiebreak', state), 'csp-tiebreak');
-                    else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano && !state.isMexicano) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
-                    else if (curRibbon && curRibbon !== "TIEBREAK_POINT" && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
+                    else if ((state.deuceCounter || 0) > lastCornerDeuce && !state.isAmericano && !state.isMexicano && !GOLD_STYLES.includes(state.deuceStyle)) showCornerSlide(getCornerSlideText('deuce', state), 'csp-deuce');
+                    else if (curRibbon && curRibbon !== "TIEBREAK_POINT" && !(curRibbon === 'GOLDEN_POINT') && curRibbon !== lastCornerRibbon && !state.isAmericano && !state.isMexicano) {
                         showCornerSlide(getCornerSlideText(curRibbon.toLowerCase().replace('_',''), state), 'csp-' + curRibbon.toLowerCase().replace('_',''));
                     }
                     lastCornerRibbon = curRibbon; lastCornerDeuce = state.deuceCounter || 0; lastCornerTiebreak = !!state.isTiebreak;
@@ -3070,12 +3072,12 @@
 
                 const pb = document.getElementById('points-board-outer'), pbT1 = document.getElementById('pb-t1-pts'), pbT2 = document.getElementById('pb-t2-pts');
                 let p1 = state.p1Index || 0, p2 = state.p2Index || 0;
-                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); }
+                if ((p1 === 0 && p2 === 0) || state.isMatchFinished) { pb.classList.remove('visible'); document.getElementById('advantage-callout').classList.remove('visible'); lastCalloutTxt = ''; }
                 else {
                     pb.classList.add('visible');
                     if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                         pbT1.innerText = p1; pbT2.innerText = p2; pbT1.classList.remove('ad-active'); pbT2.classList.remove('ad-active');
-                        document.getElementById('advantage-callout').classList.remove('visible');
+                        document.getElementById('advantage-callout').classList.remove('visible'); lastCalloutTxt = '';
                     } else {
                         // Golden [3] (double): 2 переваги; Golden [2] (golden-2): 1 перевага
                         const adMax = state.deuceStyle === 'double' ? 2 : (state.deuceStyle === 'golden-2' ? 1 : 0);
@@ -3088,22 +3090,23 @@
                         pbT2.classList.toggle('ad-active', p2 === 4);
 
                         const advCallout = document.getElementById('advantage-callout');
-                        const isDoubleStyle = adMax > 0;
+                        const dStyle = state.deuceStyle || 'classic', dN = state.deuceCounter || 0;
+                        const isGoldenStyle = dStyle === 'one-golden' || dStyle === 'golden-2' || dStyle === 'double';
+                        const goldenDeuce = dStyle === 'one-golden' || (dStyle === 'golden-2' && dN >= 1) || (dStyle === 'double' && dN >= 2);
                         const atDeuce = p1 === 3 && p2 === 3;
                         const isAdvantageHeld = p1 === 4 || p2 === 4;
-
-                        if (isDoubleStyle && (atDeuce || isAdvantageHeld)) {
-                            const round = (state.deuceCounter || 0) + 1;
-                            if (round <= adMax) {
-                                advCallout.innerText = "ADVANTAGE " + round;
-                                advCallout.classList.add('visible');
-                            } else {
-                                advCallout.innerText = "STAR POINT";
-                                advCallout.classList.add('visible');
-                            }
+                        let calloutTxt = '';
+                        if (isGoldenStyle && atDeuce) calloutTxt = goldenDeuce ? 'STAR POINT' : ('DEUCE ' + (dN + 1));
+                        else if (isGoldenStyle && isAdvantageHeld) calloutTxt = 'ADVANTAGE ' + (dN + 1);
+                        if (calloutTxt) {
+                            advCallout.innerText = calloutTxt; advCallout.classList.add('visible');
+                            // нижня-ліва висувна плашка — синхронно з написом під рахунком
+                            if (calloutTxt !== lastCalloutTxt && !state.isMatchFinished && !state.showStatsOverlay && !state.showSetOverlayTrigger)
+                                showCornerSlide(calloutTxt, calloutTxt === 'STAR POINT' ? 'csp-goldenpoint' : 'csp-deuce');
                         } else {
                             advCallout.classList.remove('visible');
                         }
+                        lastCalloutTxt = calloutTxt;
                     }
                 }
 
