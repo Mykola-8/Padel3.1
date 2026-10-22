@@ -1036,6 +1036,15 @@
         .si-clip { position: absolute; right: 100%; top: 0; height: 100%; overflow: hidden; width: var(--si-w, 420px); }
         .si-panel { position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 18px; background: var(--si-bg, #0c1c45); color: var(--si-color, #fff); border-radius: 10px 0 0 10px; border: 2px solid var(--si-border, rgba(255,255,255,0.35)); border-right: none; font-family: var(--si-font, 'Montserrat'), sans-serif; font-weight: 800; text-align: center; transform: translateX(105%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.8, 0.4); }
         .si-panel.in { transform: translateX(0); transition: transform 1.5s cubic-bezier(0.22, 0.7, 0.2, 1); }
+        /* розташування інфо-табла відносно логотипа: left (за замовч.) | right | below | above */
+        .sponsor-info-wrap[data-pos] .si-panel.in { transform: translate(0, 0); transition: transform 1.5s cubic-bezier(0.22, 0.7, 0.2, 1); }
+        .sponsor-info-wrap[data-pos="right"] .si-clip { right: auto; left: 100%; }
+        .sponsor-info-wrap[data-pos="right"] .si-panel { transform: translateX(-105%); border-radius: 0 10px 10px 0; border: 2px solid var(--si-border, rgba(255,255,255,0.35)); border-left: none; }
+        .sponsor-info-wrap[data-pos="below"] .si-clip, .sponsor-info-wrap[data-pos="above"] .si-clip { right: auto; left: 50%; margin-left: calc(var(--si-w, 420px) / -2); }
+        .sponsor-info-wrap[data-pos="below"] .si-clip { top: calc(100% + 6px); }
+        .sponsor-info-wrap[data-pos="above"] .si-clip { top: auto; bottom: calc(100% + 6px); }
+        .sponsor-info-wrap[data-pos="below"] .si-panel { transform: translateY(-110%); border-radius: 10px; border: 2px solid var(--si-border, rgba(255,255,255,0.35)); }
+        .sponsor-info-wrap[data-pos="above"] .si-panel { transform: translateY(110%); border-radius: 10px; border: 2px solid var(--si-border, rgba(255,255,255,0.35)); }
         .si-text { text-shadow: 0 1px 3px rgba(0,0,0,0.55); white-space: normal; line-height: 1.12; max-width: 100%; overflow-wrap: anywhere; }
 
         .sponsor-logo-all-frame {
@@ -1066,6 +1075,22 @@
             transition: opacity 0.4s ease, visibility 0.4s, background-color 0.3s ease;
         }
         .ticker-bar.visible { opacity: 1; visibility: visible; }
+        /* ===== БІГУЧИЙ РЯДОК: слайди лого + текст ===== */
+        .ticker-track { transition: opacity 0.35s ease; }
+        .ticker-bar.tk-out .ticker-track { opacity: 0; }
+        .tk-left img { transition: transform 0.35s ease, opacity 0.35s ease; }
+        .ticker-bar.tk-out .tk-left img { opacity: 0; }
+        .ticker-bar.tk-out[data-sa="slide"] .tk-left img { transform: translateY(-120%); }
+        .ticker-bar.tk-out[data-sa="flip"] .tk-left img { transform: perspective(300px) rotateX(90deg); }
+        .ticker-bar.tk-out[data-sa="zoom"] .tk-left img { transform: scale(0.2); }
+        @keyframes tkInFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tkInSlide { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: none; } }
+        @keyframes tkInFlip { from { opacity: 0; transform: perspective(300px) rotateX(-90deg); } to { opacity: 1; transform: none; } }
+        @keyframes tkInZoom { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: none; } }
+        .ticker-bar.tk-in .tk-left img { animation: tkInFade 0.5s ease both; }
+        .ticker-bar.tk-in[data-sa="slide"] .tk-left img { animation-name: tkInSlide; }
+        .ticker-bar.tk-in[data-sa="flip"] .tk-left img { animation-name: tkInFlip; }
+        .ticker-bar.tk-in[data-sa="zoom"] .tk-left img { animation-name: tkInZoom; }
         .tk-left, .tk-right { position: absolute; top: 0; bottom: 0; display: none; align-items: center; justify-content: center; z-index: 3; box-sizing: border-box; }
         .tk-left { left: 0; padding: 0 8px; }
         .tk-left img { height: 82%; width: auto; max-width: 100%; object-fit: contain; display: block; }
@@ -1852,6 +1877,27 @@
             team2Fallback: { en: 'Team B', ua: 'Команда B' },
         };
 
+        // ===== БІГУЧИЙ РЯДОК: ротація слайдів (лого + текст) з лімітом часу =====
+        let tkSlideIdx = 0, tkSlideTimer = null, tkSlideSig = '', tkSlidesCur = [], tkSlideDefSec = 15, tkSlideAnim = 'fade';
+        function tkSlideSecFor(i) { const s = tkSlidesCur[i % (tkSlidesCur.length || 1)] || {}; return Math.max(3, Math.min(600, parseInt(s.sec) || tkSlideDefSec || 15)); }
+        function tkScheduleNext() { clearTimeout(tkSlideTimer); if (tkSlidesCur.length < 2) return; tkSlideTimer = setTimeout(tkAdvance, tkSlideSecFor(tkSlideIdx) * 1000); }
+        function tkAdvance() {
+            const bar = document.getElementById('ticker-bar'); if (!bar || tkSlidesCur.length < 2) return;
+            bar.setAttribute('data-sa', tkSlideAnim); bar.classList.add('tk-out');
+            setTimeout(() => {
+                tkSlideIdx = (tkSlideIdx + 1) % tkSlidesCur.length;
+                if (window.__rerender) window.__rerender();
+                bar.classList.remove('tk-out'); bar.classList.add('tk-in'); setTimeout(() => bar.classList.remove('tk-in'), 650);
+                tkScheduleNext();
+            }, 380);
+        }
+        function tkSyncSlides(sl, state) {
+            tkSlideDefSec = parseInt(state.tickerSlideSec) || 15; tkSlideAnim = ['slide', 'flip', 'zoom'].indexOf(state.tickerSlideAnim) >= 0 ? state.tickerSlideAnim : 'fade';
+            const sig = JSON.stringify(sl.map(s => [(s.logo || '').length, String(s.logo || '').slice(-24), s.html || '', s.sec || 0])) + '|' + tkSlideDefSec;
+            tkSlidesCur = sl;
+            if (sig !== tkSlideSig) { tkSlideSig = sig; tkSlideIdx = 0; tkScheduleNext(); }
+        }
+
         // ===== ГОДИННИК У БІГУЧОМУ РЯДКУ =====
         function tkClockTick() {
             const el = document.getElementById('tk-clock'); if (!el || !window.__tkClockOn) return;
@@ -2627,7 +2673,7 @@
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
         let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalIc = null, __lastSnap = null;
-        const __BARS_KEYS = ['tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
+        const __BARS_KEYS = ['tickerSlides', 'tickerSlideSec', 'tickerSlideAnim', 'tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
@@ -2665,6 +2711,7 @@
         }
         function __courtOnValue(cb) {
             const wrap = snap => ({ val: () => __mergeSp(snap.val()) });
+            window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
             onValue(ref(db, databasePath), (snap) => { __lastSnap = snap; cb(wrap(snap)); });
             onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/bars'), (snap) => { __globalBars = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
@@ -3144,9 +3191,10 @@
                               infoWrap.style.setProperty('--si-bg', 'rgba(' + rr + ',' + gg + ',' + bb + ',' + op + ')'); infoWrap.style.setProperty('--si-border', 'rgba(255,255,255,' + (0.35 * op) + ')');
                               infoWrap.style.setProperty('--si-font', "'" + (state.sponsorInfoFontFamily || 'Montserrat') + "'"); } infoWrap.style.setProperty('--si-color', state.sponsorInfoColor || '#ffffff');
                             infoWrap.style.transform = scaleTransform; infoWrap.style.top = topPx;
+                            infoWrap.setAttribute('data-pos', ['right', 'below', 'above'].indexOf(state.sponsorInfoPos) >= 0 ? state.sponsorInfoPos : 'left');
                             const mf = String(parseInt(state.sponsorInfoFont) || 26);
-                            const styleChanged = infoPanel.getAttribute('data-maxfont') !== mf || infoPanel.getAttribute('data-ff') !== String(state.sponsorInfoFontFamily) || infoPanel.getAttribute('data-w') !== String(state.sponsorInfoWidth) || infoPanel.getAttribute('data-h') !== String(__ls);
-                            infoPanel.setAttribute('data-maxfont', mf); infoPanel.setAttribute('data-ff', String(state.sponsorInfoFontFamily)); infoPanel.setAttribute('data-w', String(state.sponsorInfoWidth)); infoPanel.setAttribute('data-h', String(__ls));
+                            const styleChanged = infoPanel.getAttribute('data-maxfont') !== mf || infoPanel.getAttribute('data-ff') !== String(state.sponsorInfoFontFamily) || infoPanel.getAttribute('data-w') !== String(state.sponsorInfoWidth) || infoPanel.getAttribute('data-h') !== String(__ls) || infoPanel.getAttribute('data-pos') !== String(state.sponsorInfoPos);
+                            infoPanel.setAttribute('data-maxfont', mf); infoPanel.setAttribute('data-ff', String(state.sponsorInfoFontFamily)); infoPanel.setAttribute('data-w', String(state.sponsorInfoWidth)); infoPanel.setAttribute('data-h', String(__ls)); infoPanel.setAttribute('data-pos', String(state.sponsorInfoPos));
                             infoWrap.classList.toggle('visible', on);
                             const prevOn = sponsorInfoOn; sponsorInfoOn = on; sponsorInfoList = validInfos;
                             if (on !== prevOn || !on) { if (!on) { infoPanel.classList.remove('in'); sponsorInfoShownIdx = -2; clearTimeout(sponsorInfoDelayTimer); sponsorInfoPending = false; } else sponsorInfoShowFor(sponsorLogoIndex); }
@@ -3169,7 +3217,12 @@
                     // ===== БІГУЧИЙ РЯДОК =====
                     const tickerBar = document.getElementById('ticker-bar');
                     if (tickerBar) {
-                        const tickerHtml = (state.tickerContentHTML || state.tickerText || '').trim();
+                        const __tkRaw = Array.isArray(state.tickerSlides) ? state.tickerSlides : (state.tickerSlides && typeof state.tickerSlides === 'object' ? Object.values(state.tickerSlides) : []);
+                        const __tkSl = __tkRaw.filter(s => s && (s.logo || (s.html && String(s.html).trim() !== '')));
+                        tkSyncSlides(__tkSl, state);
+                        const __tkCur = __tkSl.length ? __tkSl[tkSlideIdx % __tkSl.length] : null;
+                        const tickerHtml = ((__tkCur && __tkCur.html && String(__tkCur.html).trim()) || state.tickerContentHTML || state.tickerText || '').trim();
+                        const __tkLogoEff = (__tkCur && __tkCur.logo) || state.tickerLogo || '';
                         tickerBar.classList.toggle('visible', !!state.tickerEnabled && tickerHtml !== '');
 
                         const hex = (state.tickerBgColor || '#141414').replace('#', '');
@@ -3185,7 +3238,7 @@
                             const tkL = document.getElementById('tk-left'), tkR = document.getElementById('tk-right'), tkI = document.getElementById('tk-logo');
                             const hh = state.tickerHeight || 34;
                             if (tkL) {
-                                const lg = state.tickerLogo || '';
+                                const lg = __tkLogoEff;
                                 tkL.style.display = lg ? 'flex' : 'none';
                                 if (lg && tkI.dataset.src !== lg) { tkI.dataset.src = lg; tkI.src = lg; }
                                 tkL.style.background = state.tickerLogoBg || '#1d3fd8';
@@ -3211,7 +3264,8 @@
 
                         const t1 = document.getElementById('ticker-text-1');
                         const track = document.getElementById('ticker-track');
-                        if (t1.getAttribute('data-src') !== tickerHtml) { t1.innerHTML = tickerHtml; t1.setAttribute('data-src', tickerHtml); }
+                        let __tkRestart = false;
+                        if (t1.getAttribute('data-src') !== tickerHtml) { t1.innerHTML = tickerHtml; t1.setAttribute('data-src', tickerHtml); __tkRestart = true; }
                         const tColor = state.tickerTextColor || '#ffffff';
                         t1.style.color = tColor;
                         track.style.animationDuration = (state.tickerSpeed || 20) + 's';
@@ -3253,6 +3307,8 @@
                             });
                         }
                     }
+
+                    if (typeof __tkRestart !== 'undefined' && __tkRestart) { const _tr = document.getElementById('ticker-track'); const an = _tr.style.animationName; _tr.style.animationName = 'none'; void _tr.offsetWidth; _tr.style.animationName = an; }
 
                     // ===== РЕКЛАМНИЙ РЯДОК =====
                     const adBar = document.getElementById('ad-bar');
