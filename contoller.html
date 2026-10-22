@@ -766,6 +766,7 @@
                         <input type="checkbox" id="sponsor-info-show-checkbox" style="width:22px; height:22px;" onchange="toggleSponsorInfo(this.checked)">
                     </div>
                     <div class="row"><span>Розмір логотипа: <b id="sponsor-logo-size-val" style="color:#e0b878;">100%</b></span><input type="range" id="sponsor-logo-size-slider" min="30" max="250" step="5" value="100" oninput="updateSponsorInfoNum('sponsorLogoSize', this.value, 'sponsor-logo-size-val', '%')"></div>
+                    <div class="row"><span>Де показувати інфо-табло:</span><select id="sponsor-info-pos-select" onchange="updateSponsorInfoPos(this.value)"><option value="left">Зліва від логотипа</option><option value="right">Справа від логотипа</option><option value="below">Під логотипом</option><option value="above">Над логотипом</option></select></div>
                     <div class="row"><span>Ширина інфо-табла: <b id="sponsor-info-width-val" style="color:#e0b878;">420px</b></span><input type="range" id="sponsor-info-width-slider" min="120" max="1200" step="10" value="420" oninput="updateSponsorInfoNum('sponsorInfoWidth', this.value, 'sponsor-info-width-val', 'px')"></div>
                     <div class="row"><span>Макс. розмір тексту: <b id="sponsor-info-font-val" style="color:#e0b878;">26px</b></span><input type="range" id="sponsor-info-font-slider" min="10" max="80" step="1" value="26" oninput="updateSponsorInfoNum('sponsorInfoFont', this.value, 'sponsor-info-font-val', 'px')"></div>
                     <div class="row"><span>Прозорість фону: <b id="sponsor-info-bgop-val" style="color:#e0b878;">100%</b></span><input type="range" id="sponsor-info-bgop-slider" min="0" max="100" step="1" value="100" oninput="updateSponsorInfoNum('sponsorInfoBgOpacity', this.value, 'sponsor-info-bgop-val', '%')"></div>
@@ -821,6 +822,14 @@
                     <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">Ширина блоку лого: <b id="tk-logow-val" style="color:#e0b878;">120</b>px</span><input type="range" id="tk-logow" min="40" max="500" step="2" value="120" oninput="tkSet('tickerLogoW', parseInt(this.value)); document.getElementById('tk-logow-val').innerText = this.value;"></label>
                     <label style="display:flex; gap:8px; align-items:center; font-size:12px; color:#ccc;"><input type="checkbox" id="tk-clockshow" onchange="tkSet('tickerClockShow', this.checked)"> Показувати годинник справа (час комп'ютера з OBS)</label>
                     <div style="display:flex; gap:12px; align-items:center; font-size:11px; color:#ccc;">Фон годинника <input type="color" id="tk-clockbg" value="#ffffff" oninput="tkSet('tickerClockBg', this.value)" style="width:46px; height:26px; padding:0; border:none; background:none;"> Цифри <input type="color" id="tk-clockcolor" value="#111111" oninput="tkSet('tickerClockColor', this.value)" style="width:46px; height:26px; padding:0; border:none; background:none;"></div>
+                </div>
+                <div style="border:1px solid #333; border-radius:6px; padding:8px; margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:11px; font-weight:700; color:#e0b878;">🔁 Слайди: кілька лого + текст, що змінюються</div>
+                    <div style="font-size:10px; color:#888;">Додайте слайди — рядок показуватиме по черзі лого зліва та відповідний текст. Порожній текст = звичайний текст рядка; без лого = загальне лого. Без слайдів усе працює як раніше.</div>
+                    <div id="tk-slides-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                    <button type="button" class="btn btn-gray" style="padding:6px 10px !important; font-size:12px !important;" onclick="tkSlideAdd()">➕ Додати слайд</button>
+                    <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">Час показу слайда (за замовчуванням): <b id="tk-slidesec-val" style="color:#e0b878;">15</b> с</span><input type="range" id="tk-slidesec" min="3" max="120" step="1" value="15" oninput="tkSet('tickerSlideSec', parseInt(this.value)); document.getElementById('tk-slidesec-val').innerText = this.value;"></label>
+                    <div class="row"><span>Анімація зміни:</span><select id="tk-slideanim" onchange="tkSet('tickerSlideAnim', this.value)"><option value="fade">Розчинення</option><option value="slide">Виїзд вгору</option><option value="flip">Переворот</option><option value="zoom">Масштаб</option></select></div>
                 </div>
                 <label style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
                     <span style="font-size:11px; color:#ccc;">Ширина рядка — зменшити (%% екрана): <b id="ticker-width-value" style="color:#e0b878;">100%%</b></span>
@@ -1147,7 +1156,7 @@
             if (gs.infos !== undefined) { let a = Array.isArray(gs.infos) ? gs.infos.slice() : Object.values(gs.infos || {}); while (a.length < 10) a.push(""); state.sponsorInfos = a.slice(0, 10); }
         }
         // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
-        const BARS_KEYS = ['tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
+        const BARS_KEYS = ['tickerSlides', 'tickerSlideSec', 'tickerSlideAnim', 'tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         let globalBars = null;
         function mergeGlobalBars() {
             if (!globalBars || typeof state !== 'object' || !state) return;
@@ -1994,6 +2003,43 @@
 
         window.updateBarWidth = function(key, v, lblId) { state[key] = Math.max(20, Math.min(100, parseInt(v) || 100)); const l = document.getElementById(lblId); if (l) l.innerText = state[key] + '%'; set(matchRef, state); };
         window.tkSet = function(key, v) { state[key] = v; saveBars(); };
+        function tkSlidesArr() { if (!Array.isArray(state.tickerSlides)) state.tickerSlides = (state.tickerSlides && typeof state.tickerSlides === 'object') ? Object.values(state.tickerSlides) : []; return state.tickerSlides; }
+        let tkSlidesSig = '';
+        const tkSlidesSigOf = () => JSON.stringify(tkSlidesArr().map(s => [!!(s && s.logo), s && s.html, s && s.sec]));
+        function tkUnesc(h) { return String(h || '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); }
+        function tkRenderSlides() {
+            const host = document.getElementById('tk-slides-list'); if (!host) return;
+            const IN = 'background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box; padding:5px 6px; font-size:12px;';
+            host.innerHTML = tkSlidesArr().map((s, i) => `<div style="display:flex; gap:6px; align-items:center; background:#161616; border:1px solid #333; border-radius:6px; padding:6px;">
+                <div style="width:54px; height:34px; background:#1d3fd8; border-radius:4px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto;">${s && s.logo ? `<img src="${s.logo}" style="max-width:100%; max-height:100%;">` : '<span style="font-size:9px; color:#9ab;">лого</span>'}</div>
+                <label style="flex:0 0 auto; cursor:pointer; font-size:14px;" title="Завантажити лого">📁<input type="file" accept="image/*" style="display:none" onchange="tkSlideLogo(${i}, this)"></label>
+                <input type="text" value="${tkUnesc(s && s.html).replace(/"/g, '&quot;')}" placeholder="Текст слайда" style="flex:1; min-width:0; ${IN}" oninput="tkSlideField(${i}, 'html', this.value)">
+                <input type="number" min="0" max="600" value="${(s && s.sec) || ''}" placeholder="с" title="Секунд показу (порожньо = за замовчуванням)" style="width:52px; ${IN}" oninput="tkSlideField(${i}, 'sec', this.value)">
+                <button type="button" class="btn btn-gray" style="width:auto; padding:4px 8px !important; font-size:12px !important;" onclick="tkSlideDel(${i})">✖</button></div>`).join('');
+            tkSlidesSig = tkSlidesSigOf();
+        }
+        window.tkSlideAdd = function() { const a = tkSlidesArr(); if (a.length >= 10) return; a.push({ logo: '', html: '', sec: 0 }); saveBars(); tkRenderSlides(); };
+        window.tkSlideDel = function(i) { tkSlidesArr().splice(i, 1); saveBars(); tkRenderSlides(); };
+        window.tkSlideField = function(i, k, v) {
+            const s = tkSlidesArr()[i]; if (!s) return;
+            if (k === 'html') s.html = String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); else s.sec = Math.max(0, parseInt(v) || 0);
+            tkSlidesSig = tkSlidesSigOf(); saveBars();
+        };
+        window.tkSlideLogo = function(i, input) {
+            const file = input.files && input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const sc = Math.min(500 / img.width, 140 / img.height, 1);
+                    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+                    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                    const s = tkSlidesArr()[i]; if (s) { s.logo = cv.toDataURL('image/png'); saveBars(); tkRenderSlides(); }
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
         window.tkLogoUpload = function(input) {
             const file = input.files && input.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -2025,6 +2071,7 @@
             while (arr.length < 10) arr.push("");
             state.sponsorInfos = arr.slice(0, 10).map(x => (x === undefined || x === null) ? "" : String(x));
         }
+        window.updateSponsorInfoPos = function(v) { state.sponsorInfoPos = v; set(matchRef, state); };
         window.toggleSponsorInfo = function(v) { state.sponsorInfoShow = !!v; set(matchRef, state); };
         window.updateSponsorInfoNum = function(key, v, lblId, suffix) { state[key] = parseInt(v) || 0; const l = document.getElementById(lblId); if (l) l.innerText = state[key] + (suffix || ''); set(matchRef, state); };
         window.updateSponsorInfoColor = function(key, v) { state[key] = v; set(matchRef, state); };
@@ -2174,7 +2221,7 @@
             'tournamentStage', 'stageTextColor', 'stageOffsetX', 'stageOffsetY', 'stageFontSize', 'stageBgColor',
             'statsBgOpacity', 'statsBoardScale', 'statsTextScale', 'showStatsBetweenGames',
             'logoUrl', 'logoSrc', 'customLogoText', 'showLogo', 'showStatsLeftLogo', 'statsLeftLogoUrl', 'statsLeftLogoSrc',
-            'sponsorLogoScale', 'sponsorLogoPosX', 'sponsorLogoPosY', 'sponsorInfoShow', 'sponsorLogoSize', 'sponsorInfoWidth', 'sponsorInfoFont', 'sponsorInfoBg', 'sponsorInfoColor', 'sponsorInfoBgOpacity', 'sponsorInfoFontFamily', 'showBoardPromoPanel', 'boardPromoLines', 'promoPosX', 'promoPosY',
+            'sponsorLogoScale', 'sponsorLogoPosX', 'sponsorLogoPosY', 'sponsorInfoShow', 'sponsorInfoPos', 'sponsorLogoSize', 'sponsorInfoWidth', 'sponsorInfoFont', 'sponsorInfoBg', 'sponsorInfoColor', 'sponsorInfoBgOpacity', 'sponsorInfoFontFamily', 'showBoardPromoPanel', 'boardPromoLines', 'promoPosX', 'promoPosY',
             'qrCodeUrl', 'qrCodeDescription', 'qrLinks', 'qrScale', 'qrOffsetX', 'qrOffsetY',
             'adBarSlides', 'adBarEnabled', 'adBarTextColor', 'adBarRemoveBg', 'adBarOffsetY', 'adBarHeight', 'adBarGap', 'adBarBgColor', 'adBarBgAlpha', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration',
             'tickerEnabled', 'tickerTextColor', 'tickerSpeed', 'tickerOffsetY', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerContentHTML', 'tickerBgColor', 'tickerBgAlpha',
@@ -3175,6 +3222,12 @@
               const lw = document.getElementById('tk-logow-val'); if (lw) lw.innerText = state.tickerLogoW || 120;
               const cs = document.getElementById('tk-clockshow'); if (cs) cs.checked = !!state.tickerClockShow;
               const ls = document.getElementById('tk-logo-st'); if (ls) ls.innerText = state.tickerLogo ? '✅' : ''; }
+            { const sl = document.getElementById('tk-slides-list');
+              if (sl && !sl.contains(document.activeElement) && tkSlidesSig !== tkSlidesSigOf()) tkRenderSlides();
+              else if (sl && !sl.firstChild && tkSlidesArr().length) tkRenderSlides();
+              const ss = document.getElementById('tk-slidesec'); if (ss && document.activeElement !== ss) ss.value = state.tickerSlideSec || 15;
+              const sv2 = document.getElementById('tk-slidesec-val'); if (sv2) sv2.innerText = state.tickerSlideSec || 15;
+              const sa = document.getElementById('tk-slideanim'); if (sa && document.activeElement !== sa) sa.value = state.tickerSlideAnim || 'fade'; }
             const tickerBgInput = document.getElementById('ticker-bgcolor-input');
             if (tickerBgInput && document.activeElement !== tickerBgInput) tickerBgInput.value = state.tickerBgColor || '#141414';
             const tickerTextColorInput = document.getElementById('ticker-textcolor-input');
@@ -3288,6 +3341,7 @@
                 }
                 const sv = (id, v) => { const e = document.getElementById(id); if (e && document.activeElement !== e) e.value = v; };
                 const ck = document.getElementById('sponsor-info-show-checkbox'); if (ck) ck.checked = !!state.sponsorInfoShow;
+                { const ps = document.getElementById('sponsor-info-pos-select'); if (ps && document.activeElement !== ps) ps.value = state.sponsorInfoPos || 'left'; }
                 sv('sponsor-logo-size-slider', state.sponsorLogoSize || 100); sv('sponsor-info-width-slider', state.sponsorInfoWidth || 420); sv('sponsor-info-font-slider', state.sponsorInfoFont || 26);
                 sv('sponsor-info-bgop-slider', state.sponsorInfoBgOpacity === undefined ? 100 : state.sponsorInfoBgOpacity); sv('sponsor-info-fontfamily-select', state.sponsorInfoFontFamily || 'Montserrat'); sv('sponsor-info-bg-input', state.sponsorInfoBg || '#0c1c45'); sv('sponsor-info-color-input', state.sponsorInfoColor || '#ffffff');
                 [['sponsor-logo-size-val', (state.sponsorLogoSize || 100) + '%'], ['sponsor-info-width-val', (state.sponsorInfoWidth || 420) + 'px'], ['sponsor-info-font-val', (state.sponsorInfoFont || 26) + 'px'], ['sponsor-info-bgop-val', (state.sponsorInfoBgOpacity === undefined ? 100 : state.sponsorInfoBgOpacity) + '%']].forEach(([id, t]) => { const e = document.getElementById(id); if (e) e.innerText = t; });
