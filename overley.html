@@ -2730,7 +2730,9 @@
             const s1 = srv1 && srv1.classList.contains('active'), s2 = srv2 && srv2.classList.contains('active');
             const isAd = v => /^AD/.test(v);
             const cell = (h, cls) => '<div class="tl-cell ' + (cls || '') + '">' + h + '</div>';
-            const cfg = window.__tvCfg || {};
+            let cfg = window.__tvCfg;
+            const cfgSrc = (cfg && Object.keys(cfg).length) ? 'padel/tv' : ((window.__tvState && window.__tvState.tvCfg) ? 'court.tvCfg (резерв)' : 'нема');
+            if (cfgSrc !== 'padel/tv') cfg = (window.__tvState && window.__tvState.tvCfg) || {};
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const logos = arr(cfg.spLogos).filter(x => x && typeof x === 'string');
             const spSec = Math.max(2, parseInt(cfg.spSec) || 5), spRow = cfg.spMode === 'row';
@@ -2746,7 +2748,7 @@
             if (co && co.classList.contains('visible') && cfg.showGolden !== false) { plate = co.textContent.trim(); plateType = 'GOLDEN_POINT'; }   // DEUCE n / ADVANTAGE n / STAR POINT
             const showSrv = cfg.showServer !== false;
             const bgSig = [cfg.spAnim, cfg.style, document.documentElement.className, cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
-            const sig = JSON.stringify([txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
+            const sig = JSON.stringify([cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -2768,6 +2770,7 @@
             const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
             h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
             if (logos.length) h += '<div class="tl-spons">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img' + (cfg.spAnim && cfg.spAnim !== 'fade' ? ' class="an-' + cfg.spAnim + '"' : '') + ' src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
+            if (urlParams.get('tvdebug') === '1') h += '<div style="position:absolute;left:0;bottom:0;font:14px monospace;color:#ff0;background:#000c;padding:3px 8px;z-index:9">overlay v6 | налаштування ТВ: ' + cfgSrc + ' | ключів: ' + Object.keys(cfg).length + ' | логотипів: ' + logos.length + ' | стиль: ' + (cfg.style || 'theme') + ' | фон: ' + (cfg.bgColor || '-') + '</div>';
             root.innerHTML = h;
         }
         function tvLayout() {
