@@ -1015,13 +1015,14 @@
                     <div class="switch-row"><span>⚪ Плашка GAME POINT</span><input type="checkbox" id="tv-showGame" onchange="tvSet('showGame', this.checked)"></div>
                     <div style="font-size:11px; font-weight:700; margin-top:4px;">Логотипи спонсорів (внизу екрана):</div>
                     <div id="tv-save-st" style="font-size:11px;"></div>
-                    <div id="tv-sp-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                    <div id="tv-sp-list" style="display:flex; flex-direction:column; gap:8px;"></div>
                     <label class="btn" style="padding:7px !important; font-size:11px !important; cursor:pointer; text-align:center;">➕ Додати логотипи (можна кілька)<input type="file" accept="image/*" multiple style="display:none" onchange="tvSpAdd(this)"></label>
                     <div class="row"><span>Місце логотипів:</span><select id="tv-spPos" onchange="tvSet('spPos', this.value)"><option value="bottom">Знизу</option><option value="top">Зверху</option><option value="free">Вільно (переміщувати по табло)</option></select></div>
                     <div class="row"><span>Позиція X: <b id="tv-spX-v">50%</b></span><input type="range" id="tv-spX" min="0" max="100" step="1" oninput="tvSet('spX', parseInt(this.value))" style="width:55%"></div>
                     <div class="row"><span>Позиція Y: <b id="tv-spY-v">50%</b></span><input type="range" id="tv-spY" min="0" max="100" step="1" oninput="tvSet('spY', parseInt(this.value))" style="width:55%"></div>
                     <div style="font-size:9px; color:#777;">X/Y працюють у режимі «Вільно». Бігучий рядок і рядок реклами ТВ-табло бере з налаштувань «Бігучий рядок» / «Рекламний рядок» (вкл/викл там).</div>
                     <div class="row"><span>Режим:</span><select id="tv-spMode" onchange="tvSet('spMode', this.value)"><option value="carousel">Карусель (по одному)</option><option value="row">Всі одразу в ряд</option></select></div>
+                    <div class="row"><span>Опис логотипа:</span><select id="tv-spDescPos" onchange="tvSet('spDescPos', this.value)"><option value="bottom">Знизу</option><option value="right">Справа</option><option value="left">Зліва</option></select></div>
                     <div class="row"><span>Анімація:</span><select id="tv-spAnim" onchange="tvSet('spAnim', this.value)"><option value="fade">Поява знизу (fade)</option><option value="slide">Виїзд справа</option><option value="zoom">Збільшення</option><option value="flip">Переворот</option></select></div>
                     <div class="row"><span>Зміна кожні: <b id="tv-spSec-v">5 с</b></span><input type="range" id="tv-spSec" min="2" max="30" step="1" oninput="tvSet('spSec', parseInt(this.value))" style="width:55%"></div>
                     <div class="row"><span>Висота смуги: <b id="tv-spH-v">14%</b></span><input type="range" id="tv-spH" min="8" max="30" step="1" oninput="tvSet('spH', parseInt(this.value))" style="width:55%"></div>
@@ -1205,7 +1206,7 @@
 
 
         // ===== ТВ-ТАБЛО (overlay ?tv=1): спільні налаштування padel/tv для всіх кортів =====
-        const TV_DEF = { tvTheme: 'board', spPos: 'bottom', spX: 50, spY: 50, spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
+        const TV_DEF = { tvTheme: 'board', spPos: 'bottom', spX: 50, spY: 50, spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spDescPos: 'bottom', spLogos: [], spScale: [], spDesc: [], spMode: 'carousel', spSec: 5, spH: 14 };
         let tvCfg = JSON.parse(JSON.stringify(TV_DEF));
         function tvStatus(ok, msg) { const e = document.getElementById('tv-save-st'); if (e) { e.innerText = ok ? ('☁️ Збережено в базі ✅' + (msg ? ' — ' + msg : '')) : '⚠️ Не збережено: ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
         function tvMirror() { try { if (typeof state === 'object' && state) state.tvCfg = tvCfg; } catch (e) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/tvCfg'), tvCfg); }   // резервний шлях, якщо база не дозволяє padel/tv
@@ -1216,7 +1217,7 @@
         window.tvSet = function(k, v) { tvCfg[k] = v; tvSave(); tvUiRefresh(); };
         function tvUiRefresh() {
             const g = id => document.getElementById(id); if (!g('tv-card')) return;
-            ['tvTheme', 'spPos', 'spX', 'spY', 'spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
+            ['tvTheme', 'spPos', 'spX', 'spY', 'spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode', 'spDescPos'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
             ['showServer', 'showBreak', 'showGolden', 'showSetMatch', 'showGame'].forEach(k => { const e = g('tv-' + k); if (e) e.checked = !!tvCfg[k]; });
             if (g('tv-bgDim-v')) g('tv-bgDim-v').innerText = (tvCfg.bgDim || 0) + '%';
             if (g('tv-spX-v')) g('tv-spX-v').innerText = (tvCfg.spX === undefined ? 50 : tvCfg.spX) + '%';
@@ -1225,13 +1226,27 @@
             if (g('tv-spH-v')) g('tv-spH-v').innerText = tvCfg.spH + '%';
             if (g('tv-bgImg-st')) g('tv-bgImg-st').innerText = tvCfg.bgImg ? '✅ є' : '';
             const host = g('tv-sp-list'); if (!host) return;
+            if (host.contains(document.activeElement) && document.activeElement.tagName === 'INPUT' && host.children.length === tvCfg.spLogos.length) return;
             host.innerHTML = '';
+            if (!Array.isArray(tvCfg.spScale)) tvCfg.spScale = Object.values(tvCfg.spScale || {});
+            if (!Array.isArray(tvCfg.spDesc)) tvCfg.spDesc = Object.values(tvCfg.spDesc || {});
             tvCfg.spLogos.forEach((u, i) => {
-                const w = document.createElement('div'); w.style.cssText = 'position:relative; width:70px; height:44px; background:#222; border-radius:6px; display:flex; align-items:center; justify-content:center;';
-                const im = document.createElement('img'); im.src = u; im.style.cssText = 'max-width:64px; max-height:38px;';
+                const w = document.createElement('div'); w.style.cssText = 'position:relative; width:100%; background:#222; border-radius:6px; padding:6px; display:flex; gap:8px; align-items:center; box-sizing:border-box;';
+                const imw = document.createElement('div'); imw.style.cssText = 'flex:0 0 70px; height:44px; display:flex; align-items:center; justify-content:center;';
+                const im = document.createElement('img'); im.src = u; im.style.cssText = 'max-width:66px; max-height:40px;'; imw.appendChild(im);
+                const col = document.createElement('div'); col.style.cssText = 'flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;';
+                const sc = tvCfg.spScale[i] || 100;
+                const lab = document.createElement('div'); lab.style.cssText = 'font-size:11px; color:#ccc;'; lab.innerText = 'Масштаб: ' + sc + '%';
+                const rg = document.createElement('input'); rg.type = 'range'; rg.min = 30; rg.max = 200; rg.step = 5; rg.value = sc; rg.style.width = '100%';
+                rg.oninput = () => { tvCfg.spScale[i] = parseInt(rg.value); lab.innerText = 'Масштаб: ' + rg.value + '%'; };
+                rg.onchange = () => { tvSave(); };
+                const ds = document.createElement('input'); ds.type = 'text'; ds.placeholder = 'Опис під логотипом (необов’язково)'; ds.value = tvCfg.spDesc[i] || ''; ds.maxLength = 60; ds.style.cssText = 'width:100%; box-sizing:border-box; font-size:12px; padding:5px;';
+                ds.oninput = () => { tvCfg.spDesc[i] = ds.value; };
+                ds.onchange = () => { tvSave(); };
+                col.appendChild(lab); col.appendChild(rg); col.appendChild(ds);
                 const x = document.createElement('button'); x.type = 'button'; x.innerText = '✕'; x.style.cssText = 'position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; border:0; background:#c33; color:#fff; font-size:11px; cursor:pointer; padding:0;';
-                x.onclick = () => { tvCfg.spLogos.splice(i, 1); tvSave(); tvUiRefresh(); };
-                w.appendChild(im); w.appendChild(x); host.appendChild(w);
+                x.onclick = () => { tvCfg.spLogos.splice(i, 1); tvCfg.spScale.splice(i, 1); tvCfg.spDesc.splice(i, 1); tvSave(); tvUiRefresh(); };
+                w.appendChild(imw); w.appendChild(col); w.appendChild(x); host.appendChild(w);
             });
         }
         function tvResize(file, maxW, maxH, mime, cb) {
@@ -1252,7 +1267,7 @@
             const files = Array.from(input.files || []); if (!files.length) return;
             let left = files.length;
             files.forEach(f => tvResize(f, 600, 200, 'image/png', url => {
-                if (tvCfg.spLogos.length < 12) tvCfg.spLogos.push(url);
+                if (tvCfg.spLogos.length < 12) { tvCfg.spLogos.push(url); tvCfg.spScale[tvCfg.spLogos.length - 1] = 100; tvCfg.spDesc[tvCfg.spLogos.length - 1] = ''; }
                 if (--left === 0) { tvSave(); tvUiRefresh(); input.value = ''; }
             }));
         };
