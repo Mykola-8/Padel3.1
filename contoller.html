@@ -1202,8 +1202,12 @@
         // ===== ТВ-ТАБЛО (overlay ?tv=1): спільні налаштування padel/tv для всіх кортів =====
         const TV_DEF = { spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
         let tvCfg = JSON.parse(JSON.stringify(TV_DEF));
-        function tvStatus(ok, msg) { const e = document.getElementById('tv-save-st'); if (e) { e.innerText = ok ? '☁️ Збережено в базі ✅' : '⚠️ Не збережено: ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
-        function tvSave() { try { set(ref(db, 'padel/tv'), tvCfg).then(() => tvStatus(true), (e) => tvStatus(false, (e && e.message) || e)); } catch (e) { tvStatus(false, e.message); } }
+        function tvStatus(ok, msg) { const e = document.getElementById('tv-save-st'); if (e) { e.innerText = ok ? ('☁️ Збережено в базі ✅' + (msg ? ' — ' + msg : '')) : '⚠️ Не збережено: ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
+        function tvMirror() { try { if (typeof state === 'object' && state) state.tvCfg = tvCfg; } catch (e) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/tvCfg'), tvCfg); }   // резервний шлях, якщо база не дозволяє padel/tv
+        function tvSave() {
+            const fail = (e) => { const m = (e && e.message) || String(e); try { tvMirror(); tvStatus(true, 'padel/tv відхилено (' + m + '), збережено у кортах (резерв)'); } catch (e2) { tvStatus(false, m); } };
+            try { set(ref(db, 'padel/tv'), tvCfg).then(() => tvStatus(true), fail); } catch (e) { fail(e); }
+        }
         window.tvSet = function(k, v) { tvCfg[k] = v; tvSave(); tvUiRefresh(); };
         function tvUiRefresh() {
             const g = id => document.getElementById(id); if (!g('tv-card')) return;
