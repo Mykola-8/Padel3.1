@@ -98,6 +98,7 @@
       <label>Джерело
         <select id="engine">
           <option value="claude">Claude (потрібен API-ключ)</option>
+          <option value="gemini">Gemini (потрібен ключ Google AI Studio) — текст і голоси</option>
           <option value="local">Без ШІ — готові фрази (безкоштовно)</option>
         </select>
       </label>
@@ -109,6 +110,23 @@
       </label>
       <label>API-ключ Anthropic
         <input type="password" id="key" placeholder="sk-ant-…" autocomplete="off">
+      </label>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <label>Ключ Gemini (aistudio.google.com/apikey)
+        <input type="password" id="gkey" placeholder="AIza…" autocomplete="off">
+      </label>
+      <label>Модель Gemini
+        <select id="gmodel"><option value="gemini-2.5-flash">gemini-2.5-flash (швидко)</option><option value="gemini-2.5-pro">gemini-2.5-pro (розумніше)</option></select>
+      </label>
+      <label>Озвучення голосами Gemini
+        <select id="gtts"><option value="1">Так — голоси Gemini (якісніші)</option><option value="0">Ні — голос браузера</option></select>
+      </label>
+      <label>Чоловічий голос Gemini
+        <select id="gvm"><option value="">Авто (Charon / Puck для смішного)</option><option>Charon</option><option>Puck</option><option>Orus</option><option>Fenrir</option><option>Algenib</option><option>Iapetus</option></select>
+      </label>
+      <label>Жіночий голос Gemini
+        <select id="gvf"><option value="">Авто (Kore / Leda для смішного)</option><option>Kore</option><option>Leda</option><option>Zephyr</option><option>Aoede</option><option>Callirrhoe</option><option>Autonoe</option></select>
       </label>
     </div>
     <div class="hint" style="margin-top:8px">Ключ зберігається лише в цьому браузері й відправляється тільки на api.anthropic.com. Не відкривайте цю сторінку на чужому комп’ютері й не вставляйте її в загальнодоступний OBS-профіль з ключем.</div>
@@ -152,6 +170,10 @@ const MODES = {
   emo:   { name: '🔥 Емоційний коментатор (1 голос)', speakers: 1, voice: 'A', prompt: BASE + ' Говори як гарячий спортивний коментатор: енергійно, з захопленням, 1 коротке речення (до 15 слів). Називай команди за прізвищами, не повторюйся.' },
   calm:  { name: '🎓 Спокійний аналітик (1 голос)', speakers: 1, voice: 'A', prompt: 'Ти досвідчений тренер і коментатор паделу. Стеж за табло. Після кожної події дай коротку спокійну репліку українською: що сталося і що це означає для матчу (1–2 речення, до 25 слів). Без вигуків.' },
   fun:   { name: '😄 Жартівливий (жіночий голос)', speakers: 1, voice: 'B', prompt: BASE + ' Стиль: легкий гумор і дружні підколки, але без образ. 1 коротке речення (до 15 слів).' },
+  m_pro: { name: '👔 Він — професійний коментатор', speakers: 1, voice: 'A', prompt: 'Ти професійний чоловічий коментатор паделу. Стеж за табло. Після кожної події дай коротку, впевнену, експертну репліку українською з правильною термінологією (брейк, гейм, сет, тайбрейк, склo, бандейха, віборa тощо — лише якщо доречно): 1 речення, до 18 слів. Тон стриманий і поважний.' },
+  f_pro: { name: '👩‍💼 Вона — професійна коментаторка', speakers: 1, voice: 'B', prompt: 'Ти професійна жіноча коментаторка паделу. Стеж за табло. Після кожної події дай коротку, впевнену, експертну репліку українською: що сталося і чому це важливо (1 речення, до 18 слів). Тон спокійний, компетентний, доброзичливий.' },
+  m_fun: { name: '🤡 Він — смішний коментатор', speakers: 1, voice: 'A', prompt: 'Ти кумедний чоловічий коментатор паделу. Стеж за табло. Після кожної події — коротка смішна репліка українською з жартом чи порівнянням (1 речення, до 18 слів). Жартуй добродушно, без образ гравців, не повторюй жарти.' },
+  f_fun: { name: '😜 Вона — смішна коментаторка', speakers: 1, voice: 'B', prompt: 'Ти весела жіноча коментаторка паделу з почуттям гумору. Стеж за табло. Після кожної події — коротка дотепна репліка українською (1 речення, до 18 слів). Легкий сарказм і гумор, але доброзичливо, без образ.' },
   duo:   { name: '🎙️ Дует: він і вона (2 голоси)', speakers: 2, voice: 'A', prompt: 'Ти пишеш діалог двох коментаторів паделу: чоловік (Олег, емоційний) і жінка (Марина, аналітична). Стеж за табло. Щойно рахунок змінюється або відбувається розіграш — коротка живa репліка або обмін з двох реплік, українською, до 25 слів загалом. Не кожну подію треба коментувати двома: інколи достатньо однієї репліки.' },
   score: { name: '📟 Тільки рахунок (1 голос)', speakers: 1, voice: 'B', prompt: 'Ти диктор табло паделу. Після події коротко й нейтрально оголоси рахунок українською: гейми, потім очки. Без емоцій, до 12 слів.' }
 };
@@ -159,7 +181,7 @@ const SYS_COMMON = `\nПравила виводу: пиши лише текст 
 const SYS_DUO = `\nФормат відповіді для дуету — СТРОГО JSON-масив: [{"s":"A","t":"репліка чоловіка"},{"s":"B","t":"репліка жінки"}] (A — чоловік, B — жінка, 1–2 об'єкти).`;
 
 // ───────── Налаштування ─────────
-const S = Object.assign({ mode: 'emo', react: 'key', gap: 4, court: qs.get('court') || '1', voiceA: '', voiceB: '', rate: 1.05, vol: 1, engine: 'claude', model: 'claude-haiku-5-5', key: '', prompts: {} }, (() => { try { return JSON.parse(localStorage.getItem('padelCommentator') || '{}'); } catch (e) { return {}; } })());
+const S = Object.assign({ mode: 'emo', react: 'key', gap: 4, court: qs.get('court') || '1', voiceA: '', voiceB: '', rate: 1.05, vol: 1, engine: 'claude', model: 'claude-haiku-5-5', key: '', gkey: '', gmodel: 'gemini-2.5-flash', gtts: true, gvm: '', gvf: '', prompts: {} }, (() => { try { return JSON.parse(localStorage.getItem('padelCommentator') || '{}'); } catch (e) { return {}; } })());
 if (qs.get('court')) S.court = qs.get('court');
 const save = () => { try { localStorage.setItem('padelCommentator', JSON.stringify(S)); } catch (e) {} };
 
@@ -168,7 +190,8 @@ for (let i = 1; i <= 10; i++) $('court').add(new Option('Корт ' + i, String(
 const bind = (id, key, num) => { const e = $(id); e.value = S[key]; e.addEventListener('input', () => { S[key] = num ? parseFloat(e.value) : e.value; save(); upd(); }); };
 const promptOf = () => S.prompts[S.mode] || MODES[S.mode].prompt;
 function upd() { $('rateV').textContent = S.rate; $('volV').textContent = Math.round(S.vol * 100) + '%'; }
-bind('react', 'react'); bind('gap', 'gap', 1); bind('rate', 'rate', 1); bind('vol', 'vol', 1); bind('engine', 'engine'); bind('model', 'model'); bind('key', 'key');
+bind('react', 'react'); bind('gap', 'gap', 1); bind('rate', 'rate', 1); bind('vol', 'vol', 1); bind('engine', 'engine'); bind('gkey', 'gkey'); bind('gmodel', 'gmodel'); bind('gvm', 'gvm'); bind('gvf', 'gvf');
+$('gtts').value = S.gtts ? '1' : '0'; $('gtts').addEventListener('input', () => { S.gtts = $('gtts').value === '1'; save(); }); bind('model', 'model'); bind('key', 'key');
 bind('voiceA', 'voiceA'); bind('voiceB', 'voiceB');
 $('mode').value = S.mode; $('court').value = S.court; $('prompt').value = promptOf();
 $('mode').onchange = () => { S.mode = $('mode').value; save(); $('prompt').value = promptOf(); };
@@ -201,6 +224,10 @@ const voiceFor = s => voices.find(v => v.name === (s === 'B' ? S.voiceB : S.voic
 
 let speaking = false;
 function say(speaker, text) {
+  if (S.engine === 'gemini' && S.gkey && S.gtts) return geminiTTS(text, speaker).catch(e => { log('ev bad', '⚠ ' + e.message + ' — перемикаюсь на голос браузера'); return sayBrowser(speaker, text); });
+  return sayBrowser(speaker, text);
+}
+function sayBrowser(speaker, text) {
   return new Promise(res => {
     if (!synth || !text) return res();
     const u = new SpeechSynthesisUtterance(text);
@@ -248,15 +275,44 @@ function ctx(s) {
 }
 
 // ───────── Генерація реплік ─────────
+            // ---- Gemini: текст + голос ----
+            const geminiText = async (sys, user) => {
+                const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (S.gmodel || 'gemini-2.5-flash') + ':generateContent?key=' + encodeURIComponent(S.gkey);
+                const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { maxOutputTokens: 300, temperature: 0.9, thinkingConfig: { thinkingBudget: 0 } } }) });
+                if (!r.ok) throw new Error('Gemini API ' + r.status + ' ' + (await r.text()).slice(0, 160));
+                const j = await r.json(); return ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || '').join('').trim();
+            };
+            let actx = null;
+            const geminiTTS = async (text, sp) => {
+                const fun = /fun/.test(S.mode);
+                const vn = sp === 'B' ? (S.gvf || (fun ? 'Leda' : 'Kore')) : (S.gvm || (fun ? 'Puck' : 'Charon'));
+                const style = /fun/.test(S.mode) ? 'Скажи українською жваво, з усмішкою і гумором: ' : /pro|calm/.test(S.mode) ? 'Скажи українською впевнено, як професійний спортивний коментатор: ' : 'Скажи українською емоційно, як спортивний коментатор: ';
+                const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (S.gtts_model || 'gemini-2.5-flash-preview-tts') + ':generateContent?key=' + encodeURIComponent(S.gkey);
+                const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: style + text }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: vn } } } } }) });
+                if (!r.ok) throw new Error('Gemini TTS ' + r.status);
+                const j = await r.json(); const b64 = ((((((j.candidates || [])[0] || {}).content || {}).parts || [])[0] || {}).inlineData || {}).data;
+                if (!b64) throw new Error('Gemini TTS: порожня відповідь');
+                const bin = atob(b64), n = bin.length >> 1, f = new Float32Array(n);
+                for (let i = 0; i < n; i++) { let v = bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8); if (v & 0x8000) v -= 0x10000; f[i] = v / 32768; }
+                actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') await actx.resume();
+                const buf = actx.createBuffer(1, n, 24000); buf.copyToChannel(f, 0);
+                const src = actx.createBufferSource(); src.buffer = buf; const g = actx.createGain(); g.gain.value = S.vol; src.connect(g); g.connect(actx.destination);
+                return new Promise(res => { src.onended = () => res(); src.start(); });
+            };
+
 const hist = [];
 async function generate(ev, s) {
   const mode = MODES[S.mode];
-  if (S.engine === 'claude' && S.key) {
+  if ((S.engine === 'gemini' && S.gkey) || (S.engine === 'claude' && S.key)) {
     const sys = promptOf() + SYS_COMMON + (mode.speakers === 2 ? SYS_DUO : '');
     const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй): ${hist.slice(-5).join(' | ') || '—'}`;
+    let t;
+    if (S.engine === 'gemini') t = await geminiText(sys, user);
+    else {
     const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': S.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: S.model, max_tokens: 220, system: sys, messages: [{ role: 'user', content: user }] }) });
     if (!r.ok) throw new Error('Claude API ' + r.status + ' ' + (await r.text()).slice(0, 160));
-    const j = await r.json(); const t = (j.content || []).map(c => c.text || '').join('').trim();
+    const j = await r.json(); t = (j.content || []).map(c => c.text || '').join('').trim();
+    }
     if (mode.speakers === 2) {
       try { const m = t.match(/\[[\s\S]*\]/); const arr = JSON.parse(m ? m[0] : t); const out = arr.filter(x => x && x.t).slice(0, 2).map(x => ({ s: x.s === 'B' ? 'B' : 'A', t: String(x.t) })); if (out.length) return out; } catch (e) {}
     }
@@ -330,7 +386,7 @@ const pushCfg = (extra) => {
 $('btnOn').onclick = () => pushCfg({ enabled: true });
 $('btnOff').onclick = () => pushCfg({ enabled: false });
 $('btnPush').onclick = () => pushCfg({ enabled: true });
-$('lnk').textContent = location.origin + location.pathname.replace(/commentator\.html$/, 'overley.html') + '?court=' + S.court + '&ai=1&aikey=sk-ant-...&aimode=emo&aivoice=m';
+$('lnk').textContent = location.origin + location.pathname.replace(/commentator\.html$/, 'overley.html') + '?court=' + S.court + '&ai=1&gkey=ВАШ_КЛЮЧ_GEMINI&aimode=m_pro  (або f_pro, m_fun, f_fun, duo)';
 window.__cm = { detect, local, MODES, S, enqueue, get running() { return running; }, setRunning(v) { running = v; } };
 </script>
 </body>
