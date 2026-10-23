@@ -355,20 +355,21 @@
         @keyframes tlFlip { from { opacity: 0; transform: rotateX(90deg); } to { opacity: 1; transform: none; } }
         @keyframes tlFade { from { opacity: 0; transform: translateY(1.5vh); } to { opacity: 1; transform: none; } }
         #tv-led .tl-sep { position: relative; overflow: visible; }
-        #tv-led .tl-plate { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; padding: 0.7vh 2.6vw; border-radius: 99px; font-weight: 900; font-size: min(3.6vh, 2.4vw); letter-spacing: 0.12em; color: #fff; white-space: nowrap; box-shadow: 0 0 2vh rgba(0,0,0,0.7); animation: tlFade 0.5s ease; }
+        #tv-led .tl-plate { position: static; z-index: 3; padding: 0.6vh 3vw; border-radius: 99px; font-weight: 900; font-size: min(4.6vh, 3vw); letter-spacing: 0.12em; color: #fff; white-space: nowrap; box-shadow: 0 0 2vh rgba(0,0,0,0.7); animation: tlFade 0.5s ease; }
         html.tvled .scoreboard-wrapper { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
         html.tvled #tv-led { display: flex; flex-direction: column; position: fixed; left: 3vw; top: 3vh; width: 94vw; height: 94vh; z-index: 5; font-family: 'Montserrat', sans-serif; color: #fff; transition: opacity 0.3s; }
         #tv-led.hidden { opacity: 0; }
-        #tv-led .tl-row { display: grid; grid-template-columns: 1.55fr repeat(var(--n, 3), 1fr); column-gap: 1.4vw; align-items: center; }
-        #tv-led .tl-head { flex: 0 0 9vh; text-align: center; }
+        #tv-led .tl-row { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr) 1.75fr; column-gap: 1.4vw; align-items: center; }
+        #tv-led .tl-head { flex: 0 0 7vh; text-align: center; }
         #tv-led .tl-head div { font-weight: 800; font-size: min(4.2vh, 2.6vw); letter-spacing: 0.15em; color: #fff; line-height: 1; }
         #tv-led .tl-head small { display: block; margin-top: 0.7vh; font-size: 0.55em; letter-spacing: 0.2em; color: #9aa; font-weight: 700; }
         #tv-led .tl-head .cur { color: #ffd23f; }
-        #tv-led .tl-name { flex: 0 0 11vh; font-weight: 900; font-size: min(8.5vh, 5.6vw); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 1.4vw; }
+        #tv-led .tl-name { flex: 0 0 9vh; font-weight: 900; font-size: min(7vh, 5vw); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 1.4vw; }
         #tv-led .tl-name i { font-style: normal; font-size: 0.6em; }
-        #tv-led .tl-score { flex: 1 1 0; min-height: 0; }
-        #tv-led .tl-cell { text-align: center; font-weight: 900; font-size: min(var(--cfs, 25vh), 13vw); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        #tv-led .tl-cell.ad { font-size: min(calc(var(--cfs, 25vh) * 0.68), 9vw); }
+        #tv-led .tl-score { flex: 1 1 0; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+        #tv-led .tl-cell { min-height: 0; overflow: visible; text-align: center; font-weight: 900; font-size: min(var(--cfs, 25vh), 13vw); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        #tv-led .tl-cell.pt { font-size: min(calc(var(--cfs, 25vh) * 1.12), 15vw); }
+        #tv-led .tl-cell.pt.ad { font-size: min(calc(var(--cfs, 25vh) * 0.8), 10vw); }
         #tv-led .tl-cell sup { font-size: 0.34em; vertical-align: top; position: relative; top: 0.12em; }
         #tv-led .tl-cell.off { opacity: 0.18; }
         #tv-led .tl-a .tl-name, #tv-led .tl-a .tl-cell { color: var(--tl-a, #ff4040); text-shadow: 0 0 2.2vh var(--tl-a, #ff4040); }
@@ -383,8 +384,8 @@
         #tv-led.themed .tl-cell.pt.ad { background: linear-gradient(to bottom, var(--points-ad-top), var(--points-ad-bottom)); color: var(--points-ad-text) !important; }
         #tv-led.themed .tl-cell.sc.cur { background: var(--score-set-current-bg); color: var(--score-set-current-text) !important; opacity: 1; }
         #tv-led.themed .tl-cell.sc.dim { background: var(--score-set-past-bg); color: var(--score-set-past-text) !important; opacity: 1; }
-        #tv-led.themed .tl-sep { background: transparent; }
-        #tv-led .tl-sep { flex: 0 0 0.4vh; background: #222; margin: 0.6vh 0; }
+        #tv-led .tl-spons.free { position: fixed; flex: none; transform: translate(-50%, -50%); padding: 0; max-width: 92vw; z-index: 6; height: var(--sp-h, 14vh); }
+        #tv-led .tl-sep { flex: 0 0 7vh; display: flex; align-items: center; justify-content: center; background: none; margin: 0; }
         /* ?tv=1: очки (15/30/40/AD) і гейми/сети — крупними цифрами (висота рядка табла та сама, тож усе влазить у рамки теми) */
         html.tv .points-board-outer.visible, html.tv .points-board { width: 150px !important; }
         html.tv .points-cell { font-size: 42px !important; letter-spacing: 0 !important; }
@@ -2708,6 +2709,8 @@
         const TV_MODE = urlParams.get('tv') === '2';       // те саме табло теми, збільшене на весь екран
         if (TV_MODE) document.documentElement.classList.add('tv');
         if (TV_LED) document.documentElement.classList.add('tvled');
+        function tvCfgNow(st) { const c = window.__tvCfg; if (c && Object.keys(c).length) return c; return (st && st.tvCfg) || {}; }
+        function tvThemeOv(st) { if (!TV_LED) return ''; const t = tvCfgNow(st).tvTheme; return (t && t !== 'board') ? t : ''; }
         function tvLedRender() {
             if (!TV_LED) return;
             const root = document.getElementById('tv-led'); if (!root) return;
@@ -2748,7 +2751,12 @@
             if (co && co.classList.contains('visible') && cfg.showGolden !== false) { plate = co.textContent.trim(); plateType = 'GOLDEN_POINT'; }   // DEUCE n / ADVANTAGE n / STAR POINT
             const showSrv = cfg.showServer !== false;
             const bgSig = [cfg.spAnim, cfg.style, document.documentElement.className, cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
-            const sig = JSON.stringify([cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
+            const tb = document.querySelector('.ticker-bar.visible'), ab = document.querySelector('.ad-bar.visible');
+            let topY = window.innerHeight;
+            [tb, ab].forEach(el => { if (el) { const r = el.getBoundingClientRect(); if (r.height > 0) topY = Math.min(topY, r.top); } });
+            const reserve = Math.max(0, Math.round(window.innerHeight - topY));
+            const spPos = cfg.spPos || 'bottom';
+            const sig = JSON.stringify([reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -2760,16 +2768,23 @@
             root.style.setProperty('--tl-a', cfg.teamAColor || '#ff4040'); root.style.setProperty('--tl-b', cfg.teamBColor || '#3dff6b');
             root.style.setProperty('--sp-h', (parseInt(cfg.spH) || 14) + 'vh');
             // висота рядка рахунку = (94vh − заголовок − 2 назви − смуга спонсорів − відступи) / 2; цифри ≈ 80% висоти
-            const rowVh = (94 - 9 - 22 - (logos.length ? (parseInt(cfg.spH) || 14) : 0) - 4) / 2;
-            root.style.setProperty('--cfs', Math.max(8, Math.min(25, rowVh * 0.8)) + 'vh');
+            const rootVh = 94 - reserve / window.innerHeight * 100;
+            root.style.height = rootVh + 'vh';
+            const spVh = (logos.length && spPos !== 'free') ? (parseInt(cfg.spH) || 14) : 0;
+            const rowVh = (rootVh - 7 - 18 - 7 - 3 - spVh) / 2;
+            root.style.setProperty('--cfs', Math.max(7, Math.min(28, rowVh * 0.86)) + 'vh');
             root.style.setProperty('--n', sets.length);
-            let h = '<div class="tl-row tl-head"><div>ОЧКИ<small>У ГЕЙМІ</small></div>' + sets.map(x => '<div class="' + (x.cur ? 'cur' : '') + '">СЕТ ' + x.n + '<small>ГЕЙМИ</small></div>').join('') + '</div>';
+            let h = '<div class="tl-row tl-head">' + sets.map(x => '<div class="' + (x.cur ? 'cur' : '') + '">СЕТ ' + x.n + '<small>ГЕЙМИ</small></div>').join('') + '<div>ОЧКИ<small>У ГЕЙМІ</small></div></div>';
             const team = (k, name, pts, srv, key) => '<div class="tl-' + k + '" style="display:contents">' +
                 '<div class="tl-name">' + (srv && showSrv ? '<i>🎾</i>' : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span></div>' +
-                '<div class="tl-row tl-score tl-' + k + '">' + cell(pts === '' ? '&nbsp;' : pts, 'pt' + (isAd(pts) ? ' ad' : '')) + sets.map(x => cell(x[key], 'sc ' + (x.cur ? 'cur' : 'dim'))).join('') + '</div></div>';
+                '<div class="tl-row tl-score tl-' + k + '">' + sets.map(x => cell(x[key], 'sc ' + (x.cur ? 'cur' : 'dim'))).join('') + cell(pts === '' ? '&nbsp;' : pts, 'pt' + (isAd(pts) ? ' ad' : '')) + '</div></div>';
             const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
             h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
-            if (logos.length) h += '<div class="tl-spons">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img' + (cfg.spAnim && cfg.spAnim !== 'fade' ? ' class="an-' + cfg.spAnim + '"' : '') + ' src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
+            const spx = Math.max(0, Math.min(100, cfg.spX === undefined ? 50 : parseFloat(cfg.spX) || 0)), spy = Math.max(0, Math.min(100, cfg.spY === undefined ? 50 : parseFloat(cfg.spY) || 0));
+            if (logos.length) {
+                const spHtml = '<div class="tl-spons' + (spPos === 'free' ? ' free" style="left:' + spx + '%;top:' + spy + '%' : '') + '">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img' + (cfg.spAnim && cfg.spAnim !== 'fade' ? ' class="an-' + cfg.spAnim + '"' : '') + ' src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
+                if (spPos === 'top') h = spHtml + h; else h += spHtml;
+            }
             if (urlParams.get('tvdebug') === '1') h += '<div style="position:absolute;left:0;bottom:0;font:14px monospace;color:#ff0;background:#000c;padding:3px 8px;z-index:9">overlay v6 | налаштування ТВ: ' + cfgSrc + ' | ключів: ' + Object.keys(cfg).length + ' | логотипів: ' + logos.length + ' | стиль: ' + (cfg.style || 'theme') + ' | фон: ' + (cfg.bgColor || '-') + '</div>';
             root.innerHTML = h;
         }
@@ -2943,15 +2958,15 @@
                     promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
                 }
 
-                document.documentElement.classList.toggle('theme-courtgreen', state.boardTheme === 'courtgreen');
-                document.documentElement.classList.toggle('theme-graydark', state.boardTheme === 'graydark');
-                document.documentElement.classList.toggle('theme-lightgray', state.boardTheme === 'lightgray');
-                document.documentElement.classList.toggle('theme-transparent', state.boardTheme === 'transparent');
-                document.documentElement.classList.toggle('theme-padelblue', state.boardTheme === 'padelblue');
-                document.documentElement.classList.toggle('theme-championship', state.boardTheme === 'championship');
-                document.documentElement.classList.toggle('theme-mono', state.boardTheme === 'mono');
-                document.documentElement.classList.toggle('theme-stonesand', state.boardTheme === 'stonesand');
-                document.documentElement.classList.toggle('theme-skewlime', state.boardTheme === 'skewlime');
+                document.documentElement.classList.toggle('theme-courtgreen', (tvThemeOv(state) || state.boardTheme) === 'courtgreen');
+                document.documentElement.classList.toggle('theme-graydark', (tvThemeOv(state) || state.boardTheme) === 'graydark');
+                document.documentElement.classList.toggle('theme-lightgray', (tvThemeOv(state) || state.boardTheme) === 'lightgray');
+                document.documentElement.classList.toggle('theme-transparent', (tvThemeOv(state) || state.boardTheme) === 'transparent');
+                document.documentElement.classList.toggle('theme-padelblue', (tvThemeOv(state) || state.boardTheme) === 'padelblue');
+                document.documentElement.classList.toggle('theme-championship', (tvThemeOv(state) || state.boardTheme) === 'championship');
+                document.documentElement.classList.toggle('theme-mono', (tvThemeOv(state) || state.boardTheme) === 'mono');
+                document.documentElement.classList.toggle('theme-stonesand', (tvThemeOv(state) || state.boardTheme) === 'stonesand');
+                document.documentElement.classList.toggle('theme-skewlime', (tvThemeOv(state) || state.boardTheme) === 'skewlime');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
