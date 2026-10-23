@@ -346,10 +346,20 @@
         #tv-bg { display: none; }
         html.tvled #tv-bg { display: block; position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; background-color: #000; background-size: cover; background-position: center; }
         #tv-led .tl-spons { flex: 0 0 var(--sp-h, 14vh); display: flex; align-items: center; justify-content: center; gap: 3vw; padding-top: 1vh; }
-        #tv-led .tl-spons img { max-height: 100%; max-width: 40vw; object-fit: contain; animation: tlFade 0.8s ease; }
-        #tv-led .tl-spons img.an-slide { animation: tlSlide 0.9s cubic-bezier(0.2, 0.9, 0.3, 1); }
-        #tv-led .tl-spons img.an-zoom { animation: tlZoom 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
-        #tv-led .tl-spons img.an-flip { animation: tlFlip 0.9s ease; }
+        #tv-led .tl-spons img { max-width: 40vw; object-fit: contain; }
+        #tv-led .tl-lg { display: flex; flex-direction: column; align-items: center; justify-content: center; animation: tlFade 0.8s ease; }
+        #tv-led .tl-lg.right { flex-direction: row; gap: 1.2vw; }
+        #tv-led .tl-lg.left { flex-direction: row-reverse; gap: 1.2vw; }
+        #tv-led .tl-lg.right .cap, #tv-led .tl-lg.left .cap { margin-top: 0; max-width: 22vw; white-space: normal; }
+        #tv-led .tl-lg.left .cap { text-align: right; } #tv-led .tl-lg.right .cap { text-align: left; }
+        #tv-led .tl-lg figcaption, #tv-led .tl-lg .cap { color: #fff; font-weight: 700; text-align: center; white-space: nowrap; text-shadow: 0 0 1vh #000; line-height: 1.1; margin-top: 0.4vh; }
+        #tv-led .tl-mode { position: absolute; left: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 1vw; z-index: 2; }
+        #tv-led .tl-mode b { padding: 0.4vh 1.6vw; border-radius: 999px; font-size: min(3.6vh, 2.4vw); font-weight: 900; letter-spacing: 0.08em; color: #fff; background: #6d28d9; white-space: nowrap; }
+        #tv-led .tl-mode b.tb { background: #0f766e; }
+        #tv-led .tl-mode b.am { background: #be185d; }
+        #tv-led .tl-lg.an-slide { animation: tlSlide 0.9s cubic-bezier(0.2, 0.9, 0.3, 1); }
+        #tv-led .tl-lg.an-zoom { animation: tlZoom 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+        #tv-led .tl-lg.an-flip { animation: tlFlip 0.9s ease; }
         @keyframes tlSlide { from { opacity: 0; transform: translateX(12vw); } to { opacity: 1; transform: none; } }
         @keyframes tlZoom { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
         @keyframes tlFlip { from { opacity: 0; transform: rotateX(90deg); } to { opacity: 1; transform: none; } }
@@ -2750,7 +2760,9 @@
             const cfgSrc = (cfg && Object.keys(cfg).length) ? 'padel/tv' : ((window.__tvState && window.__tvState.tvCfg) ? 'court.tvCfg (резерв)' : 'нема');
             if (cfgSrc !== 'padel/tv') cfg = (window.__tvState && window.__tvState.tvCfg) || {};
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-            const logos = arr(cfg.spLogos).filter(x => x && typeof x === 'string');
+            const logosRaw = arr(cfg.spLogos), scaleRaw = arr(cfg.spScale), descRaw = arr(cfg.spDesc);
+            const lgMeta = [];
+            const logos = logosRaw.filter((x, i) => { if (x && typeof x === 'string') { lgMeta.push({ s: Math.max(30, Math.min(250, parseFloat(scaleRaw[i]) || 100)), d: String(descRaw[i] || '') }); return true; } return false; });
             const spSec = Math.max(2, parseInt(cfg.spSec) || 5), spRow = cfg.spMode === 'row';
             const spIdx = (logos.length && !spRow) ? Math.floor(Date.now() / (spSec * 1000)) % logos.length : 0;
             const rb = document.getElementById('ribbon-match'), st = window.__tvState || {};
@@ -2772,7 +2784,7 @@
             const fx = (window.__tvFx && window.__tvFx.until > Date.now()) ? window.__tvFx : null;
             const stNow = window.__tvState || {};
             const icType = stNow.serverIconType || 'ball', icColor = stNow.serverIconColor || '#b28a55';
-            const sig = JSON.stringify([fx ? fx.until : 0, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
+            const sig = JSON.stringify([fx ? fx.until : 0, !!stNow.isTiebreak, !!stNow.isSuperTiebreak, !!stNow.isProSet, !!stNow.isAmericano, !!stNow.isMexicano, stNow.cornerSlideLang, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0, JSON.stringify(lgMeta), cfg.spDescPos, st.proSetLimit, st.americanoLimit, st.superTiebreakLimit]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -2795,10 +2807,19 @@
                 '<div class="tl-name"><span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span>' + (srv && showSrv ? '<i style="color:' + (icType === 'ball' ? 'inherit' : icColor) + '">' + (icType === 'arrow' ? '<span class="tl-ic-arrow"></span>' : icType === 'triangle' ? '<span class="tl-ic-tri"></span>' : '🎾') + '</i>' : '') + (fx && String(fx.team) === (k === 'a' ? '1' : '2') ? '<div class="tl-fx ' + fx.cls + '">' + fx.text.replace(/</g, '&lt;') + '</div>' : '') + '</div>' +
                 '<div class="tl-row tl-score tl-' + k + '">' + sets.map(x => cell(x[key], 'sc ' + (x.cur ? 'cur' : 'dim'))).join('') + cell(pts === '' ? '&nbsp;' : pts, 'pt' + (isAd(pts) ? ' ad' : '')) + '</div></div>';
             const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
-            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
+            const uaL = st.cornerSlideLang === 'ua', modes = [];
+            if (st.isSuperTiebreak) modes.push('<b class="tb">' + (uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10) + '</b>');
+            else if (st.isTiebreak) modes.push('<b class="tb">' + (uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK') + '</b>');
+            if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
+            if (st.isMexicano) modes.push('<b class="am">' + (uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24) + '</b>');
+            else if (st.isAmericano) modes.push('<b class="am">' + (uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21) + '</b>');
+            const modeHtml = modes.length ? '<div class="tl-mode">' + modes.join('') + '</div>' : '';
+            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + modeHtml + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
             const spx = Math.max(0, Math.min(100, cfg.spX === undefined ? 50 : parseFloat(cfg.spX) || 0)), spy = Math.max(0, Math.min(100, cfg.spY === undefined ? 50 : parseFloat(cfg.spY) || 0));
             if (logos.length) {
-                const spHtml = '<div class="tl-spons' + (spPos === 'free' ? ' free" style="left:' + spx + '%;top:' + spy + '%' : '') + '">' + (spRow ? logos.map(u => '<img src="' + u.replace(/"/g, '&quot;') + '">').join('') : '<img' + (cfg.spAnim && cfg.spAnim !== 'fade' ? ' class="an-' + cfg.spAnim + '"' : '') + ' src="' + logos[spIdx].replace(/"/g, '&quot;') + '">') + '</div>';
+                const spBase = parseInt(cfg.spH) || 14, dp = (cfg.spDescPos === 'left' || cfg.spDescPos === 'right') ? cfg.spDescPos : 'bottom';
+                const lg = (i, an) => { const m = lgMeta[i], hh = spBase * (m.d && dp === 'bottom' ? 0.72 : 1) * m.s / 100; return '<div class="tl-lg ' + dp + (an ? ' an-' + an : '') + '"><img style="height:' + hh + 'vh" src="' + logos[i].replace(/"/g, '&quot;') + '">' + (m.d ? '<div class="cap" style="font-size:' + Math.max(1.6, spBase * 0.2) + 'vh">' + m.d.replace(/</g, '&lt;') + '</div>' : '') + '</div>'; };
+                const spHtml = '<div class="tl-spons' + (spPos === 'free' ? ' free" style="left:' + spx + '%;top:' + spy + '%' : '') + '">' + (spRow ? logos.map((u, i) => lg(i, '')).join('') : lg(spIdx, cfg.spAnim && cfg.spAnim !== 'fade' ? cfg.spAnim : '')) + '</div>';
                 if (spPos === 'top') h = spHtml + h; else h += spHtml;
             }
             if (urlParams.get('tvdebug') === '1') h += '<div style="position:absolute;left:0;bottom:0;font:14px monospace;color:#ff0;background:#000c;padding:3px 8px;z-index:9">overlay v6 | налаштування ТВ: ' + cfgSrc + ' | ключів: ' + Object.keys(cfg).length + ' | логотипів: ' + logos.length + ' | стиль: ' + (cfg.style || 'theme') + ' | фон: ' + (cfg.bgColor || '-') + '</div>';
