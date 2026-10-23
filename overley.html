@@ -365,7 +365,13 @@
         #tv-led .tl-head small { display: block; margin-top: 0.7vh; font-size: 0.55em; letter-spacing: 0.2em; color: #9aa; font-weight: 700; }
         #tv-led .tl-head .cur { color: #ffd23f; }
         #tv-led .tl-name { flex: 0 0 9vh; font-weight: 900; font-size: min(7vh, 5vw); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 1.4vw; }
-        #tv-led .tl-name i { font-style: normal; font-size: 0.6em; }
+        #tv-led .tl-name { position: relative; }
+        #tv-led .tl-name i { font-style: normal; font-size: 0.7em; display: inline-flex; align-items: center; flex: 0 0 auto; }
+        #tv-led .tl-ic-arrow { display: inline-block; width: 0; height: 0; border-top: 0.34em solid transparent; border-bottom: 0.34em solid transparent; border-left: 0.6em solid currentColor; }
+        #tv-led .tl-ic-tri { display: inline-block; width: 0; height: 0; border-left: 0.36em solid transparent; border-right: 0.36em solid transparent; border-bottom: 0.62em solid currentColor; }
+        #tv-led .tl-fx { position: absolute; right: 1.5vw; top: 50%; transform: translateY(-50%); padding: 0.5vh 2vw; border-radius: 1vh; font-weight: 900; font-size: min(5vh, 3.4vw); letter-spacing: 0.06em; color: #111; background: #ffd23f; box-shadow: 0 0 2vh rgba(0,0,0,0.6); animation: tlSlide 0.5s cubic-bezier(0.2, 0.9, 0.3, 1); text-shadow: none; white-space: nowrap; }
+        #tv-led .tl-fx.blue { background: #1e66ff; color: #fff; }
+        #tv-led .tl-fx.red { background: #e11d2e; color: #fff; }
         #tv-led .tl-score { flex: 1 1 0; min-height: 0; grid-template-rows: minmax(0, 1fr); }
         #tv-led .tl-cell { min-height: 0; overflow: visible; text-align: center; font-weight: 900; font-size: min(var(--cfs, 25vh), 13vw); line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
         #tv-led .tl-cell.pt { font-size: min(calc(var(--cfs, 25vh) * 1.12), 15vw); }
@@ -2711,6 +2717,13 @@
         if (TV_LED) document.documentElement.classList.add('tvled');
         function tvCfgNow(st) { const c = window.__tvCfg; if (c && Object.keys(c).length) return c; return (st && st.tvCfg) || {}; }
         function tvThemeOv(st) { if (!TV_LED) return ''; const t = tvCfgNow(st).tvTheme; return (t && t !== 'board') ? t : ''; }
+        // написи на командах (Smash, Por Tres, Por Cuatro, Dormilona, Net Cord, Double Fault) — показуються 3 с на смузі команди
+        function tvFxHook(st) {
+            if (!TV_LED || !st || !st.animation) return;
+            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', double_fault: 'DOUBLE FAULT' };
+            const t = st.animation.type; if (!labelTexts[t] || st.showActionLabels === false) return;
+            window.__tvFx = { team: st.animation.team, text: labelTexts[t], cls: (t === 'dormilona' || t === 'net_cord') ? 'blue' : (t === 'double_fault' ? 'red' : ''), until: Date.now() + 3000 };
+        }
         function tvLedRender() {
             if (!TV_LED) return;
             const root = document.getElementById('tv-led'); if (!root) return;
@@ -2749,14 +2762,17 @@
             }
             const co = document.getElementById('advantage-callout');
             if (co && co.classList.contains('visible') && cfg.showGolden !== false) { plate = co.textContent.trim(); plateType = 'GOLDEN_POINT'; }   // DEUCE n / ADVANTAGE n / STAR POINT
-            const showSrv = cfg.showServer !== false;
+            const showSrv = cfg.showServer !== false && (window.__tvState || {}).showServerIndicator !== false;
             const bgSig = [cfg.spAnim, cfg.style, document.documentElement.className, cfg.bgColor, cfg.bgImg ? cfg.bgImg.length : 0, cfg.bgDim, cfg.teamAColor, cfg.teamBColor, cfg.spH].join('|');
             const tb = document.querySelector('.ticker-bar.visible'), ab = document.querySelector('.ad-bar.visible');
             let topY = window.innerHeight;
             [tb, ab].forEach(el => { if (el) { const r = el.getBoundingClientRect(); if (r.height > 0) topY = Math.min(topY, r.top); } });
             const reserve = Math.max(0, Math.round(window.innerHeight - topY));
             const spPos = cfg.spPos || 'bottom';
-            const sig = JSON.stringify([reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
+            const fx = (window.__tvFx && window.__tvFx.until > Date.now()) ? window.__tvFx : null;
+            const stNow = window.__tvState || {};
+            const icType = stNow.serverIconType || 'ball', icColor = stNow.serverIconColor || '#b28a55';
+            const sig = JSON.stringify([fx ? fx.until : 0, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -2776,7 +2792,7 @@
             root.style.setProperty('--n', sets.length);
             let h = '<div class="tl-row tl-head">' + sets.map(x => '<div class="' + (x.cur ? 'cur' : '') + '">СЕТ ' + x.n + '<small>ГЕЙМИ</small></div>').join('') + '<div>ОЧКИ<small>У ГЕЙМІ</small></div></div>';
             const team = (k, name, pts, srv, key) => '<div class="tl-' + k + '" style="display:contents">' +
-                '<div class="tl-name">' + (srv && showSrv ? '<i>🎾</i>' : '') + '<span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span></div>' +
+                '<div class="tl-name"><span style="overflow:hidden;text-overflow:ellipsis">' + name.replace(/</g, '&lt;') + '</span>' + (srv && showSrv ? '<i style="color:' + (icType === 'ball' ? 'inherit' : icColor) + '">' + (icType === 'arrow' ? '<span class="tl-ic-arrow"></span>' : icType === 'triangle' ? '<span class="tl-ic-tri"></span>' : '🎾') + '</i>' : '') + (fx && String(fx.team) === (k === 'a' ? '1' : '2') ? '<div class="tl-fx ' + fx.cls + '">' + fx.text.replace(/</g, '&lt;') + '</div>' : '') + '</div>' +
                 '<div class="tl-row tl-score tl-' + k + '">' + sets.map(x => cell(x[key], 'sc ' + (x.cur ? 'cur' : 'dim'))).join('') + cell(pts === '' ? '&nbsp;' : pts, 'pt' + (isAd(pts) ? ' ad' : '')) + '</div></div>';
             const PL = { BREAK_POINT: '#2563eb', GOLDEN_POINT: '#f59e0b', SET_POINT: '#ea580c', MATCH_POINT: '#b91c1c', GAME_POINT: '#374151' };
             h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
@@ -3641,7 +3657,7 @@
                 updateManualStatsPanelVisibility();
 
                 if (state.animation && state.animation.ts !== lastAnimationTs) {
-                    lastAnimationTs = state.animation.ts; const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
+                    lastAnimationTs = state.animation.ts; tvFxHook(state); const tBlock = document.getElementById(`block-anim-${state.animation.team}`);
                     if (tBlock) {
                         if (state.animation.type === 'double_fault') {
                             tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
