@@ -1029,6 +1029,34 @@
                 </div>
             </div>
 
+            <div class="card" id="ai-card">
+                <div style="font-size:11px; font-weight:700; margin-bottom:2px;">🎙 ШІ-коментатор <span style="font-weight:400; color:#9bd;">(у посиланні overlay: <b>&amp;ai=1&amp;gkey=…</b> — ключ лише там, у базу він не йде)</span></div>
+                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-green" id="ai-on" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', true)">✅ ВКЛ</button>
+                        <button class="btn btn-red" id="ai-off" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', false)">⏹ ВИКЛ</button>
+                    </div>
+                    <div class="row"><span>Режим:</span><select id="ai-mode" onchange="aiSet('mode', this.value)">
+                        <option value="emo">🔥 Емоційний (1 голос)</option><option value="calm">🎓 Спокійний аналітик</option>
+                        <option value="m_pro">👔 Він — професійний</option><option value="f_pro">👩‍💼 Вона — професійна</option>
+                        <option value="m_fun">🤡 Він — смішний</option><option value="f_fun">😜 Вона — смішна</option>
+                        <option value="duo">🎙️ Дует: він і вона</option><option value="fun">😄 Жартівливий (жін.)</option><option value="score">📟 Тільки рахунок</option></select></div>
+                    <div class="row"><span>Реагувати на:</span><select id="ai-react" onchange="aiSet('react', this.value)"><option value="all">Кожне очко</option><option value="key">Гейми, брейки, яскраві моменти</option><option value="big">Тільки гейми, сети, кінець</option></select></div>
+                    <div class="row"><span>Голос (для 1-голосих режимів):</span><select id="ai-voice" onchange="aiSet('voice', this.value)"><option value="">Як у режимі</option><option value="m">Чоловічий</option><option value="f">Жіночий</option></select></div>
+                    <div class="row"><span>Чоловічий голос Gemini:</span><select id="ai-gvm" onchange="aiSet('gvm', this.value)"><option value="">Авто</option><option>Charon</option><option>Puck</option><option>Orus</option><option>Fenrir</option><option>Algenib</option><option>Iapetus</option></select></div>
+                    <div class="row"><span>Жіночий голос Gemini:</span><select id="ai-gvf" onchange="aiSet('gvf', this.value)"><option value="">Авто</option><option>Kore</option><option>Leda</option><option>Zephyr</option><option>Aoede</option><option>Callirrhoe</option><option>Autonoe</option></select></div>
+                    <div class="row"><span>Озвучення:</span><select id="ai-gtts" onchange="aiSet('gtts', this.value === '1')"><option value="1">Голоси Gemini</option><option value="0">Голос браузера/телефона</option></select></div>
+                    <div class="row"><span>Субтитри в ефірі:</span><input type="checkbox" id="ai-sub" onchange="aiSet('sub', this.checked)"></div>
+                    <div class="row"><span>Звук (голос):</span><input type="checkbox" id="ai-speak" onchange="aiSet('speak', this.checked)"></div>
+                    <div class="row"><span>Швидкість: <b id="ai-rate-v">1.05</b></span><input type="range" id="ai-rate" min="0.7" max="1.6" step="0.05" oninput="aiSet('rate', parseFloat(this.value))"></div>
+                    <div class="row"><span>Гучність: <b id="ai-vol-v">100%</b></span><input type="range" id="ai-vol" min="0" max="1" step="0.05" oninput="aiSet('vol', parseFloat(this.value))"></div>
+                    <div class="row"><span>Пауза між репліками: <b id="ai-gap-v">4 с</b></span><input type="range" id="ai-gap" min="0" max="20" step="1" oninput="aiSet('gap', parseInt(this.value))"></div>
+                    <textarea id="ai-prompt" rows="4" placeholder="Своя інструкція для ШІ (порожньо = стандартна для режиму)" style="width:100%; box-sizing:border-box; font-size:12px; padding:6px;" onchange="aiSet('prompt', this.value)"></textarea>
+                    <button class="btn" style="padding:9px;" onclick="aiTest()">🔊 Тест звуку в ефірі</button>
+                    <div id="ai-st" style="font-size:11px;"></div>
+                </div>
+            </div>
+
 
             <div id="match-actions" style="display:flex; flex-direction:column; gap:8px; border:2px solid #b91c1c; border-radius:8px; padding:10px; background:#1a0f0f;">
                 <div style="font-size:12px; font-weight:800; color:#fca5a5; text-transform:uppercase;">⚠️ Матч та корт</div>
@@ -1277,6 +1305,25 @@
             tvUiRefresh();
         });
         setTimeout(tvUiRefresh, 0);
+
+        // ===== ШІ-коментатор: керування з пульта (padel/commentator) =====
+        const AI_DEF = { enabled: true, mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
+        let aiCfg = Object.assign({}, AI_DEF);
+        function aiSave() { const st = document.getElementById('ai-st'); try { set(ref(db, 'padel/commentator'), Object.assign({}, aiCfg, { t: Date.now() })).then(() => { if (st) { st.innerText = '☁️ Надіслано в ефір ✅'; st.style.color = '#7c7'; } }, e => { if (st) { st.innerText = '⚠️ ' + e.message; st.style.color = '#f66'; } }); } catch (e) { if (st) st.innerText = '⚠️ ' + e.message; } }
+        window.aiSet = function(k, v) { aiCfg[k] = v; aiSave(); aiUi(); };
+        window.aiTest = function() { aiCfg.test = Date.now(); aiSave(); };
+        function aiUi() {
+            const g = id => document.getElementById(id); if (!g('ai-card')) return;
+            ['mode', 'react', 'voice', 'gvm', 'gvf'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k] || ''; });
+            if (g('ai-gtts')) g('ai-gtts').value = aiCfg.gtts === false ? '0' : '1';
+            if (g('ai-sub')) g('ai-sub').checked = aiCfg.sub !== false; if (g('ai-speak')) g('ai-speak').checked = aiCfg.speak !== false;
+            ['rate', 'vol', 'gap'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k]; });
+            g('ai-rate-v').innerText = aiCfg.rate; g('ai-vol-v').innerText = Math.round((aiCfg.vol === undefined ? 1 : aiCfg.vol) * 100) + '%'; g('ai-gap-v').innerText = aiCfg.gap + ' с';
+            if (g('ai-prompt') && document.activeElement !== g('ai-prompt')) g('ai-prompt').value = aiCfg.prompt || '';
+            g('ai-on').style.outline = aiCfg.enabled ? '3px solid #fff' : 'none'; g('ai-off').style.outline = aiCfg.enabled ? 'none' : '3px solid #fff';
+        }
+        onValue(ref(db, 'padel/commentator'), (snap) => { const v = snap.val(); if (v) aiCfg = Object.assign({}, AI_DEF, v); aiUi(); });
+        setTimeout(aiUi, 0);
 
         // ===== СПІЛЬНИЙ QR-КОД для всіх кортів: padel/qr (розмір і позиції — окремо для корту) =====
         let globalQr = null;
@@ -2922,7 +2969,7 @@
             const modal = document.getElementById('settings-modal'); if (!modal) return;
             const inner = Array.from(modal.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
             const cards = Array.from(inner.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)'];
+            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('smcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
