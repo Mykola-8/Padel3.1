@@ -2903,10 +2903,10 @@ async function pump() {
 }
 function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; if (e.some(x => x.big >= 3) || queue.length >= 3) { queue = queue.filter(q => q.ev.some(x => x.big >= 3)); } queue.push({ ev: e, s: JSON.parse(JSON.stringify(s)) }); pump(); }
 
-            let prev = null;
+            let prev = null, lastTest = null;
             return {
                 onState(s) { if (!S.enabled) { prev = s; return; } if (prev) { const ev = detect(prev, s); if (ev.length) enqueue(ev, s); } prev = JSON.parse(JSON.stringify(s)); },
-                setCfg(v) { if (!v) return; if (v.enabled !== undefined) S.enabled = !!v.enabled; if (v.mode && MODES[v.mode]) S.mode = v.mode; if (v.react) S.react = v.react; if (v.gap !== undefined) S.gap = +v.gap; if (v.rate) S.rate = +v.rate; if (v.prompt !== undefined) S.prompt = String(v.prompt || ''); if (v.voice !== undefined && v.voice !== '') S.voice = v.voice; if (v.sub !== undefined) S.sub = !!v.sub; if (v.speak !== undefined) S.speak = !!v.speak; if (!S.enabled) { queue = []; try { synth && synth.cancel(); } catch (e) {} } },
+                setCfg(v) { if (!v) return; if (v.enabled !== undefined) S.enabled = !!v.enabled; if (v.mode && MODES[v.mode]) S.mode = v.mode; if (v.react) S.react = v.react; if (v.gap !== undefined) S.gap = +v.gap; if (v.rate) S.rate = +v.rate; if (v.prompt !== undefined) S.prompt = String(v.prompt || ''); if (v.voice !== undefined && v.voice !== '') S.voice = v.voice; if (v.vol !== undefined) S.vol = +v.vol; if (v.gvm !== undefined) S.gvm = v.gvm; if (v.gvf !== undefined) S.gvf = v.gvf; if (v.gtts !== undefined) S.gtts = !!v.gtts; if (v.voice !== undefined) S.voice = v.voice; if (v.test) { if (lastTest !== null && v.test !== lastTest) say('A', 'Перевірка звуку коментатора.'); lastTest = v.test; } else if (lastTest === null) lastTest = 0; if (v.sub !== undefined) S.sub = !!v.sub; if (v.speak !== undefined) S.speak = !!v.speak; if (!S.enabled) { queue = []; try { synth && synth.cancel(); } catch (e) {} } },
                 test() { say('A', 'Перевірка звуку коментатора.'); }
             };
         })();
