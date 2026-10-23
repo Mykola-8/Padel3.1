@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ШІ-коментатор паделу</title>
+<style>
+  :root { --bg:#0e1116; --card:#171c24; --line:#2a3340; --tx:#e8edf3; --mut:#8b97a7; --ac:#ffb020; --ok:#2fd27a; --bad:#ff5a5a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--tx); font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  h1 { font-size:20px; margin:0; } h2 { font-size:14px; margin:0 0 10px; color:var(--ac); text-transform:uppercase; letter-spacing:.06em; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--mut); }
+  input,select,textarea,button { font:inherit; color:var(--tx); background:#0b0f14; border:1px solid var(--line); border-radius:8px; padding:8px; }
+  textarea { min-height:120px; resize:vertical; width:100%; }
+  button { cursor:pointer; background:#1f2733; } button:hover { border-color:var(--ac); }
+  button.main { background:var(--ac); color:#111; font-weight:800; border:0; padding:12px 18px; }
+  button.stop { background:var(--bad); color:#fff; border:0; font-weight:800; padding:12px 18px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  #score { font-size:22px; font-weight:800; } #stat { font-size:13px; color:var(--mut); }
+  #log { max-height:260px; overflow:auto; font-size:13px; display:flex; flex-direction:column; gap:6px; }
+  #log div { padding:6px 8px; border-radius:8px; background:#0b0f14; border-left:3px solid var(--line); }
+  #log .A { border-left-color:#4aa3ff; } #log .B { border-left-color:#ff7ac8; } #log .ev { color:var(--mut); border-left-color:#555; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:99px; background:#0b0f14; border:1px solid var(--line); font-size:12px; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .hint { font-size:12px; color:var(--mut); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="row" style="justify-content:space-between">
+    <h1>🎙️ ШІ-коментатор паделу</h1>
+    <div class="row">
+      <button class="main" id="btnStart">▶ Запустити коментатора</button>
+      <button id="btnTest">🔊 Тест голосів</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Матч на екрані</h2>
+    <div id="score">—</div>
+    <div id="stat">Очікування даних…</div>
+  </div>
+
+  <div class="card">
+    <h2>Режим коментування</h2>
+    <div class="grid">
+      <label>Режим
+        <select id="mode"></select>
+      </label>
+      <label>Реагувати на
+        <select id="react">
+          <option value="all">Кожне очко і подію</option>
+          <option value="key">Гейми, сети, брейк-поінти і яскраві моменти</option>
+          <option value="big">Тільки гейми, сети, кінець матчу</option>
+        </select>
+      </label>
+      <label>Мін. пауза між репліками (с)
+        <input type="number" id="gap" min="0" max="60" step="1">
+      </label>
+      <label>Корт
+        <select id="court"></select>
+      </label>
+    </div>
+    <label style="margin-top:10px">Інструкція для ШІ (можна змінити під себе)
+      <textarea id="prompt"></textarea>
+    </label>
+    <div class="row" style="margin-top:8px">
+      <button id="btnResetPrompt">↺ Повернути стандартну інструкцію режиму</button>
+      <span class="hint">Зміни зберігаються в цьому браузері.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Голоси</h2>
+    <div class="grid">
+      <label>Голос 1 — чоловічий
+        <select id="voiceA"></select>
+      </label>
+      <label>Голос 2 — жіночий
+        <select id="voiceB"></select>
+      </label>
+      <label>Швидкість мовлення: <span id="rateV"></span>
+        <input type="range" id="rate" min="0.7" max="1.6" step="0.05">
+      </label>
+      <label>Гучність: <span id="volV"></span>
+        <input type="range" id="vol" min="0" max="1" step="0.05">
+      </label>
+    </div>
+    <div class="hint" style="margin-top:8px">Голоси беруться з браузера/системи (Chrome, Edge — «Ostap», «Polina», «Google українська»). Якщо українських голосів немає — встановіть їх у налаштуваннях мови Windows/macOS.</div>
+  </div>
+
+  <div class="card">
+    <h2>Мозок ШІ</h2>
+    <div class="grid">
+      <label>Джерело
+        <select id="engine">
+          <option value="claude">Claude (потрібен API-ключ)</option>
+          <option value="local">Без ШІ — готові фрази (безкоштовно)</option>
+        </select>
+      </label>
+      <label>Модель Claude
+        <select id="model">
+          <option value="claude-haiku-5-5">Haiku 5.5 — швидко і дешево (рекомендовано)</option>
+          <option value="claude-sonnet-5-5">Sonnet 5.5 — розумніше</option>
+        </select>
+      </label>
+      <label>API-ключ Anthropic
+        <input type="password" id="key" placeholder="sk-ant-…" autocomplete="off">
+      </label>
+    </div>
+    <div class="hint" style="margin-top:8px">Ключ зберігається лише в цьому браузері й відправляється тільки на api.anthropic.com. Не відкривайте цю сторінку на чужому комп’ютері й не вставляйте її в загальнодоступний OBS-профіль з ключем.</div>
+  </div>
+
+  <div class="card">
+    <h2>📡 Коментатор у самій трансляції (з одного пристрою)</h2>
+    <div class="hint" style="margin-bottom:8px">Додайте до посилання overlay у Prism/OBS параметри <b>?ai=1&aikey=ВАШ_КЛЮЧ</b>, наприклад:<br><code id="lnk" style="word-break:break-all"></code><br>Коментатор тоді працює всередині плашки на тому ж iPhone: виводить текст-субтитри і озвучує голосом. Звідси (з пульта-телефона) його вмикають, вимикають і міняють режим на відстані.</div>
+    <div class="row">
+      <button class="main" id="btnOn">✅ Увімкнути в ефірі</button>
+      <button class="stop" id="btnOff">⏹ Вимкнути в ефірі</button>
+      <button id="btnPush">📤 Надіслати режим і інструкцію в ефір</button>
+      <span id="pushSt" class="hint"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Журнал</h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
+  authDomain: "padel-2-gurskyj.firebaseapp.com",
+  databaseURL: "https://padel-2-gurskyj-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "padel-2-gurskyj", storageBucket: "padel-2-gurskyj.firebasestorage.app",
+  messagingSenderId: "671715970020", appId: "1:671715970020:web:aeaf370ad1a1b5f7a915f1"
+});
+const db = getDatabase(app);
+const $ = id => document.getElementById(id);
+const qs = new URLSearchParams(location.search);
+
+// ───────── Режими ─────────
+const BASE = 'Ти коментатор паделу. Стеж за табло на екрані. Щойно рахунок змінюється або на корті відбувається розіграш, згенеруй коротку емоційну репліку українською.';
+const MODES = {
+  emo:   { name: '🔥 Емоційний коментатор (1 голос)', speakers: 1, voice: 'A', prompt: BASE + ' Говори як гарячий спортивний коментатор: енергійно, з захопленням, 1 коротке речення (до 15 слів). Називай команди за прізвищами, не повторюйся.' },
+  calm:  { name: '🎓 Спокійний аналітик (1 голос)', speakers: 1, voice: 'A', prompt: 'Ти досвідчений тренер і коментатор паделу. Стеж за табло. Після кожної події дай коротку спокійну репліку українською: що сталося і що це означає для матчу (1–2 речення, до 25 слів). Без вигуків.' },
+  fun:   { name: '😄 Жартівливий (жіночий голос)', speakers: 1, voice: 'B', prompt: BASE + ' Стиль: легкий гумор і дружні підколки, але без образ. 1 коротке речення (до 15 слів).' },
+  duo:   { name: '🎙️ Дует: він і вона (2 голоси)', speakers: 2, voice: 'A', prompt: 'Ти пишеш діалог двох коментаторів паделу: чоловік (Олег, емоційний) і жінка (Марина, аналітична). Стеж за табло. Щойно рахунок змінюється або відбувається розіграш — коротка живa репліка або обмін з двох реплік, українською, до 25 слів загалом. Не кожну подію треба коментувати двома: інколи достатньо однієї репліки.' },
+  score: { name: '📟 Тільки рахунок (1 голос)', speakers: 1, voice: 'B', prompt: 'Ти диктор табло паделу. Після події коротко й нейтрально оголоси рахунок українською: гейми, потім очки. Без емоцій, до 12 слів.' }
+};
+const SYS_COMMON = `\nПравила виводу: пиши лише текст для озвучення, без емодзі, без лапок, без коментарів. Числа пиши словами, де це звучить природніше ("тридцять — сорок"). Рахунок очок у гемі озвучуй за тенісними правилами (п'ятнадцять, тридцять, сорок, перевага). Не вигадуй фактів, яких немає в даних. Дивись на історію останніх подій, щоб не повторюватись.`;
+const SYS_DUO = `\nФормат відповіді для дуету — СТРОГО JSON-масив: [{"s":"A","t":"репліка чоловіка"},{"s":"B","t":"репліка жінки"}] (A — чоловік, B — жінка, 1–2 об'єкти).`;
+
+// ───────── Налаштування ─────────
+const S = Object.assign({ mode: 'emo', react: 'key', gap: 4, court: qs.get('court') || '1', voiceA: '', voiceB: '', rate: 1.05, vol: 1, engine: 'claude', model: 'claude-haiku-5-5', key: '', prompts: {} }, (() => { try { return JSON.parse(localStorage.getItem('padelCommentator') || '{}'); } catch (e) { return {}; } })());
+if (qs.get('court')) S.court = qs.get('court');
+const save = () => { try { localStorage.setItem('padelCommentator', JSON.stringify(S)); } catch (e) {} };
+
+Object.keys(MODES).forEach(k => $('mode').add(new Option(MODES[k].name, k)));
+for (let i = 1; i <= 10; i++) $('court').add(new Option('Корт ' + i, String(i)));
+const bind = (id, key, num) => { const e = $(id); e.value = S[key]; e.addEventListener('input', () => { S[key] = num ? parseFloat(e.value) : e.value; save(); upd(); }); };
+const promptOf = () => S.prompts[S.mode] || MODES[S.mode].prompt;
+function upd() { $('rateV').textContent = S.rate; $('volV').textContent = Math.round(S.vol * 100) + '%'; }
+bind('react', 'react'); bind('gap', 'gap', 1); bind('rate', 'rate', 1); bind('vol', 'vol', 1); bind('engine', 'engine'); bind('model', 'model'); bind('key', 'key');
+bind('voiceA', 'voiceA'); bind('voiceB', 'voiceB');
+$('mode').value = S.mode; $('court').value = S.court; $('prompt').value = promptOf();
+$('mode').onchange = () => { S.mode = $('mode').value; save(); $('prompt').value = promptOf(); };
+$('prompt').oninput = () => { S.prompts[S.mode] = $('prompt').value; save(); };
+$('btnResetPrompt').onclick = () => { delete S.prompts[S.mode]; save(); $('prompt').value = promptOf(); };
+$('court').onchange = () => { S.court = $('court').value; save(); subscribe(); };
+upd();
+
+// ───────── Голоси (SpeechSynthesis) ─────────
+const synth = window.speechSynthesis;
+let voices = [];
+const FEMALE = /(polina|olena|oksana|lesya|kateryna|marina|female|жін|zira|hazel|google українська|ukrainian.*female)/i;
+const MALE = /(ostap|taras|andriy|oleg|male|чол|david|mark)/i;
+function loadVoices() {
+  voices = (synth ? synth.getVoices() : []).slice();
+  const rank = v => /^uk/i.test(v.lang) ? 0 : /^(ru|pl|cs|sk|bg)/i.test(v.lang) ? 1 : 2;
+  voices.sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+  for (const [id, key, rx] of [['voiceA', 'voiceA', MALE], ['voiceB', 'voiceB', FEMALE]]) {
+    const sel = $(id); sel.innerHTML = '';
+    voices.forEach(v => sel.add(new Option(v.name + ' (' + v.lang + ')', v.name)));
+    if (!voices.length) sel.add(new Option('Голосів не знайдено', ''));
+    let cur = voices.find(v => v.name === S[key]);
+    if (!cur) { const uk = voices.filter(v => /^uk/i.test(v.lang)); cur = uk.find(v => rx.test(v.name)) || (key === 'voiceA' ? uk[0] : uk[1] || uk[0]) || voices[0]; }
+    if (cur) { S[key] = cur.name; sel.value = cur.name; }
+  }
+  save();
+}
+if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; }
+const voiceFor = s => voices.find(v => v.name === (s === 'B' ? S.voiceB : S.voiceA));
+
+let speaking = false;
+function say(speaker, text) {
+  return new Promise(res => {
+    if (!synth || !text) return res();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voiceFor(speaker); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'uk-UA';
+    u.rate = S.rate; u.volume = S.vol; u.pitch = speaker === 'B' ? 1.1 : 0.95;
+    u.onend = u.onerror = () => res();
+    synth.speak(u);
+    // страховка від «зависання» голосу в Chrome
+    setTimeout(res, Math.max(4000, text.length * 120));
+  });
+}
+
+// ───────── Журнал ─────────
+function log(cls, text) { const d = document.createElement('div'); d.className = cls; d.textContent = text; $('log').prepend(d); while ($('log').children.length > 60) $('log').lastChild.remove(); }
+
+// ───────── Розбір табла ─────────
+const PT = ['0', '15', '30', '40', 'AD'];
+const isRaw = s => s.isTiebreak || s.isSuperTiebreak || s.isAmericano || s.isMexicano;
+const ptTxt = (s, i) => isRaw(s) ? String(i || 0) : (PT[Math.min(i || 0, 4)] || '0');
+const ptSpeak = (s, a, b) => { if (isRaw(s)) return a + ' — ' + b; if (a >= 3 && b >= 3) return a === b ? 'рівно' : (a > b ? 'перевага ' + (s.p1name || 'першої команди') : 'перевага ' + (s.p2name || 'другої команди')); return ptTxt(s, a) + ' — ' + ptTxt(s, b); };
+function gamesStr(s) { const out = []; for (let n = 1; n <= 5; n++) { const a = s['t1_s' + n], b = s['t2_s' + n]; if (a === undefined && b === undefined) break; if (n > (s.currentSet || 1)) break; out.push((a || 0) + ':' + (b || 0)); } return out.join('  '); }
+const snap = s => ({ p1: s.p1Index || 0, p2: s.p2Index || 0, set: s.currentSet || 1, g: gamesStr(s), g1: s['t1_s' + (s.currentSet || 1)] || 0, g2: s['t2_s' + (s.currentSet || 1)] || 0, fin: !!s.isMatchFinished, ts: s.animation ? s.animation.ts : 0, srv: s.currentServer || 0 });
+const T1 = s => s.p1name || 'Команда 1', T2 = s => s.p2name || 'Команда 2';
+const ANIM = { smash: 'смеш', net_cord: 'м’яч зачепив сітку і впав на половині суперника (net cord)', por_tres: 'розіграш «пор трес»', por_cuatro: 'розіграш «пор куатро»', dormilona: 'дормілона', double_fault: 'подвійна помилка на подачі' };
+
+function detect(prev, s) {
+  const a = snap(s), p = prev ? snap(prev) : null; const ev = [];
+  if (!p) return ev;
+  if (a.fin && !p.fin) { ev.push({ k: 'match', big: 3, d: 'Матч закінчено. Фінальний рахунок по сетах: ' + a.g }); return ev; }
+  if (a.set > p.set) ev.push({ k: 'set', big: 3, d: 'Сет виграно. Рахунок по сетах: ' + gamesStr(s) });
+  else if (a.g1 !== p.g1 || a.g2 !== p.g2) { const w = a.g1 > p.g1 ? T1(s) : a.g2 > p.g2 ? T2(s) : null; if (w) ev.push({ k: 'game', big: 2, d: 'Гейм виграла команда ' + w + '. Гейми: ' + a.g1 + ':' + a.g2 }); }
+  else if (a.p1 !== p.p1 || a.p2 !== p.p2) {
+    let w = null; if (a.p1 > p.p1) w = T1(s); else if (a.p2 > p.p2) w = T2(s);
+    if (w) ev.push({ k: 'point', big: 1, d: 'Очко виграла команда ' + w + '. Очки в гемі: ' + ptSpeak(s, a.p1, a.p2) });
+    else ev.push({ k: 'point', big: 1, d: 'Знову рівно: ' + ptSpeak(s, a.p1, a.p2) });
+  }
+  if (a.ts && a.ts !== p.ts && s.animation && ANIM[s.animation.type]) { const tm = String(s.animation.team) === '1' ? T1(s) : T2(s); ev.push({ k: 'anim', big: 2, d: 'Яскравий момент у виконанні ' + tm + ': ' + ANIM[s.animation.type] }); }
+  const r = s.activeMatchRibbon; if (r && r !== 'NONE' && r !== (prev.activeMatchRibbon || 'NONE')) { const M = { BREAK_POINT: 'брейк-поінт', SET_POINT: 'сет-пойнт', MATCH_POINT: 'матч-пойнт', GOLDEN_POINT: 'золотий пойнт', TIEBREAK_POINT: 'пойнт у тайбрейку' }; if (M[r]) ev.push({ k: 'ribbon', big: 2, d: 'Увага: ' + M[r] }); }
+  if (s.isTiebreak && !prev.isTiebreak) ev.push({ k: 'tb', big: 2, d: 'Починається тайбрейк' });
+  return ev;
+}
+function ctx(s) {
+  const srv = s.currentServer === 1 ? T1(s) : s.currentServer === 2 ? T2(s) : 'невідомо';
+  return `Команда 1: ${T1(s)}; Команда 2: ${T2(s)}. Поточний рахунок по сетах (гейми): ${gamesStr(s) || '0:0'}. Очки в гемі: ${ptSpeak(s, s.p1Index || 0, s.p2Index || 0)}. Подає: ${srv}.` + (s.isTiebreak ? ' Зараз тайбрейк.' : '') + (s.isProSet ? ' Формат: про-сет.' : '') + (s.isAmericano ? ' Формат: Americano.' : '');
+}
+
+// ───────── Генерація реплік ─────────
+const hist = [];
+async function generate(ev, s) {
+  const mode = MODES[S.mode];
+  if (S.engine === 'claude' && S.key) {
+    const sys = promptOf() + SYS_COMMON + (mode.speakers === 2 ? SYS_DUO : '');
+    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй): ${hist.slice(-5).join(' | ') || '—'}`;
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': S.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: S.model, max_tokens: 220, system: sys, messages: [{ role: 'user', content: user }] }) });
+    if (!r.ok) throw new Error('Claude API ' + r.status + ' ' + (await r.text()).slice(0, 160));
+    const j = await r.json(); const t = (j.content || []).map(c => c.text || '').join('').trim();
+    if (mode.speakers === 2) {
+      try { const m = t.match(/\[[\s\S]*\]/); const arr = JSON.parse(m ? m[0] : t); const out = arr.filter(x => x && x.t).slice(0, 2).map(x => ({ s: x.s === 'B' ? 'B' : 'A', t: String(x.t) })); if (out.length) return out; } catch (e) {}
+    }
+    return [{ s: mode.voice, t: t.replace(/^["«]|["»]$/g, '') }];
+  }
+  return local(ev, s, mode);
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function local(ev, s, mode) {
+  const e = ev.sort((x, y) => y.big - x.big)[0]; const sc = ptSpeak(s, s.p1Index || 0, s.p2Index || 0);
+  const w = (e.d.match(/команда ([^.]+?)\./) || [])[1] || '';
+  const L = {
+    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`],
+    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`],
+    set: [`Сет завершено! ${gamesStr(s)}.`], match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`],
+    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!'], ribbon: [e.d + '! Напруга зростає.'], tb: ['Тайбрейк! Тепер кожне очко на вагу золота.']
+  };
+  const t = pick(L[e.k] || [e.d]);
+  if (mode.speakers === 2) return [{ s: 'A', t: t }, { s: 'B', t: pick(['Так, цікаво тепер!', 'Гарна гра від обох.', 'Дивимось далі.']) }].slice(0, ev[0].big > 1 ? 2 : 1);
+  return [{ s: mode.voice, t: t }];
+}
+
+// ───────── Черга ─────────
+let queue = [], busy = false, lastSpoke = 0, running = false;
+function allowed(e) { return S.react === 'all' ? true : S.react === 'key' ? e.big >= 2 : e.big >= 3 || e.k === 'game'; }
+async function pump() {
+  if (busy || !running) return; busy = true;
+  try {
+    while (queue.length && running) {
+      const wait = lastSpoke + S.gap * 1000 - Date.now(); if (wait > 0) await new Promise(r => setTimeout(r, wait));
+      const job = queue.shift(); if (queue.length > 2) queue.splice(0, queue.length - 2);
+      log('ev', '▸ ' + job.ev.map(e => e.d).join(' · '));
+      let lines; try { lines = await generate(job.ev, job.s); } catch (err) { log('ev bad', '⚠ ' + err.message); lines = local(job.ev, job.s, MODES[S.mode]); }
+      for (const l of lines) { log(l.s, (l.s === 'B' ? '👩 ' : '🎙 ') + l.t); hist.push(l.t); await say(l.s, l.t); }
+      lastSpoke = Date.now();
+    }
+  } finally { busy = false; }
+}
+function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; if (e.some(x => x.big >= 3) || queue.length >= 3) { queue = queue.filter(q => q.ev.some(x => x.big >= 3)); } queue.push({ ev: e, s: JSON.parse(JSON.stringify(s)) }); pump(); }
+
+// ───────── Firebase ─────────
+let prevState = null, curState = null, unsub = null, firstSnap = true;
+function subscribe() {
+  if (unsub) try { unsub(); } catch (e) {}
+  prevState = null; firstSnap = true;
+  unsub = onValue(ref(db, 'padel/courts/court_' + S.court), snap => {
+    const s = snap.val() || {}; curState = s;
+    $('score').textContent = T1(s) + '  ' + gamesStr(s) + '  ' + T2(s) + '   •   ' + ptSpeak(s, s.p1Index || 0, s.p2Index || 0);
+    $('stat').textContent = 'Корт ' + S.court + (running ? ' · коментатор слухає табло' : ' · коментатор вимкнений');
+    if (running && prevState && !firstSnap) { const ev = detect(prevState, s); if (ev.length) enqueue(ev, s); }
+    prevState = JSON.parse(JSON.stringify(s)); firstSnap = false;
+  }, err => { $('stat').innerHTML = '<span class="bad">Помилка Firebase: ' + err.message + '</span>'; });
+}
+subscribe();
+
+// ───────── Кнопки ─────────
+$('btnStart').onclick = () => {
+  running = !running;
+  $('btnStart').textContent = running ? '■ Зупинити коментатора' : '▶ Запустити коментатора';
+  $('btnStart').className = running ? 'stop' : 'main';
+  if (running) { try { synth && synth.cancel(); const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth && synth.speak(u); } catch (e) {} log('ev', 'Коментатор увімкнено · ' + MODES[S.mode].name); if (S.engine === 'claude' && !S.key) log('ev bad', 'API-ключа немає — працюють готові фрази. Додайте ключ у блоці «Мозок ШІ».'); }
+  else { queue = []; try { synth && synth.cancel(); } catch (e) {} log('ev', 'Коментатор вимкнено'); }
+  $('stat').textContent = 'Корт ' + S.court + (running ? ' · коментатор слухає табло' : ' · коментатор вимкнений');
+};
+$('btnTest').onclick = async () => { await say('A', 'Вітаю! Це чоловічий голос коментатора паделу.'); await say('B', 'А я жіночий голос. Готові до гри!'); };
+
+const pushCfg = (extra) => {
+  const v = Object.assign({ mode: S.mode, react: S.react, gap: S.gap, rate: S.rate, prompt: promptOf(), t: Date.now() }, extra || {});
+  set(ref(db, 'padel/commentator'), v).then(() => { $('pushSt').innerHTML = '<span class="ok">✓ надіслано ' + new Date().toLocaleTimeString() + '</span>'; }, e => { $('pushSt').innerHTML = '<span class="bad">' + e.message + '</span>'; });
+};
+$('btnOn').onclick = () => pushCfg({ enabled: true });
+$('btnOff').onclick = () => pushCfg({ enabled: false });
+$('btnPush').onclick = () => pushCfg({ enabled: true });
+$('lnk').textContent = location.origin + location.pathname.replace(/commentator\.html$/, 'overley.html') + '?court=' + S.court + '&ai=1&aikey=sk-ant-...&aimode=emo&aivoice=m';
+window.__cm = { detect, local, MODES, S, enqueue, get running() { return running; }, setRunning(v) { running = v; } };
+</script>
+</body>
+</html>
