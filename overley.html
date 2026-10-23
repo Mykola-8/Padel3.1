@@ -369,6 +369,9 @@
         #tv-sb .sb-spons .lg { display: flex; align-items: center; gap: 1vw; animation: tlFade 0.8s ease; }
         #tv-sb .sb-spons .cap { font-weight: 700; font-size: 2.4vh; text-shadow: 0 0 1vh #000; }
         #tv-sb .sb-spons.col .lg { flex-direction: column; gap: 0.3vh; }
+        #cm-sub { position: fixed; left: 50%; bottom: 9vh; transform: translateX(-50%) translateY(20px); max-width: 80vw; padding: 1.2vh 2vw; border-radius: 1.4vh; background: rgba(0,0,0,0.78); color: #fff; font: 700 3.2vh 'Montserrat', sans-serif; text-align: center; z-index: 50; opacity: 0; transition: opacity .3s, transform .3s; border-left: 0.8vh solid #4aa3ff; pointer-events: none; }
+        #cm-sub.B { border-left-color: #ff7ac8; }
+        #cm-sub.show { opacity: 1; transform: translateX(-50%); }
         #tv-led { display: none; }
         html.tvled .corner-slide-wrapper, html.tvled .server-change-banner, html.tvled .stage-badge-wrapper { display: none !important; }   /* у ТВ-табло власні плашки */
         html.tvled, html.tvled body { background: #000 !important; background-color: #000 !important; }
@@ -2749,6 +2752,128 @@
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
+
+        // ===== ШІ-коментатор усередині overlay (?ai=1) — працює з одного пристрою (віджет у Prism/OBS) =====
+        const CM = (function () {
+            const P = new URLSearchParams(location.search);
+            const S = { enabled: true, mode: P.get('aimode') || 'emo', react: P.get('aireact') || 'key', gap: parseFloat(P.get('aigap') || '4'), rate: parseFloat(P.get('airate') || '1.05'), vol: parseFloat(P.get('aivol') || '1'), key: P.get('aikey') || '', model: P.get('aimodel') || 'claude-haiku-5-5', voice: P.get('aivoice') || '', sub: P.get('aisub') !== '0', speak: P.get('aispeak') !== '0', prompt: '', engine: P.get('aikey') ? 'claude' : 'local' };
+            const synth = window.speechSynthesis; let voices = [];
+            const FEM = /(polina|olena|oksana|lesya|kateryna|marina|female|zira|hazel|google українська)/i, MAL = /(ostap|taras|andriy|oleg|male|david|mark)/i;
+            const loadV = () => { voices = synth ? synth.getVoices().slice() : []; };
+            if (synth) { loadV(); synth.onvoiceschanged = loadV; }
+            const voiceFor = sp => { const uk = voices.filter(v => /^uk/i.test(v.lang)); const pool = uk.length ? uk : voices; return (sp === 'B' ? pool.find(v => FEM.test(v.name)) || pool[1] : pool.find(v => MAL.test(v.name)) || pool[0]) || pool[0] || null; };
+            let subEl = null, subTimer = null;
+            const showSub = (sp, t) => { if (!S.sub) return; if (!subEl) { subEl = document.createElement('div'); subEl.id = 'cm-sub'; document.body.appendChild(subEl); } subEl.textContent = t; subEl.className = 'show ' + sp; clearTimeout(subTimer); subTimer = setTimeout(() => { subEl.className = ''; }, Math.max(3500, t.length * 75)); };
+            const log = () => {};
+            const say = (sp, t) => new Promise(res => {
+                showSub(sp, t);
+                if (!synth || !S.speak || !t) return setTimeout(res, Math.max(2500, t.length * 70));
+                const u = new SpeechSynthesisUtterance(t); const v = voiceFor(sp); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'uk-UA';
+                u.rate = S.rate; u.volume = S.vol; u.pitch = sp === 'B' ? 1.1 : 0.95; u.onend = u.onerror = () => res(); synth.speak(u); setTimeout(res, Math.max(4000, t.length * 120));
+            });
+            const promptOf = () => S.prompt || MODES[S.mode].prompt;
+            let running = true;
+// ───────── Режими ─────────
+const BASE = 'Ти коментатор паделу. Стеж за табло на екрані. Щойно рахунок змінюється або на корті відбувається розіграш, згенеруй коротку емоційну репліку українською.';
+const MODES = {
+  emo:   { name: '🔥 Емоційний коментатор (1 голос)', speakers: 1, voice: 'A', prompt: BASE + ' Говори як гарячий спортивний коментатор: енергійно, з захопленням, 1 коротке речення (до 15 слів). Називай команди за прізвищами, не повторюйся.' },
+  calm:  { name: '🎓 Спокійний аналітик (1 голос)', speakers: 1, voice: 'A', prompt: 'Ти досвідчений тренер і коментатор паделу. Стеж за табло. Після кожної події дай коротку спокійну репліку українською: що сталося і що це означає для матчу (1–2 речення, до 25 слів). Без вигуків.' },
+  fun:   { name: '😄 Жартівливий (жіночий голос)', speakers: 1, voice: 'B', prompt: BASE + ' Стиль: легкий гумор і дружні підколки, але без образ. 1 коротке речення (до 15 слів).' },
+  duo:   { name: '🎙️ Дует: він і вона (2 голоси)', speakers: 2, voice: 'A', prompt: 'Ти пишеш діалог двох коментаторів паделу: чоловік (Олег, емоційний) і жінка (Марина, аналітична). Стеж за табло. Щойно рахунок змінюється або відбувається розіграш — коротка живa репліка або обмін з двох реплік, українською, до 25 слів загалом. Не кожну подію треба коментувати двома: інколи достатньо однієї репліки.' },
+  score: { name: '📟 Тільки рахунок (1 голос)', speakers: 1, voice: 'B', prompt: 'Ти диктор табло паделу. Після події коротко й нейтрально оголоси рахунок українською: гейми, потім очки. Без емоцій, до 12 слів.' }
+};
+const SYS_COMMON = `\nПравила виводу: пиши лише текст для озвучення, без емодзі, без лапок, без коментарів. Числа пиши словами, де це звучить природніше ("тридцять — сорок"). Рахунок очок у гемі озвучуй за тенісними правилами (п'ятнадцять, тридцять, сорок, перевага). Не вигадуй фактів, яких немає в даних. Дивись на історію останніх подій, щоб не повторюватись.`;
+const SYS_DUO = `\nФормат відповіді для дуету — СТРОГО JSON-масив: [{"s":"A","t":"репліка чоловіка"},{"s":"B","t":"репліка жінки"}] (A — чоловік, B — жінка, 1–2 об'єкти).`;
+
+// ───────── Розбір табла ─────────
+const PT = ['0', '15', '30', '40', 'AD'];
+const isRaw = s => s.isTiebreak || s.isSuperTiebreak || s.isAmericano || s.isMexicano;
+const ptTxt = (s, i) => isRaw(s) ? String(i || 0) : (PT[Math.min(i || 0, 4)] || '0');
+const ptSpeak = (s, a, b) => { if (isRaw(s)) return a + ' — ' + b; if (a >= 3 && b >= 3) return a === b ? 'рівно' : (a > b ? 'перевага ' + (s.p1name || 'першої команди') : 'перевага ' + (s.p2name || 'другої команди')); return ptTxt(s, a) + ' — ' + ptTxt(s, b); };
+function gamesStr(s) { const out = []; for (let n = 1; n <= 5; n++) { const a = s['t1_s' + n], b = s['t2_s' + n]; if (a === undefined && b === undefined) break; if (n > (s.currentSet || 1)) break; out.push((a || 0) + ':' + (b || 0)); } return out.join('  '); }
+const snap = s => ({ p1: s.p1Index || 0, p2: s.p2Index || 0, set: s.currentSet || 1, g: gamesStr(s), g1: s['t1_s' + (s.currentSet || 1)] || 0, g2: s['t2_s' + (s.currentSet || 1)] || 0, fin: !!s.isMatchFinished, ts: s.animation ? s.animation.ts : 0, srv: s.currentServer || 0 });
+const T1 = s => s.p1name || 'Команда 1', T2 = s => s.p2name || 'Команда 2';
+const ANIM = { smash: 'смеш', net_cord: 'м’яч зачепив сітку і впав на половині суперника (net cord)', por_tres: 'розіграш «пор трес»', por_cuatro: 'розіграш «пор куатро»', dormilona: 'дормілона', double_fault: 'подвійна помилка на подачі' };
+
+function detect(prev, s) {
+  const a = snap(s), p = prev ? snap(prev) : null; const ev = [];
+  if (!p) return ev;
+  if (a.fin && !p.fin) { ev.push({ k: 'match', big: 3, d: 'Матч закінчено. Фінальний рахунок по сетах: ' + a.g }); return ev; }
+  if (a.set > p.set) ev.push({ k: 'set', big: 3, d: 'Сет виграно. Рахунок по сетах: ' + gamesStr(s) });
+  else if (a.g1 !== p.g1 || a.g2 !== p.g2) { const w = a.g1 > p.g1 ? T1(s) : a.g2 > p.g2 ? T2(s) : null; if (w) ev.push({ k: 'game', big: 2, d: 'Гейм виграла команда ' + w + '. Гейми: ' + a.g1 + ':' + a.g2 }); }
+  else if (a.p1 !== p.p1 || a.p2 !== p.p2) {
+    let w = null; if (a.p1 > p.p1) w = T1(s); else if (a.p2 > p.p2) w = T2(s);
+    if (w) ev.push({ k: 'point', big: 1, d: 'Очко виграла команда ' + w + '. Очки в гемі: ' + ptSpeak(s, a.p1, a.p2) });
+    else ev.push({ k: 'point', big: 1, d: 'Знову рівно: ' + ptSpeak(s, a.p1, a.p2) });
+  }
+  if (a.ts && a.ts !== p.ts && s.animation && ANIM[s.animation.type]) { const tm = String(s.animation.team) === '1' ? T1(s) : T2(s); ev.push({ k: 'anim', big: 2, d: 'Яскравий момент у виконанні ' + tm + ': ' + ANIM[s.animation.type] }); }
+  const r = s.activeMatchRibbon; if (r && r !== 'NONE' && r !== (prev.activeMatchRibbon || 'NONE')) { const M = { BREAK_POINT: 'брейк-поінт', SET_POINT: 'сет-пойнт', MATCH_POINT: 'матч-пойнт', GOLDEN_POINT: 'золотий пойнт', TIEBREAK_POINT: 'пойнт у тайбрейку' }; if (M[r]) ev.push({ k: 'ribbon', big: 2, d: 'Увага: ' + M[r] }); }
+  if (s.isTiebreak && !prev.isTiebreak) ev.push({ k: 'tb', big: 2, d: 'Починається тайбрейк' });
+  return ev;
+}
+function ctx(s) {
+  const srv = s.currentServer === 1 ? T1(s) : s.currentServer === 2 ? T2(s) : 'невідомо';
+  return `Команда 1: ${T1(s)}; Команда 2: ${T2(s)}. Поточний рахунок по сетах (гейми): ${gamesStr(s) || '0:0'}. Очки в гемі: ${ptSpeak(s, s.p1Index || 0, s.p2Index || 0)}. Подає: ${srv}.` + (s.isTiebreak ? ' Зараз тайбрейк.' : '') + (s.isProSet ? ' Формат: про-сет.' : '') + (s.isAmericano ? ' Формат: Americano.' : '');
+}
+
+// ───────── Генерація реплік ─────────
+const hist = [];
+async function generate(ev, s) {
+  const mode = MODES[S.mode];
+  if (S.engine === 'claude' && S.key) {
+    const sys = promptOf() + SYS_COMMON + (mode.speakers === 2 ? SYS_DUO : '');
+    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй): ${hist.slice(-5).join(' | ') || '—'}`;
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': S.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: S.model, max_tokens: 220, system: sys, messages: [{ role: 'user', content: user }] }) });
+    if (!r.ok) throw new Error('Claude API ' + r.status + ' ' + (await r.text()).slice(0, 160));
+    const j = await r.json(); const t = (j.content || []).map(c => c.text || '').join('').trim();
+    if (mode.speakers === 2) {
+      try { const m = t.match(/\[[\s\S]*\]/); const arr = JSON.parse(m ? m[0] : t); const out = arr.filter(x => x && x.t).slice(0, 2).map(x => ({ s: x.s === 'B' ? 'B' : 'A', t: String(x.t) })); if (out.length) return out; } catch (e) {}
+    }
+    return [{ s: S.voice === 'f' ? 'B' : S.voice === 'm' ? 'A' : mode.voice, t: t.replace(/^["«]|["»]$/g, '') }];
+  }
+  return local(ev, s, mode);
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function local(ev, s, mode) {
+  const e = ev.sort((x, y) => y.big - x.big)[0]; const sc = ptSpeak(s, s.p1Index || 0, s.p2Index || 0);
+  const w = (e.d.match(/команда ([^.]+?)\./) || [])[1] || '';
+  const L = {
+    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`],
+    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`],
+    set: [`Сет завершено! ${gamesStr(s)}.`], match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`],
+    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!'], ribbon: [e.d + '! Напруга зростає.'], tb: ['Тайбрейк! Тепер кожне очко на вагу золота.']
+  };
+  const t = pick(L[e.k] || [e.d]);
+  if (mode.speakers === 2) return [{ s: 'A', t: t }, { s: 'B', t: pick(['Так, цікаво тепер!', 'Гарна гра від обох.', 'Дивимось далі.']) }].slice(0, ev[0].big > 1 ? 2 : 1);
+  return [{ s: S.voice === 'f' ? 'B' : S.voice === 'm' ? 'A' : mode.voice, t: t }];
+}
+
+// ───────── Черга ─────────
+let queue = [], busy = false, lastSpoke = 0;
+function allowed(e) { return S.react === 'all' ? true : S.react === 'key' ? e.big >= 2 : e.big >= 3 || e.k === 'game'; }
+async function pump() {
+  if (busy || !running) return; busy = true;
+  try {
+    while (queue.length && running) {
+      const wait = lastSpoke + S.gap * 1000 - Date.now(); if (wait > 0) await new Promise(r => setTimeout(r, wait));
+      const job = queue.shift(); if (queue.length > 2) queue.splice(0, queue.length - 2);
+      log('ev', '▸ ' + job.ev.map(e => e.d).join(' · '));
+      let lines; try { lines = await generate(job.ev, job.s); } catch (err) { log('ev bad', '⚠ ' + err.message); lines = local(job.ev, job.s, MODES[S.mode]); }
+      for (const l of lines) { log(l.s, (l.s === 'B' ? '👩 ' : '🎙 ') + l.t); hist.push(l.t); await say(l.s, l.t); }
+      lastSpoke = Date.now();
+    }
+  } finally { busy = false; }
+}
+function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; if (e.some(x => x.big >= 3) || queue.length >= 3) { queue = queue.filter(q => q.ev.some(x => x.big >= 3)); } queue.push({ ev: e, s: JSON.parse(JSON.stringify(s)) }); pump(); }
+
+            let prev = null;
+            return {
+                onState(s) { if (!S.enabled) { prev = s; return; } if (prev) { const ev = detect(prev, s); if (ev.length) enqueue(ev, s); } prev = JSON.parse(JSON.stringify(s)); },
+                setCfg(v) { if (!v) return; if (v.enabled !== undefined) S.enabled = !!v.enabled; if (v.mode && MODES[v.mode]) S.mode = v.mode; if (v.react) S.react = v.react; if (v.gap !== undefined) S.gap = +v.gap; if (v.rate) S.rate = +v.rate; if (v.prompt !== undefined) S.prompt = String(v.prompt || ''); if (v.voice !== undefined && v.voice !== '') S.voice = v.voice; if (v.sub !== undefined) S.sub = !!v.sub; if (v.speak !== undefined) S.speak = !!v.speak; if (!S.enabled) { queue = []; try { synth && synth.cancel(); } catch (e) {} } },
+                test() { say('A', 'Перевірка звуку коментатора.'); }
+            };
+        })();
+
         const courtId = urlParams.get('court') || "1"; 
         const TV_LED = urlParams.get('tv') === '1';        // світлове табло: Команда A / рахунок / Команда B / рахунок
         const TV_MODE = urlParams.get('tv') === '2';       // те саме табло теми, збільшене на весь екран
@@ -2954,6 +3079,7 @@
         }
         window.addEventListener('resize', () => { try { tvLayout(); } catch (e) {} });
         if (TV_MODE) setInterval(() => { try { tvLayout(); } catch (e) {} }, 400);
+        if (urlParams.get('ai') === '1') { onValue(ref(db, 'padel/commentator'), (snap) => { try { CM.setCfg(snap.val()); } catch (e) {} }); if (urlParams.get('aitest') === '1') document.addEventListener('click', () => CM.test(), { once: true }); }
         if (TV_LED || TV_MODE) { setInterval(() => { try { if (TV_LED) tvLedRender(); else tvSbRender(); } catch (e) {} }, 250); onValue(ref(db, 'padel/tv'), (snap) => { window.__tvCfg = snap.val() || {}; try { if (TV_LED) tvLedRender(); else tvSbRender(); } catch (e) {} }, (err) => { console.error('padel/tv read error', err); }); }   // табло змінює ширину (цифри, анімації) — перераховуємо масштаб
         const databasePath = `padel/courts/court_${courtId}`;
         const formatTime = (sec) => { return Math.floor(sec / 60).toString().padStart(2, '0') + ":" + (sec % 60).toString().padStart(2, '0'); };
@@ -3183,6 +3309,7 @@
 
                 boardWrapper.style.transform = `translate(${state.posX || 0}px, ${state.posY || 0}px) scale(${state.scale || 1})`;
                 if (TV_MODE) tvLayout();
+                if (urlParams.get('ai') === '1') { try { CM.onState(state); } catch (e) { console.error(e); } }
                 if (TV_LED) { window.__tvState = state; setTimeout(() => { try { tvLedRender(); } catch (e) {} }, 60); }
                 else if (TV_MODE) { window.__tvState = state; setTimeout(() => { try { tvSbRender(); } catch (e) {} }, 60); }
                 boardWrapper.style.setProperty('--board-opacity', (state.boardOpacity !== undefined ? state.boardOpacity : 100) / 100);
