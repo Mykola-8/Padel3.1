@@ -1001,6 +1001,7 @@
                 <div style="font-size:11px; font-weight:700; margin-bottom:2px;">📺 ТВ-табло <span style="font-weight:400; color:#9bd;">(посилання з <b>&amp;tv=1</b>; налаштування спільні для всіх кортів)</span></div>
                 <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
                     <div class="row"><span>Стиль табла:</span><select id="tv-style" onchange="tvSet('style', this.value)"><option value="theme">Як тема кольорів табла</option><option value="led">Світлове (LED, свої кольори A/B)</option></select></div>
+                    <div class="row"><span>Тема ТВ-табла:</span><select id="tv-tvTheme" onchange="tvSet('tvTheme', this.value)"><option value="board">Як на головному табло</option><option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора</option><option value="padelblue">Padel Blue</option><option value="championship">Championship (Navy/Orange)</option><option value="mono">Монохром</option><option value="stonesand">Stone/Sand</option><option value="skewlime">Паралелограм Lime</option></select></div>
                     <div class="row"><span>Колір фону:</span><input type="color" id="tv-bgColor" oninput="tvSet('bgColor', this.value)" style="width:60px; height:30px; padding:0;"></div>
                     <div class="row"><span>Фото фону:</span>
                         <span style="display:flex; gap:6px; align-items:center;"><label class="btn" style="padding:5px 10px !important; font-size:11px !important; cursor:pointer; margin:0;">Завантажити<input type="file" accept="image/*" style="display:none" onchange="tvBgUpload(this)"></label><button type="button" class="btn btn-gray" style="padding:5px 10px !important; font-size:11px !important;" onclick="tvSet('bgImg','')">✕</button><span id="tv-bgImg-st" style="font-size:11px;"></span></span></div>
@@ -1016,6 +1017,10 @@
                     <div id="tv-save-st" style="font-size:11px;"></div>
                     <div id="tv-sp-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
                     <label class="btn" style="padding:7px !important; font-size:11px !important; cursor:pointer; text-align:center;">➕ Додати логотипи (можна кілька)<input type="file" accept="image/*" multiple style="display:none" onchange="tvSpAdd(this)"></label>
+                    <div class="row"><span>Місце логотипів:</span><select id="tv-spPos" onchange="tvSet('spPos', this.value)"><option value="bottom">Знизу</option><option value="top">Зверху</option><option value="free">Вільно (переміщувати по табло)</option></select></div>
+                    <div class="row"><span>Позиція X: <b id="tv-spX-v">50%</b></span><input type="range" id="tv-spX" min="0" max="100" step="1" oninput="tvSet('spX', parseInt(this.value))" style="width:55%"></div>
+                    <div class="row"><span>Позиція Y: <b id="tv-spY-v">50%</b></span><input type="range" id="tv-spY" min="0" max="100" step="1" oninput="tvSet('spY', parseInt(this.value))" style="width:55%"></div>
+                    <div style="font-size:9px; color:#777;">X/Y працюють у режимі «Вільно». Бігучий рядок і рядок реклами ТВ-табло бере з налаштувань «Бігучий рядок» / «Рекламний рядок» (вкл/викл там).</div>
                     <div class="row"><span>Режим:</span><select id="tv-spMode" onchange="tvSet('spMode', this.value)"><option value="carousel">Карусель (по одному)</option><option value="row">Всі одразу в ряд</option></select></div>
                     <div class="row"><span>Анімація:</span><select id="tv-spAnim" onchange="tvSet('spAnim', this.value)"><option value="fade">Поява знизу (fade)</option><option value="slide">Виїзд справа</option><option value="zoom">Збільшення</option><option value="flip">Переворот</option></select></div>
                     <div class="row"><span>Зміна кожні: <b id="tv-spSec-v">5 с</b></span><input type="range" id="tv-spSec" min="2" max="30" step="1" oninput="tvSet('spSec', parseInt(this.value))" style="width:55%"></div>
@@ -1200,7 +1205,7 @@
 
 
         // ===== ТВ-ТАБЛО (overlay ?tv=1): спільні налаштування padel/tv для всіх кортів =====
-        const TV_DEF = { spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
+        const TV_DEF = { tvTheme: 'board', spPos: 'bottom', spX: 50, spY: 50, spAnim: 'fade', style: 'theme', bgColor: '#000000', bgImg: '', bgDim: 0, teamAColor: '#ff4040', teamBColor: '#3dff6b', showServer: true, showBreak: true, showGolden: true, showSetMatch: true, showGame: false, spLogos: [], spMode: 'carousel', spSec: 5, spH: 14 };
         let tvCfg = JSON.parse(JSON.stringify(TV_DEF));
         function tvStatus(ok, msg) { const e = document.getElementById('tv-save-st'); if (e) { e.innerText = ok ? ('☁️ Збережено в базі ✅' + (msg ? ' — ' + msg : '')) : '⚠️ Не збережено: ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
         function tvMirror() { try { if (typeof state === 'object' && state) state.tvCfg = tvCfg; } catch (e) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/tvCfg'), tvCfg); }   // резервний шлях, якщо база не дозволяє padel/tv
@@ -1211,9 +1216,11 @@
         window.tvSet = function(k, v) { tvCfg[k] = v; tvSave(); tvUiRefresh(); };
         function tvUiRefresh() {
             const g = id => document.getElementById(id); if (!g('tv-card')) return;
-            ['spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
+            ['tvTheme', 'spPos', 'spX', 'spY', 'spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
             ['showServer', 'showBreak', 'showGolden', 'showSetMatch', 'showGame'].forEach(k => { const e = g('tv-' + k); if (e) e.checked = !!tvCfg[k]; });
             if (g('tv-bgDim-v')) g('tv-bgDim-v').innerText = (tvCfg.bgDim || 0) + '%';
+            if (g('tv-spX-v')) g('tv-spX-v').innerText = (tvCfg.spX === undefined ? 50 : tvCfg.spX) + '%';
+            if (g('tv-spY-v')) g('tv-spY-v').innerText = (tvCfg.spY === undefined ? 50 : tvCfg.spY) + '%';
             if (g('tv-spSec-v')) g('tv-spSec-v').innerText = tvCfg.spSec + ' с';
             if (g('tv-spH-v')) g('tv-spH-v').innerText = tvCfg.spH + '%';
             if (g('tv-bgImg-st')) g('tv-bgImg-st').innerText = tvCfg.bgImg ? '✅ є' : '';
