@@ -3154,11 +3154,87 @@
             });
         })();
 
+        // ===== ТИТРИ ТУРНІРУ (картка) =====
+        (function crInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const DEF = { show: false, court: 'all', title: 'ТИТРИ ТУРНІРУ', endText: 'Дякуємо за увагу!', sections: [{ kind: 'crew', title: 'Організатори', on: true }, { kind: 'groups', title: '', on: true }, { kind: 'teams', title: '', on: false }, { kind: 'sponsors', title: 'Наші партнери', on: true }, { kind: 'custom', title: 'Подяка', text: 'Дякуємо глядачам і волонтерам', on: false }], speed: 90, loop: false, autoClose: true, scale: 100, width: 100, textSize: 100, logoSize: 100, bgOpacity: 85, bg1: '#000000', bg2: '#0a1230', accent: '#f5c542', role: '#ffe08a', text: '#ffffff', ts: 0 };
+            const KINDS = [['crew', '👔 Організатори (з панелі «Організатори»)'], ['sponsors', '🤝 Спонсори (з панелі «Спонсори»)'], ['groups', '👥 Команди по групах'], ['teams', '🏆 Усі команди (рейтинг)'], ['custom', '✏️ Свій текст («Роль | Ім’я»)']];
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Головний заголовок', t: 'txt' }, { k: 'endText', l: 'Фінальний напис', t: 'txt' },
+                { k: 'speed', l: 'Швидкість прокрутки (px/с)', t: 'rng', min: 20, max: 300 },
+                { k: 'loop', l: 'Повторювати по колу', t: 'chk' }, { k: 'autoClose', l: 'Сховати після закінчення', t: 'chk' },
+                { k: 'bgOpacity', l: 'Фон (прозорість) 0–100%', t: 'rng', min: 0, max: 100 },
+                { k: 'scale', l: 'Масштаб титрів', t: 'rng', min: 40, max: 250 }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220 },
+                { k: 'logoSize', l: 'Розмір логотипів', t: 'rng', min: 30, max: 250 }, { k: 'width', l: 'Ширина колонки', t: 'rng', min: 40, max: 170 },
+                { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовків', t: 'col' }, { k: 'role', l: 'Колір посад', t: 'col' }, { k: 'text', l: 'Колір тексту', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'cr-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('spcard-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            function save(now) {
+                const run = () => {
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.creditsCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/creditsCfg'), data); st(true, 'padel/credits відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/credits'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function st(ok, m) { const e = card.querySelector('#cr-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function lab(t) { return '<span style="font-size:11px; color:#ccc;">' + t + '</span>'; }
+            function fld(f) {
+                const id = 'cr-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'chk') return '<div class="row">' + lab(f.l + ':') + '<input type="checkbox" data-k="' + f.k + '" id="' + id + '"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">🎞 Титри турніру (прокрутка знизу вгору)</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="cr-on">▶ ЗАПУСТИТИ ТИТРИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="cr-off">■ СХОВАТИ</button></div>' +
+                '<div id="cr-st" style="font-size:11px;"></div><div style="font-size:11px; font-weight:700;">Розділи титрів (вміст підтягується автоматично):</div><div id="cr-list" style="display:flex; flex-direction:column; gap:6px;"></div>' +
+                '<div style="display:flex; gap:6px; flex-wrap:wrap;" id="cr-add"></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            card.querySelector('#cr-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            card.querySelector('#cr-off').onclick = () => { d.show = false; save(true); refresh(); };
+            KINDS.forEach(k => { const b = document.createElement('button'); b.className = 'btn btn-gray'; b.style.cssText = 'padding:5px 8px; font-size:11px;'; b.innerText = '➕ ' + k[1].replace(/^\S+\s/, '').split(' (')[0]; b.onclick = () => { d.sections.push({ kind: k[0], title: '', text: '', on: true }); list(); save(true); }; card.querySelector('#cr-add').appendChild(b); });
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = el.type === 'checkbox' ? el.checked : f.t === 'rng' ? parseFloat(el.value) : el.value; d[f.k] = v;
+                    const lv = card.querySelector('#cr-f-' + f.k + '-v'); if (lv) lv.innerText = v + '%'.replace('%', f.k === 'speed' ? ' px/с' : '%'); save(false);
+                });
+            });
+            function list() {
+                const host = card.querySelector('#cr-list'); host.innerHTML = '';
+                d.sections.forEach((s, i) => {
+                    const w = document.createElement('div'); w.style.cssText = 'position:relative; background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;';
+                    const top = document.createElement('div'); top.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                    const ck = document.createElement('input'); ck.type = 'checkbox'; ck.checked = s.on !== false; ck.onchange = () => { s.on = ck.checked; save(true); };
+                    const sel = document.createElement('select'); sel.style.cssText = inp; KINDS.forEach(k => { const o = document.createElement('option'); o.value = k[0]; o.text = k[1]; sel.appendChild(o); }); sel.value = s.kind; sel.onchange = () => { s.kind = sel.value; list(); save(true); };
+                    const mv = (dir) => { const b = document.createElement('button'); b.type = 'button'; b.innerText = dir < 0 ? '▲' : '▼'; b.style.cssText = 'padding:4px 8px; border:0; border-radius:4px; background:#444; color:#fff;'; b.onclick = () => { const j = i + dir; if (j < 0 || j >= d.sections.length) return; [d.sections[i], d.sections[j]] = [d.sections[j], d.sections[i]]; list(); save(true); }; return b; };
+                    top.appendChild(ck); top.appendChild(sel); top.appendChild(mv(-1)); top.appendChild(mv(1)); w.appendChild(top);
+                    const t = document.createElement('input'); t.type = 'text'; t.placeholder = 'Заголовок розділу (порожньо = стандартний)'; t.value = s.title || ''; t.style.cssText = inp; t.oninput = () => { s.title = t.value; save(false); }; w.appendChild(t);
+                    if (s.kind === 'custom') { const ta = document.createElement('textarea'); ta.rows = 4; ta.placeholder = 'Кожен рядок окремо. «Посада | Ім’я» — посада малими літерами над іменем'; ta.value = s.text || ''; ta.style.cssText = inp; ta.oninput = () => { s.text = ta.value; save(false); }; w.appendChild(ta); }
+                    const x = document.createElement('button'); x.type = 'button'; x.innerText = '✕'; x.style.cssText = 'position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:0; background:#c33; color:#fff; font-size:12px; cursor:pointer; padding:0;'; x.onclick = () => { d.sections.splice(i, 1); list(); save(true); }; w.appendChild(x);
+                    host.appendChild(w);
+                });
+            }
+            function refresh() {
+                F.forEach(f => { const el = card.querySelector('#cr-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = !!v; else el.value = v; const lv = card.querySelector('#cr-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.k === 'speed' ? ' px/с' : '%'); });
+                card.querySelector('#cr-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#cr-off').style.outline = d.show ? 'none' : '3px solid #fff';
+            }
+            list(); refresh();
+            onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); if (!v) return; const old = JSON.stringify(d.sections); d = Object.assign({}, DEF, v); d.sections = A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); });
+        })();
+
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
