@@ -2756,7 +2756,11 @@
         // ===== ШІ-коментатор усередині overlay (?ai=1) — працює з одного пристрою (віджет у Prism/OBS) =====
         const CM = (function () {
             const P = new URLSearchParams(location.search);
-            const S = { enabled: true, mode: P.get('aimode') || 'emo', react: P.get('aireact') || 'key', gap: parseFloat(P.get('aigap') || '4'), rate: parseFloat(P.get('airate') || '1.05'), vol: parseFloat(P.get('aivol') || '1'), key: P.get('aikey') || '', model: P.get('aimodel') || 'claude-haiku-5-5', voice: P.get('aivoice') || '', sub: P.get('aisub') !== '0', speak: P.get('aispeak') !== '0', prompt: '', gkey: P.get('gkey') || '', gmodel: P.get('gmodel') || 'gemini-2.5-flash', gtts: P.get('gtts') !== '0', gvm: P.get('gvm') || '', gvf: P.get('gvf') || '', engine: P.get('gkey') ? 'gemini' : (P.get('aikey') ? 'claude' : 'local') };
+            const S = { enabled: true, mode: P.get('aimode') || 'emo', react: P.get('aireact') || 'key', gap: parseFloat(P.get('aigap') || '4'), rate: parseFloat(P.get('airate') || '1.05'), vol: parseFloat(P.get('aivol') || '1'), key: P.get('aikey') || '', model: P.get('aimodel') || 'claude-haiku-5-5', voice: P.get('aivoice') || '', sub: P.get('aisub') !== '0', speak: P.get('aispeak') !== '0', prompt: '', gkey: P.get('gkey') || '', gmodel: P.get('gmodel') || 'gemini-2.5-flash', gtts: P.get('gtts') !== '0', gvm: P.get('gvm') || '', gvf: P.get('gvf') || '', grkey: P.get('grkey') || '', orkey: P.get('orkey') || '', mkey: P.get('mkey') || '', ckey: P.get('ckey') || '', pmodel: P.get('pmodel') || '', engine: '' };
+            const KEYOF = { gemini: 'gkey', claude: 'key', groq: 'grkey', openrouter: 'orkey', mistral: 'mkey', cerebras: 'ckey' };
+            const hasKey = (e) => e === 'local' || !!S[KEYOF[e]];
+            const autoEngine = () => ['gemini', 'groq', 'openrouter', 'mistral', 'cerebras', 'claude'].find(hasKey) || 'local';
+            S.engine = (P.get('engine') && hasKey(P.get('engine'))) ? P.get('engine') : autoEngine();
             const synth = window.speechSynthesis; let voices = [];
             const FEM = /(polina|olena|oksana|lesya|kateryna|marina|female|zira|hazel|google українська)/i, MAL = /(ostap|taras|andriy|oleg|male|david|mark)/i;
             const loadV = () => { voices = synth ? synth.getVoices().slice() : []; };
@@ -2764,16 +2768,18 @@
             const voiceFor = sp => { const uk = voices.filter(v => /^uk/i.test(v.lang)); const pool = uk.length ? uk : voices; return (sp === 'B' ? pool.find(v => FEM.test(v.name)) || pool[1] : pool.find(v => MAL.test(v.name)) || pool[0]) || pool[0] || null; };
             let subEl = null, subTimer = null;
             const showSub = (sp, t) => { if (!S.sub) return; if (!subEl) { subEl = document.createElement('div'); subEl.id = 'cm-sub'; document.body.appendChild(subEl); } subEl.textContent = t; subEl.className = 'show ' + sp; clearTimeout(subTimer); subTimer = setTimeout(() => { subEl.className = ''; }, Math.max(3500, t.length * 75)); };
+            const dbg = (m) => { if (P.get('aidebug') !== '1') return; let e = document.getElementById('cm-dbg'); if (!e) { e = document.createElement('div'); e.id = 'cm-dbg'; e.style.cssText = 'position:fixed;left:0;top:0;z-index:99;font:14px monospace;color:#ff0;background:#000c;padding:4px 8px;max-width:100vw;white-space:pre-wrap'; document.body.appendChild(e); } e.textContent = m; };
             const log = () => {};
             const say = (sp, t) => new Promise(res => {
                 showSub(sp, t);
-                if (S.speak && S.engine === 'gemini' && S.gkey && S.gtts) { geminiTTS(t, sp).then(res, e => { console.warn(e); sayBrowser(sp, t).then(res); }); return; }
+                if (S.speak && S.gkey && S.gtts) { geminiTTS(t, sp).then(() => { dbg('Gemini TTS OK · ' + (sp === 'B' ? 'жін' : 'чол')); res(); }, e => { console.warn(e); dbg('Gemini TTS ПОМИЛКА (' + (sp === 'B' ? 'жін' : 'чол') + '): ' + e.message + ' → голос браузера'); sayBrowser(sp, t).then(res); }); return; }
                 sayBrowser(sp, t).then(res);
             });
             const sayBrowser = (sp, t) => new Promise(res => {
                 if (!synth || !S.speak || !t) return setTimeout(res, Math.max(2500, t.length * 70));
                 const u = new SpeechSynthesisUtterance(t); const v = voiceFor(sp); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'uk-UA';
-                u.rate = S.rate; u.volume = S.vol; u.pitch = sp === 'B' ? 1.1 : 0.95; u.onend = u.onerror = () => res(); synth.speak(u); setTimeout(res, Math.max(4000, t.length * 120));
+                const maleOk = voices.some(x => /^uk/i.test(x.lang) && MAL.test(x.name)); dbg('Голос браузера: ' + (v ? v.name : 'за замовчуванням') + (sp !== 'B' && !maleOk ? ' (чоловічого немає — знижую тембр)' : ''));
+                u.rate = sp === 'B' ? S.rate : (maleOk ? S.rate : S.rate * 0.92); u.volume = S.vol; u.pitch = sp === 'B' ? 1.1 : (maleOk ? 0.9 : 0.4); u.onend = u.onerror = () => res(); synth.speak(u); setTimeout(res, Math.max(4000, t.length * 120));
             });
             const promptOf = () => S.prompt || MODES[S.mode].prompt;
             let running = true;
@@ -2792,7 +2798,7 @@
                 const style = /fun/.test(S.mode) ? 'Скажи українською жваво, з усмішкою і гумором: ' : /pro|calm/.test(S.mode) ? 'Скажи українською впевнено, як професійний спортивний коментатор: ' : 'Скажи українською емоційно, як спортивний коментатор: ';
                 const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (S.gtts_model || 'gemini-2.5-flash-preview-tts') + ':generateContent?key=' + encodeURIComponent(S.gkey);
                 const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: style + text }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: vn } } } } }) });
-                if (!r.ok) throw new Error('Gemini TTS ' + r.status);
+                if (!r.ok) throw new Error('Gemini TTS ' + r.status + ' ' + (await r.text().catch(() => '')).slice(0, 120));
                 const j = await r.json(); const b64 = ((((((j.candidates || [])[0] || {}).content || {}).parts || [])[0] || {}).inlineData || {}).data;
                 if (!b64) throw new Error('Gemini TTS: порожня відповідь');
                 const bin = atob(b64), n = bin.length >> 1, f = new Float32Array(n);
@@ -2851,13 +2857,28 @@ function ctx(s) {
 
 // ───────── Генерація реплік ─────────
 const hist = [];
+const ANGLES = ['емоція і драйв', 'тактика і позиція на корті', 'порівняння зі спортом чи побутом', 'увага до подачі', 'напруга для глядачів', 'вдячність за красиву гру', 'тиск на суперників', 'ритм матчу', 'лаконічний вигук', 'маленька цікава деталь про паделу', 'хвалимо витримку', 'хвалимо техніку удару', 'інтрига — що буде далі', 'гра від скла', 'командна робота пари', 'легкий жарт', 'психологія моменту', 'темп і фізика', 'контраст з попереднім розіграшем', 'гучний захоплений вигук'];
+const PROV = {
+  groq: { url: 'https://api.groq.com/openai/v1/chat/completions', model: 'llama-3.3-70b-versatile', key: 'grkey' },
+  openrouter: { url: 'https://openrouter.ai/api/v1/chat/completions', model: 'meta-llama/llama-3.3-70b-instruct:free', key: 'orkey' },
+  mistral: { url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', key: 'mkey' },
+  cerebras: { url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama-3.3-70b', key: 'ckey' }
+};
+async function openaiText(name, sys, user) {
+  const p = PROV[name];
+  const r = await fetch(p.url, { method: 'POST', headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + S[p.key] }, body: JSON.stringify({ model: S.pmodel || p.model, max_tokens: 260, temperature: 1.0, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }] }) });
+  if (!r.ok) throw new Error(name + ' API ' + r.status + ' ' + (await r.text()).slice(0, 140));
+  const j = await r.json(); return (((j.choices || [])[0] || {}).message || {}).content.trim();
+}
 async function generate(ev, s) {
   const mode = MODES[S.mode];
-  if ((S.engine === 'gemini' && S.gkey) || (S.engine === 'claude' && S.key)) {
+  if (S.engine !== 'local' && hasKey(S.engine)) {
     const sys = promptOf() + SYS_COMMON + (mode.speakers === 2 ? SYS_DUO : '');
-    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй): ${hist.slice(-5).join(' | ') || '—'}`;
+    const starts = hist.slice(-8).map(h => h.split(/\s+/).slice(0, 2).join(' ')).filter(Boolean);
+    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй ні слова, ні образи): ${hist.slice(-8).join(' | ') || '—'}\nНЕ ПОЧИНАЙ репліку зі слів: ${starts.join(' / ') || '—'}\nРАКУРС ЦІЄЇ РЕПЛІКИ: ${pick(ANGLES)}. Використай нові слова та порівняння, багату лексику, синоніми.`;
     let t;
     if (S.engine === 'gemini') t = await geminiText(sys, user);
+    else if (PROV[S.engine]) t = await openaiText(S.engine, sys, user);
     else {
     const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': S.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: S.model, max_tokens: 220, system: sys, messages: [{ role: 'user', content: user }] }) });
     if (!r.ok) throw new Error('Claude API ' + r.status + ' ' + (await r.text()).slice(0, 160));
@@ -2874,12 +2895,17 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 function local(ev, s, mode) {
   const e = ev.sort((x, y) => y.big - x.big)[0]; const sc = ptSpeak(s, s.p1Index || 0, s.p2Index || 0);
   const w = (e.d.match(/команда ([^.]+?)\./) || [])[1] || '';
+  const sv = s.currentServer === 1 ? (s.p1name || '') : s.currentServer === 2 ? (s.p2name || '') : '';
   const L = {
-    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`],
-    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`],
-    set: [`Сет завершено! ${gamesStr(s)}.`], match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`],
-    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!'], ribbon: [e.d + '! Напруга зростає.'], tb: ['Тайбрейк! Тепер кожне очко на вагу золота.']
+    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`, `Красиво! ${w} додає в рахунок. ${sc}.`, `${w} грає впевнено — ${sc}.`, `Ще одне очко на рахунку ${w}. ${sc}.`, `Ось це удар! ${sc}.`, `Розіграш виграно в напруженій боротьбі. ${sc}.`, `${w} не дає суперникам жодного шансу. ${sc}.`, `Влучно й точно, ${w}! ${sc}.`, `Глядачі аплодують. ${sc}.`, `Складний м'яч, але ${w} впорались. ${sc}.`, `Такий розіграш варто бачити! ${sc}.`, `Рахунок змінюється: ${sc}.`, `Дуже чистий розіграш від ${w}. ${sc}.`],
+    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`, `Гейм закрито! ${w} ведуть, ${gamesStr(s)}.`, `Впевнена гра, гейм у ${w}. ${gamesStr(s)}.`, `Ось і гейм! ${gamesStr(s)}.`, `${w} забирають гейм — ${gamesStr(s)}.`, `Хороший гейм! ${gamesStr(s)}.`, `Так тримати, ${w}! ${gamesStr(s)}.`],
+    set: [`Сет завершено! ${gamesStr(s)}.`, `Сет виграно! ${gamesStr(s)}.`, `Сет за нами! Рахунок по сетах ${gamesStr(s)}.`],
+    match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`, `Це перемога! ${gamesStr(s)}. Дякуємо, що були з нами.`, `Фінальний свисток! ${gamesStr(s)}. Вітаємо переможців!`],
+    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!', e.d.replace('Яскравий момент у виконанні', 'Яка майстерність від') + '!', e.d + ' — неймовірно!', 'Оце так! ' + e.d + '.', e.d + '. Зал аплодує!'],
+    ribbon: [e.d + '! Напруга зростає.', e.d + '. Нерви на межі!', e.d + ' — тепер кожен м’яч важливий.', e.d + '. Побачимо, хто витримає.', e.d + '! Це момент істини.'],
+    tb: ['Тайбрейк! Тепер кожне очко на вагу золота.', 'Тайбрейк — і нерви вирішують усе.', 'Починається тайбрейк! Жодного права на помилку.']
   };
+  if (sv && e.k === 'point') L.point.push(`Подає ${sv}. ${sc}.`);
   const t = pick(L[e.k] || [e.d]);
   if (mode.speakers === 2) return [{ s: 'A', t: t }, { s: 'B', t: pick(['Так, цікаво тепер!', 'Гарна гра від обох.', 'Дивимось далі.']) }].slice(0, ev[0].big > 1 ? 2 : 1);
   return [{ s: S.voice === 'f' ? 'B' : S.voice === 'm' ? 'A' : mode.voice, t: t }];
@@ -2906,7 +2932,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             let prev = null, lastTest = null;
             return {
                 onState(s) { if (!S.enabled) { prev = s; return; } if (prev) { const ev = detect(prev, s); if (ev.length) enqueue(ev, s); } prev = JSON.parse(JSON.stringify(s)); },
-                setCfg(v) { if (!v) return; if (v.enabled !== undefined) S.enabled = !!v.enabled; if (v.mode && MODES[v.mode]) S.mode = v.mode; if (v.react) S.react = v.react; if (v.gap !== undefined) S.gap = +v.gap; if (v.rate) S.rate = +v.rate; if (v.prompt !== undefined) S.prompt = String(v.prompt || ''); if (v.voice !== undefined && v.voice !== '') S.voice = v.voice; if (v.vol !== undefined) S.vol = +v.vol; if (v.gvm !== undefined) S.gvm = v.gvm; if (v.gvf !== undefined) S.gvf = v.gvf; if (v.gtts !== undefined) S.gtts = !!v.gtts; if (v.voice !== undefined) S.voice = v.voice; if (v.test) { if (lastTest !== null && v.test !== lastTest) say('A', 'Перевірка звуку коментатора.'); lastTest = v.test; } else if (lastTest === null) lastTest = 0; if (v.sub !== undefined) S.sub = !!v.sub; if (v.speak !== undefined) S.speak = !!v.speak; if (!S.enabled) { queue = []; try { synth && synth.cancel(); } catch (e) {} } },
+                setCfg(v) { if (!v) return; if (v.enabled !== undefined) S.enabled = !!v.enabled; if (v.mode && MODES[v.mode]) S.mode = v.mode; if (v.react) S.react = v.react; if (v.gap !== undefined) S.gap = +v.gap; if (v.rate) S.rate = +v.rate; if (v.prompt !== undefined) S.prompt = String(v.prompt || ''); if (v.voice !== undefined && v.voice !== '') S.voice = v.voice; if (v.engine && hasKey(v.engine)) S.engine = v.engine; if (v.pmodel !== undefined && v.pmodel !== '') S.pmodel = String(v.pmodel); if (v.vol !== undefined) S.vol = +v.vol; if (v.gvm !== undefined) S.gvm = v.gvm; if (v.gvf !== undefined) S.gvf = v.gvf; if (v.gtts !== undefined) S.gtts = !!v.gtts; if (v.voice !== undefined) S.voice = v.voice; if (v.test) { if (lastTest !== null && v.test !== lastTest) say('A', 'Перевірка звуку коментатора.'); lastTest = v.test; } else if (lastTest === null) lastTest = 0; if (v.sub !== undefined) S.sub = !!v.sub; if (v.speak !== undefined) S.speak = !!v.speak; if (!S.enabled) { queue = []; try { synth && synth.cancel(); } catch (e) {} } },
                 test() { say('A', 'Перевірка звуку коментатора.'); }
             };
         })();
