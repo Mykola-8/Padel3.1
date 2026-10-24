@@ -555,6 +555,59 @@
         .ic-line3 { font-size: 42px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin-top: 26px; }
         .ic-foot { height: 52px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--ic-foottext, #10213f); font-size: 26px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
 
+        /* ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) ===== */
+        .tc-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10005; pointer-events: none; visibility: hidden; font-family: var(--tc-font, 'Montserrat'), sans-serif; }
+        .tc-wrap.tc-show { visibility: visible; }
+        .tc-pos { position: absolute; transform: translate(-50%, -50%); }
+        .tc-panel { position: relative; width: var(--tc-w, 900px); color: var(--tc-text, #fff); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,calc(.55 * var(--tc-op, 1))); animation-duration: var(--tc-d, .7s); animation-fill-mode: both; animation-timing-function: cubic-bezier(.2,.85,.25,1); }
+        .tc-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(160deg, var(--tc-bg1, #0c1a3d), var(--tc-bg2, #14295a)); opacity: var(--tc-op, 1); z-index: 0; }
+        .tc-panel > * { position: relative; z-index: 1; }
+        .tc-title { padding: 16px 30px; font-size: calc(30px * var(--tc-ts, 1)); font-weight: 800; letter-spacing: 4px; text-transform: uppercase; text-align: center; color: var(--tc-title, #10213f); background: var(--tc-accent, #f5c542); }
+        .tc-rows { padding: 20px 34px 26px; display: flex; flex-direction: column; gap: calc(16px * var(--tc-ts, 1)); }
+        .tc-row { display: flex; flex-direction: column; gap: 2px; border-left: 6px solid var(--tc-accent, #f5c542); padding: 2px 0 2px 18px; }
+        .tc-row.stg { animation: tcRow .55s cubic-bezier(.2,.85,.25,1) both; }
+        .tc-role { font-size: calc(22px * var(--tc-ts, 1)); font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--tc-role, #f5c542); }
+        .tc-name { font-size: calc(40px * var(--tc-ts, 1)); font-weight: 800; color: var(--tc-text, #fff); }
+        @keyframes tcRow { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
+        /* вступи / виходи панелі */
+        @keyframes tcIn-zoom { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-zoom { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.5); } }
+        @keyframes tcIn-slideUp { from { opacity: 0; transform: translateY(700px); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-slideUp { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(700px); } }
+        @keyframes tcIn-slideDown { from { opacity: 0; transform: translateY(-700px); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-slideDown { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-700px); } }
+        @keyframes tcIn-slideLeft { from { opacity: 0; transform: translateX(-1500px); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-slideLeft { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-1500px); } }
+        @keyframes tcIn-slideRight { from { opacity: 0; transform: translateX(1500px); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-slideRight { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(1500px); } }
+        @keyframes tcIn-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tcOut-fade { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes tcIn-flip { from { opacity: 0; transform: perspective(1400px) rotateX(90deg); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-flip { from { opacity: 1; transform: none; } to { opacity: 0; transform: perspective(1400px) rotateX(-90deg); } }
+        @keyframes tcIn-wipe { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
+        @keyframes tcOut-wipe { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 50% 0 50%); } }
+        @keyframes tcIn-blur { from { opacity: 0; filter: blur(30px); transform: scale(1.15); } to { opacity: 1; filter: none; transform: none; } }
+        @keyframes tcOut-blur { from { opacity: 1; filter: none; } to { opacity: 0; filter: blur(30px); transform: scale(1.15); } }
+        @keyframes tcIn-bounce { 0% { opacity: 0; transform: translateY(-900px); } 55% { opacity: 1; transform: translateY(40px); } 75% { transform: translateY(-20px); } 90% { transform: translateY(8px); } 100% { transform: none; } }
+        @keyframes tcIn-spin { from { opacity: 0; transform: rotate(-200deg) scale(.2); } to { opacity: 1; transform: none; } }
+        @keyframes tcOut-spin { from { opacity: 1; transform: none; } to { opacity: 0; transform: rotate(200deg) scale(.2); } }
+        @keyframes tcOut-bounce { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(900px); } }
+        /* картка спонсора */
+        .spc-body { padding: 26px 34px 30px; min-height: calc(260px * var(--tc-ts, 1)); display: flex; align-items: center; }
+        .spc-item { display: flex; align-items: center; gap: 34px; width: 100%; animation: tcIn-fade .5s both; }
+        .spc-item.lay-right { flex-direction: row-reverse; } .spc-item.lay-top { flex-direction: column; text-align: center; }
+        .spc-item.leave { animation: tcOut-fade .45s both; }
+        .spc-logo { flex: none; width: var(--spc-lw, 300px); max-height: 260px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); animation-duration: .9s; animation-fill-mode: both; animation-timing-function: cubic-bezier(.2,.85,.25,1); }
+        .spc-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+        .spc-name { font-size: calc(46px * var(--tc-ts, 1)); font-weight: 800; color: var(--tc-role, #f5c542); line-height: 1.1; }
+        .spc-desc { font-size: calc(30px * var(--tc-ts, 1)); font-weight: 500; line-height: 1.3; color: var(--tc-text, #fff); }
+        .spc-caret::after { content: '▌'; margin-left: 2px; animation: spcBlink .7s steps(1) infinite; color: var(--tc-accent, #f5c542); }
+        @keyframes spcBlink { 50% { opacity: 0; } }
+        .spc-w { display: inline-block; animation: tcRow .5s cubic-bezier(.2,.85,.25,1) both; }
+        .spc-fadeT { animation: tcIn-fade .9s both; } .spc-slideT { animation: tcIn-slideUp .8s both; }
+        .spc-dots { display: flex; gap: 8px; justify-content: center; padding: 0 0 16px; }
+        .spc-dots i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.25); } .spc-dots i.on { background: var(--tc-accent, #f5c542); }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1763,6 +1816,8 @@
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
+    <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
+    <div class="tc-wrap" id="spc-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="po-wrap" id="po-wrap-upper"></div>
     <div class="po-wrap" id="po-wrap-lower"></div>
 
@@ -3209,6 +3264,105 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             if (gs.infos !== undefined) m.sponsorInfos = Array.isArray(gs.infos) ? gs.infos : Object.values(gs.infos || {});
             return m;
         }
+        // ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) =====
+        const TC = (function () {
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            const hex2rgba = (h, a) => h; // зарезервовано
+            function mk(wrapId, key) {
+                const wrap = document.getElementById(wrapId), pos = wrap.querySelector('.tc-pos'), panel = wrap.querySelector('.tc-panel');
+                const o = { wrap, pos, panel, key, cfg: {}, shown: false, hideT: null, onShow: null, onHide: null, sig: '' };
+                return o;
+            }
+            const crew = mk('crew-wrap', 'crew'), spc = mk('spc-wrap', 'spcard');
+            function visible(o) { const c = o.cfg || {}; const ct = g(c.court, 'all'); if (!c.show) return false; if (ct !== 'all' && String(ct) !== String(courtNum)) return false; const ah = parseFloat(c.autoHide) || 0; if (ah > 0 && c.ts && Date.now() - c.ts > ah * 1000) return false; return true; }
+            function look(o) {
+                const c = o.cfg || {}, s = o.wrap.style, p = o.panel.style;
+                const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(c.scale, 100)) / 100);
+                s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+                o.pos.style.left = (parseFloat(g(c.x, 50)) / 100 * 1920) + 'px'; o.pos.style.top = (parseFloat(g(c.y, 50)) / 100 * 1080) + 'px';
+                p.setProperty('--tc-w', (parseInt(g(c.width, o.key === 'crew' ? 900 : 1000)) || 900) + 'px');
+                p.setProperty('--tc-bg1', g(c.bg1, '#0c1a3d')); p.setProperty('--tc-bg2', g(c.bg2, '#14295a')); p.setProperty('--tc-accent', g(c.accent, '#f5c542'));
+                p.setProperty('--tc-text', g(c.text, '#ffffff')); p.setProperty('--tc-role', g(c.role, '#f5c542')); p.setProperty('--tc-title', g(c.titleColor, '#10213f'));
+                p.setProperty('--tc-op', Math.max(0, Math.min(100, parseInt(g(c.bgOpacity, 100)))) / 100); p.setProperty('--tc-ts', Math.max(40, Math.min(250, parseInt(g(c.textSize, 100)))) / 100);
+                p.setProperty('--tc-d', Math.max(0.15, Math.min(3, parseFloat(g(c.animDur, 0.7)))) + 's');
+                s.setProperty('--tc-font', "'" + g(c.font, 'Montserrat') + "'");
+            }
+            function setVis(o, vis) {
+                const c = o.cfg || {}, dur = Math.max(0.15, Math.min(3, parseFloat(g(c.animDur, 0.7)))) * 1000;
+                const inA = g(c.animIn, 'zoom'), outA = g(c.animOut, 'fade');
+                if (vis && !o.shown) {
+                    clearTimeout(o.hideT); o.shown = true; if (o.onShow) o.onShow();
+                    o.panel.style.animationName = (inA === 'none') ? 'none' : 'tcIn-' + inA; o.wrap.classList.add('tc-show');
+                } else if (!vis && o.shown) {
+                    o.shown = false; if (o.onHide) o.onHide();
+                    const exists = outA === 'none' ? null : ('tcOut-' + outA); 
+                    o.panel.style.animationName = 'none'; void o.panel.offsetWidth;
+                    if (exists && getAnimExists(exists)) { o.panel.style.animationName = exists; o.hideT = setTimeout(() => { o.wrap.classList.remove('tc-show'); }, dur + 40); }
+                    else o.wrap.classList.remove('tc-show');
+                }
+            }
+            function getAnimExists(n) { return ['zoom', 'slideUp', 'slideDown', 'slideLeft', 'slideRight', 'fade', 'flip', 'wipe', 'blur', 'spin', 'bounce'].some(a => n === 'tcOut-' + a); }
+            // --- Організатори ---
+            function buildCrew() {
+                const c = crew.cfg, rows = arr(c.rows).filter(r => r && (r.role || r.name)); const stg = c.stagger !== false;
+                const title = g(c.title, 'ОРГАНІЗАТОРИ ТУРНІРУ');
+                crew.panel.innerHTML = (title ? '<div class="tc-title">' + esc(title) + '</div>' : '') + '<div class="tc-rows">' + rows.map((r, i) => '<div class="tc-row' + (stg ? ' stg' : '') + '"' + (stg ? ' style="animation-delay:' + (0.25 + i * 0.18) + 's"' : '') + '><div class="tc-role">' + esc(r.role) + '</div><div class="tc-name">' + esc(r.name) + '</div></div>').join('') + '</div>';
+            }
+            crew.onShow = buildCrew;
+            // --- Спонсори ---
+            let spIdx = 0, spT = [], spTyp = null;
+            const clr = () => { spT.forEach(clearTimeout); spT = []; if (spTyp) { clearInterval(spTyp); spTyp = null; } };
+            function typeInto(el, text, ms, done) {
+                el.textContent = ''; el.classList.add('spc-caret'); let i = 0;
+                spTyp = setInterval(() => { i++; el.textContent = text.slice(0, i); if (i >= text.length) { clearInterval(spTyp); spTyp = null; setTimeout(() => el.classList.remove('spc-caret'), 700); if (done) done(); } }, ms);
+            }
+            function showItem() {
+                const c = spc.cfg, items = arr(c.items).filter(it => it && (it.logo || it.name || it.desc)); const body = spc.panel.querySelector('.spc-body'); if (!body) return;
+                if (!items.length) { body.innerHTML = ''; return; }
+                spIdx = spIdx % items.length; const it = items[spIdx];
+                const lay = g(c.layout, 'left'), la = g(c.logoAnim, 'zoom'), ta = g(c.textAnim, 'typing'), ms = Math.max(8, Math.min(200, parseInt(g(c.typeMs, 35))));
+                const lw = Math.round(300 * Math.max(20, Math.min(250, parseInt(g(c.logoSize, 100)))) / 100);
+                spc.panel.style.setProperty('--spc-lw', lw + 'px');
+                body.innerHTML = '<div class="spc-item lay-' + lay + '">' + (it.logo ? '<img class="spc-logo" src="' + esc(it.logo) + '" style="animation-name:' + (la === 'none' ? 'none' : 'tcIn-' + la) + '">' : '') + '<div class="spc-txt"><div class="spc-name"></div><div class="spc-desc"></div></div></div>';
+                const dots = spc.panel.querySelector('.spc-dots'); if (dots) dots.innerHTML = items.length > 1 ? items.map((_, i) => '<i class="' + (i === spIdx ? 'on' : '') + '"></i>').join('') : '';
+                const nm = body.querySelector('.spc-name'), ds = body.querySelector('.spc-desc'), name = String(it.name || ''), desc = String(it.desc || '');
+                const fill = (el, text, delay) => {
+                    if (!text) return;
+                    if (ta === 'words') { el.innerHTML = text.split(/\s+/).map((w, i) => '<span class="spc-w" style="animation-delay:' + (delay + i * 0.12) + 's">' + esc(w) + '&nbsp;</span>').join(''); }
+                    else if (ta === 'fade') { el.textContent = text; el.classList.add('spc-fadeT'); el.style.animationDelay = delay + 's'; }
+                    else if (ta === 'slideUp') { el.textContent = text; el.classList.add('spc-slideT'); el.style.animationDelay = delay + 's'; }
+                    else el.textContent = text;
+                };
+                if (ta === 'typing') { const t1 = setTimeout(() => { if (name) typeInto(nm, name, ms, () => { if (desc) typeInto(ds, desc, ms); }); else if (desc) typeInto(ds, desc, ms); }, 500); spT.push(t1); }
+                else { fill(nm, name, 0.5); fill(ds, desc, 0.5 + (name ? 0.4 : 0)); }
+                const sec = Math.max(2, parseFloat(it.sec) || parseFloat(g(c.itemSec, 8)) || 8);
+                if (items.length > 1 || g(c.loop, true)) {
+                    spT.push(setTimeout(() => { const el = body.querySelector('.spc-item'); if (el) el.classList.add('leave'); spT.push(setTimeout(() => { spIdx++; showItem(); }, 480)); }, sec * 1000));
+                }
+            }
+            function buildSpc() {
+                const c = spc.cfg, title = g(c.title, 'НАШІ ПАРТНЕРИ');
+                spc.panel.innerHTML = (title ? '<div class="tc-title">' + esc(title) + '</div>' : '') + '<div class="spc-body"></div><div class="spc-dots"></div>';
+                clr(); spIdx = 0; showItem();
+            }
+            spc.onShow = buildSpc; spc.onHide = () => { setTimeout(clr, 900); };
+            function apply(o, cfg) {
+                o.cfg = cfg || {}; look(o);
+                const sig = o === crew ? JSON.stringify([cfg && cfg.rows, cfg && cfg.title, cfg && cfg.stagger]) : JSON.stringify([cfg && cfg.items, cfg && cfg.title, cfg && cfg.layout, cfg && cfg.logoAnim, cfg && cfg.textAnim, cfg && cfg.itemSec, cfg && cfg.typeMs, cfg && cfg.logoSize, cfg && cfg.textSize]);
+                const vis = visible(o);
+                if (o.shown && sig !== o.sig && vis) { o.sig = sig; if (o === crew) buildCrew(); else buildSpc(); }
+                o.sig = sig; setVis(o, vis);
+            }
+            onValue(ref(db, 'padel/crew'), s => apply(crew, s.val()));
+            onValue(ref(db, 'padel/spcard'), s => apply(spc, s.val()));
+            setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
+            window.addEventListener('resize', () => { look(crew); look(spc); });
+            return {};
+        })();
+
         function __courtOnValue(cb) {
             const wrap = snap => ({ val: () => __mergeSp(snap.val()) });
             window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
