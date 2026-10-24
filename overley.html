@@ -621,6 +621,24 @@
         body[data-tt] .mi-vs { background: var(--tt-b) !important; border-color: var(--tt-acc) !important; color: var(--tt-acc) !important; }
         body[data-tt] .mi-date { color: var(--tt-text) !important; opacity: .85; }
 
+        /* ===== ТИТРИ ТУРНІРУ (padel/credits) ===== */
+        .cr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10006; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .7s; font-family: var(--cr-font, 'Montserrat'), sans-serif; }
+        .cr-wrap.on { opacity: 1; visibility: visible; transition: opacity .7s ease; }
+        .cr-bg { position: absolute; inset: 0; background: linear-gradient(180deg, var(--cr-bg1, #000), var(--cr-bg2, #0a1230)); opacity: var(--cr-op, .85); }
+        .cr-bg::after { content: ''; position: absolute; inset: 0; background: var(--tt-pat, none); opacity: .8; }
+        .cr-scroll { position: absolute; left: 50%; top: 0; width: var(--cr-w, 1100px); transform: translateX(-50%); will-change: transform; text-align: center; color: var(--cr-text, #fff); }
+        .cr-mask { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.65) 0, transparent 14%, transparent 86%, rgba(0,0,0,.65) 100%); pointer-events: none; }
+        .cr-title { font-size: calc(76px * var(--cr-ts, 1)); font-weight: 900; letter-spacing: 8px; text-transform: uppercase; color: var(--cr-acc, #f5c542); margin-bottom: calc(70px * var(--cr-ts, 1)); text-shadow: 0 4px 18px rgba(0,0,0,.5); }
+        .cr-sec { margin-bottom: calc(80px * var(--cr-ts, 1)); }
+        .cr-h { font-size: calc(40px * var(--cr-ts, 1)); font-weight: 800; letter-spacing: 6px; text-transform: uppercase; color: var(--cr-acc, #f5c542); margin-bottom: calc(26px * var(--cr-ts, 1)); padding-bottom: 12px; border-bottom: 3px solid var(--cr-acc, #f5c542); display: inline-block; min-width: 40%; }
+        .cr-line { font-size: calc(36px * var(--cr-ts, 1)); font-weight: 600; line-height: 1.3; margin: calc(10px * var(--cr-ts, 1)) 0; }
+        .cr-role { display: block; font-size: calc(24px * var(--cr-ts, 1)); font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--cr-role, #ffe08a); opacity: .95; }
+        .cr-logos { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(34px * var(--cr-ts, 1)) calc(54px * var(--cr-ts, 1)); }
+        .cr-sp { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 360px; }
+        .cr-sp img { height: calc(120px * var(--cr-ts, 1) * var(--cr-ls, 1)); max-width: 360px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
+        .cr-sp span { font-size: calc(26px * var(--cr-ts, 1)); font-weight: 600; }
+        .cr-end { font-size: calc(34px * var(--cr-ts, 1)); font-weight: 600; opacity: .85; padding-top: 40px; }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1829,6 +1847,7 @@
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
+    <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-scroll"></div><div class="cr-mask"></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="tc-wrap" id="spc-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="po-wrap" id="po-wrap-upper"></div>
@@ -2228,6 +2247,7 @@
                 else { b.setAttribute('data-tt', id); if (tt.snow) b.setAttribute('data-tt-snow', '1'); else b.removeAttribute('data-tt-snow'); b.style.setProperty('--tt-a', tt.a); b.style.setProperty('--tt-b', tt.b); b.style.setProperty('--tt-acc', tt.acc); b.style.setProperty('--tt-acctx', tt.acctx); b.style.setProperty('--tt-text', tt.text); b.style.setProperty('--tt-pat', tt.pat); }
                 try { window.__rerender && window.__rerender(); } catch (e) {}
                 try { window.__tcRelook && window.__tcRelook(); } catch (e) {}
+                try { window.__crRelook && window.__crRelook(); } catch (e) {}
             }
             const m = (cfg, add) => { const t = cur(); return t ? Object.assign({}, cfg, add(t)) : cfg; };
             return {
@@ -2238,7 +2258,8 @@
                 gr: c => m(c, t => ({ bgColor: t.b, cardColor: t.a, headColor: t.acc, accent: t.sec, textColor: t.text, numColor: t.sec, titleColor: t.text, pattern: t.gp, pc: t.pc, pc2: t.pc2 || '', bgImg: '', bgLogo: c.bgLogo })),
                 po: c => m(c, t => ({ bg1: t.a, bg2: t.b, frame: t.acc, score: t.acc, line: t.acc, head: t.sec, titleColor: t.text })),
                 rk: c => m(c, t => ({ bgColor: t.b, headColor: t.acc, titleColor: t.acctx, textColor: t.text, numColor: t.sec })),
-                tc: c => m(c, t => ({ bg1: t.a, bg2: t.b, accent: t.acc, titleColor: t.acctx, role: t.sec, text: t.text }))
+                tc: c => m(c, t => ({ bg1: t.a, bg2: t.b, accent: t.acc, titleColor: t.acctx, role: t.sec, text: t.text })),
+                cr: c => m(c, t => ({ bg1: t.b, bg2: t.a, accent: t.acc, role: t.sec, text: t.text }))
             };
         })();
 
@@ -3419,11 +3440,85 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '').length : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; if (!o.gcfg) apply(o, o.mcfg); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
             window.__tcRelook = () => { look(crew); look(spc); };
+            window.__tcGet = () => ({ crew: crew.cfg || {}, spc: spc.cfg || {} });
+            return {};
+        })();
+
+        // ===== ТИТРИ ТУРНІРУ =====
+        const CR = (function () {
+            const wrap = document.getElementById('cr-wrap'), scroll = wrap.querySelector('.cr-scroll');
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, mcfg = null, mj = '', running = false, lastTs = 0, endT = null, sig = '';
+            function sections() {
+                const st = lastKnownState || {}, T = (window.__tcGet ? window.__tcGet() : { crew: {}, spc: {} });
+                const out = [];
+                arr(cfg.sections).forEach(sec => {
+                    if (!sec || sec.on === false) return;
+                    const kind = sec.kind || 'custom', title = sec.title || '';
+                    if (kind === 'crew') { const rows = arr(T.crew.rows).filter(r => r && (r.role || r.name)); if (rows.length) out.push({ title: title || 'ОРГАНІЗАТОРИ', html: rows.map(r => '<div class="cr-line"><span class="cr-role">' + esc(r.role) + '</span>' + esc(r.name) + '</div>').join('') }); }
+                    else if (kind === 'sponsors') {
+                        let items = arr(T.spc.items).filter(it => it && (it.logo || it.name));
+                        if (!items.length) items = arr(st.sponsorLogos).filter(Boolean).map(u => ({ logo: u, name: '' }));
+                        if (items.length) out.push({ title: title || 'ПАРТНЕРИ ТУРНІРУ', html: '<div class="cr-logos">' + items.map(it => '<div class="cr-sp">' + (it.logo ? '<img src="' + esc(it.logo) + '">' : '') + (it.name ? '<span>' + esc(it.name) + '</span>' : '') + '</div>').join('') + '</div>' });
+                    } else if (kind === 'groups') {
+                        const gr = st.groups || {}, pre = g(gr.prefix, 'ГРУПА');
+                        arr(gr.g).forEach((grp, i) => { const ts = arr(grp && grp.t).map(x => String(x || '').trim()).filter(Boolean); if (ts.length) out.push({ title: (title ? title + ' · ' : '') + pre + ' ' + String.fromCharCode(65 + i), html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') }); });
+                    } else if (kind === 'teams') {
+                        const ts = arr((st.teamRanking || {}).teams).filter(t => t && String(t.n || '').trim()).map(t => String(t.n));
+                        if (ts.length) out.push({ title: title || 'УЧАСНИКИ ТУРНІРУ', html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') });
+                    } else {
+                        const lines = String(sec.text || '').split('\n').map(x => x.trim()).filter(Boolean);
+                        if (lines.length || title) out.push({ title, html: lines.map(l => { const p = l.split('|'); return p.length > 1 ? '<div class="cr-line"><span class="cr-role">' + esc(p[0].trim()) + '</span>' + esc(p.slice(1).join('|').trim()) + '</div>' : '<div class="cr-line">' + esc(l) + '</div>'; }).join('') });
+                    }
+                });
+                return out;
+            }
+            function look() {
+                const c = (window.TT && TT.cr) ? TT.cr(cfg) : cfg, s = wrap.style;
+                const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
+                s.transform = 'translate(-50%, -50%) scale(' + (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) + ')';
+                s.setProperty('--cr-bg1', g(c.bg1, '#000000')); s.setProperty('--cr-bg2', g(c.bg2, '#0a1230')); s.setProperty('--cr-acc', g(c.accent, '#f5c542')); s.setProperty('--cr-text', g(c.text, '#ffffff')); s.setProperty('--cr-role', g(c.role, '#ffe08a'));
+                s.setProperty('--cr-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 85)))) / 100);
+                s.setProperty('--cr-ts', Math.max(40, Math.min(250, parseInt(g(cfg.textSize, 100)))) / 100 * (parseInt(g(cfg.scale, 100)) / 100));
+                s.setProperty('--cr-ls', Math.max(30, Math.min(250, parseInt(g(cfg.logoSize, 100)))) / 100);
+                s.setProperty('--cr-w', Math.round(1100 * (parseInt(g(cfg.width, 100)) / 100)) + 'px');
+            }
+            function build() {
+                const secs = sections();
+                scroll.innerHTML = (g(cfg.title, 'ТИТРИ') ? '<div class="cr-title">' + esc(g(cfg.title, 'ТИТРИ')) + '</div>' : '') + secs.map(s => '<div class="cr-sec">' + (s.title ? '<div class="cr-h">' + esc(s.title) + '</div>' : '') + s.html + '</div>').join('') + (cfg.endText ? '<div class="cr-end">' + esc(cfg.endText) + '</div>' : '');
+            }
+            function startRoll() {
+                clearTimeout(endT); look(); build();
+                scroll.style.animation = 'none'; scroll.style.transform = 'translate(-50%, 1080px)'; void scroll.offsetWidth;
+                const H = scroll.scrollHeight, speed = Math.max(20, Math.min(400, parseFloat(g(cfg.speed, 90))));
+                const dist = H + 1080, dur = dist / speed;
+                const id = 'crRoll' + Date.now();
+                const st = document.createElement('style'); st.id = 'cr-kf'; const old = document.getElementById('cr-kf'); if (old) old.remove();
+                st.textContent = '@keyframes ' + id + ' { from { transform: translate(-50%, 1080px); } to { transform: translate(-50%, ' + (-H) + 'px); } }'; document.head.appendChild(st);
+                scroll.style.animation = id + ' ' + dur + 's linear ' + (g(cfg.loop, false) ? 'infinite' : '1 forwards');
+                if (!g(cfg.loop, false) && g(cfg.autoClose, true) !== false) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; }, dur * 1000 + 400);
+            }
+            function visibleNow() { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); }
+            function apply(c) {
+                cfg = c || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v && (!running || ts !== lastTs)) { lastTs = ts; running = true; wrap.classList.add('on'); startRoll(); }
+                else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); }
+                else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.sections, cfg.endText]); if (s2 !== sig) { /* зміна вмісту — оновлюємо без перезапуску */ build(); } sig = s2; }
+            }
+            sig = '';
+            onValue(ref(db, 'padel/credits'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            window.__crMirror = (st) => { const v = st && st.creditsCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            window.__crRelook = look;
             return {};
         })();
 
