@@ -608,6 +608,19 @@
         .spc-dots { display: flex; gap: 8px; justify-content: center; padding: 0 0 16px; }
         .spc-dots i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.25); } .spc-dots i.on { background: var(--tc-accent, #f5c542); }
 
+        /* ===== РІЗДВЯНІ ТЕМИ ТУРНІРНИХ ТАБЛ (padel/tournTheme) ===== */
+        body[data-tt] .tc-panel::after, body[data-tt] .ic-panel::after, body[data-tt] #match-intro-board::after, body[data-tt] .rk-board::after { content: ''; position: absolute; inset: 0; background: var(--tt-pat); pointer-events: none; z-index: 0; border-radius: inherit; }
+        body[data-tt] #match-intro-board, body[data-tt] .rk-board { position: relative; }
+        body[data-tt-snow] .tc-panel::after, body[data-tt-snow] .ic-panel::after, body[data-tt-snow] #match-intro-board::after, body[data-tt-snow] .rk-board::after { animation: ttSnow 14s linear infinite; }
+        @keyframes ttSnow { from { background-position: 0 0, 23px 23px; } to { background-position: 0 92px, 23px 115px; } }
+        body[data-tt] #match-intro-board { background: linear-gradient(160deg, var(--tt-a), var(--tt-b)) !important; border-color: var(--tt-acc) !important; }
+        body[data-tt] .mi-head { color: var(--tt-acctx) !important; }
+        body[data-tt] .mi-head::before { background: var(--tt-acc) !important; }
+        body[data-tt] .mi-body::before { background: linear-gradient(160deg, var(--tt-a), var(--tt-b)) !important; }
+        body[data-tt] .mi-first, body[data-tt] .mi-last, body[data-tt] .mi-round { color: var(--tt-text) !important; }
+        body[data-tt] .mi-vs { background: var(--tt-b) !important; border-color: var(--tt-acc) !important; color: var(--tt-acc) !important; }
+        body[data-tt] .mi-date { color: var(--tt-text) !important; opacity: .85; }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -2165,7 +2178,7 @@
             const po = st.playoff || {}; let anyVisible = false;
             ['upper', 'lower'].forEach(key => {
                 const wrap = document.getElementById('po-wrap-' + key); if (!wrap) return;
-                const cfg = po[key] || {};
+                const cfg = TT.po(po[key] || {});
                 const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
                 wrap.style.setProperty('--po-bg1', g(cfg.bg1, '#0c1c45')); wrap.style.setProperty('--po-bg2', g(cfg.bg2, '#1c3d78'));
                 wrap.style.setProperty('--po-frame', g(cfg.frame, '#f5c542')); wrap.style.setProperty('--po-score', g(cfg.score, '#e8b52c'));
@@ -2184,6 +2197,51 @@
         window.addEventListener('resize', () => { if (lastKnownState) { try { renderPlayoff(lastKnownState); } catch (e) {} try { renderGroups(lastKnownState); } catch (e) {} try { renderIntroCard(lastKnownState); } catch (e) {} } });
 
 
+        // ===== РІЗДВЯНІ ТЕМИ ТУРНІРНИХ ТАБЛ =====
+        const TT = (function () {
+            const RIB = 'repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 4px, rgba(0,0,0,.24) 4px 12px)';
+            const SNOW = 'radial-gradient(circle, rgba(255,255,255,.95) 1.6px, transparent 2.2px) 0 0/46px 46px, radial-gradient(circle, rgba(255,255,255,.65) 1px, transparent 1.6px) 23px 23px/46px 46px';
+            const T = {
+                xr: { a: '#8f0f1d', b: '#4e0610', acc: '#f5c542', acctx: '#3a0a0f', text: '#ffffff', sec: '#ffe08a', pat: RIB, gp: 'ribs', pc: 'rgba(255,255,255,0.10)', pc2: 'rgba(0,0,0,0.28)' },
+                xg: { a: '#0f5a34', b: '#07311d', acc: '#e8b52c', acctx: '#0a2a17', text: '#ffffff', sec: '#ffd96b', pat: RIB, gp: 'ribs', pc: 'rgba(255,255,255,0.09)', pc2: 'rgba(0,0,0,0.28)' },
+                xs: { a: '#12306b', b: '#081a3d', acc: '#bfe4ff', acctx: '#0a1d44', text: '#ffffff', sec: '#bfe4ff', pat: SNOW, gp: 'dots', pc: 'rgba(255,255,255,0.35)', pc2: '', snow: 1 },
+                xc: { a: '#a3121f', b: '#6b0a14', acc: '#ffffff', acctx: '#8f0f1d', text: '#ffffff', sec: '#ffffff', pat: 'repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 18px, transparent 18px 36px)', gp: 'diag', pc: 'rgba(255,255,255,0.18)', pc2: '' },
+                xl: { a: '#5a0f2e', b: '#2e0618', acc: '#ffd23f', acctx: '#2e0618', text: '#fff7e0', sec: '#ffd23f', pat: 'radial-gradient(circle at 14px 9px, #ff3b3b 5px, transparent 6px) 0 0/56px 22px repeat-x, radial-gradient(circle at 42px 9px, #ffd23f 5px, transparent 6px) 0 0/56px 22px repeat-x, radial-gradient(circle, rgba(255,226,140,.35) 1.4px, transparent 2px) 0 0/38px 38px', gp: 'dots', pc: 'rgba(255,226,140,0.30)', pc2: '' },
+                mp: { a: '#0d1b3a', b: '#050c1f', acc: '#c6f432', acctx: '#0a1330', text: '#ffffff', sec: '#c6f432', pat: 'linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px) 0 0/44px 44px, linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/44px 44px', gp: 'grid', pc: 'rgba(255,255,255,0.07)', pc2: '' },
+                gs: { a: '#1a1a1a', b: '#080808', acc: '#d4af37', acctx: '#111111', text: '#f5f0e0', sec: '#d4af37', pat: 'repeating-linear-gradient(90deg, rgba(212,175,55,.10) 0 2px, transparent 2px 10px)', gp: 'ribs', pc: 'rgba(212,175,55,0.12)', pc2: 'rgba(0,0,0,0.30)' },
+                cl: { a: '#b5502b', b: '#7d3217', acc: '#ffffff', acctx: '#7d3217', text: '#ffffff', sec: '#ffe3d0', pat: 'linear-gradient(rgba(255,255,255,.22) 3px, transparent 3px) 0 40px/100% 120px, linear-gradient(90deg, rgba(255,255,255,.14) 2px, transparent 2px) 0 0/160px 100%, radial-gradient(circle, rgba(255,255,255,.07) 1.5px, transparent 2px) 0 0/14px 14px', gp: 'dots', pc: 'rgba(255,255,255,0.14)', pc2: '' },
+                tb: { a: '#2b2f36', b: '#14161a', acc: '#ff7a1a', acctx: '#14161a', text: '#ffffff', sec: '#ff9a4d', pat: 'repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 12px, transparent 12px 24px)', gp: 'diag', pc: 'rgba(255,255,255,0.07)', pc2: '' },
+                ac: { a: '#fafafa', b: '#e4e7ec', acc: '#111111', acctx: '#c6f432', text: '#111111', sec: '#4a7d00', pat: 'linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px) 0 0/40px 40px', gp: 'grid', pc: 'rgba(0,0,0,0.08)', pc2: '', light: 1 },
+                gl: { a: '#0e6b78', b: '#07323b', acc: '#7be3f2', acctx: '#042329', text: '#ffffff', sec: '#aef0f8', pat: 'linear-gradient(115deg, rgba(255,255,255,.20) 0 14%, transparent 14% 30%, rgba(255,255,255,.10) 30% 36%, transparent 36% 100%)', gp: 'waves', pc: 'rgba(255,255,255,0.08)', pc2: '' },
+                nl: { a: '#2a1457', b: '#0f0626', acc: '#35e0ff', acctx: '#0f0626', text: '#ffffff', sec: '#35e0ff', pat: 'repeating-radial-gradient(circle at 0 100%, transparent 0 34px, rgba(53,224,255,.12) 35px 37px)', gp: 'waves', pc: 'rgba(53,224,255,0.12)', pc2: '' },
+                wn: { a: '#1b1b1f', b: '#0b0b0d', acc: '#e8202a', acctx: '#ffffff', text: '#ffffff', sec: '#ff5a5f', pat: 'linear-gradient(27deg, rgba(255,255,255,.06) 5px, transparent 5px) 0 5px/20px 20px, linear-gradient(207deg, rgba(255,255,255,.06) 5px, transparent 5px) 10px 0/20px 20px', gp: 'carbon', pc: 'rgba(255,255,255,0.06)', pc2: '' },
+                bn: { a: '#14532d', b: '#0a2e19', acc: '#f2f2f2', acctx: '#0a2e19', text: '#ffffff', sec: '#bbf7d0', pat: 'repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 60px, transparent 60px 120px)', gp: 'ribs', pc: 'rgba(255,255,255,0.05)', pc2: 'rgba(0,0,0,0.20)' },
+                mm: { a: '#2b2f36', b: '#1b1e23', acc: '#f2f2f2', acctx: '#1b1e23', text: '#f2f2f2', sec: '#b8bfca', pat: 'none', gp: 'none', pc: 'rgba(255,255,255,0.05)', pc2: '' },
+                xw: { a: '#f4f9ff', b: '#cfe6fb', acc: '#c8102e', acctx: '#ffffff', text: '#12306b', sec: '#c8102e', pat: 'radial-gradient(circle, rgba(18,48,107,.18) 1.6px, transparent 2.2px) 0 0/46px 46px, radial-gradient(circle, rgba(18,48,107,.12) 1px, transparent 1.6px) 23px 23px/46px 46px', gp: 'dots', pc: 'rgba(18,48,107,0.14)', pc2: '', light: 1, snow: 1 }
+            };
+            let id = '', gId = null, mId = null;
+            const cur = () => T[id] ? T[id] : null;
+            function paint() {
+                const t = cur(), b = document.body; id = (gId !== null && gId !== undefined && gId !== '') ? gId : (mId || '');
+                const tt = T[id] || null;
+                if (!tt) { b.removeAttribute('data-tt'); b.removeAttribute('data-tt-snow'); ['--tt-a', '--tt-b', '--tt-acc', '--tt-acctx', '--tt-text', '--tt-pat'].forEach(k => b.style.removeProperty(k)); }
+                else { b.setAttribute('data-tt', id); if (tt.snow) b.setAttribute('data-tt-snow', '1'); else b.removeAttribute('data-tt-snow'); b.style.setProperty('--tt-a', tt.a); b.style.setProperty('--tt-b', tt.b); b.style.setProperty('--tt-acc', tt.acc); b.style.setProperty('--tt-acctx', tt.acctx); b.style.setProperty('--tt-text', tt.text); b.style.setProperty('--tt-pat', tt.pat); }
+                try { window.__rerender && window.__rerender(); } catch (e) {}
+                try { window.__tcRelook && window.__tcRelook(); } catch (e) {}
+            }
+            const m = (cfg, add) => { const t = cur(); return t ? Object.assign({}, cfg, add(t)) : cfg; };
+            return {
+                setGlobal(v) { gId = v && v.id !== undefined ? String(v.id) : null; const pre = id; paint(); },
+                setMirror(st) { const v = st && st.tournTheme ? String(st.tournTheme.id || '') : ''; if (v !== (mId || '')) { mId = v; paint(); } },
+                on: () => !!cur(),
+                ic: c => m(c, t => ({ bgColor: t.a, bgColor2: t.b, topColor: t.acc, bottomColor: t.acc, textColor: t.text, topTextColor: t.acctx, footTextColor: t.acctx })),
+                gr: c => m(c, t => ({ bgColor: t.b, cardColor: t.a, headColor: t.acc, accent: t.sec, textColor: t.text, numColor: t.sec, titleColor: t.text, pattern: t.gp, pc: t.pc, pc2: t.pc2 || '', bgImg: '', bgLogo: c.bgLogo })),
+                po: c => m(c, t => ({ bg1: t.a, bg2: t.b, frame: t.acc, score: t.acc, line: t.acc, head: t.sec, titleColor: t.text })),
+                rk: c => m(c, t => ({ bgColor: t.b, headColor: t.acc, titleColor: t.acctx, textColor: t.text, numColor: t.sec })),
+                tc: c => m(c, t => ({ bg1: t.a, bg2: t.b, accent: t.acc, titleColor: t.acctx, role: t.sec, text: t.text }))
+            };
+        })();
+
         // ===== ВСТУПНЕ ТАБЛО =====
         let icKeyCache = '', icCd = { ts: 0, label: '', end: '', show: false };
         function icTick() {
@@ -2197,7 +2255,7 @@
         }
         setInterval(icTick, 1000);
         function renderIntroCard(st) {
-            const cfg = st.introCard || {}, wrap = document.getElementById('ic-wrap'), panel = document.getElementById('ic-panel'); if (!wrap || !panel) return;
+            const cfg = TT.ic(st.introCard || {}), wrap = document.getElementById('ic-wrap'), panel = document.getElementById('ic-panel'); if (!wrap || !panel) return;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const s = wrap.style, dur = Math.max(0.1, Math.min(3, (parseInt(g(cfg.animDur, 6)) || 6) / 10));
@@ -2233,7 +2291,7 @@
         // ===== ГРУПОВИЙ ЕТАП =====
         let grKeyCache = '';
         function renderGroups(st) {
-            const cfg = st.groups || {}, wrap = document.getElementById('gr-wrap'); if (!wrap) return;
+            const cfg = TT.gr(st.groups || {}), wrap = document.getElementById('gr-wrap'); if (!wrap) return;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const st2 = wrap.style;
@@ -2448,7 +2506,7 @@
         }
         function renderTeamRanking(st) {
             const wrap = document.getElementById('team-ranking-wrap'); if (!wrap) return;
-            const rk = st.teamRanking || {}; rkLast = rk;
+            const rk = TT.rk(st.teamRanking || {}); rkLast = rk;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             wrap.style.setProperty('--rk-head', g(rk.headColor, '#0f1f3d'));
             wrap.style.setProperty('--rk-title', g(rk.titleColor, '#ffffff'));
@@ -3279,7 +3337,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const crew = mk('crew-wrap', 'crew'), spc = mk('spc-wrap', 'spcard');
             function visible(o) { const c = o.cfg || {}; const ct = g(c.court, 'all'); if (!c.show) return false; if (ct !== 'all' && String(ct) !== String(courtNum)) return false; const ah = parseFloat(c.autoHide) || 0; if (ah > 0 && c.ts && Date.now() - c.ts > ah * 1000) return false; return true; }
             function look(o) {
-                const c = o.cfg || {}, s = o.wrap.style, p = o.panel.style;
+                const c = TT.tc(o.cfg || {}), s = o.wrap.style, p = o.panel.style;
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(c.scale, 100)) / 100);
                 s.transform = 'translate(-50%, -50%) scale(' + k + ')';
                 o.pos.style.left = (parseFloat(g(c.x, 50)) / 100 * 1920) + 'px'; o.pos.style.top = (parseFloat(g(c.y, 50)) / 100 * 1080) + 'px';
@@ -3361,9 +3419,11 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '').length : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; if (!o.gcfg) apply(o, o.mcfg); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} };
+            onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
+            window.__tcRelook = () => { look(crew); look(spc); };
             return {};
         })();
 
