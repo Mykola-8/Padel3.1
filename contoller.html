@@ -3051,10 +3051,15 @@
                 const card = document.createElement('div'); card.className = 'card'; card.id = key + '-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; tab.appendChild(card); cards[key] = card;
             });
             function save(key, now) {
-                const run = () => { data[key].ts = Date.now(); try { set(ref(db, CFG[key].path), data[key]).then(() => st(key, true), e => st(key, false, e.message)); } catch (e) { st(key, false, e.message); } };
+                const run = () => {
+                    data[key].ts = Date.now();
+                    const mk = key === 'crew' ? 'crewCfg' : 'spcardCfg';
+                    const fail = (e) => { const m = (e && e.message) || String(e); try { try { state[mk] = data[key]; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/' + mk), data[key]); st(key, true, 'padel/' + (key === 'crew' ? 'crew' : 'spcard') + ' відхилено (' + m + '), збережено в кортах (резерв)'); } catch (e2) { st(key, false, m); } };
+                    try { set(ref(db, CFG[key].path), data[key]).then(() => st(key, true), fail); } catch (e) { fail(e); }
+                };
                 clearTimeout(timers[key]); if (now) run(); else timers[key] = setTimeout(run, 250);
             }
-            function st(key, ok, msg) { const e = document.getElementById(key + '-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' : '⚠️ ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function st(key, ok, msg) { const e = document.getElementById(key + '-st'); if (e) { e.innerText = ok ? ('☁️ Збережено ✅' + (msg ? ' — ' + msg : '')) : '⚠️ ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
             function field(key, f) {
                 const id = key + '-f-' + f.k, v = data[key][f.k];
                 const lab = (txt) => '<span style="font-size:11px; color:#ccc;">' + txt + '</span>';
