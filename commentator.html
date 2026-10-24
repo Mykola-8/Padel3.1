@@ -99,6 +99,10 @@
         <select id="engine">
           <option value="claude">Claude (потрібен API-ключ)</option>
           <option value="gemini">Gemini (потрібен ключ Google AI Studio) — текст і голоси</option>
+          <option value="groq">Groq — безкоштовно, швидко (ключ console.groq.com)</option>
+          <option value="openrouter">OpenRouter — безкоштовні моделі (openrouter.ai/keys)</option>
+          <option value="mistral">Mistral — безкоштовний рівень (console.mistral.ai)</option>
+          <option value="cerebras">Cerebras — безкоштовно (cloud.cerebras.ai)</option>
           <option value="local">Без ШІ — готові фрази (безкоштовно)</option>
         </select>
       </label>
@@ -115,6 +119,18 @@
     <div class="grid" style="margin-top:10px">
       <label>Ключ Gemini (aistudio.google.com/apikey)
         <input type="password" id="gkey" placeholder="AIza…" autocomplete="off">
+      </label>
+      <label>Ключ Groq
+        <input type="password" id="grkey" autocomplete="off">
+      </label>
+      <label>Ключ OpenRouter
+        <input type="password" id="orkey" autocomplete="off">
+      </label>
+      <label>Ключ Mistral
+        <input type="password" id="mkey" autocomplete="off">
+      </label>
+      <label>Ключ Cerebras
+        <input type="password" id="ckey" autocomplete="off">
       </label>
       <label>Модель Gemini
         <select id="gmodel"><option value="gemini-2.5-flash">gemini-2.5-flash (швидко)</option><option value="gemini-2.5-pro">gemini-2.5-pro (розумніше)</option></select>
@@ -181,7 +197,7 @@ const SYS_COMMON = `\nПравила виводу: пиши лише текст 
 const SYS_DUO = `\nФормат відповіді для дуету — СТРОГО JSON-масив: [{"s":"A","t":"репліка чоловіка"},{"s":"B","t":"репліка жінки"}] (A — чоловік, B — жінка, 1–2 об'єкти).`;
 
 // ───────── Налаштування ─────────
-const S = Object.assign({ mode: 'emo', react: 'key', gap: 4, court: qs.get('court') || '1', voiceA: '', voiceB: '', rate: 1.05, vol: 1, engine: 'claude', model: 'claude-haiku-5-5', key: '', gkey: '', gmodel: 'gemini-2.5-flash', gtts: true, gvm: '', gvf: '', prompts: {} }, (() => { try { return JSON.parse(localStorage.getItem('padelCommentator') || '{}'); } catch (e) { return {}; } })());
+const S = Object.assign({ mode: 'emo', react: 'key', gap: 4, court: qs.get('court') || '1', voiceA: '', voiceB: '', rate: 1.05, vol: 1, engine: 'claude', model: 'claude-haiku-5-5', key: '', grkey: '', orkey: '', mkey: '', ckey: '', pmodel: '', gkey: '', gmodel: 'gemini-2.5-flash', gtts: true, gvm: '', gvf: '', prompts: {} }, (() => { try { return JSON.parse(localStorage.getItem('padelCommentator') || '{}'); } catch (e) { return {}; } })());
 if (qs.get('court')) S.court = qs.get('court');
 const save = () => { try { localStorage.setItem('padelCommentator', JSON.stringify(S)); } catch (e) {} };
 
@@ -190,7 +206,7 @@ for (let i = 1; i <= 10; i++) $('court').add(new Option('Корт ' + i, String(
 const bind = (id, key, num) => { const e = $(id); e.value = S[key]; e.addEventListener('input', () => { S[key] = num ? parseFloat(e.value) : e.value; save(); upd(); }); };
 const promptOf = () => S.prompts[S.mode] || MODES[S.mode].prompt;
 function upd() { $('rateV').textContent = S.rate; $('volV').textContent = Math.round(S.vol * 100) + '%'; }
-bind('react', 'react'); bind('gap', 'gap', 1); bind('rate', 'rate', 1); bind('vol', 'vol', 1); bind('engine', 'engine'); bind('gkey', 'gkey'); bind('gmodel', 'gmodel'); bind('gvm', 'gvm'); bind('gvf', 'gvf');
+bind('react', 'react'); bind('gap', 'gap', 1); bind('rate', 'rate', 1); bind('vol', 'vol', 1); bind('engine', 'engine'); bind('gkey', 'gkey'); bind('grkey', 'grkey'); bind('orkey', 'orkey'); bind('mkey', 'mkey'); bind('ckey', 'ckey'); bind('gmodel', 'gmodel'); bind('gvm', 'gvm'); bind('gvf', 'gvf');
 $('gtts').value = S.gtts ? '1' : '0'; $('gtts').addEventListener('input', () => { S.gtts = $('gtts').value === '1'; save(); }); bind('model', 'model'); bind('key', 'key');
 bind('voiceA', 'voiceA'); bind('voiceB', 'voiceB');
 $('mode').value = S.mode; $('court').value = S.court; $('prompt').value = promptOf();
@@ -203,6 +219,7 @@ upd();
 // ───────── Голоси (SpeechSynthesis) ─────────
 const synth = window.speechSynthesis;
 let voices = [];
+const MAL = /(ostap|taras|andriy|oleg|male|чол|david|mark)/i;
 const FEMALE = /(polina|olena|oksana|lesya|kateryna|marina|female|жін|zira|hazel|google українська|ukrainian.*female)/i;
 const MALE = /(ostap|taras|andriy|oleg|male|чол|david|mark)/i;
 function loadVoices() {
@@ -224,7 +241,7 @@ const voiceFor = s => voices.find(v => v.name === (s === 'B' ? S.voiceB : S.voic
 
 let speaking = false;
 function say(speaker, text) {
-  if (S.engine === 'gemini' && S.gkey && S.gtts) return geminiTTS(text, speaker).catch(e => { log('ev bad', '⚠ ' + e.message + ' — перемикаюсь на голос браузера'); return sayBrowser(speaker, text); });
+  if (S.gkey && S.gtts) return geminiTTS(text, speaker).catch(e => { log('ev bad', '⚠ ' + e.message + ' — перемикаюсь на голос браузера'); return sayBrowser(speaker, text); });
   return sayBrowser(speaker, text);
 }
 function sayBrowser(speaker, text) {
@@ -232,7 +249,8 @@ function sayBrowser(speaker, text) {
     if (!synth || !text) return res();
     const u = new SpeechSynthesisUtterance(text);
     const v = voiceFor(speaker); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'uk-UA';
-    u.rate = S.rate; u.volume = S.vol; u.pitch = speaker === 'B' ? 1.1 : 0.95;
+    const maleOk = voices.some(x => /^uk/i.test(x.lang) && MAL.test(x.name)); const lowM = speaker !== 'B' && !maleOk;
+    u.rate = lowM ? S.rate * 0.92 : S.rate; u.volume = S.vol; u.pitch = speaker === 'B' ? 1.1 : (lowM ? 0.4 : 0.9);
     u.onend = u.onerror = () => res();
     synth.speak(u);
     // страховка від «зависання» голосу в Chrome
@@ -275,6 +293,8 @@ function ctx(s) {
 }
 
 // ───────── Генерація реплік ─────────
+const KEYOF = { gemini: 'gkey', claude: 'key', groq: 'grkey', openrouter: 'orkey', mistral: 'mkey', cerebras: 'ckey' };
+const hasKey = (e) => e === 'local' || !!S[KEYOF[e]];
             // ---- Gemini: текст + голос ----
             const geminiText = async (sys, user) => {
                 const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + (S.gmodel || 'gemini-2.5-flash') + ':generateContent?key=' + encodeURIComponent(S.gkey);
@@ -301,13 +321,28 @@ function ctx(s) {
             };
 
 const hist = [];
+const ANGLES = ['емоція і драйв', 'тактика і позиція на корті', 'порівняння зі спортом чи побутом', 'увага до подачі', 'напруга для глядачів', 'вдячність за красиву гру', 'тиск на суперників', 'ритм матчу', 'лаконічний вигук', 'маленька цікава деталь про паделу', 'хвалимо витримку', 'хвалимо техніку удару', 'інтрига — що буде далі', 'гра від скла', 'командна робота пари', 'легкий жарт', 'психологія моменту', 'темп і фізика', 'контраст з попереднім розіграшем', 'гучний захоплений вигук'];
+const PROV = {
+  groq: { url: 'https://api.groq.com/openai/v1/chat/completions', model: 'llama-3.3-70b-versatile', key: 'grkey' },
+  openrouter: { url: 'https://openrouter.ai/api/v1/chat/completions', model: 'meta-llama/llama-3.3-70b-instruct:free', key: 'orkey' },
+  mistral: { url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', key: 'mkey' },
+  cerebras: { url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama-3.3-70b', key: 'ckey' }
+};
+async function openaiText(name, sys, user) {
+  const p = PROV[name];
+  const r = await fetch(p.url, { method: 'POST', headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + S[p.key] }, body: JSON.stringify({ model: S.pmodel || p.model, max_tokens: 260, temperature: 1.0, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }] }) });
+  if (!r.ok) throw new Error(name + ' API ' + r.status + ' ' + (await r.text()).slice(0, 140));
+  const j = await r.json(); return (((j.choices || [])[0] || {}).message || {}).content.trim();
+}
 async function generate(ev, s) {
   const mode = MODES[S.mode];
-  if ((S.engine === 'gemini' && S.gkey) || (S.engine === 'claude' && S.key)) {
+  if (S.engine !== 'local' && hasKey(S.engine)) {
     const sys = promptOf() + SYS_COMMON + (mode.speakers === 2 ? SYS_DUO : '');
-    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй): ${hist.slice(-5).join(' | ') || '—'}`;
+    const starts = hist.slice(-8).map(h => h.split(/\s+/).slice(0, 2).join(' ')).filter(Boolean);
+    const user = `ПОДІЯ: ${ev.map(e => e.d).join('. ')}\nТАБЛО: ${ctx(s)}\nОСТАННІ РЕПЛІКИ (не повторюй ні слова, ні образи): ${hist.slice(-8).join(' | ') || '—'}\nНЕ ПОЧИНАЙ репліку зі слів: ${starts.join(' / ') || '—'}\nРАКУРС ЦІЄЇ РЕПЛІКИ: ${pick(ANGLES)}. Використай нові слова та порівняння, багату лексику, синоніми.`;
     let t;
     if (S.engine === 'gemini') t = await geminiText(sys, user);
+    else if (PROV[S.engine]) t = await openaiText(S.engine, sys, user);
     else {
     const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': S.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: S.model, max_tokens: 220, system: sys, messages: [{ role: 'user', content: user }] }) });
     if (!r.ok) throw new Error('Claude API ' + r.status + ' ' + (await r.text()).slice(0, 160));
@@ -324,12 +359,17 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 function local(ev, s, mode) {
   const e = ev.sort((x, y) => y.big - x.big)[0]; const sc = ptSpeak(s, s.p1Index || 0, s.p2Index || 0);
   const w = (e.d.match(/команда ([^.]+?)\./) || [])[1] || '';
+  const sv = s.currentServer === 1 ? (s.p1name || '') : s.currentServer === 2 ? (s.p2name || '') : '';
   const L = {
-    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`],
-    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`],
-    set: [`Сет завершено! ${gamesStr(s)}.`], match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`],
-    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!'], ribbon: [e.d + '! Напруга зростає.'], tb: ['Тайбрейк! Тепер кожне очко на вагу золота.']
+    point: [`Очко — ${w}! ${sc}.`, `${w} забирає розіграш. ${sc}.`, `Чудовий розіграш! ${sc}.`, `Красиво! ${w} додає в рахунок. ${sc}.`, `${w} грає впевнено — ${sc}.`, `Ще одне очко на рахунку ${w}. ${sc}.`, `Ось це удар! ${sc}.`, `Розіграш виграно в напруженій боротьбі. ${sc}.`, `${w} не дає суперникам жодного шансу. ${sc}.`, `Влучно й точно, ${w}! ${sc}.`, `Глядачі аплодують. ${sc}.`, `Складний м'яч, але ${w} впорались. ${sc}.`, `Такий розіграш варто бачити! ${sc}.`, `Рахунок змінюється: ${sc}.`, `Дуже чистий розіграш від ${w}. ${sc}.`],
+    game: [`Гейм за ${w}! Рахунок ${gamesStr(s)}.`, `${w} виграє гейм. ${gamesStr(s)}.`, `Гейм закрито! ${w} ведуть, ${gamesStr(s)}.`, `Впевнена гра, гейм у ${w}. ${gamesStr(s)}.`, `Ось і гейм! ${gamesStr(s)}.`, `${w} забирають гейм — ${gamesStr(s)}.`, `Хороший гейм! ${gamesStr(s)}.`, `Так тримати, ${w}! ${gamesStr(s)}.`],
+    set: [`Сет завершено! ${gamesStr(s)}.`, `Сет виграно! ${gamesStr(s)}.`, `Сет за нами! Рахунок по сетах ${gamesStr(s)}.`],
+    match: [`Матч завершено! Підсумок: ${gamesStr(s)}. Дякуємо за увагу!`, `Це перемога! ${gamesStr(s)}. Дякуємо, що були з нами.`, `Фінальний свисток! ${gamesStr(s)}. Вітаємо переможців!`],
+    anim: [e.d.replace('Яскравий момент у виконанні', 'Вау! Це зробив(ла)') + '!', e.d.replace('Яскравий момент у виконанні', 'Яка майстерність від') + '!', e.d + ' — неймовірно!', 'Оце так! ' + e.d + '.', e.d + '. Зал аплодує!'],
+    ribbon: [e.d + '! Напруга зростає.', e.d + '. Нерви на межі!', e.d + ' — тепер кожен м’яч важливий.', e.d + '. Побачимо, хто витримає.', e.d + '! Це момент істини.'],
+    tb: ['Тайбрейк! Тепер кожне очко на вагу золота.', 'Тайбрейк — і нерви вирішують усе.', 'Починається тайбрейк! Жодного права на помилку.']
   };
+  if (sv && e.k === 'point') L.point.push(`Подає ${sv}. ${sc}.`);
   const t = pick(L[e.k] || [e.d]);
   if (mode.speakers === 2) return [{ s: 'A', t: t }, { s: 'B', t: pick(['Так, цікаво тепер!', 'Гарна гра від обох.', 'Дивимось далі.']) }].slice(0, ev[0].big > 1 ? 2 : 1);
   return [{ s: mode.voice, t: t }];
@@ -380,7 +420,7 @@ $('btnStart').onclick = () => {
 $('btnTest').onclick = async () => { await say('A', 'Вітаю! Це чоловічий голос коментатора паделу.'); await say('B', 'А я жіночий голос. Готові до гри!'); };
 
 const pushCfg = (extra) => {
-  const v = Object.assign({ mode: S.mode, react: S.react, gap: S.gap, rate: S.rate, prompt: promptOf(), t: Date.now() }, extra || {});
+  const v = Object.assign({ mode: S.mode, react: S.react, gap: S.gap, rate: S.rate, vol: S.vol, engine: S.engine === 'claude' && !S.key ? '' : S.engine, gvm: S.gvm || '', gvf: S.gvf || '', gtts: !!S.gtts, prompt: promptOf(), t: Date.now() }, extra || {});
   set(ref(db, 'padel/commentator'), v).then(() => { $('pushSt').innerHTML = '<span class="ok">✓ надіслано ' + new Date().toLocaleTimeString() + '</span>'; }, e => { $('pushSt').innerHTML = '<span class="bad">' + e.message + '</span>'; });
 };
 $('btnOn').onclick = () => pushCfg({ enabled: true });
