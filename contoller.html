@@ -3016,6 +3016,25 @@
             for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
         };
 
+        // ===== РІЗДВЯНА ТЕМА ВСІХ ТУРНІРНИХ ТАБЛ (padel/tournTheme) =====
+        (function ttInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'tt-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const OPTS = [['', 'Без теми (власні кольори кожного табла)'], ['mp', '🎾 Матчпойнт — нічний синій + лайм, сітка'], ['gs', '🥇 Золотий сет — чорний і золото, ребра'], ['cl', '🧱 Ґрунт — теракотовий корт з лініями'], ['tb', '⚡ Тайбрейк — графіт + помаранчевий'], ['ac', '⚪ Ейс — світла мінімалістична'], ['gl', '🪟 Скляна стіна — бірюзовий блиск'], ['nl', '🌌 Нічна ліга — фіолет і неон'], ['wn', '🔴 Віннер — карбон + червоний'], ['bn', '🌿 Бандеха — зелений газон зі смугами'], ['mm', '▫️ Стриманий графіт (мінімалізм)'], ['xr', '🎄 Різдво — червоні ребристі'], ['xg', '🎄 Різдво — зелені ребристі'], ['xs', '❄️ Сніжна ніч (падає сніг)'], ['xc', '🍬 Цукерка (смуги)'], ['xl', '✨ Гірлянда та золото'], ['xw', '⛄ Біле Різдво (світла, сніг)']];
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">🎄 Тема всіх турнірних табл (Організатори, Спонсори, Хто грає, Групи, Play-off, Рейтинг, Вступ)</div>' +
+                '<div style="font-size:10px; color:#9a9;">Тема перефарбовує і додає фон до всіх табл одразу. «Без теми» повертає ваші власні кольори. Діє на всіх кортах.</div>' +
+                '<select id="tt-sel" style="width:100%; padding:8px; font-size:13px;">' + OPTS.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select><div id="tt-st" style="font-size:11px;"></div>';
+            const first = Array.from(tab.children).find(el => el.classList && el.classList.contains('card')); tab.insertBefore(card, first || null);
+            const sel = card.querySelector('#tt-sel'), stEl = card.querySelector('#tt-st');
+            sel.onchange = () => {
+                const v = { id: sel.value, ts: Date.now() };
+                try { state.tournTheme = v; } catch (e) {}
+                try { set(ref(db, 'padel/tournTheme'), v).then(() => { stEl.innerText = '☁️ Тему застосовано ✅'; stEl.style.color = '#7c7'; }, e => { stEl.innerText = '⚠️ ' + e.message + ' (резерв у кортах)'; stEl.style.color = '#fc6'; }); } catch (e) { stEl.innerText = '⚠️ ' + e.message; }
+                for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/tournTheme'), v);
+            };
+            onValue(ref(db, 'padel/tournTheme'), snap => { const v = snap.val(); if (v && document.activeElement !== sel) sel.value = v.id || ''; });
+        })();
+
         // ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) =====
         (function tcInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -3139,7 +3158,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
