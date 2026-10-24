@@ -3356,8 +3356,12 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (o.shown && sig !== o.sig && vis) { o.sig = sig; if (o === crew) buildCrew(); else buildSpc(); }
                 o.sig = sig; setVis(o, vis);
             }
-            onValue(ref(db, 'padel/crew'), s => apply(crew, s.val()));
-            onValue(ref(db, 'padel/spcard'), s => apply(spc, s.val()));
+            const src = (o) => o.gcfg || o.mcfg || null;
+            onValue(ref(db, 'padel/crew'), s => { crew.gcfg = s.val(); apply(crew, src(crew)); }, () => { crew.gcfg = null; });
+            onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
+            // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
+            const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '').length : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; if (!o.gcfg) apply(o, o.mcfg); };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); };
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
             return {};
@@ -3379,6 +3383,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const state = snapshot.val();
             if (state) {
                 lastKnownState = state;
+                try { window.__tcMirror && window.__tcMirror(state); } catch (e) {}
                 // Табло «Хто грає» рендеримо одразу і окремо, щоб воно не залежало від решти коду оновлення
                 try { renderMatchIntro(state); } catch (miErr) { console.error("matchIntro render error:", miErr); }
                 try { renderTeamRanking(state); } catch (rkErr) { console.error("teamRanking render error:", rkErr); }
