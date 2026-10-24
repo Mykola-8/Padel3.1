@@ -3016,11 +3016,125 @@
             for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
         };
 
+        // ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) =====
+        (function tcInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const ANIMS = [['zoom', 'Збільшення'], ['slideUp', 'Знизу вгору'], ['slideDown', 'Зверху вниз'], ['slideLeft', 'Зліва'], ['slideRight', 'Справа'], ['fade', 'Плавна поява'], ['flip', 'Переворот'], ['wipe', 'Розкриття від центру'], ['blur', 'Розмиття'], ['bounce', 'Падіння з відскоком'], ['spin', 'Обертання'], ['none', 'Без анімації']];
+            const LOGO_ANIMS = [['zoom', 'Збільшення'], ['spin', 'Обертання'], ['bounce', 'Падіння з відскоком'], ['flip', 'Переворот'], ['slideLeft', 'Зліва'], ['slideRight', 'Справа'], ['blur', 'Розмиття'], ['fade', 'Поява'], ['none', 'Без анімації']];
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const COMMON = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS },
+                { k: 'animIn', l: 'Вступ (поява)', t: 'sel', o: ANIMS }, { k: 'animOut', l: 'Вихід (зникнення)', t: 'sel', o: ANIMS },
+                { k: 'animDur', l: 'Тривалість анімації', t: 'rng', min: 2, max: 30, div: 10, u: ' с' },
+                { k: 'autoHide', l: 'Сховати автоматично через (с, 0 = вручну)', t: 'num', min: 0, max: 600 },
+                { k: 'scale', l: 'Масштаб', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина панелі', t: 'rng', min: 400, max: 1800, step: 10, u: ' px' },
+                { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
+                { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'bgOpacity', l: 'Фон (прозорість)', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір акценту / заголовка', t: 'col' },
+                { k: 'titleColor', l: 'Колір тексту заголовка', t: 'col' }, { k: 'role', l: 'Колір посад / назв', t: 'col' }, { k: 'text', l: 'Колір тексту', t: 'col' }
+            ];
+            const CFG = {
+                crew: { path: 'padel/crew', title: '👔 Організатори турніру (суддя, оператор, коментатор)', def: { show: false, court: 'all', title: 'ОРГАНІЗАТОРИ ТУРНІРУ', rows: [{ role: 'Головний суддя турніру', name: '' }, { role: 'Помічник судді', name: '' }, { role: 'Відео оператор турніру', name: '' }, { role: 'Коментатор', name: '' }], stagger: true, animIn: 'slideLeft', animOut: 'fade', animDur: 0.7, autoHide: 0, scale: 100, width: 900, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg1: '#0c1a3d', bg2: '#14295a', accent: '#f5c542', titleColor: '#10213f', role: '#f5c542', text: '#ffffff' },
+                    extra: [{ k: 'title', l: 'Заголовок', t: 'txt' }, { k: 'stagger', l: 'Рядки з’являються по черзі', t: 'chk' }] },
+                spcard: { path: 'padel/spcard', title: '🤝 Спонсори: логотип і опис (по черзі)', def: { show: false, court: 'all', title: 'НАШІ ПАРТНЕРИ', items: [], itemSec: 8, loop: true, layout: 'left', logoSize: 100, logoAnim: 'zoom', textAnim: 'typing', typeMs: 35, animIn: 'zoom', animOut: 'fade', animDur: 0.7, autoHide: 0, scale: 100, width: 1000, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg1: '#0c1a3d', bg2: '#14295a', accent: '#f5c542', titleColor: '#10213f', role: '#f5c542', text: '#ffffff' },
+                    extra: [{ k: 'title', l: 'Заголовок', t: 'txt' }, { k: 'itemSec', l: 'Час показу одного спонсора', t: 'rng', min: 2, max: 60, u: ' с' },
+                        { k: 'layout', l: 'Розташування логотипа', t: 'sel', o: [['left', 'Логотип зліва'], ['right', 'Логотип справа'], ['top', 'Логотип зверху']] }, { k: 'logoSize', l: 'Розмір логотипа', t: 'rng', min: 30, max: 250, u: '%' },
+                        { k: 'logoAnim', l: 'Анімація логотипа', t: 'sel', o: LOGO_ANIMS },
+                        { k: 'textAnim', l: 'Анімація тексту', t: 'sel', o: [['typing', 'Друкується'], ['words', 'По словах'], ['fade', 'Плавна поява'], ['slideUp', 'Виїжджає знизу'], ['none', 'Одразу']] },
+                        { k: 'typeMs', l: 'Швидкість друку (мс на літеру)', t: 'rng', min: 8, max: 150, u: ' мс' }] }
+            };
+            const inp = 'width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;';
+            const data = {}, timers = {}, cards = {};
+            Object.keys(CFG).forEach(key => {
+                data[key] = JSON.parse(JSON.stringify(CFG[key].def));
+                const card = document.createElement('div'); card.className = 'card'; card.id = key + '-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; tab.appendChild(card); cards[key] = card;
+            });
+            function save(key, now) {
+                const run = () => { data[key].ts = Date.now(); try { set(ref(db, CFG[key].path), data[key]).then(() => st(key, true), e => st(key, false, e.message)); } catch (e) { st(key, false, e.message); } };
+                clearTimeout(timers[key]); if (now) run(); else timers[key] = setTimeout(run, 250);
+            }
+            function st(key, ok, msg) { const e = document.getElementById(key + '-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' : '⚠️ ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function field(key, f) {
+                const id = key + '-f-' + f.k, v = data[key][f.k];
+                const lab = (txt) => '<span style="font-size:11px; color:#ccc;">' + txt + '</span>';
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '" step="' + (f.step || 1) + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'chk') return '<div class="row">' + lab(f.l + ':') + '<input type="checkbox" data-k="' + f.k + '" id="' + id + '"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '" style="width:80px; ' + inp + '"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            function build(key) {
+                const c = CFG[key], card = cards[key];
+                const fields = c.extra.concat(COMMON);
+                const list = key === 'crew'
+                    ? '<div style="font-size:11px; font-weight:700;">Посади й імена:</div><div id="crew-list" style="display:flex; flex-direction:column; gap:6px;"></div><button class="btn btn-gray" style="padding:7px;" id="crew-add">➕ Додати рядок</button>'
+                    : '<div style="font-size:11px; font-weight:700;">Спонсори (кожен — логотип, назва, опис):</div><div id="spc-list" style="display:flex; flex-direction:column; gap:8px;"></div><div style="display:flex; gap:6px; flex-wrap:wrap;"><label class="btn btn-gray" style="padding:7px; cursor:pointer; flex:1; text-align:center;">➕ Додати спонсора (логотип)<input type="file" accept="image/*" multiple style="display:none" id="spc-file"></label><button class="btn btn-gray" style="padding:7px; flex:1;" id="spc-imp">⬇ Взяти з логотипів спонсорів</button></div>';
+                card.innerHTML = '<div style="font-size:11px; font-weight:700;">' + c.title + '</div>' +
+                    '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-off">■ СХОВАТИ</button></div>' +
+                    '<div id="' + key + '-st" style="font-size:11px;"></div>' + list +
+                    '<div style="display:flex; flex-direction:column; gap:6px;">' + fields.map(f => field(key, f)).join('') + '</div>';
+                card.querySelector('#' + key + '-on').onclick = () => { data[key].show = true; save(key, true); };
+                card.querySelector('#' + key + '-off').onclick = () => { data[key].show = false; save(key, true); };
+                card.querySelectorAll('[data-k]').forEach(el => {
+                    const f = fields.find(x => x.k === el.getAttribute('data-k'));
+                    const handler = () => {
+                        let v = el.type === 'checkbox' ? el.checked : (f.t === 'rng' || f.t === 'num') ? parseFloat(el.value) : el.value;
+                        if (f.div) v = v / f.div; data[key][f.k] = v; const lv = document.getElementById(key + '-f-' + f.k + '-v'); if (lv) lv.innerText = (f.div ? v.toFixed(1) : v) + (f.u || ''); save(key, false);
+                    };
+                    el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'color' ? 'change' : 'input', handler);
+                });
+                if (key === 'crew') card.querySelector('#crew-add').onclick = () => { data.crew.rows.push({ role: '', name: '' }); listUi('crew'); save('crew', false); };
+                else {
+                    card.querySelector('#spc-file').onchange = (e) => { const files = Array.from(e.target.files || []); let left = files.length; files.forEach(fl => tvResize(fl, 600, 300, 'image/png', url => { data.spcard.items.push({ logo: url, name: '', desc: '', sec: '' }); if (--left === 0) { listUi('spcard'); save('spcard', true); e.target.value = ''; } })); };
+                    card.querySelector('#spc-imp').onclick = () => { try { const lg = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : []; const inf = Array.isArray(state.sponsorInfos) ? state.sponsorInfos : []; let n = 0; lg.forEach((u, i) => { if (u) { data.spcard.items.push({ logo: u, name: '', desc: inf[i] || '', sec: '' }); n++; } }); listUi('spcard'); save('spcard', true); st('spcard', true, n + ' шт.'); } catch (e) { st('spcard', false, e.message); } };
+                }
+                listUi(key); refresh(key);
+            }
+            function listUi(key) {
+                const host = document.getElementById(key === 'crew' ? 'crew-list' : 'spc-list'); if (!host) return; host.innerHTML = '';
+                const arrK = key === 'crew' ? data.crew.rows : data.spcard.items;
+                arrK.forEach((r, i) => {
+                    const w = document.createElement('div'); w.style.cssText = 'position:relative; background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;';
+                    const mk = (ph, k, extra) => { const e = document.createElement('input'); e.type = 'text'; e.placeholder = ph; e.value = r[k] || ''; e.style.cssText = inp + (extra || ''); e.oninput = () => { r[k] = e.value; save(key, false); }; return e; };
+                    if (key === 'crew') { w.appendChild(mk('Посада (наприклад: Головний суддя турніру)', 'role')); w.appendChild(mk('Ім’я та прізвище', 'name')); }
+                    else {
+                        const top = document.createElement('div'); top.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                        if (r.logo) { const im = document.createElement('img'); im.src = r.logo; im.style.cssText = 'width:64px; height:40px; object-fit:contain; background:#222; border-radius:4px;'; top.appendChild(im); }
+                        const lbl = document.createElement('label'); lbl.className = 'btn btn-gray'; lbl.style.cssText = 'padding:4px 8px; font-size:11px; cursor:pointer;'; lbl.innerText = r.logo ? 'Змінити лого' : 'Додати лого';
+                        const fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none'; fi.onchange = () => { const fl = fi.files[0]; if (fl) tvResize(fl, 600, 300, 'image/png', url => { r.logo = url; listUi(key); save(key, true); }); }; lbl.appendChild(fi); top.appendChild(lbl);
+                        const sc = mk('Свій час, с (порожньо = загальний)', 'sec', 'width:120px;'); top.appendChild(sc); w.appendChild(top);
+                        w.appendChild(mk('Назва спонсора', 'name')); const ta = document.createElement('textarea'); ta.rows = 2; ta.placeholder = 'Опис спонсора (друкується в табло)'; ta.value = r.desc || ''; ta.style.cssText = inp; ta.oninput = () => { r.desc = ta.value; save(key, false); }; w.appendChild(ta);
+                    }
+                    const x = document.createElement('button'); x.type = 'button'; x.innerText = '✕'; x.style.cssText = 'position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:0; background:#c33; color:#fff; font-size:12px; cursor:pointer; padding:0;';
+                    x.onclick = () => { arrK.splice(i, 1); listUi(key); save(key, true); }; w.appendChild(x); host.appendChild(w);
+                });
+            }
+            function refresh(key) {
+                const c = CFG[key], fields = c.extra.concat(COMMON);
+                fields.forEach(f => { const el = document.getElementById(key + '-f-' + f.k); if (!el || document.activeElement === el) return; let v = data[key][f.k]; if (v === undefined) v = c.def[f.k]; if (f.t === 'chk') el.checked = !!v; else if (f.t === 'rng') { el.value = f.div ? Math.round(v * f.div) : v; const lv = document.getElementById(key + '-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); } else el.value = v; });
+                const on = document.getElementById(key + '-on'), off = document.getElementById(key + '-off'); if (on) { on.style.outline = data[key].show ? '3px solid #fff' : 'none'; off.style.outline = data[key].show ? 'none' : '3px solid #fff'; }
+            }
+            Object.keys(CFG).forEach(key => {
+                build(key);
+                onValue(ref(db, CFG[key].path), snap => {
+                    const v = snap.val(); if (!v) return;
+                    const old = JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items);
+                    data[key] = Object.assign({}, CFG[key].def, v);
+                    const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+                    if (key === 'crew') data.crew.rows = A(v.rows); else data.spcard.items = A(v.items);
+                    if (JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items) !== old && !cards[key].contains(document.activeElement)) listUi(key);
+                    refresh(key);
+                });
+            });
+        })();
+
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло'];
+            const titles = ['💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
