@@ -1036,6 +1036,7 @@
                         <button class="btn btn-green" id="ai-on" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', true)">✅ ВКЛ</button>
                         <button class="btn btn-red" id="ai-off" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', false)">⏹ ВИКЛ</button>
                     </div>
+                    <div class="row"><span>Мозок ШІ:</span><select id="ai-engine" onchange="aiSet('engine', this.value)"><option value="">Авто (за наявним ключем)</option><option value="gemini">Gemini (Google)</option><option value="groq">Groq — безкоштовно, швидко</option><option value="openrouter">OpenRouter — безкоштовні моделі</option><option value="mistral">Mistral — безкоштовний рівень</option><option value="cerebras">Cerebras — безкоштовно</option><option value="claude">Claude (Anthropic)</option><option value="local">Без ШІ — готові фрази</option></select></div>
                     <div class="row"><span>Режим:</span><select id="ai-mode" onchange="aiSet('mode', this.value)">
                         <option value="emo">🔥 Емоційний (1 голос)</option><option value="calm">🎓 Спокійний аналітик</option>
                         <option value="m_pro">👔 Він — професійний</option><option value="f_pro">👩‍💼 Вона — професійна</option>
@@ -1307,14 +1308,14 @@
         setTimeout(tvUiRefresh, 0);
 
         // ===== ШІ-коментатор: керування з пульта (padel/commentator) =====
-        const AI_DEF = { enabled: true, mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
+        const AI_DEF = { enabled: true, engine: '', mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
         let aiCfg = Object.assign({}, AI_DEF);
         function aiSave() { const st = document.getElementById('ai-st'); try { set(ref(db, 'padel/commentator'), Object.assign({}, aiCfg, { t: Date.now() })).then(() => { if (st) { st.innerText = '☁️ Надіслано в ефір ✅'; st.style.color = '#7c7'; } }, e => { if (st) { st.innerText = '⚠️ ' + e.message; st.style.color = '#f66'; } }); } catch (e) { if (st) st.innerText = '⚠️ ' + e.message; } }
         window.aiSet = function(k, v) { aiCfg[k] = v; aiSave(); aiUi(); };
         window.aiTest = function() { aiCfg.test = Date.now(); aiSave(); };
         function aiUi() {
             const g = id => document.getElementById(id); if (!g('ai-card')) return;
-            ['mode', 'react', 'voice', 'gvm', 'gvf'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k] || ''; });
+            ['engine', 'mode', 'react', 'voice', 'gvm', 'gvf'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k] || ''; });
             if (g('ai-gtts')) g('ai-gtts').value = aiCfg.gtts === false ? '0' : '1';
             if (g('ai-sub')) g('ai-sub').checked = aiCfg.sub !== false; if (g('ai-speak')) g('ai-speak').checked = aiCfg.speak !== false;
             ['rate', 'vol', 'gap'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k]; });
