@@ -2891,7 +2891,7 @@
         // ===== ШІ-коментатор усередині overlay (?ai=1) — працює з одного пристрою (віджет у Prism/OBS) =====
         const CM = (function () {
             const P = new URLSearchParams(location.search);
-            const S = { enabled: true, mode: P.get('aimode') || 'emo', react: P.get('aireact') || 'key', gap: parseFloat(P.get('aigap') || '4'), rate: parseFloat(P.get('airate') || '1.05'), vol: parseFloat(P.get('aivol') || '1'), key: P.get('aikey') || '', model: P.get('aimodel') || 'claude-haiku-5-5', voice: P.get('aivoice') || '', sub: P.get('aisub') !== '0', speak: P.get('aispeak') !== '0', prompt: '', gkey: P.get('gkey') || '', gmodel: P.get('gmodel') || 'gemini-2.5-flash', gtts: P.get('gtts') !== '0', gvm: P.get('gvm') || '', gvf: P.get('gvf') || '', grkey: P.get('grkey') || '', orkey: P.get('orkey') || '', mkey: P.get('mkey') || '', ckey: P.get('ckey') || '', pmodel: P.get('pmodel') || '', engine: '' };
+            const S = { enabled: false, mode: P.get('aimode') || 'emo', react: P.get('aireact') || 'key', gap: parseFloat(P.get('aigap') || '4'), rate: parseFloat(P.get('airate') || '1.05'), vol: parseFloat(P.get('aivol') || '1'), key: P.get('aikey') || '', model: P.get('aimodel') || 'claude-haiku-5-5', voice: P.get('aivoice') || '', sub: P.get('aisub') !== '0', speak: P.get('aispeak') !== '0', prompt: '', gkey: P.get('gkey') || '', gmodel: P.get('gmodel') || 'gemini-2.5-flash', gtts: P.get('gtts') !== '0', gvm: P.get('gvm') || '', gvf: P.get('gvf') || '', grkey: P.get('grkey') || '', orkey: P.get('orkey') || '', mkey: P.get('mkey') || '', ckey: P.get('ckey') || '', pmodel: P.get('pmodel') || '', engine: '' };
             const KEYOF = { gemini: 'gkey', claude: 'key', groq: 'grkey', openrouter: 'orkey', mistral: 'mkey', cerebras: 'ckey' };
             const hasKey = (e) => e === 'local' || !!S[KEYOF[e]];
             const autoEngine = () => ['gemini', 'groq', 'openrouter', 'mistral', 'cerebras', 'claude'].find(hasKey) || 'local';
@@ -3648,15 +3648,15 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
                 }
 
-                document.documentElement.classList.toggle('theme-courtgreen', (tvThemeOv(state) || state.boardTheme) === 'courtgreen');
-                document.documentElement.classList.toggle('theme-graydark', (tvThemeOv(state) || state.boardTheme) === 'graydark');
-                document.documentElement.classList.toggle('theme-lightgray', (tvThemeOv(state) || state.boardTheme) === 'lightgray');
-                document.documentElement.classList.toggle('theme-transparent', (tvThemeOv(state) || state.boardTheme) === 'transparent');
-                document.documentElement.classList.toggle('theme-padelblue', (tvThemeOv(state) || state.boardTheme) === 'padelblue');
-                document.documentElement.classList.toggle('theme-championship', (tvThemeOv(state) || state.boardTheme) === 'championship');
-                document.documentElement.classList.toggle('theme-mono', (tvThemeOv(state) || state.boardTheme) === 'mono');
-                document.documentElement.classList.toggle('theme-stonesand', (tvThemeOv(state) || state.boardTheme) === 'stonesand');
-                document.documentElement.classList.toggle('theme-skewlime', (tvThemeOv(state) || state.boardTheme) === 'skewlime');
+                document.documentElement.classList.toggle('theme-courtgreen', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'courtgreen');
+                document.documentElement.classList.toggle('theme-graydark', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'graydark');
+                document.documentElement.classList.toggle('theme-lightgray', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'lightgray');
+                document.documentElement.classList.toggle('theme-transparent', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'transparent');
+                document.documentElement.classList.toggle('theme-padelblue', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'padelblue');
+                document.documentElement.classList.toggle('theme-championship', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'championship');
+                document.documentElement.classList.toggle('theme-mono', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'mono');
+                document.documentElement.classList.toggle('theme-stonesand', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'stonesand');
+                document.documentElement.classList.toggle('theme-skewlime', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'skewlime');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
                 if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
