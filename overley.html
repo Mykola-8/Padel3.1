@@ -3132,7 +3132,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const uaL = st.cornerSlideLang === 'ua';
             const tags = [];
             if (st.isSuperTiebreak) tags.push((uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10)); else if (st.isTiebreak) tags.push(uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK');
-            if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
+            if (st.isTotalSet) tags.push('СУМА ГЕМІВ ' + (st.proSetLimit || 8)); else if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
             if (st.isMexicano) tags.push((uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24)); else if (st.isAmericano) tags.push((uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21));
             const rb = document.getElementById('ribbon-match'); let plate = '', pt = '';
             if (rb && rb.classList.contains('visible')) {
@@ -3228,7 +3228,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const fx = (window.__tvFx && window.__tvFx.until > Date.now()) ? window.__tvFx : null;
             const stNow = window.__tvState || {};
             const icType = stNow.serverIconType || 'ball', icColor = stNow.serverIconColor || '#b28a55';
-            const sig = JSON.stringify([fx ? fx.until : 0, !!stNow.isTiebreak, !!stNow.isSuperTiebreak, !!stNow.isProSet, !!stNow.isAmericano, !!stNow.isMexicano, stNow.cornerSlideLang, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0, JSON.stringify(lgMeta), cfg.spDescPos, st.proSetLimit, st.americanoLimit, st.superTiebreakLimit]);
+            const sig = JSON.stringify([fx ? fx.until : 0, !!stNow.isTiebreak, !!stNow.isSuperTiebreak, !!stNow.isProSet, !!stNow.isTotalSet, !!stNow.isAmericano, !!stNow.isMexicano, stNow.cornerSlideLang, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0, JSON.stringify(lgMeta), cfg.spDescPos, st.proSetLimit, st.americanoLimit, st.superTiebreakLimit]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -3254,7 +3254,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const uaL = st.cornerSlideLang === 'ua', modes = [];
             if (st.isSuperTiebreak) modes.push('<b class="tb">' + (uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10) + '</b>');
             else if (st.isTiebreak) modes.push('<b class="tb">' + (uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK') + '</b>');
-            if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
+            if (st.isTotalSet) modes.push('<b>СУМА ГЕМІВ ' + (st.proSetLimit || 8) + '</b>'); else if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
             if (st.isMexicano) modes.push('<b class="am">' + (uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24) + '</b>');
             else if (st.isAmericano) modes.push('<b class="am">' + (uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21) + '</b>');
             const modeHtml = modes.length ? '<div class="tl-mode">' + modes.join('') + '</div>' : '';
@@ -3880,7 +3880,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     
                     let tbVal1 = state[`t1_tb_s${s}`], tbVal2 = state[`t2_tb_s${s}`];
                     
-                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9)))) {
+                    if ((g1 === 7 && g2 === 6) || (g1 === 6 && g2 === 7) || (state.isProSet && ((g1 === 9 && g2 === 8) || (g1 === 8 && g2 === 9))) || (state.isTotalSet && g1 + g2 === (parseInt(state.proSetLimit) || 8) + 1)) {
                         if (tbVal1 === undefined && tbVal2 === undefined) {
                             if (state.lastTiebreakScore1 !== undefined && state.lastTiebreakScore2 !== undefined) {
                                 tbVal1 = state.lastTiebreakScore1; tbVal2 = state.lastTiebreakScore2;
@@ -3900,7 +3900,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
 
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
-                else if (state.isProSet) { ribbonProset.innerText = `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
+                else if (state.isProSet) { ribbonProset.innerText = state.isTotalSet ? `СУМА ГЕМІВ ${state.proSetLimit||8}` : `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
                 else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
                 else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
                 else ribbonProset.classList.remove('visible');
