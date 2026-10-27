@@ -3522,8 +3522,36 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             return {};
         })();
 
+        // ===== АВТО-РОЗКЛАД: бігучий рядок / рекламний рядок / QR =====
+        const SCH = (function () {
+            let gcfg = null, last = '';
+            const MAP = { ticker: 'tickerEnabled', adbar: 'adBarEnabled', qr: 'showQrCode' };
+            const mins = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '')); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+            function ok(c) {
+                if (c.mode === 'cycle') {
+                    const per = Math.max(1, parseFloat(c.every) || 10) * 60, dur = Math.max(1, parseFloat(c.dur) || 30);
+                    return ((Date.now() / 1000) % per) < Math.min(dur, per);
+                }
+                const a = mins(c.start), b = mins(c.end); if (a === null || b === null) return true;
+                const d = new Date(), n = d.getHours() * 60 + d.getMinutes();
+                if (a === b) return true;
+                return a < b ? (n >= a && n < b) : (n >= a || n < b);
+            }
+            function cfgOf(s) { return gcfg || (s && s.autoSchedCfg) || null; }
+            function sig(s) { const c = cfgOf(s); if (!c) return ''; return Object.keys(MAP).map(k => (c[k] && c[k].on) ? (ok(c[k]) ? 1 : 0) : '-').join(''); }
+            function gate(s) {
+                if (!s) return s; const c = cfgOf(s); if (!c) return s;
+                let out = null;
+                Object.keys(MAP).forEach(k => { if (c[k] && c[k].on) { out = out || Object.assign({}, s); out[MAP[k]] = ok(c[k]); } });
+                return out || s;
+            }
+            onValue(ref(db, 'padel/autoSched'), s => { gcfg = s.val(); last = ''; if (window.__rerender) window.__rerender(); }, () => {});
+            setInterval(() => { const s = sig(window.__schState); if (s !== last) { last = s; if (window.__rerender) window.__rerender(); } }, 1000);
+            return { gate };
+        })();
+
         function __courtOnValue(cb) {
-            const wrap = snap => ({ val: () => __mergeSp(snap.val()) });
+            const wrap = snap => ({ val: () => { const m = __mergeSp(snap.val()); window.__schState = m; return SCH.gate(m); } });
             window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
             onValue(ref(db, databasePath), (snap) => { __lastSnap = snap; cb(wrap(snap)); });
             onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
