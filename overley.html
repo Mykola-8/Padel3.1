@@ -626,8 +626,9 @@
         .cr-wrap.on { opacity: 1; visibility: visible; transition: opacity .7s ease; }
         .cr-bg { position: absolute; inset: 0; background: linear-gradient(180deg, var(--cr-bg1, #000), var(--cr-bg2, #0a1230)); opacity: var(--cr-op, .85); }
         .cr-bg::after { content: ''; position: absolute; inset: 0; background: var(--tt-pat, none); opacity: .8; }
+        .cr-fade { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
         .cr-scroll { position: absolute; left: 50%; top: 0; width: var(--cr-w, 1100px); transform: translateX(-50%); will-change: transform; text-align: center; color: var(--cr-text, #fff); }
-        .cr-mask { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.65) 0, transparent 14%, transparent 86%, rgba(0,0,0,.65) 100%); pointer-events: none; }
+        .cr-mask { display: none; }
         .cr-title { font-size: calc(76px * var(--cr-ts, 1)); font-weight: 900; letter-spacing: 8px; text-transform: uppercase; color: var(--cr-acc, #f5c542); margin-bottom: calc(70px * var(--cr-ts, 1)); text-shadow: 0 4px 18px rgba(0,0,0,.5); }
         .cr-sec { margin-bottom: calc(80px * var(--cr-ts, 1)); }
         .cr-h { font-size: calc(40px * var(--cr-ts, 1)); font-weight: 800; letter-spacing: 6px; text-transform: uppercase; color: var(--cr-acc, #f5c542); margin-bottom: calc(26px * var(--cr-ts, 1)); padding-bottom: 12px; border-bottom: 3px solid var(--cr-acc, #f5c542); display: inline-block; min-width: 40%; }
@@ -1847,7 +1848,7 @@
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
-    <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-scroll"></div><div class="cr-mask"></div></div>
+    <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="tc-wrap" id="spc-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="po-wrap" id="po-wrap-upper"></div>
