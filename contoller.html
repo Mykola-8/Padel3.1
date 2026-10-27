@@ -201,7 +201,6 @@
             <button class="btn btn-gray btn-large-action" style="padding:14px 6px !important; font-size:12px !important;" onclick="undoAction()">↩️ Повернути назад</button>
         </div>
 
-        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <div style="display:flex; gap:8px;">
             <button class="btn" id="btn-hide-board" style="flex:1; padding:14px; background:#374151;" onclick="toggleMainBoard()">👁 СХОВАТИ ТАБЛО</button>
@@ -209,6 +208,7 @@
         </div>
 
         <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:14px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+        <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <!-- ===== БЛОКИ ADMIN ===== -->
         <div class="card" id="admin-camera-panel" style="display:none; border: 2px solid #7c3aed; background: #1a1525; flex-direction:column; gap:10px;">
@@ -562,7 +562,7 @@
             <div class="card">
                 <div style="font-size:11px; font-weight:700; margin-bottom:4px;">Тема кольорів табла:</div>
                 <select id="board-theme-selector" onchange="updateBoardTheme(this.value)">
-                    <option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="graydark">Сіро-темна</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option><option value="padelblue">Padel Blue (Електрик-синя)</option><option value="championship">Championship (Navy/Orange)</option><option value="mono">Монохром (Black & White)</option><option value="stonesand">Stone/Sand (Пісочна)</option><option value="skewlime">Паралелограм (Lime / Pro Tour)</option>
+                    <option value="graydark">Сіро-темна (за замовчуванням)</option><option value="gold">Стандартна (Золото)</option><option value="courtgreen">Корт (Салатова)</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора (лише контури)</option><option value="padelblue">Padel Blue (Електрик-синя)</option><option value="championship">Championship (Navy/Orange)</option><option value="mono">Монохром (Black & White)</option><option value="stonesand">Stone/Sand (Пісочна)</option><option value="skewlime">Паралелограм (Lime / Pro Tour)</option>
                 </select>
             </div>
 
@@ -1308,7 +1308,7 @@
         setTimeout(tvUiRefresh, 0);
 
         // ===== ШІ-коментатор: керування з пульта (padel/commentator) =====
-        const AI_DEF = { enabled: true, engine: '', mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
+        const AI_DEF = { enabled: false, engine: '', mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
         let aiCfg = Object.assign({}, AI_DEF);
         function aiSave() { const st = document.getElementById('ai-st'); try { set(ref(db, 'padel/commentator'), Object.assign({}, aiCfg, { t: Date.now() })).then(() => { if (st) { st.innerText = '☁️ Надіслано в ефір ✅'; st.style.color = '#7c7'; } }, e => { if (st) { st.innerText = '⚠️ ' + e.message; st.style.color = '#f66'; } }); } catch (e) { if (st) st.innerText = '⚠️ ' + e.message; } }
         window.aiSet = function(k, v) { aiCfg[k] = v; aiSave(); aiUi(); };
@@ -1561,7 +1561,7 @@
                 isMexicano: false, mexicanoLimit: 24,
                 isProSet: false, proSetLimit: 8,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
-                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
+                activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
@@ -2344,7 +2344,7 @@
                 isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
-                activeMatchRibbon: "NONE", boardTheme: "gold", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
+                activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
@@ -3242,7 +3242,11 @@
                     '<select data-f="mode" style="' + inp + '"><option value="window">Щодня з … до …</option><option value="cycle">Циклічно: кожні N хв на M с</option></select>' +
                     '<div data-w="window" style="display:flex; gap:6px; align-items:center;">з <input type="time" data-f="start" style="' + inp + '"> до <input type="time" data-f="end" style="' + inp + '"></div>' +
                     '<div data-w="cycle" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">кожні <input type="number" min="1" max="600" data-f="every" style="width:70px; ' + inp + '"> хв показувати <input type="number" min="1" max="3600" data-f="dur" style="width:70px; ' + inp + '"> с</div></div>').join('');
-            anchor.before(card);
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head';
+            head.innerHTML = '<span>⏱ Авто-вмикання за часом (бігучий / реклама / QR)</span><span class="tcol-arrow">▸</span>';
+            card.style.display = 'none';
+            head.onclick = () => { const open = card.style.display === 'none'; card.style.display = open ? '' : 'none'; head.classList.toggle('open', open); };
+            anchor.before(head); anchor.before(card);
             let timer;
             function st(ok, m) { const e = card.querySelector('#sch-st'); e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; }
             function save() { clearTimeout(timer); timer = setTimeout(() => { const data = JSON.parse(JSON.stringify(d)); const fail = e => { try { try { state.autoSchedCfg = data; } catch (x) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/autoSchedCfg'), data); st(true, 'через корти'); } catch (e2) { st(false, 'помилка'); } }; try { set(ref(db, 'padel/autoSched'), data).then(() => st(true), fail); } catch (e) { fail(e); } }, 300); }
