@@ -3263,6 +3263,48 @@
             onValue(ref(db, 'padel/autoSched'), s => { const v = s.val(); if (!v) return; items.forEach(i => { if (v[i[0]]) Object.assign(d[i[0]], v[i[0]]); }); fill(); });
         })();
 
+        // ===== ПАУЗА / ПЕРЕРВА: оформлення (картка) =====
+        (function brkInit() {
+            const DEF = { style: 'clock', anim: 'spin', speed: 6, size: 30, bgOpacity: 0, logoPick: 'all', logoIndex: 1, cycleSec: 8, logoUrl: '', showLabel: false, label: 'ПЕРЕРВА', showTimer: false };
+            let d = Object.assign({}, DEF), timer;
+            const t = document.getElementById('ticker-enabled-checkbox'); const anchor = t && t.closest('.card'); if (!anchor) return;
+            const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const ANIM = [['spin', '🔄 Крутиться навколо осі'], ['swing', '↔️ Повертається вліво-вправо (по колу)'], ['tilt', '⚖️ Хитається (нахил)'], ['dvd', '📺 Літає по екрану як у старих ТВ (повільно, рандомно)'], ['blink', '💡 Блимає'], ['glow', '✨ Сяє'], ['pulse', '💓 Пульсує'], ['float', '🎈 Плаває вгору-вниз'], ['flip', '🔃 Перекидається'], ['none', 'Без анімації']];
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'brk-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const lab = x => '<span style="font-size:11px; color:#ccc;">' + x + '</span>';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Кнопка «☕ ПЕРЕРВА» вмикає перерву. Тут обирається, як вона виглядає. Налаштування спільні для всіх кортів.</div><div id="brk-st" style="font-size:11px;"></div>' +
+                '<div class="row">' + lab('Вигляд перерви:') + '<select data-k="style"><option value="clock">⏱ Годинник + рахунок (як було)</option><option value="logo">🖼 Прозорий фон + логотип спонсора</option></select></div>' +
+                '<div data-logo style="display:flex; flex-direction:column; gap:8px;">' +
+                '<div class="row">' + lab('Анімація логотипа:') + '<select data-k="anim">' + ANIM.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join('') + '</select></div>' +
+                '<div class="row">' + lab('Період анімації / швидкість (с; для «літає» — менше = швидше): <b data-v="speed"></b>') + '<input type="range" data-k="speed" min="1" max="30" step="0.5"></div>' +
+                '<div class="row">' + lab('Розмір логотипа (% висоти екрана): <b data-v="size"></b>') + '<input type="range" data-k="size" min="8" max="90"></div>' +
+                '<div class="row">' + lab('Фон: 0% = повністю прозорий, 100% = чорний: <b data-v="bgOpacity"></b>') + '<input type="range" data-k="bgOpacity" min="0" max="100"></div>' +
+                '<div class="row">' + lab('Які логотипи:') + '<select data-k="logoPick"><option value="all">Усі спонсори по черзі</option><option value="one">Один спонсор (за номером)</option></select></div>' +
+                '<div class="row">' + lab('Номер спонсора:') + '<input type="number" data-k="logoIndex" min="1" max="50" style="width:70px; ' + inp + '"></div>' +
+                '<div class="row">' + lab('Зміна логотипа кожні (с):') + '<input type="number" data-k="cycleSec" min="2" max="600" style="width:70px; ' + inp + '"></div>' +
+                '<div style="font-size:10px; color:#888;">Логотипи беруться з блоку «Спонсори: логотип і опис», а якщо він порожній — із ТВ-логотипів спонсорів. Або завантажте свій:</div>' +
+                '<div style="display:flex; gap:6px; align-items:center;"><label class="btn btn-gray" style="padding:6px 10px; font-size:11px; cursor:pointer;">📁 Власний логотип<input type="file" accept="image/*" id="brk-file" style="display:none;"></label><button type="button" class="btn btn-gray" id="brk-clr" style="padding:6px 10px; font-size:11px;">✖ Прибрати власний</button><span id="brk-has" style="font-size:11px; color:#8f8;"></span></div>' +
+                '<label style="font-size:12px;"><input type="checkbox" data-k="showLabel"> Напис знизу</label><input type="text" data-k="label" style="' + inp + '" placeholder="ПЕРЕРВА">' +
+                '<label style="font-size:12px;"><input type="checkbox" data-k="showTimer"> Таймер перерви знизу</label></div>';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head';
+            head.innerHTML = '<span>☕ Пауза / перерва: вигляд (годинник або логотип)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            anchor.before(head); anchor.before(card);
+            function st(ok, m) { const e = card.querySelector('#brk-st'); e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; }
+            function save() { clearTimeout(timer); timer = setTimeout(() => { const data = JSON.parse(JSON.stringify(d)); const fail = e => { try { try { state.brkCfg = data; } catch (x) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/brkCfg'), data); st(true, 'через корти'); } catch (e2) { st(false, 'помилка'); } }; try { set(ref(db, 'padel/breakCfg'), data).then(() => st(true), fail); } catch (e) { fail(e); } }, 300); }
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; });
+                card.querySelectorAll('[data-v]').forEach(b => { const k = b.dataset.v; b.innerText = d[k] + (k === 'speed' ? ' с' : '%'); });
+                card.querySelector('[data-logo]').style.display = d.style === 'logo' ? 'flex' : 'none';
+                card.querySelector('#brk-has').innerText = d.logoUrl ? '✅ власний логотип є' : '';
+            }
+            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => { const k = el.dataset.k; d[k] = el.type === 'checkbox' ? el.checked : (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value; fill(); save(); }));
+            card.querySelector('#brk-file').onchange = e => { const f = e.target.files[0]; if (f) tvResize(f, 800, 800, 'image/png', url => { d.logoUrl = url; fill(); save(); }); };
+            card.querySelector('#brk-clr').onclick = () => { d.logoUrl = ''; fill(); save(); };
+            fill();
+            onValue(ref(db, 'padel/breakCfg'), s => { const v = s.val(); if (!v) return; d = Object.assign({}, DEF, v); fill(); });
+        })();
+
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
