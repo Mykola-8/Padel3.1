@@ -553,6 +553,7 @@
         .ic-sl { position: absolute; bottom: calc(52px + 18px); max-width: 300px; height: var(--ic-sl, 90px); width: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,.45)); }
         .ic-sl-l { left: 34px; } .ic-sl-r { right: 34px; }
         .ic-line3 { font-size: 42px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin-top: 26px; }
+        .ic-line4 { font-size: var(--ic-l4, 40px); font-weight: 300; line-height: 1.25; letter-spacing: 2px; margin-top: 18px; max-width: 1060px; white-space: pre-line; opacity: .95; }
         .ic-foot { height: 52px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--ic-foottext, #10213f); font-size: 26px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
 
         /* ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) ===== */
@@ -2289,7 +2290,7 @@
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
             s.setProperty('--ic-cd', g(cfg.cdColor, '#ffffff')); s.setProperty('--ic-cd-s', (parseInt(g(cfg.cdSize, 34)) || 34) + 'px'); s.setProperty('--ic-sl', (parseInt(g(cfg.sideLogoSize, 90)) || 90) + 'px');
-            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
+            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
             if (key !== icKeyCache || !panel.firstChild) {
                 icKeyCache = key;
                 const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
@@ -2297,9 +2298,13 @@
                 let h = '<div class="ic-top">' + esc(cfg.topText) + '</div><div class="ic-body">';
                 if (logo) h += '<img class="ic-logo" style="max-width:' + Math.round(1000 * ls) + 'px; max-height:' + Math.round(330 * ls) + 'px;" src="' + esc(logo) + '">';
                 else if (cfg.line3) h += '<div class="ic-bigtext" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
+                const l4 = String(cfg.line4 || '').trim();
+                const l4h = l4 ? '<div class="ic-line4" style="font-size:' + (parseInt(g(cfg.line4Size, 40)) || 40) + 'px;">' + esc(l4) + '</div>' : '';
+                if (!logo) h += l4h;
                 if (cfg.city) h += '<div class="ic-city"' + (logo || cfg.line3 ? '' : ' style="margin-top:0"') + '>' + esc(cfg.city) + '</div>';
                 if (icCd.show && icCd.ts) h += '<div class="ic-cd" id="ic-cd"><span class="ic-cd-l">' + esc(icCd.label) + '</span><span class="ic-cd-t" id="ic-cd-t"></span></div>';
                 if (cfg.line3 && logo) h += '<div class="ic-line3">' + esc(cfg.line3) + '</div>';
+                if (logo) h += l4h;
                 h += '</div><div class="ic-foot">' + esc(cfg.footText) + '</div>';
                 if (cfg.logoL) h += '<img class="ic-sl ic-sl-l" src="' + esc(String(cfg.logoL).trim()) + '">';
                 if (cfg.logoR) h += '<img class="ic-sl ic-sl-r" src="' + esc(String(cfg.logoR).trim()) + '">';
