@@ -4174,11 +4174,32 @@
             reader.readAsDataURL(file);
         }
         window.toggleStatsManual = function() { state.showStatsOverlay = !state.showStatsOverlay; set(matchRef, state); }
-        window.toggleAmericanoMode = function(c) { state.isAmericano = c; if(c){state.isTotalSet=false; state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
-        window.toggleMexicanoMode = function(c) { state.isMexicano = c; if(c){state.isTotalSet=false; state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        function modeFam(s) { return (s.isAmericano || s.isMexicano || s.isSuperTiebreak) ? 'pts' : 'game'; }
+        function modeBefore(s) { return { fam: modeFam(s), p1: s.p1Index || 0, p2: s.p2Index || 0, tb: !!s.isTiebreak, dc: s.deuceCounter || 0, set: s.currentSet || 1 }; }
+        // Зміна режиму посеред розіграшу: рахунок НЕ обнуляється. Між «геймовими» режимами (класичний / Pro-Set / Сума геймів) і
+        // між «очковими» (Американо / Мексикано / Супер-тайбрейк) усе продовжується. При переході геймовий → очковий поточний
+        // розіграш запам'ятовується, а при поверненні назад — відновлюється таким, яким був.
+        function modeAfter(s, b) {
+          const now = modeFam(s);
+          if (b.fam === 'game' && now === 'pts') {
+            s.modeStash = { p1: b.p1, p2: b.p2, tb: b.tb, dc: b.dc, set: b.set };
+          } else if (b.fam === 'pts' && now === 'game') {
+            const m = s.modeStash;
+            const cs = s.currentSet || 1;
+            if (m && (cs === m.set || (cs === m.set + 1 && !s['t1_s' + cs] && !s['t2_s' + cs]))) {
+              if (cs === m.set + 1) { s.currentSet = m.set; delete s['int_s' + m.set]; }
+              s.p1Index = m.p1; s.p2Index = m.p2; s.isTiebreak = m.tb; s.deuceCounter = m.dc;
+            } else { s.p1Index = 0; s.p2Index = 0; s.isTiebreak = false; s.deuceCounter = 0; }
+            delete s.modeStash;
+          }
+        }
+        
+        window.toggleAmericanoMode = function(c) { const __b = modeBefore(state); state.isAmericano = c; if(c){state.isTotalSet=false; state.isProSet=false; state.isSuperTiebreak=false; state.isMexicano=false;} modeAfter(state, __b); set(matchRef, state); }
+        window.toggleMexicanoMode = function(c) { const __b = modeBefore(state); state.isMexicano = c; if(c){state.isTotalSet=false; state.isAmericano=false; state.isProSet=false; state.isSuperTiebreak=false;} modeAfter(state, __b); set(matchRef, state); }
         window.updateMexicanoLimit = function(v) { state.mexicanoLimit = parseInt(v) || 24; set(matchRef, state); }
-        window.toggleProSetMode = function(c) { state.isProSet = c; state.isTotalSet = false; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+        window.toggleProSetMode = function(c) { const __b = modeBefore(state); state.isProSet = c; state.isTotalSet = false; if(c){state.isAmericano=false; state.isSuperTiebreak=false; state.isMexicano=false;} modeAfter(state, __b); set(matchRef, state); }
         window.toggleSuperTiebreakMode = function(c) {
+            const __b = modeBefore(state);
             if (c && !state.isSuperTiebreak) {
                 // Перемикання посеред сету: зіграні гейми лишаємо на табло як окремий (незавершений) сет,
                 // супер-тайбрейк йде в новій колонці
@@ -4190,9 +4211,9 @@
                 }
                 state.isTiebreak = false; state.deuceCounter = 0;
             }
-            state.isSuperTiebreak = c; if(c){state.isTotalSet=false; state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} state.p1Index=0; state.p2Index=0; set(matchRef, state); }
+            state.isSuperTiebreak = c; if(c){state.isTotalSet=false; state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} modeAfter(state, __b); set(matchRef, state); }
         window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
-        window.toggleTotalSetMode = function(c) { state.isTotalSet = c; state.isProSet = c; if (c) { state.isAmericano = false; state.isSuperTiebreak = false; state.isMexicano = false; if (!state.proSetLimit) state.proSetLimit = 8; if (!state.totalTbLimit) state.totalTbLimit = 5; } state.p1Index = 0; state.p2Index = 0; state.isTiebreak = false; set(matchRef, state); }
+        window.toggleTotalSetMode = function(c) { const __b = modeBefore(state); state.isTotalSet = c; state.isProSet = c; if (c) { state.isAmericano = false; state.isSuperTiebreak = false; state.isMexicano = false; if (!state.proSetLimit) state.proSetLimit = 8; if (!state.totalTbLimit) state.totalTbLimit = 5; } modeAfter(state, __b); set(matchRef, state); }
         window.updateTotalSetLimit = function(v) { state.proSetLimit = Math.max(2, parseInt(v) || 8); set(matchRef, state); }
         window.updateTotalTbLimit = function(v) { state.totalTbLimit = Math.max(1, parseInt(v) || 5); set(matchRef, state); }
         window.updateProSetLimit = function(v) { state.proSetLimit = parseInt(v)||8; set(matchRef, state); }
