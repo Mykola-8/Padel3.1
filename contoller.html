@@ -2807,7 +2807,7 @@
         // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
         let IC_GLOBAL_KEYS = [];
         function icDefault() {
-            return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
+            return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
                 logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, bgOpacity: 100, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
         }
         function icEnsure() {
@@ -2907,6 +2907,8 @@
                 ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
                 ${txt('city', 'Місто / підзаголовок (Perugia)')}
                 ${txt('line3', 'Назва турніру (під містом; без логотипу — великим)')}
+                ${txt('line4', 'Додатковий текст під назвою турніру (порожньо — не показується)')}
+                ${slider('line4Size', 'Розмір додаткового тексту (px)', 16, 100, 40)}
                 ${txt('footText', 'Текст у нижній смузі (необов’язково)')}
                 <div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
                     <div style="font-size:11px; color:#e0b878; font-weight:700;">🖼 Логотип <span id="ic-st-logo" style="color:#8f8;"></span></div>
