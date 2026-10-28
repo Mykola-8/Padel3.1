@@ -641,6 +641,34 @@
         .cr-sp span { font-size: calc(26px * var(--cr-ts, 1)); font-weight: 600; }
         .cr-end { font-size: calc(34px * var(--cr-ts, 1)); font-weight: 600; opacity: .85; padding-top: 40px; }
 
+        /* ===== ПЕРЕРВА: варіант «логотип спонсора» (padel/breakCfg) ===== */
+        .brk-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; display: none; }
+        .break-overlay.brk-logo { background: rgba(0,0,0,var(--brk-bg, 0)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .break-overlay.brk-logo .brk-layer { display: block; }
+        .break-overlay.brk-logo .break-clock-wrap, .break-overlay.brk-logo .break-teams-row, .break-overlay.brk-logo .break-sets-line { display: none; }
+        .break-overlay.brk-logo #brk-label, .break-overlay.brk-logo #brk-timer { display: none; position: absolute; left: 0; right: 0; text-align: center; z-index: 3; text-shadow: 0 3px 14px rgba(0,0,0,.7); }
+        .break-overlay.brk-logo.brk-lbl #brk-label { display: block; bottom: 150px; font-size: 64px; margin: 0; }
+        .break-overlay.brk-logo.brk-tm #brk-timer { display: block; bottom: 80px; font-size: 54px; }
+        .brk-mover { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+        .brk-mover.dvd { left: 0; top: 0; transform: none; }
+        .brk-img { display: block; height: var(--brk-h, 30vh); max-width: 80vw; object-fit: contain; filter: drop-shadow(0 8px 22px rgba(0,0,0,.5)); animation-duration: var(--brk-sp, 6s); animation-iteration-count: infinite; animation-timing-function: ease-in-out; transition: opacity .5s; }
+        .brk-img.a-spin { animation-name: brkSpin; animation-timing-function: linear; }
+        .brk-img.a-swing { animation-name: brkSwing; }
+        .brk-img.a-tilt { animation-name: brkTilt; }
+        .brk-img.a-blink { animation-name: brkBlink; }
+        .brk-img.a-pulse { animation-name: brkPulse; }
+        .brk-img.a-float { animation-name: brkFloat; }
+        .brk-img.a-flip { animation-name: brkFlip; animation-timing-function: linear; }
+        .brk-img.a-glow { animation-name: brkGlow; }
+        @keyframes brkSpin { from { transform: perspective(900px) rotateY(0); } to { transform: perspective(900px) rotateY(360deg); } }
+        @keyframes brkFlip { from { transform: perspective(900px) rotateX(0); } to { transform: perspective(900px) rotateX(360deg); } }
+        @keyframes brkSwing { 0%, 100% { transform: perspective(900px) rotateY(-38deg); } 50% { transform: perspective(900px) rotateY(38deg); } }
+        @keyframes brkTilt { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+        @keyframes brkBlink { 0%, 100% { opacity: 1; } 50% { opacity: .1; } }
+        @keyframes brkPulse { 0%, 100% { transform: scale(.88); } 50% { transform: scale(1.12); } }
+        @keyframes brkFloat { 0%, 100% { transform: translateY(-4vh); } 50% { transform: translateY(4vh); } }
+        @keyframes brkGlow { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255,255,255,.2)) brightness(1); } 50% { filter: drop-shadow(0 0 40px rgba(255,255,255,.95)) brightness(1.35); } }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1975,6 +2003,7 @@
 
     <!-- ПАНЕЛЬ ПЕРЕРВИ -->
     <div class="break-overlay" id="break-panel">
+        <div class="brk-layer" id="brk-layer"><div class="brk-mover" id="brk-mover"><img class="brk-img" id="brk-img" alt=""></div></div>
         <div class="break-label" id="brk-label">ПЕРЕРВА</div>
         <div class="break-clock-wrap">
             <svg id="brk-clock-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -3556,6 +3585,63 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             return { gate };
         })();
 
+        // ===== ПЕРЕРВА: варіанти оформлення (годинник / логотип спонсора) =====
+        const BRK = (function () {
+            const panel = document.getElementById('break-panel'), layer = document.getElementById('brk-layer'), mover = document.getElementById('brk-mover'), img = document.getElementById('brk-img');
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            let gcfg = null, mcfg = null, mj = '', idx = 0, cycT = null, raf = 0, lastSrc = '', active = false, curStyle = '';
+            const dvd = { x: 80, y: 80, vx: 0, vy: 0, last: 0 };
+            const cfg = () => gcfg || mcfg || {};
+            function logos(st) {
+                const c = cfg(); const own = String(c.logoUrl || '').trim(); if (own) return [own];
+                const T = window.__tcGet ? window.__tcGet() : { spc: {} };
+                let l = arr(T.spc && T.spc.items).map(it => it && it.logo).filter(Boolean);
+                if (!l.length) l = arr(st && st.sponsorLogos).filter(Boolean);
+                const sel = parseInt(c.logoIndex); if (c.logoPick === 'one' && l[sel - 1]) return [l[sel - 1]];
+                return l;
+            }
+            function dvdLoop(t) {
+                raf = requestAnimationFrame(dvdLoop);
+                const dt = Math.min(0.1, (t - (dvd.last || t)) / 1000); dvd.last = t;
+                const W = window.innerWidth, H = window.innerHeight, w = mover.offsetWidth, h = mover.offsetHeight;
+                dvd.x += dvd.vx * dt; dvd.y += dvd.vy * dt;
+                let hit = false;
+                if (dvd.x <= 0) { dvd.x = 0; dvd.vx = Math.abs(dvd.vx); hit = true; } else if (dvd.x + w >= W) { dvd.x = Math.max(0, W - w); dvd.vx = -Math.abs(dvd.vx); hit = true; }
+                if (dvd.y <= 0) { dvd.y = 0; dvd.vy = Math.abs(dvd.vy); hit = true; } else if (dvd.y + h >= H) { dvd.y = Math.max(0, H - h); dvd.vy = -Math.abs(dvd.vy); hit = true; }
+                if (hit) { // «рандомно»: після кожного відбиття трохи міняємо кут, швидкість зберігається
+                    const sp = Math.hypot(dvd.vx, dvd.vy), ang = Math.atan2(dvd.vy, dvd.vx) + (Math.random() - 0.5) * 0.5;
+                    let vx = Math.cos(ang) * sp, vy = Math.sin(ang) * sp; if (Math.abs(vx) < sp * .25) vx = Math.sign(vx || 1) * sp * .25; if (Math.abs(vy) < sp * .25) vy = Math.sign(vy || 1) * sp * .25; dvd.vx = vx; dvd.vy = vy;
+                }
+                mover.style.transform = 'translate(' + dvd.x + 'px,' + dvd.y + 'px)';
+            }
+            function stopDvd() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+            function pick(st) { const l = logos(st); if (!l.length) { img.removeAttribute('src'); lastSrc = ''; return; } const s = l[idx % l.length]; if (s !== lastSrc) { lastSrc = s; img.src = s; } }
+            function apply(st, breakOn) {
+                const c = cfg(), logoMode = c.style === 'logo' && breakOn;
+                panel.classList.toggle('brk-logo', logoMode); panel.classList.toggle('brk-lbl', logoMode && !!c.showLabel); panel.classList.toggle('brk-tm', logoMode && !!c.showTimer);
+                if (!logoMode) { active = false; clearInterval(cycT); cycT = null; stopDvd(); return; }
+                const bg = Math.max(0, Math.min(100, parseInt(g(c.bgOpacity, 0)))) / 100;
+                panel.style.setProperty('--brk-bg', bg); panel.style.setProperty('--brk-h', Math.max(8, Math.min(90, parseInt(g(c.size, 30)))) + 'vh');
+                const sp = Math.max(1, Math.min(30, parseFloat(g(c.speed, 6)))); panel.style.setProperty('--brk-sp', sp + 's');
+                const an = g(c.anim, 'spin'); const lbl = document.getElementById('brk-label'); if (c.showLabel) lbl.innerText = g(c.label, 'ПЕРЕРВА');
+                const sig = an + '|' + sp; if (sig !== curStyle) {
+                    curStyle = sig; img.className = 'brk-img' + (an !== 'dvd' && an !== 'none' ? ' a-' + an : '');
+                    mover.classList.toggle('dvd', an === 'dvd'); stopDvd();
+                    if (an === 'dvd') { mover.style.transform = ''; const a = Math.random() * Math.PI * 2, v = Math.max(40, sp * 30); dvd.vx = Math.cos(a) * v || v; dvd.vy = Math.sin(a) * v || v; dvd.x = Math.random() * 200; dvd.y = Math.random() * 100; dvd.last = 0; raf = requestAnimationFrame(dvdLoop); }
+                    else mover.style.transform = '';
+                }
+                if (an === 'dvd' && !raf) raf = requestAnimationFrame(dvdLoop);
+                pick(st);
+                const cyc = Math.max(2, parseInt(g(c.cycleSec, 8)) || 8);
+                if (!active || cycT === null) { active = true; clearInterval(cycT); cycT = setInterval(() => { idx++; const s2 = window.__lastBrkState; pick(s2); }, cyc * 1000); }
+                window.__lastBrkState = st;
+            }
+            onValue(ref(db, 'padel/breakCfg'), s => { gcfg = s.val(); curStyle = ''; if (window.__rerender) window.__rerender(); }, () => {});
+            window.__brkMirror = (st) => { const v = st && st.brkCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; curStyle = ''; };
+            return { apply };
+        })();
+
         function __courtOnValue(cb) {
             const wrap = snap => ({ val: () => { const m = __mergeSp(snap.val()); window.__schState = m; return SCH.gate(m); } });
             window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
@@ -3690,6 +3776,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     }
                     document.getElementById('brk-sets').innerText = setsLine; breakPanel.classList.add('visible');
                 } else { breakPanel.classList.remove('visible'); }
+                try { window.__brkMirror && window.__brkMirror(state); BRK.apply(state, newBreakActive); } catch (e) { console.error(e); }
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
