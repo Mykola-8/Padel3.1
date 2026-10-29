@@ -208,6 +208,7 @@
         </div>
 
         <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:14px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
+        <button class="btn" id="btn-analytics" style="width:100%; background:#4338ca; padding:14px; font-weight:800;" onclick="toggleAnalytics()">📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ</button>
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <!-- ===== БЛОКИ ADMIN ===== -->
@@ -2323,7 +2324,7 @@
                 activeMatchRibbon: "NONE",
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
-                completedGamesCount: 0, statsAutoTrigger: 0,
+                completedGamesCount: 0, statsAutoTrigger: 0, pointLog: [],
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [],
                 showMainBoard: false, isMatchFinished: false, showBreak: false,
                 animation: { team: 0, type: "", ts: 0 }
@@ -3338,6 +3339,31 @@
             }, true);
         })();
 
+        // ===== АНАЛІТИКА МАТЧУ (керування) =====
+        (function anInit() {
+            const BL = [['serve', 'Подача і прийом (очки, % на подачі/прийомі)'], ['key', 'Ключові очки (брейк-пойнти, золоті, переваги)'], ['games', 'Гейми (холди, брейки, «насухо», тайбрейки)'], ['streak', 'Серії (очки, гейми, найдовший гейм)'], ['timing', 'Час (між очками, паузи, гейми, сети, матч)'], ['mom', 'Графік моментуму']];
+            const cfg = () => { if (!state.anCfg || typeof state.anCfg !== 'object') state.anCfg = { show: false, scale: 100, bgOpacity: 92, c1: '#38bdf8', c2: '#fb923c', bg1: '#0b1220', bg2: '#131c33', blocks: {} }; if (!state.anCfg.blocks) state.anCfg.blocks = {}; return state.anCfg; };
+            window.toggleAnalytics = function () { const c = cfg(); c.show = !c.show; set(matchRef, state); };
+            const t = document.getElementById('ticker-enabled-checkbox'); const anchor = t && t.closest('.card'); if (!anchor) return;
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'an-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff;';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Панель аналітики рахується з журналу очок цього корту. Кнопка «📈 АНАЛІТИКА МАТЧУ» на головному екрані пульта показує й ховає її. Очки з годинника теж потрапляють у журнал.</div>' +
+                '<div style="font-size:11px; font-weight:700;">Які блоки показувати:</div>' + BL.map(b => '<label style="font-size:12px; display:flex; gap:6px; align-items:center;"><input type="checkbox" data-b="' + b[0] + '"> ' + b[1] + '</label>').join('') +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Масштаб: <b id="an-v-scale"></b></span><input type="range" data-k="scale" min="40" max="150"></div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Фон 0–100%: <b id="an-v-bgOpacity"></b></span><input type="range" data-k="bgOpacity" min="0" max="100"></div>' +
+                '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px; color:#ccc;"><label>Колір команди 1 <input type="color" data-k="c1"></label><label>Колір команди 2 <input type="color" data-k="c2"></label><label>Фон (верх) <input type="color" data-k="bg1"></label><label>Фон (низ) <input type="color" data-k="bg2"></label></div>' +
+                '<button type="button" class="btn btn-gray" id="an-clear" style="padding:8px; font-size:11px;">🗑 Очистити журнал очок цього корту</button>';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📈 Аналітика матчу: блоки й вигляд</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            anchor.before(head); anchor.before(card);
+            function fill() { const c = cfg(); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
+            card.querySelectorAll('[data-b]').forEach(e => e.addEventListener('change', () => { cfg().blocks[e.dataset.b] = e.checked; set(matchRef, state); }));
+            card.querySelectorAll('[data-k]').forEach(e => e.addEventListener('input', () => { const c = cfg(), k = e.dataset.k; c[k] = e.type === 'range' ? parseInt(e.value) : e.value; fill(); set(matchRef, state); }));
+            card.querySelector('#an-clear').onclick = () => { if (confirm('Очистити журнал очок цього корту? Аналітика почнеться з нуля.')) { state.pointLog = []; set(matchRef, state); } };
+            setInterval(() => { const b = document.getElementById('btn-analytics'); if (b) { const on = !!(state.anCfg && state.anCfg.show); b.innerText = on ? '📈 СХОВАТИ АНАЛІТИКУ МАТЧУ' : '📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ'; b.classList.toggle('tb-live', on); } if (card.style.display !== 'none') fill(); }, 600);
+            fill();
+        })();
+
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -4042,7 +4068,19 @@
             window.scorePointWithoutHistorySave(team);
         }
 
+        // Журнал очок для аналітики матчу: [переможець, подаючий, час, код табло-ривбона, перевага, кінець(0/1 гейм/2 сет), режим(0 звичайний/1 тайбрейк/2 очковий)]
+        function ptLogPre(s) {
+            return { srv: s.currentServer || 1, rib: s.activeMatchRibbon || '', av: (!s.isAmericano && !s.isMexicano && !s.isSuperTiebreak && !s.isTiebreak) ? (s.p1Index === 4 ? 1 : (s.p2Index === 4 ? 2 : 0)) : 0,
+                cg: s.completedGamesCount || 0, cs: s.currentSet || 1, m: (s.isAmericano || s.isMexicano || s.isSuperTiebreak) ? 2 : (s.isTiebreak ? 1 : 0) };
+        }
+        function ptLogPost(s, pre, w) {
+            const RC = { BREAK_POINT: 'B', GOLDEN_POINT: 'G', GAME_POINT: 'P', SET_POINT: 'S', MATCH_POINT: 'M', TIEBREAK_POINT: 'T' };
+            const e = (s.currentSet || 1) > pre.cs ? 2 : ((s.completedGamesCount || 0) > pre.cg ? 1 : 0);
+            if (!Array.isArray(s.pointLog)) s.pointLog = (s.pointLog && typeof s.pointLog === 'object') ? Object.values(s.pointLog) : [];
+            s.pointLog.push([w, pre.srv, Date.now(), RC[pre.rib] || '', pre.av, e, pre.m]);
+        }
         window.scorePointWithoutHistorySave = function(tIndex) {
+            const __pl = ptLogPre(state);
             if (state.isSuperTiebreak) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -4094,6 +4132,7 @@
                     else state.p2Index++;
                 }
             }
+            ptLogPost(state, __pl, tIndex);
             recalculateRibbons(state); set(matchRef, state);
         }
 
