@@ -3736,18 +3736,32 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 svg += '<defs><clipPath id="anUp"><rect x="0" y="0" width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="anDn"><rect x="0" y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath></defs><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c1,#38bdf8)" opacity=".32" clip-path="url(#anUp)"/><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c2,#fb923c)" opacity=".32" clip-path="url(#anDn)"/></svg>';
                 return svg;
             }
-            let lastSig = '', localEnd = 0, lastEndTs = null;
-            // Автопослідовність наприкінці матчу: статистика → (через N с) аналітика → (ще M с) ховаємо все
+            let lastSig = '', localEnd = 0, lastPh = '';
+            // Автопослідовність наприкінці матчу: переможець (7 с) → ручна статистика OBS (10 с) → аналітика (15 с) → ховаємо все
             function endPhase(st, cfg) {
-                if (!st.isMatchFinished) { localEnd = 0; return 0; }
-                if (cfg.autoEnd === false) return 0;
+                if (!st.isMatchFinished) { localEnd = 0; return 'none'; }
+                if (cfg.autoEnd === false) return 'none';
                 let t0 = parseInt(st.matchEndTs) || 0; if (!t0) { if (!localEnd) localEnd = Date.now(); t0 = localEnd; }
-                const e = (Date.now() - t0) / 1000, d = parseFloat(g(cfg.endDelay, 12)), du = parseFloat(g(cfg.endDur, 20));
-                if (e < d) return 0; if (e < d + du) return 1; return cfg.endHide === false ? 0 : 2;
+                const e = (Date.now() - t0) / 1000, w = parseFloat(g(cfg.endWin, 7)), s = parseFloat(g(cfg.endStats, 10)), d = parseFloat(g(cfg.endDur, 15));
+                if (e < w) return 'win'; if (e < w + s) return 'stats'; if (e < w + s + d) return 'an'; return cfg.endHide === false ? 'none' : 'done';
+            }
+            function enterPhase(ph) {
+                try {
+                    if (ph === 'win' || ph === 'stats' || ph === 'an') {
+                        if (matchFinishedFadeTimer) { clearTimeout(matchFinishedFadeTimer); matchFinishedFadeTimer = null; }
+                        if (statsRevealTimer) { clearTimeout(statsRevealTimer); statsRevealTimer = null; }
+                        if (statsAfterFinishDismissTimer) { clearTimeout(statsAfterFinishDismissTimer); statsAfterFinishDismissTimer = null; }
+                    }
+                    const mfb = document.getElementById('match-finished-board');
+                    if (ph === 'win') { statsRevealAllowed = false; statsAfterFinishLocallyDismissed = false; if (mfb) mfb.classList.remove('fading-out'); updateManualStatsPanelVisibility(); }
+                    else if (ph === 'stats') { if (mfb) mfb.classList.add('fading-out'); statsRevealAllowed = true; statsAfterFinishLocallyDismissed = false; updateManualStatsPanelVisibility(); refreshBoardVisibility(); }
+                    else if (ph === 'an' || ph === 'done') { statsAfterFinishLocallyDismissed = true; updateManualStatsPanelVisibility(); refreshBoardVisibility(); }
+                } catch (e) {}
             }
             function render(st) {
-                const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 2 ? false : (ph === 1 || !!cfg.show);
-                document.body.classList.toggle('an-end-1', ph === 1); document.body.classList.toggle('an-end-2', ph === 2);
+                const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 'done' ? false : (ph === 'an' || !!cfg.show);
+                if (ph !== lastPh) { lastPh = ph; enterPhase(ph); }
+                document.body.classList.toggle('an-end-1', ph === 'an'); document.body.classList.toggle('an-end-2', ph === 'done');
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
