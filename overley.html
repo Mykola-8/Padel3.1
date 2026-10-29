@@ -1961,12 +1961,13 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">STAR</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-ac">ACE</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">STAR</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
                         <span class="stats-broadcast-name" id="st-name1">Команда A</span>
                         <span class="stats-broadcast-cell" id="st-df1">0</span>
+                        <span class="stats-broadcast-cell" id="st-ac1">0</span>
                         <span class="stats-broadcast-cell" id="st-nc1">0</span>
                         <span class="stats-broadcast-cell" id="st-sm1">0</span>
                         <span class="stats-broadcast-cell" id="st-dm1">0</span>
@@ -1978,6 +1979,7 @@
                     <div class="stats-broadcast-row">
                         <span class="stats-broadcast-name" id="st-name2">Команда B</span>
                         <span class="stats-broadcast-cell" id="st-df2">0</span>
+                        <span class="stats-broadcast-cell" id="st-ac2">0</span>
                         <span class="stats-broadcast-cell" id="st-nc2">0</span>
                         <span class="stats-broadcast-cell" id="st-sm2">0</span>
                         <span class="stats-broadcast-cell" id="st-dm2">0</span>
@@ -2001,6 +2003,7 @@
         <div class="sm-table">
             <div class="sm-row"><div class="sm-team-left" id="stm-name1">Команда A</div><div class="sm-label" id="stm-lbl-teams">Команди</div><div class="sm-team-right" id="stm-name2">Команда B</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-g1">0</div><div class="sm-label" id="stm-lbl-games-set">Гейми (всього)</div><div class="sm-val" id="stm-g2">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-ac1">0</div><div class="sm-label" id="stm-lbl-aces">Ace</div><div class="sm-val" id="stm-ac2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-df1">0</div><div class="sm-label" id="stm-lbl-doublefaults">Дабл фоли</div><div class="sm-val" id="stm-df2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-nc1">0</div><div class="sm-label" id="stm-lbl-netcords">Від сітки (Net Cord)</div><div class="sm-val" id="stm-nc2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-sm1">0</div><div class="sm-label" id="stm-lbl-smashes">Смеш</div><div class="sm-val" id="stm-sm2">0</div></div>
@@ -2108,6 +2111,7 @@
             portres: { en: 'Por Tres - X3', ua: 'Por Tres - X3' },
             porcuatro: { en: 'Por Cuatro - X4', ua: 'Por Cuatro - X4' },
             dormilona: { en: 'Dormilona', ua: 'Повернення' },
+            aces: { en: 'Aces', ua: 'Ейси' },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
             matchTime: { en: 'Total match time', ua: 'Загальний час матчу' },
@@ -3027,7 +3031,7 @@ const ptSpeak = (s, a, b) => { if (isRaw(s)) return a + ' — ' + b; if (a >= 3 
 function gamesStr(s) { const out = []; for (let n = 1; n <= 5; n++) { const a = s['t1_s' + n], b = s['t2_s' + n]; if (a === undefined && b === undefined) break; if (n > (s.currentSet || 1)) break; out.push((a || 0) + ':' + (b || 0)); } return out.join('  '); }
 const snap = s => ({ p1: s.p1Index || 0, p2: s.p2Index || 0, set: s.currentSet || 1, g: gamesStr(s), g1: s['t1_s' + (s.currentSet || 1)] || 0, g2: s['t2_s' + (s.currentSet || 1)] || 0, fin: !!s.isMatchFinished, ts: s.animation ? s.animation.ts : 0, srv: s.currentServer || 0 });
 const T1 = s => s.p1name || 'Команда 1', T2 = s => s.p2name || 'Команда 2';
-const ANIM = { smash: 'смеш', net_cord: 'м’яч зачепив сітку і впав на половині суперника (net cord)', por_tres: 'розіграш «пор трес»', por_cuatro: 'розіграш «пор куатро»', dormilona: 'дормілона', double_fault: 'подвійна помилка на подачі' };
+const ANIM = { smash: 'смеш', net_cord: 'м’яч зачепив сітку і впав на половині суперника (net cord)', por_tres: 'розіграш «пор трес»', por_cuatro: 'розіграш «пор куатро»', ace: 'ейс — виграшна подача', dormilona: 'дормілона', double_fault: 'подвійна помилка на подачі' };
 
 function detect(prev, s) {
   const a = snap(s), p = prev ? snap(prev) : null; const ev = [];
@@ -3142,7 +3146,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
         // написи на командах (Smash, Por Tres, Por Cuatro, Dormilona, Net Cord, Double Fault) — показуються 3 с на смузі команди
         function tvFxHook(st) {
             if (!(TV_LED || TV_MODE) || !st || !st.animation) return;
-            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', double_fault: 'DOUBLE FAULT' };
+            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', ace: 'ACE', double_fault: 'DOUBLE FAULT' };
             const t = st.animation.type; if (!labelTexts[t] || st.showActionLabels === false) return;
             window.__tvFx = { team: st.animation.team, text: labelTexts[t], cls: (t === 'dormilona' || t === 'net_cord') ? 'blue' : (t === 'double_fault' ? 'red' : ''), until: Date.now() + 3000 };
         }
@@ -3673,7 +3677,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const L = {
-                title: ['MATCH ANALYTICS', 'АНАЛІТИКА МАТЧУ'], serve: ['Serve & return', 'Подача і прийом'], key: ['Key points', 'Ключові очки'], games: ['Games', 'Гейми'], streak: ['Streaks', 'Серії'], timing: ['Timing', 'Час'], mom: ['Momentum (points)', 'Моментум (по очках)'],
+                title: ['MATCH ANALYTICS', 'АНАЛІТИКА МАТЧУ'], serve: ['Serve & return', 'Подача і прийом'], aces: ['Aces', 'Ейси'], key: ['Key points', 'Ключові очки'], games: ['Games', 'Гейми'], streak: ['Streaks', 'Серії'], timing: ['Timing', 'Час'], mom: ['Momentum (points)', 'Моментум (по очках)'],
                 total: ['Total points won', 'Всього виграно очок'], srvw: ['Points won on serve', 'Очки на своїй подачі'], retw: ['Points won on return', 'Очки на прийомі'],
                 bpc: ['Break points converted', 'Брейк-пойнти реалізовано'], bps: ['Break points saved', 'Брейк-пойнти відбито'], gp: ['Golden points won', 'Золоті очки'], adv: ['Advantage converted', 'Переваги реалізовано'], kp: ['Key points won', 'Ключові очки (BP/GP/SP/MP)'],
                 hold: ['Service games held', 'Свої подачі втримано'], brk: ['Breaks', 'Брейки'], love: ['Games won to love', 'Гейми «насухо»'], tbw: ['Tie-breaks won', 'Тайбрейки виграно'],
@@ -3741,12 +3745,12 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
                 const B = cfg.blocks || {}, on = key => B[key] !== false;
-                const sig = JSON.stringify([st.pointLog, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
+                const sig = JSON.stringify([st.pointLog, st.p1Aces, st.p2Aces, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
                 if (sig === lastSig) return; lastSig = sig;
                 const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="an-head"><div class="an-team t1">' + esc(st.p1name || 'Team 1') + '</div><div class="an-title">' + t('title') + '</div><div class="an-team t2">' + esc(st.p2name || 'Team 2') + '</div></div>';
                 if (!c.n) { panel.innerHTML = h + '<div class="an-empty">' + t('none') + '</div>'; return; }
                 h += '<div class="an-grid">';
-                if (on('serve')) h += '<div class="an-card"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
+                if (on('serve')) h += '<div class="an-card"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + ((st.p1Aces || st.p2Aces) ? row(t('aces'), st.p1Aces || 0, st.p2Aces || 0, st.p1Aces || 0, st.p2Aces || 0) : '') + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
                 if (on('key')) h += '<div class="an-card"><div class="an-ct">' + t('key') + '</div>' + rowRatio(t('bpc'), A.bpC, A.bpO, Bt.bpC, Bt.bpO) + rowRatio(t('bps'), A.bpS, A.bpF, Bt.bpS, Bt.bpF) + row(t('gp'), A.gp, Bt.gp, A.gp + (c.gpTot ? '/' + c.gpTot : ''), Bt.gp + (c.gpTot ? '/' + c.gpTot : '')) + rowRatio(t('adv'), A.avC, A.avO, Bt.avC, Bt.avO) + row(t('kp'), A.kp, Bt.kp, A.kp + (c.kpTot ? '/' + c.kpTot : ''), Bt.kp + (c.kpTot ? '/' + c.kpTot : '')) + '</div>';
                 if (on('games')) h += '<div class="an-card"><div class="an-ct">' + t('games') + '</div>' + rowRatio(t('hold'), A.holds, A.serv, Bt.holds, Bt.serv) + row(t('brk'), A.breaks, Bt.breaks, A.breaks, Bt.breaks) + row(t('love'), c.love[1], c.love[2], c.love[1], c.love[2]) + (A.tb + Bt.tb ? row(t('tbw'), A.tb, Bt.tb, A.tb, Bt.tb) : '') + '</div>';
                 if (on('streak')) h += '<div class="an-card"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
@@ -4399,6 +4403,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
 
                         document.getElementById('st-df1').innerText = state.p1DoubleFaults || 0; 
                         document.getElementById('st-df2').innerText = state.p2DoubleFaults || 0;
+                        document.getElementById('st-ac1').innerText = state.p1Aces || 0; document.getElementById('st-ac2').innerText = state.p2Aces || 0;
                         document.getElementById('st-nc1').innerText = state.p1NetCords || 0; 
                         document.getElementById('st-nc2').innerText = state.p2NetCords || 0;
                         document.getElementById('st-sm1').innerText = state.p1Smashes || 0; 
@@ -4417,6 +4422,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                         // Приховуємо колонки статистики, де в обох команд значення 0
                         const statCols = [
                             { label: 'col-lbl-df', cells: ['st-df1', 'st-df2'], width: '40px', val: (state.p1DoubleFaults || 0) + (state.p2DoubleFaults || 0) },
+                            { label: 'col-lbl-ac', cells: ['st-ac1', 'st-ac2'], width: '40px', val: (state.p1Aces || 0) + (state.p2Aces || 0) },
                             { label: 'col-lbl-nc', cells: ['st-nc1', 'st-nc2'], width: '40px', val: (state.p1NetCords || 0) + (state.p2NetCords || 0) },
                             { label: 'col-lbl-sm', cells: ['st-sm1', 'st-sm2'], width: '50px', val: (state.p1Smashes || 0) + (state.p2Smashes || 0) },
                             { label: 'col-lbl-dm', cells: ['st-dm1', 'st-dm2'], width: '55px', val: (state.p1Dormilona || 0) + (state.p2Dormilona || 0) },
@@ -4475,6 +4481,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     setStatsTeamName('stm-name1', state.p1name || getStatsLabel('team1Fallback', state)); setStatsTeamName('stm-name2', state.p2name || getStatsLabel('team2Fallback', state));
 
                     const df1 = state.p1DoubleFaults || 0, df2 = state.p2DoubleFaults || 0;
+                    { const ac1 = state.p1Aces || 0, ac2 = state.p2Aces || 0; document.getElementById('stm-ac1').innerText = ac1; document.getElementById('stm-ac2').innerText = ac2; document.getElementById('stm-ac1').closest('.sm-row').style.display = (ac1 === 0 && ac2 === 0) ? 'none' : 'grid'; document.getElementById('stm-lbl-aces').innerText = getStatsLabel('aces', state); }
                     document.getElementById('stm-df1').innerText = df1; document.getElementById('stm-df2').innerText = df2;
                     document.getElementById('stm-df1').closest('.sm-row').style.display = (df1 === 0 && df2 === 0) ? 'none' : 'grid';
 
@@ -4547,11 +4554,11 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                         if (state.animation.type === 'double_fault') {
                             tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
                             showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
-                        } else if (['smash', 'net_cord', 'por_tres', 'por_cuatro', 'dormilona'].includes(state.animation.type)) {
+                        } else if (['smash', 'net_cord', 'por_tres', 'por_cuatro', 'dormilona', 'ace'].includes(state.animation.type)) {
                             const aType = state.animation.type;
                             const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
                             const labelEl = document.getElementById(`action-label-${state.animation.team}`);
-                            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona' };
+                            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', ace: 'ACE' };
 
                             // ТЕКСТ-НАПИС — окрема функція (вмикається/вимикається чекбоксом "Тексти-написи", не залежить від м'яча)
                             if (labelEl && state.showActionLabels !== false) {
