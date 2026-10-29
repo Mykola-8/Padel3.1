@@ -669,6 +669,29 @@
         @keyframes brkFloat { 0%, 100% { transform: translateY(-4vh); } 50% { transform: translateY(4vh); } }
         @keyframes brkGlow { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255,255,255,.2)) brightness(1); } 50% { filter: drop-shadow(0 0 40px rgba(255,255,255,.95)) brightness(1.35); } }
 
+        /* ===== АНАЛІТИКА МАТЧУ (state.anCfg) ===== */
+        .an-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10005; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: #fff; }
+        .an-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
+        .an-panel { position: absolute; left: 150px; top: 60px; width: 1620px; max-height: 960px; border-radius: 22px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.5); display: flex; flex-direction: column; }
+        .an-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--an-bg1, #0b1220), var(--an-bg2, #131c33)); opacity: var(--an-op, .92); z-index: 0; }
+        .an-panel > * { position: relative; z-index: 1; }
+        .an-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 36px; border-bottom: 2px solid rgba(255,255,255,.14); }
+        .an-title { font-size: 34px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; opacity: .9; }
+        .an-team { font-size: 34px; font-weight: 800; max-width: 560px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .an-team.t1 { color: var(--an-c1, #38bdf8); } .an-team.t2 { color: var(--an-c2, #fb923c); text-align: right; }
+        .an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; padding: 16px 30px 22px; }
+        .an-card { background: rgba(255,255,255,.06); border-radius: 14px; padding: 10px 18px 8px; }
+        .an-card.wide { grid-column: 1 / -1; }
+        .an-ct { font-size: 17px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; opacity: .6; margin-bottom: 4px; }
+        .an-row { display: grid; grid-template-columns: 170px 1fr 170px; align-items: center; gap: 10px; padding: 2px 0; }
+        .an-row .v { font-size: 22px; font-weight: 800; white-space: nowrap; } .an-row .v1 { text-align: left; color: var(--an-c1, #38bdf8); } .an-row .v2 { text-align: right; color: var(--an-c2, #fb923c); }
+        .an-row .lb { text-align: center; font-size: 17px; font-weight: 600; opacity: .85; line-height: 1.15; }
+        .an-bar { height: 7px; border-radius: 4px; display: flex; overflow: hidden; background: rgba(255,255,255,.1); margin-top: 3px; }
+        .an-bar i { display: block; height: 100%; } .an-bar i:first-child { background: var(--an-c1, #38bdf8); } .an-bar i:last-child { background: var(--an-c2, #fb923c); }
+        .an-single { display: flex; justify-content: space-between; gap: 16px; font-size: 19px; padding: 3px 0; } .an-single b { font-weight: 800; }
+        .an-chart svg { width: 100%; height: 230px; display: block; } .an-chart svg * { vector-effect: non-scaling-stroke; }
+        .an-empty { padding: 60px; text-align: center; font-size: 30px; opacity: .7; }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1877,6 +1900,7 @@
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
+    <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
     <div class="tc-wrap" id="spc-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
@@ -3642,6 +3666,98 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             return { apply };
         })();
 
+        // ===== АНАЛІТИКА МАТЧУ: розрахунок із журналу очок =====
+        const AN = (function () {
+            const wrap = document.getElementById('an-wrap'), panel = document.getElementById('an-panel');
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const L = {
+                title: ['MATCH ANALYTICS', 'АНАЛІТИКА МАТЧУ'], serve: ['Serve & return', 'Подача і прийом'], key: ['Key points', 'Ключові очки'], games: ['Games', 'Гейми'], streak: ['Streaks', 'Серії'], timing: ['Timing', 'Час'], mom: ['Momentum (points)', 'Моментум (по очках)'],
+                total: ['Total points won', 'Всього виграно очок'], srvw: ['Points won on serve', 'Очки на своїй подачі'], retw: ['Points won on return', 'Очки на прийомі'],
+                bpc: ['Break points converted', 'Брейк-пойнти реалізовано'], bps: ['Break points saved', 'Брейк-пойнти відбито'], gp: ['Golden points won', 'Золоті очки'], adv: ['Advantage converted', 'Переваги реалізовано'], kp: ['Key points won', 'Ключові очки (BP/GP/SP/MP)'],
+                hold: ['Service games held', 'Свої подачі втримано'], brk: ['Breaks', 'Брейки'], love: ['Games won to love', 'Гейми «насухо»'], tbw: ['Tie-breaks won', 'Тайбрейки виграно'],
+                sp: ['Longest point streak', 'Найдовша серія очків'], sg: ['Longest game streak', 'Найдовша серія геймів'],
+                avgp: ['Avg time between points', 'Середній час між очками'], longp: ['Longest point', 'Найдовше очко'], longpause: ['Longest pause', 'Найдовша пауза'], avgg: ['Avg game duration', 'Середній гейм'], longg: ['Longest game', 'Найдовший гейм'], shortg: ['Shortest game', 'Найкоротший гейм'], longgp: ['Longest game (points)', 'Найдовший гейм (очок)'], sets: ['Set durations', 'Тривалість сетів'], match: ['Match time', 'Час матчу'], none: ['No data yet', 'Даних ще немає']
+            };
+            const fmt = s => { s = Math.round(s); const m = Math.floor(s / 60), r = s % 60; return m + ':' + String(r).padStart(2, '0'); };
+            function compute(st) {
+                const log = arr(st.pointLog).filter(e => Array.isArray(e) || (e && typeof e === 'object')).map(e => Array.isArray(e) ? e : Object.values(e));
+                const T = [null, { pts: 0, sPts: 0, sTot: 0, rPts: 0, rTot: 0, bpO: 0, bpC: 0, bpF: 0, bpS: 0, gp: 0, avO: 0, avC: 0, kp: 0, holds: 0, sg: 0, breaks: 0, tb: 0, sp: 0, gs: 0 }, { pts: 0, sPts: 0, sTot: 0, rPts: 0, rTot: 0, bpO: 0, bpC: 0, bpF: 0, bpS: 0, gp: 0, avO: 0, avC: 0, kp: 0, holds: 0, sg: 0, breaks: 0, tb: 0, sp: 0, gs: 0 }];
+                let gpTot = 0, kpTot = 0, run = 0, runW = 0, gRun = 0, gRunW = 0, ptsInGame = 0, longGP = 0, diff = 0; const mom = [], marks = [], gDur = [], sDur = [], gaps = [];
+                let lastGameEnd = log.length ? log[0][2] - 0 : 0, lastSetEnd = lastGameEnd, prevT = null;
+                log.forEach((e, i) => {
+                    const w = e[0], s = e[1], t = e[2], rc = e[3], av = e[4], en = e[5], m = e[6]; if (w !== 1 && w !== 2) return; const l = w === 1 ? 2 : 1;
+                    T[w].pts++;
+                    if (m !== 2) {
+                        if (s === w) { T[w].sPts++; T[w].sTot++; T[l].rTot++; } else { T[w].rPts++; T[w].rTot++; T[s].sTot++; }
+                        if (rc === 'B') { const rcv = s === 1 ? 2 : 1; T[rcv].bpO++; T[s].bpF++; if (w === rcv) T[rcv].bpC++; else T[s].bpS++; }
+                        if (rc === 'G') { gpTot++; T[w].gp++; }
+                        if (av) { T[av].avO++; if (w === av) T[av].avC++; }
+                        if (rc === 'B' || rc === 'G' || rc === 'S' || rc === 'M' || rc === 'T') { kpTot++; T[w].kp++; }
+                    }
+                    if (runW === w) run++; else { runW = w; run = 1; } if (run > T[w].sp) T[w].sp = run;
+                    diff += (w === 1 ? 1 : -1); mom.push(diff); ptsInGame++;
+                    if (prevT !== null) { const d = (t - prevT) / 1000; gaps.push({ d, set: en === 2 }); } prevT = t;
+                    if (en >= 1) {
+                        marks.push({ i: mom.length - 1, set: en === 2 });
+                        if (m === 0) { T[w].sg++; if (s === w) T[s].holds++; else T[w].breaks++; if (gRunW === w) gRun++; else { gRunW = w; gRun = 1; } if (gRun > T[w].gs) T[w].gs = gRun; if (ptsInGame > longGP) longGP = ptsInGame; }
+                        else if (m === 1) { T[w].tb++; if (gRunW === w) gRun++; else { gRunW = w; gRun = 1; } if (gRun > T[w].gs) T[w].gs = gRun; }
+                        gDur.push((t - lastGameEnd) / 1000); lastGameEnd = t; ptsInGame = 0;
+                        if (en === 2) { sDur.push((t - lastSetEnd) / 1000); lastSetEnd = t; }
+                    }
+                });
+                // service games per team (для hold%): подачі кожної команди = holds + чужі брейки
+                T[1].serv = T[1].holds + T[2].breaks; T[2].serv = T[2].holds + T[1].breaks;
+                const ptsGaps = gaps.filter(x => x.d <= 240 && !x.set).map(x => x.d);
+                const allGaps = gaps.map(x => x.d);
+                const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+                // «любов»: гейми, виграні всуху, беремо з лічильників пульта (t?_lg_s*)
+                let love1 = 0, love2 = 0; for (let k = 1; k <= 9; k++) { love1 += st['t1_lg_s' + k] || 0; love2 += st['t2_lg_s' + k] || 0; }
+                return { n: log.length, T, gpTot, kpTot, mom, marks, love: [0, love1, love2], longGP, time: { avgP: avg(ptsGaps), longP: ptsGaps.length ? Math.max.apply(null, ptsGaps) : 0, longPause: allGaps.length ? Math.max.apply(null, allGaps) : 0, avgG: avg(gDur), longG: gDur.length ? Math.max.apply(null, gDur) : 0, shortG: gDur.length ? Math.min.apply(null, gDur) : 0, sets: sDur, match: log.length > 1 ? (log[log.length - 1][2] - log[0][2]) / 1000 : 0 } };
+            }
+            function row(lab, a, b, ta, tb) { const sum = (a + b) || 1; return '<div><div class="an-row"><div class="v v1">' + esc(ta) + '</div><div class="lb">' + esc(lab) + '</div><div class="v v2">' + esc(tb) + '</div></div><div class="an-bar"><i style="width:' + (a / sum * 100) + '%"></i><i style="width:' + (b / sum * 100) + '%"></i></div></div>'; }
+            const pct = (n, d) => d ? Math.round(n / d * 100) + '%' : '–';
+            const ratio = (n, d) => (d ? n + '/' + d : '–');
+            function rowRatio(lab, n1, d1, n2, d2) { return row(lab, d1 ? n1 / d1 : 0, d2 ? n2 / d2 : 0, d1 ? pct(n1, d1) + ' (' + n1 + '/' + d1 + ')' : '–', d2 ? pct(n2, d2) + ' (' + n2 + '/' + d2 + ')' : '–'); }
+            function chart(c) {
+                const m = c.mom; if (m.length < 2) return '<div class="an-empty" style="padding:30px">…</div>';
+                const W = 720, H = 230, mx = Math.max(3, Math.max.apply(null, m.map(Math.abs))), x = i => 10 + i * (W - 20) / (m.length - 1), y = v => H / 2 - v / mx * (H / 2 - 14);
+                const pts = m.map((v, i) => x(i) + ',' + y(v)).join(' ');
+                let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none"><line x1="0" y1="' + H / 2 + '" x2="' + W + '" y2="' + H / 2 + '" stroke="rgba(255,255,255,.35)" stroke-dasharray="6 6"/>';
+                c.marks.forEach(k => { svg += '<line x1="' + x(k.i) + '" y1="0" x2="' + x(k.i) + '" y2="' + H + '" stroke="rgba(255,255,255,' + (k.set ? '.55' : '.14') + ')" stroke-width="' + (k.set ? 3 : 1) + '"/>'; });
+                svg += '<polyline points="' + pts + '" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>';
+                svg += '<defs><clipPath id="anUp"><rect x="0" y="0" width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="anDn"><rect x="0" y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath></defs><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c1,#38bdf8)" opacity=".32" clip-path="url(#anUp)"/><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c2,#fb923c)" opacity=".32" clip-path="url(#anDn)"/></svg>';
+                return svg;
+            }
+            let lastSig = '';
+            function render(st) {
+                const cfg = st.anCfg || {}, show = !!cfg.show;
+                wrap.classList.toggle('on', show);
+                const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
+                wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
+                if (!show) return;
+                const s = wrap.style, lang = st.cornerSlideLang === 'ua' ? 1 : 0, t = key => L[key][lang];
+                s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
+                s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
+                const B = cfg.blocks || {}, on = key => B[key] !== false;
+                const sig = JSON.stringify([st.pointLog, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
+                if (sig === lastSig) return; lastSig = sig;
+                const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="an-head"><div class="an-team t1">' + esc(st.p1name || 'Team 1') + '</div><div class="an-title">' + t('title') + '</div><div class="an-team t2">' + esc(st.p2name || 'Team 2') + '</div></div>';
+                if (!c.n) { panel.innerHTML = h + '<div class="an-empty">' + t('none') + '</div>'; return; }
+                h += '<div class="an-grid">';
+                if (on('serve')) h += '<div class="an-card"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
+                if (on('key')) h += '<div class="an-card"><div class="an-ct">' + t('key') + '</div>' + rowRatio(t('bpc'), A.bpC, A.bpO, Bt.bpC, Bt.bpO) + rowRatio(t('bps'), A.bpS, A.bpF, Bt.bpS, Bt.bpF) + row(t('gp'), A.gp, Bt.gp, A.gp + (c.gpTot ? '/' + c.gpTot : ''), Bt.gp + (c.gpTot ? '/' + c.gpTot : '')) + rowRatio(t('adv'), A.avC, A.avO, Bt.avC, Bt.avO) + row(t('kp'), A.kp, Bt.kp, A.kp + (c.kpTot ? '/' + c.kpTot : ''), Bt.kp + (c.kpTot ? '/' + c.kpTot : '')) + '</div>';
+                if (on('games')) h += '<div class="an-card"><div class="an-ct">' + t('games') + '</div>' + rowRatio(t('hold'), A.holds, A.serv, Bt.holds, Bt.serv) + row(t('brk'), A.breaks, Bt.breaks, A.breaks, Bt.breaks) + row(t('love'), c.love[1], c.love[2], c.love[1], c.love[2]) + (A.tb + Bt.tb ? row(t('tbw'), A.tb, Bt.tb, A.tb, Bt.tb) : '') + '</div>';
+                if (on('streak')) h += '<div class="an-card"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
+                if (on('timing')) { const T2 = c.time; h += '<div class="an-card"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longp') + '</span><b>' + fmt(T2.longP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + '</span><b>' + fmt(T2.avgG) + '</b></div><div class="an-single"><span>' + t('longg') + ' / ' + t('shortg') + '</span><b>' + fmt(T2.longG) + ' / ' + fmt(T2.shortG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
+                if (on('mom')) h += '<div class="an-card"><div class="an-ct">' + t('mom') + '</div><div class="an-chart">' + chart(c) + '</div></div>';
+                panel.innerHTML = h + '</div>';
+            }
+            window.addEventListener('resize', () => { if (window.__lastAnState) { lastSig = ''; render(window.__lastAnState); } });
+            return { render: st => { window.__lastAnState = st; render(st); }, compute };
+        })();
+
         function __courtOnValue(cb) {
             const wrap = snap => ({ val: () => { const m = __mergeSp(snap.val()); window.__schState = m; return SCH.gate(m); } });
             window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
@@ -3777,6 +3893,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     document.getElementById('brk-sets').innerText = setsLine; breakPanel.classList.add('visible');
                 } else { breakPanel.classList.remove('visible'); }
                 try { window.__brkMirror && window.__brkMirror(state); BRK.apply(state, newBreakActive); } catch (e) { console.error(e); }
+                try { AN.render(state); } catch (e) { console.error(e); }
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
