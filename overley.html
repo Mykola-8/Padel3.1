@@ -694,6 +694,16 @@
         body.an-end-2 #statistics-panel, body.an-end-2 #statistics-panel-manual, body.an-end-2 #match-finished-board, body.an-end-2 #main-scoreboard, body.an-end-2 .an-wrap { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
         .an-empty { padding: 60px; text-align: center; font-size: 30px; opacity: .7; }
 
+        /* ===== АНАЛІТИКА МІЖ ГЕЙМАМИ: плашка зліва внизу ===== */
+        .anb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 5000; pointer-events: none; font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden; }
+        .anb-plate { position: absolute; left: 0; bottom: 130px; width: 600px; border-radius: 0 18px 18px 0; padding: 8px 6px 6px; background: rgba(8, 14, 30, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 10px 34px rgba(0,0,0,.4); transform: translateX(-104%); transition: transform .6s cubic-bezier(.2,.85,.25,1); }
+        .anb-plate.in { transform: translateX(0); }
+        .anb-plate .an-card { background: transparent; padding: 6px 16px 4px; }
+        .anb-teams { display: flex; justify-content: space-between; gap: 12px; padding: 2px 16px 0; font-size: 18px; font-weight: 800; }
+        .anb-teams span { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .anb-teams .t1 { color: var(--an-c1, #38bdf8); } .anb-teams .t2 { color: var(--an-c2, #fb923c); }
+        .anb-plate .an-row { grid-template-columns: 130px 1fr 130px; } .anb-plate .an-row .v { font-size: 20px; } .anb-plate .an-row .lb { font-size: 15px; }
+        .anb-plate .an-single { font-size: 17px; }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -1902,6 +1912,7 @@
 
     <div class="gr-wrap" id="gr-wrap"><div class="gr-bg"></div><div class="gr-inner"></div></div>
     <div class="ic-wrap" id="ic-wrap"><div class="ic-panel" id="ic-panel"></div></div>
+    <div class="anb-wrap" id="anb-wrap"><div class="anb-plate" id="anb-plate"></div></div>
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
@@ -2827,7 +2838,21 @@
             const availW = p.clientWidth - 36, availH = p.clientHeight - 10;
             while (size > 8 && (t.scrollWidth > availW || t.offsetHeight > availH)) { size--; t.style.fontSize = size + 'px'; }
         }
+        // QR синхронізується зі спонсором, чий логотип зараз на екрані (state.sponsorQrs[слот])
+        let sponsorLogoSlots = [], qrSponsorIdx = 0;
+        function applyQr(st) {
+            st = st || lastKnownState; if (!st) return;
+            let url = st.qrCodeUrl || "https://google.com", desc = st.qrCodeDescription || "SCAN ME";
+            const arr = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+            if (st.qrSponsorSync !== false && st.showSponsorLogos && st.sponsorLogoDisplayMode !== 'all') {
+                const slot = sponsorLogoSlots[qrSponsorIdx], u = slot === undefined ? '' : String(arr(st.sponsorQrs)[slot] || '').trim();
+                if (u) { url = u; desc = String(arr(st.sponsorQrDescs)[slot] || '').trim() || desc; }
+            }
+            if (url !== currentQrUrl) { currentQrUrl = url; document.getElementById('qr-code-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`; }
+            document.getElementById('qr-code-description-node').innerText = desc;
+        }
         function sponsorInfoShowFor(idx, instantOut) {
+            qrSponsorIdx = idx; try { applyQr(); } catch (e) {}
             const p = document.getElementById('sponsor-info-panel'), t = document.getElementById('sponsor-info-text'); if (!p || !t) return;
             clearTimeout(sponsorInfoDelayTimer); sponsorInfoPending = false;
             const txt = sponsorInfoOn ? String(sponsorInfoList[idx] || '').trim() : '';
@@ -3406,6 +3431,8 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const m = Object.assign({}, s), gs = __globalSp;
             if (gs.logos !== undefined) m.sponsorLogos = Array.isArray(gs.logos) ? gs.logos : Object.values(gs.logos || {});
             if (gs.infos !== undefined) m.sponsorInfos = Array.isArray(gs.infos) ? gs.infos : Object.values(gs.infos || {});
+            if (gs.qrs !== undefined) m.sponsorQrs = Array.isArray(gs.qrs) ? gs.qrs : Object.values(gs.qrs || {});
+            if (gs.qrDescs !== undefined) m.sponsorQrDescs = Array.isArray(gs.qrDescs) ? gs.qrDescs : Object.values(gs.qrDescs || {});
             return m;
         }
         // ===== ТАБЛО «ОРГАНІЗАТОРИ» (padel/crew) і «ОПИС СПОНСОРІВ» (padel/spcard) =====
@@ -3736,6 +3763,20 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 svg += '<defs><clipPath id="anUp"><rect x="0" y="0" width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="anDn"><rect x="0" y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath></defs><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c1,#38bdf8)" opacity=".32" clip-path="url(#anUp)"/><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c2,#fb923c)" opacity=".32" clip-path="url(#anDn)"/></svg>';
                 return svg;
             }
+            // Компактна плашка одного блоку для показу між геймами
+            function plateHtml(st, key) {
+                const lang = st.cornerSlideLang === 'ua' ? 1 : 0, t = k => L[k][lang];
+                const wrapEl = document.getElementById('anb-wrap'), cfg = st.anCfg || {};
+                wrapEl.style.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); wrapEl.style.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
+                const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="anb-teams"><span class="t1">' + esc(st.p1name || 'Team 1') + '</span><span class="t2">' + esc(st.p2name || 'Team 2') + '</span></div>';
+                if (!c.n) return h + '<div class="an-card"><div class="an-single"><span>' + t('none') + '</span></div></div>';
+                if (key === 'serve') h += '<div class="an-card"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + ((st.p1Aces || st.p2Aces) ? row(t('aces'), st.p1Aces || 0, st.p2Aces || 0, st.p1Aces || 0, st.p2Aces || 0) : '') + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
+                else if (key === 'key') h += '<div class="an-card"><div class="an-ct">' + t('key') + '</div>' + rowRatio(t('bpc'), A.bpC, A.bpO, Bt.bpC, Bt.bpO) + rowRatio(t('bps'), A.bpS, A.bpF, Bt.bpS, Bt.bpF) + row(t('gp'), A.gp, Bt.gp, A.gp + (c.gpTot ? '/' + c.gpTot : ''), Bt.gp + (c.gpTot ? '/' + c.gpTot : '')) + rowRatio(t('adv'), A.avC, A.avO, Bt.avC, Bt.avO) + '</div>';
+                else if (key === 'games') h += '<div class="an-card"><div class="an-ct">' + t('games') + '</div>' + rowRatio(t('hold'), A.holds, A.serv, Bt.holds, Bt.serv) + row(t('brk'), A.breaks, Bt.breaks, A.breaks, Bt.breaks) + row(t('love'), c.love[1], c.love[2], c.love[1], c.love[2]) + (A.tb + Bt.tb ? row(t('tbw'), A.tb, Bt.tb, A.tb, Bt.tb) : '') + '</div>';
+                else if (key === 'streak') h += '<div class="an-card"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
+                else if (key === 'timing') { const T2 = c.time; h += '<div class="an-card"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + ' / ' + t('longg') + '</span><b>' + fmt(T2.avgG) + ' / ' + fmt(T2.longG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
+                return h;
+            }
             let lastSig = '', localEnd = 0, lastPh = '';
             // Автопослідовність наприкінці матчу: переможець (7 с) → ручна статистика OBS (10 с) → аналітика (15 с) → ховаємо все
             function endPhase(st, cfg) {
@@ -3785,7 +3826,43 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             }
             window.addEventListener('resize', () => { if (window.__lastAnState) { lastSig = ''; render(window.__lastAnState); } });
             setInterval(() => { if (window.__lastAnState && window.__lastAnState.isMatchFinished) render(window.__lastAnState); }, 500);
-            return { render: st => { window.__lastAnState = st; render(st); }, compute };
+            return { render: st => { window.__lastAnState = st; render(st); }, compute, plateHtml };
+        })();
+
+        // ===== АНАЛІТИКА МІЖ ГЕЙМАМИ =====
+        const AB = (function () {
+            const wrap = document.getElementById('anb-wrap'), plate = document.getElementById('anb-plate');
+            const ORDER = ['serve', 'key', 'games', 'streak', 'timing'];
+            let prevCnt = null, idx = 0, active = false, showing = false, timer = null, last = null;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            function fit() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')'; }
+            function blocks(st) { const B = (st.anCfg && st.anCfg.blocks) || {}; return ORDER.filter(k => B[k] !== false); }
+            function gated(st) { return !!(st.anCfg && st.anCfg.between === true) && !st.isMatchFinished && st.showMainBoard !== false && !st.showBreak && !st.showStatsOverlay && !st.showSetOverlayTrigger; }
+            function retract() { clearTimeout(timer); timer = null; plate.classList.remove('in'); showing = false; }
+            function showNext() {
+                const st = last; if (!st) return; const bl = blocks(st);
+                if (!active || idx >= bl.length || !gated(st)) { if (idx >= bl.length) active = false; retract(); return; }
+                plate.innerHTML = AN.plateHtml(st, bl[idx]);
+                plate.classList.add('in'); showing = true; clearTimeout(timer);
+                const sec = Math.max(1, parseFloat(g(st.anCfg.betweenSec, 3)));
+                timer = setTimeout(() => { idx++; if (idx >= blocks(last).length) { active = false; retract(); } else showNext(); }, sec * 1000);
+            }
+            function onState(st) {
+                last = st; fit();
+                const cnt = st.completedGamesCount || 0;
+                if (prevCnt === null) { prevCnt = cnt; return; }
+                if (!gated(st)) { if (showing) retract(); prevCnt = cnt; return; }
+                if (cnt < prevCnt) { prevCnt = cnt; active = false; retract(); return; }
+                if (cnt > prevCnt) {
+                    prevCnt = cnt; const every = Math.max(1, parseInt(g(st.anCfg.betweenEvery, 3)) || 3);
+                    if (cnt % every === 0) { active = true; idx = 0; }
+                    if (active && !showing) showNext();
+                    return;
+                }
+                if (showing && ((st.p1Index || 0) + (st.p2Index || 0)) > 0) retract();   // почався розіграш — плашка ховається вліво
+            }
+            window.addEventListener('resize', fit);
+            return { onState };
         })();
 
         function __courtOnValue(cb) {
@@ -3924,6 +4001,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 } else { breakPanel.classList.remove('visible'); }
                 try { window.__brkMirror && window.__brkMirror(state); BRK.apply(state, newBreakActive); } catch (e) { console.error(e); }
                 try { AN.render(state); } catch (e) { console.error(e); }
+                try { AB.onState(state); } catch (e) { console.error(e); }
 
                 const boardWrapper = document.getElementById('main-scoreboard');
                 const setResultPanel = document.getElementById('set-result-panel');
@@ -3939,11 +4017,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 refreshBoardVisibility();
 
                 if (state.showQrCode) {
-                    if ((state.qrCodeUrl || "https://google.com") !== currentQrUrl) {
-                        currentQrUrl = state.qrCodeUrl || "https://google.com";
-                        document.getElementById('qr-code-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentQrUrl)}`;
-                    }
-                    document.getElementById('qr-code-description-node').innerText = state.qrCodeDescription || "SCAN ME";
+                    applyQr(state);
                     const qrPanelEl = document.getElementById('qr-code-panel');
                     qrPanelEl.classList.add('visible');
                     const qrScaleVal = (state.qrScale !== undefined ? state.qrScale : 100) / 100;
@@ -4252,8 +4326,9 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     if (sponsorFrame && sponsorAllFrame) {
                         const __logosRaw = Array.isArray(state.sponsorLogos) ? state.sponsorLogos : [];
                         const __infosRaw = Array.isArray(state.sponsorInfos) ? state.sponsorInfos : (state.sponsorInfos && typeof state.sponsorInfos === 'object' ? Object.values(state.sponsorInfos) : []);
-                        const validLogos = [], validInfos = [];
-                        __logosRaw.forEach((u, i) => { if (u) { validLogos.push(u); validInfos.push(String(__infosRaw[i] || '')); } });
+                        const validLogos = [], validInfos = [], validSlots = [];
+                        __logosRaw.forEach((u, i) => { if (u) { validLogos.push(u); validInfos.push(String(__infosRaw[i] || '')); validSlots.push(i); } });
+                        sponsorLogoSlots = validSlots;
                         const showAllMode = state.sponsorLogoDisplayMode === 'all';
                         const __ls = Math.max(0.3, Math.min(3, (parseInt(state.sponsorLogoSize) || 100) / 100));
                         sponsorFrame.style.setProperty('--sl-w', Math.round(220 * __ls) + 'px'); sponsorFrame.style.setProperty('--sl-h', Math.round(90 * __ls) + 'px');
