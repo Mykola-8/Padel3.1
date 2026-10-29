@@ -2326,7 +2326,7 @@
                 activeMatchRibbon: "NONE",
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
-                completedGamesCount: 0, statsAutoTrigger: 0, pointLog: [],
+                completedGamesCount: 0, statsAutoTrigger: 0, pointLog: [], matchEndTs: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [],
                 showMainBoard: false, isMatchFinished: false, showBreak: false,
                 animation: { team: 0, type: "", ts: 0 }
@@ -3354,11 +3354,18 @@
                 '<div class="row"><span style="font-size:11px; color:#ccc;">Масштаб: <b id="an-v-scale"></b></span><input type="range" data-k="scale" min="40" max="150"></div>' +
                 '<div class="row"><span style="font-size:11px; color:#ccc;">Фон 0–100%: <b id="an-v-bgOpacity"></b></span><input type="range" data-k="bgOpacity" min="0" max="100"></div>' +
                 '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px; color:#ccc;"><label>Колір команди 1 <input type="color" data-k="c1"></label><label>Колір команди 2 <input type="color" data-k="c2"></label><label>Фон (верх) <input type="color" data-k="bg1"></label><label>Фон (низ) <input type="color" data-k="bg2"></label></div>' +
+                '<div style="border-top:1px dashed #444; padding-top:8px; font-size:11px; font-weight:700;">🏁 Після завершення матчу</div>' +
+                '<label style="font-size:12px; display:flex; gap:6px; align-items:center;"><input type="checkbox" data-kc="autoEnd"> Автоматично: статистика → аналітика → сховати все</label>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Показати аналітику через (с):</span><input type="number" data-kn="endDelay" min="1" max="300" style="width:70px; ' + inp + '"></div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Аналітика на екрані (с):</span><input type="number" data-kn="endDur" min="3" max="600" style="width:70px; ' + inp + '"></div>' +
+                '<label style="font-size:12px; display:flex; gap:6px; align-items:center;"><input type="checkbox" data-kc="endHide"> Після аналітики сховати табло, статистику й усе інше</label>' +
                 '<button type="button" class="btn btn-gray" id="an-clear" style="padding:8px; font-size:11px;">🗑 Очистити журнал очок цього корту</button>';
             const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📈 Аналітика матчу: блоки й вигляд</span><span class="tcol-arrow">▸</span>';
             head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
             anchor.before(head); anchor.before(card);
-            function fill() { const c = cfg(); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
+            function fill() { const c = cfg(); card.querySelectorAll('[data-kc]').forEach(e => { e.checked = c[e.dataset.kc] !== false; }); card.querySelectorAll('[data-kn]').forEach(e => { if (document.activeElement !== e) e.value = c[e.dataset.kn] !== undefined ? c[e.dataset.kn] : (e.dataset.kn === 'endDelay' ? 12 : 20); }); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
+            card.querySelectorAll('[data-kc]').forEach(e => e.addEventListener('change', () => { cfg()[e.dataset.kc] = e.checked; set(matchRef, state); }));
+            card.querySelectorAll('[data-kn]').forEach(e => e.addEventListener('input', () => { cfg()[e.dataset.kn] = parseFloat(e.value) || 0; set(matchRef, state); }));
             card.querySelectorAll('[data-b]').forEach(e => e.addEventListener('change', () => { cfg().blocks[e.dataset.b] = e.checked; set(matchRef, state); }));
             card.querySelectorAll('[data-k]').forEach(e => e.addEventListener('input', () => { const c = cfg(), k = e.dataset.k; c[k] = e.type === 'range' ? parseInt(e.value) : e.value; fill(); set(matchRef, state); }));
             card.querySelector('#an-clear').onclick = () => { if (confirm('Очистити журнал очок цього корту? Аналітика почнеться з нуля.')) { state.pointLog = []; set(matchRef, state); } };
@@ -4441,9 +4448,9 @@
         window.updateBoardOpacity = function(v) { state.boardOpacity = parseInt(v); set(matchRef, state); }
         
         window.finishMatchPro = function() {
-            if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; set(matchRef,state); return; }
+            if(state.isMatchFinished){ state.showStatsOverlay=!state.showStatsOverlay; if (state.showStatsOverlay) state.matchEndTs = Date.now(); set(matchRef,state); return; }
             if(confirm("Завершити матч та зберегти в історію?")){
-                state.isMatchFinished = true; state.showStatsOverlay = true; let scoreLines = [];
+                state.isMatchFinished = true; state.showStatsOverlay = true; state.matchEndTs = Date.now(); let scoreLines = [];
                 for(let i = 1; i <= 5; i++) { 
                     let s1 = state[`t1_s${i}`] || 0; 
                     let s2 = state[`t2_s${i}`] || 0; 
