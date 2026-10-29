@@ -690,6 +690,8 @@
         .an-bar i { display: block; height: 100%; } .an-bar i:first-child { background: var(--an-c1, #38bdf8); } .an-bar i:last-child { background: var(--an-c2, #fb923c); }
         .an-single { display: flex; justify-content: space-between; gap: 16px; font-size: 19px; padding: 3px 0; } .an-single b { font-weight: 800; }
         .an-chart svg { width: 100%; height: 230px; display: block; } .an-chart svg * { vector-effect: non-scaling-stroke; }
+        body.an-end-1 #statistics-panel, body.an-end-1 #statistics-panel-manual, body.an-end-1 #match-finished-board, body.an-end-1 #main-scoreboard,
+        body.an-end-2 #statistics-panel, body.an-end-2 #statistics-panel-manual, body.an-end-2 #match-finished-board, body.an-end-2 #main-scoreboard, body.an-end-2 .an-wrap { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
         .an-empty { padding: 60px; text-align: center; font-size: 30px; opacity: .7; }
 
         /* ===== ГРУПОВИЙ ЕТАП ===== */
@@ -3734,9 +3736,18 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 svg += '<defs><clipPath id="anUp"><rect x="0" y="0" width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="anDn"><rect x="0" y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath></defs><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c1,#38bdf8)" opacity=".32" clip-path="url(#anUp)"/><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c2,#fb923c)" opacity=".32" clip-path="url(#anDn)"/></svg>';
                 return svg;
             }
-            let lastSig = '';
+            let lastSig = '', localEnd = 0, lastEndTs = null;
+            // Автопослідовність наприкінці матчу: статистика → (через N с) аналітика → (ще M с) ховаємо все
+            function endPhase(st, cfg) {
+                if (!st.isMatchFinished) { localEnd = 0; return 0; }
+                if (cfg.autoEnd === false) return 0;
+                let t0 = parseInt(st.matchEndTs) || 0; if (!t0) { if (!localEnd) localEnd = Date.now(); t0 = localEnd; }
+                const e = (Date.now() - t0) / 1000, d = parseFloat(g(cfg.endDelay, 12)), du = parseFloat(g(cfg.endDur, 20));
+                if (e < d) return 0; if (e < d + du) return 1; return cfg.endHide === false ? 0 : 2;
+            }
             function render(st) {
-                const cfg = st.anCfg || {}, show = !!cfg.show;
+                const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 2 ? false : (ph === 1 || !!cfg.show);
+                document.body.classList.toggle('an-end-1', ph === 1); document.body.classList.toggle('an-end-2', ph === 2);
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
@@ -3745,7 +3756,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
                 const B = cfg.blocks || {}, on = key => B[key] !== false;
-                const sig = JSON.stringify([st.pointLog, st.p1Aces, st.p2Aces, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
+                const sig = JSON.stringify([ph, st.pointLog, st.p1Aces, st.p2Aces, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
                 if (sig === lastSig) return; lastSig = sig;
                 const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="an-head"><div class="an-team t1">' + esc(st.p1name || 'Team 1') + '</div><div class="an-title">' + t('title') + '</div><div class="an-team t2">' + esc(st.p2name || 'Team 2') + '</div></div>';
                 if (!c.n) { panel.innerHTML = h + '<div class="an-empty">' + t('none') + '</div>'; return; }
@@ -3759,6 +3770,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 panel.innerHTML = h + '</div>';
             }
             window.addEventListener('resize', () => { if (window.__lastAnState) { lastSig = ''; render(window.__lastAnState); } });
+            setInterval(() => { if (window.__lastAnState && window.__lastAnState.isMatchFinished) render(window.__lastAnState); }, 500);
             return { render: st => { window.__lastAnState = st; render(st); }, compute };
         })();
 
