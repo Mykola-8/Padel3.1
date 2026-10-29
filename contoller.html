@@ -3305,6 +3305,39 @@
             onValue(ref(db, 'padel/breakCfg'), s => { const v = s.val(); if (!v) return; d = Object.assign({}, DEF, v); fill(); });
         })();
 
+        // ===== Підсвітка кнопок «Показати / Сховати» у вкладці Турнір =====
+        (function tbHighlight() {
+            const css = document.createElement('style');
+            css.textContent = '.tb-live { background:#16a34a !important; color:#fff !important; font-weight:800 !important; box-shadow:0 0 0 3px #fff, 0 0 18px 2px #22c55e !important; position:relative; }' +
+                '.tb-dim { opacity:.45; }' +
+                '.tb-last { box-shadow:0 0 0 3px #fbbf24 !important; }';
+            document.head.appendChild(css);
+            const SINGLE = [['btn-mi-toggle', s => s.matchIntro && s.matchIntro.show], ['btn-rk-toggle', s => s.teamRanking && s.teamRanking.show],
+                ['po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show], ['po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show],
+                ['gr-btn-show', s => s.groups && s.groups.show], ['ic-btn-show', s => s.introCard && s.introCard.show]];
+            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off']];
+            function tick() {
+                try {
+                    const s = (typeof state === 'object' && state) || {};
+                    SINGLE.forEach(([id, f]) => { const b = document.getElementById(id); if (!b) return; const on = !!f(s); b.classList.toggle('tb-live', on); });
+                    PAIRS.forEach(([a, b]) => {
+                        const A = document.getElementById(a), B = document.getElementById(b); if (!A || !B) return;
+                        const aOn = (A.style.outline || '').indexOf('solid') >= 0;
+                        A.classList.toggle('tb-live', aOn); A.classList.toggle('tb-dim', !aOn);
+                        B.classList.toggle('tb-dim', aOn); B.classList.remove('tb-live');
+                    });
+                } catch (e) {}
+            }
+            setInterval(tick, 400); tick();
+            // «Показати на всіх / Сховати на всіх»: остання натиснута кнопка в парі лишається підсвіченою
+            document.addEventListener('click', ev => {
+                const b = ev.target.closest && ev.target.closest('button'); if (!b) return;
+                const oc = b.getAttribute('onclick') || ''; if (oc.indexOf('showAllCourts') < 0 && oc.indexOf('icShowAll') < 0) return;
+                const row = b.parentElement; if (!row) return;
+                Array.from(row.children).forEach(x => x.classList.remove('tb-last')); b.classList.add('tb-last');
+            }, true);
+        })();
+
         // ===== Згортання блоків вкладки Tournament =====
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
