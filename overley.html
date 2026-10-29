@@ -3166,7 +3166,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const uaL = st.cornerSlideLang === 'ua';
             const tags = [];
             if (st.isSuperTiebreak) tags.push((uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10)); else if (st.isTiebreak) tags.push(uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK');
-            if (st.isTotalSet) tags.push('СУМА ГЕМІВ ' + (st.proSetLimit || 8)); else if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
+            if (st.isTotalSet) tags.push(st.isTiebreak ? 'TIE-BREAK TO ' + (st.totalTbLimit || 5) : 'TOTAL SET ' + (st.proSetLimit || 8)); else if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
             if (st.isMexicano) tags.push((uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24)); else if (st.isAmericano) tags.push((uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21));
             const rb = document.getElementById('ribbon-match'); let plate = '', pt = '';
             if (rb && rb.classList.contains('visible')) {
@@ -3288,7 +3288,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const uaL = st.cornerSlideLang === 'ua', modes = [];
             if (st.isSuperTiebreak) modes.push('<b class="tb">' + (uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10) + '</b>');
             else if (st.isTiebreak) modes.push('<b class="tb">' + (uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK') + '</b>');
-            if (st.isTotalSet) modes.push('<b>СУМА ГЕМІВ ' + (st.proSetLimit || 8) + '</b>'); else if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
+            if (st.isTotalSet) modes.push('<b>' + (st.isTiebreak ? 'TIE-BREAK TO ' + (st.totalTbLimit || 5) : 'TOTAL SET ' + (st.proSetLimit || 8)) + '</b>'); else if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
             if (st.isMexicano) modes.push('<b class="am">' + (uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24) + '</b>');
             else if (st.isAmericano) modes.push('<b class="am">' + (uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21) + '</b>');
             const modeHtml = modes.length ? '<div class="tl-mode">' + modes.join('') + '</div>' : '';
@@ -3992,7 +3992,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
 
                 const ribbonProset = document.getElementById('ribbon-proset');
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
-                else if (state.isProSet) { ribbonProset.innerText = state.isTotalSet ? `СУМА ГЕМІВ ${state.proSetLimit||8}` : `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
+                else if (state.isProSet) { ribbonProset.innerText = state.isTotalSet ? (state.isTiebreak ? `TIE-BREAK TO ${state.totalTbLimit||5}` : `TOTAL SET ${state.proSetLimit||8}`) : `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
                 else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
                 else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
                 else ribbonProset.classList.remove('visible');
