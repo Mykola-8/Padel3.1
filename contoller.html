@@ -176,6 +176,7 @@
         <div class="action-grid" id="action-grid-admin">
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'ace')">🎯 Ace — виліт на подачі (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Повернення (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3 (К1)</button>
@@ -183,6 +184,7 @@
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'ace')">🎯 Ace — виліт на подачі (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Повернення (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3 (К2)</button>
@@ -1567,7 +1569,7 @@
                 isProSet: false, proSetLimit: 8, isTotalSet: false, totalTbLimit: 5,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
@@ -2322,7 +2324,7 @@
                 p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 isTiebreak: false, deuceCounter: 0,
                 activeMatchRibbon: "NONE",
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 completedGamesCount: 0, statsAutoTrigger: 0, pointLog: [],
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [],
@@ -2350,7 +2352,7 @@
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, isTotalSet: state.isTotalSet || false, totalTbLimit: state.totalTbLimit || 5, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
@@ -4058,6 +4060,7 @@
             const kindMap = {
                 por_tres:   { f: 'PorTres',   t: 'por_tres' },
                 por_cuatro: { f: 'PorCuatro', t: 'por_cuatro' },
+                ace:        { f: 'Aces', t: 'ace' },
                 dormilona:  { f: 'Dormilona', t: 'dormilona' }
             };
             const km = kindMap[kind] || { f: 'Smashes', t: 'smash' };
