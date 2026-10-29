@@ -3765,7 +3765,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             }
             // Компактна плашка одного блоку для показу між геймами
             function plateHtml(st, key) {
-                const lang = st.cornerSlideLang === 'ua' ? 1 : 0, t = k => L[k][lang];
+                const lang = ((st.anCfg && st.anCfg.betweenLang) || 'ua') === 'ua' ? 1 : 0, t = k => L[k][lang];
                 const wrapEl = document.getElementById('anb-wrap'), cfg = st.anCfg || {};
                 wrapEl.style.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); wrapEl.style.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="anb-teams"><span class="t1">' + esc(st.p1name || 'Team 1') + '</span><span class="t2">' + esc(st.p2name || 'Team 2') + '</span></div>';
@@ -3777,13 +3777,14 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 else if (key === 'timing') { const T2 = c.time; h += '<div class="an-card"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + ' / ' + t('longg') + '</span><b>' + fmt(T2.avgG) + ' / ' + fmt(T2.longG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
                 return h;
             }
-            let lastSig = '', localEnd = 0, lastPh = '';
+            let lastSig = '', localEnd = 0, lastPh = '', endLang = 0;
             // Автопослідовність наприкінці матчу: переможець (7 с) → ручна статистика OBS (10 с) → аналітика (15 с) → ховаємо все
             function endPhase(st, cfg) {
                 if (!st.isMatchFinished) { localEnd = 0; return 'none'; }
                 if (cfg.autoEnd === false) return 'none';
                 let t0 = parseInt(st.matchEndTs) || 0; if (!t0) { if (!localEnd) localEnd = Date.now(); t0 = localEnd; }
-                const e = (Date.now() - t0) / 1000, w = parseFloat(g(cfg.endWin, 7)), s = parseFloat(g(cfg.endStats, 10)), d = parseFloat(g(cfg.endDur, 15));
+                const e = (Date.now() - t0) / 1000, w = parseFloat(g(cfg.endWin, 7)), s = parseFloat(g(cfg.endStats, 10)), en = parseFloat(g(cfg.endAnEn, 10)), ua = parseFloat(g(cfg.endAnUa, 5)), d = en + ua;
+                endLang = e < w + s + en ? 0 : 1;
                 if (e < w) return 'win'; if (e < w + s) return 'stats'; if (e < w + s + d) return 'an'; return cfg.endHide === false ? 'none' : 'done';
             }
             function enterPhase(ph) {
@@ -3807,7 +3808,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
                 if (!show) return;
-                const s = wrap.style, lang = st.cornerSlideLang === 'ua' ? 1 : 0, t = key => L[key][lang];
+                const s = wrap.style, lang = ph === 'an' ? endLang : (st.cornerSlideLang === 'ua' ? 1 : 0), t = key => L[key][lang];
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
                 const B = cfg.blocks || {}, on = key => B[key] !== false;
@@ -3843,9 +3844,12 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const st = last; if (!st) return; const bl = blocks(st);
                 if (!active || idx >= bl.length || !gated(st)) { if (idx >= bl.length) active = false; retract(); return; }
                 plate.innerHTML = AN.plateHtml(st, bl[idx]);
-                plate.classList.add('in'); showing = true; clearTimeout(timer);
-                const sec = Math.max(1, parseFloat(g(st.anCfg.betweenSec, 3)));
-                timer = setTimeout(() => { idx++; if (idx >= blocks(last).length) { active = false; retract(); } else showNext(); }, sec * 1000);
+                void plate.offsetWidth; plate.classList.add('in'); showing = true; clearTimeout(timer);
+                const sec = Math.max(1, parseFloat(g(st.anCfg.betweenSec, 5)));
+                timer = setTimeout(() => {          // вихід вліво, потім наступна таблиця так само
+                    plate.classList.remove('in');
+                    timer = setTimeout(() => { idx++; if (idx >= blocks(last).length) { active = false; showing = false; timer = null; } else showNext(); }, 750);
+                }, sec * 1000);
             }
             function onState(st) {
                 last = st; fit();
