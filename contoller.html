@@ -211,6 +211,7 @@
 
         <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:14px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         <button class="btn" id="btn-analytics" style="width:100%; background:#4338ca; padding:14px; font-weight:800;" onclick="toggleAnalytics()">📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ</button>
+        <button class="btn" id="btn-anbetween" style="width:100%; background:#4338ca; padding:12px; font-weight:800;" onclick="toggleAnalyticsBetween()">📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВИМК</button>
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <!-- ===== БЛОКИ ADMIN ===== -->
@@ -673,6 +674,8 @@
             <div class="card" style="display:flex; flex-direction:column; gap:10px;">
                 <div style="font-size:10px; color:#9bd; margin-bottom:6px;">🌐 Показ, посилання й опис QR-коду — спільні для ВСІХ кортів. Розмір і позиція — окремо для кожного корту.</div>
                 <div class="switch-row"><span>Показувати QR-код:</span><input type="checkbox" id="mode-show-qr-checkbox" onchange="toggleQrCodeVisibility(this.checked)"></div>
+                <div class="switch-row"><span>QR за логотипом спонсора (карусель):</span><input type="checkbox" id="qr-sponsor-sync-checkbox" checked onchange="toggleQrSponsorSync(this.checked)"></div>
+                <div style="font-size:10px; color:#888;">Для кожного спонсора оберіть посилання зі списку нижче (поле «QR» у рядку спонсора). Без вибору — QR за замовчуванням.</div>
 
                 <div style="font-size:11px; font-weight:700;">Збережені посилання:</div>
                 <div id="qr-links-list" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;"></div>
@@ -1223,6 +1226,8 @@
             const gs = globalSponsors;
             if (gs.logos !== undefined) { let a = Array.isArray(gs.logos) ? gs.logos.slice() : Object.values(gs.logos || {}); while (a.length < 10) a.push(""); state.sponsorLogos = a; }
             if (gs.infos !== undefined) { let a = Array.isArray(gs.infos) ? gs.infos.slice() : Object.values(gs.infos || {}); while (a.length < 10) a.push(""); state.sponsorInfos = a.slice(0, 10); }
+            if (gs.qrs !== undefined) { let a = Array.isArray(gs.qrs) ? gs.qrs.slice() : Object.values(gs.qrs || {}); while (a.length < 10) a.push(""); state.sponsorQrs = a.slice(0, 10); }
+            if (gs.qrDescs !== undefined) { let a = Array.isArray(gs.qrDescs) ? gs.qrDescs.slice() : Object.values(gs.qrDescs || {}); while (a.length < 10) a.push(""); state.sponsorQrDescs = a.slice(0, 10); }
         }
         // ===== СПІЛЬНІ РЯДКИ (бігучий + рекламний) для всіх кортів: padel/bars; вертикальні позиції — окремо для корту =====
         const BARS_KEYS = ['tickerSlides', 'tickerSlideSec', 'tickerSlideAnim', 'tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
@@ -1371,7 +1376,8 @@
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
             ensureSponsorInfosArray();
-            const obj = { logos: state.sponsorLogos.slice(0, 10), infos: state.sponsorInfos.slice(0, 10) };
+            ensureSponsorQrs();
+            const obj = { logos: state.sponsorLogos.slice(0, 10), infos: state.sponsorInfos.slice(0, 10), qrs: state.sponsorQrs.slice(0, 10), qrDescs: state.sponsorQrDescs.slice(0, 10) };
             globalSponsors = obj;
             set(ref(db, 'padel/sponsors'), obj); set(matchRef, state);
         }
@@ -2233,6 +2239,26 @@
             while (arr.length < 10) arr.push("");
             state.sponsorInfos = arr.slice(0, 10).map(x => (x === undefined || x === null) ? "" : String(x));
         }
+        function ensureSponsorQrs() {
+            ['sponsorQrs', 'sponsorQrDescs'].forEach(k => { const a = Array.isArray(state[k]) ? state[k].slice() : []; while (a.length < 10) a.push(""); state[k] = a.slice(0, 10).map(x => x == null ? "" : String(x)); });
+        }
+        window.setSponsorQr = function (i, idx) {
+            ensureSponsorQrs(); const l = (Array.isArray(state.qrLinks) ? state.qrLinks : [])[parseInt(idx)];
+            state.sponsorQrs[i - 1] = l ? (l.url || '') : ''; state.sponsorQrDescs[i - 1] = l ? (l.desc || '') : '';
+            saveSponsorsGlobal();
+        };
+        window.toggleQrSponsorSync = function (c) { state.qrSponsorSync = !!c; set(matchRef, state); };
+        function refreshSponsorQrSelects() {
+            const links = Array.isArray(state.qrLinks) ? state.qrLinks : [];
+            for (let i = 1; i <= 10; i++) {
+                const s = document.getElementById('sponsor-qr-sel-' + i); if (!s || document.activeElement === s) continue;
+                const cur = (Array.isArray(state.sponsorQrs) ? state.sponsorQrs[i - 1] : '') || '';
+                const html = '<option value="">QR: за замовч.</option>' + links.map((l, k) => '<option value="' + k + '">' + String(l.desc || l.url || '').replace(/[<>&"]/g, '') + '</option>').join('');
+                if (s.getAttribute('data-h') !== html) { s.innerHTML = html; s.setAttribute('data-h', html); }
+                const k = links.findIndex(l => l.url === cur); s.value = (cur && k >= 0) ? String(k) : '';
+            }
+            const ck = document.getElementById('qr-sponsor-sync-checkbox'); if (ck) ck.checked = state.qrSponsorSync !== false;
+        }
         window.updateSponsorInfoPos = function(v) { state.sponsorInfoPos = v; set(matchRef, state); };
         window.toggleSponsorInfo = function(v) { state.sponsorInfoShow = !!v; set(matchRef, state); };
         window.updateSponsorInfoNum = function(key, v, lblId, suffix) { state[key] = parseInt(v) || 0; const l = document.getElementById(lblId); if (l) l.innerText = state[key] + (suffix || ''); set(matchRef, state); };
@@ -2258,6 +2284,7 @@
                 html += '<div style="display:flex; gap:6px; align-items:center;">' +
                     '<span style="font-size:10px; color:#999; width:16px; flex-shrink:0;">' + i + '.</span>' +
                     '<input type="text" id="sponsor-logo-info-' + i + '" placeholder="Інформація про спонсора ' + i + '" style="flex:1; min-width:0; background:#2a2a2a; border:1px solid #444; color:white; padding:6px; border-radius:4px; font-size:11px;" oninput="updateSponsorInfoText(' + i + ', this.value)">' +
+                    '<select id="sponsor-qr-sel-' + i + '" style="width:92px; flex-shrink:0; background:#2a2a2a; border:1px solid #444; color:white; padding:5px 2px; border-radius:4px; font-size:10px;" onchange="setSponsorQr(' + i + ', this.value)"><option value="">QR: за замовч.</option></select>' +
                     '<button type="button" class="btn" style="padding:6px 8px; font-size:10px; background:#444; flex-shrink:0;" onclick="document.getElementById(\'sponsor-logo-file-' + i + '\').click()">📁</button>' +
                     '<input type="file" id="sponsor-logo-file-' + i + '" accept="image/*" style="display:none" onchange="uploadSponsorLogoFile(' + i + ', event)">' +
                     '<span id="sponsor-logo-status-' + i + '" style="width:16px; flex-shrink:0; font-size:11px;"></span>' +
@@ -3019,7 +3046,7 @@
                     if (kind === 'rk') saveRankingGlobal(true);
                     else if (kind === 'po-upper' || kind === 'po-lower') syncPlayoffGlobal(true);
                     else if (kind === 'gr') syncGroupsGlobal(true);
-                    else if (kind === 'sp') { ensureSponsorLogosArray(); const o = { logos: state.sponsorLogos.slice(0, 10) }; ensureSponsorInfosArray(); o.infos = state.sponsorInfos.slice(0, 10); globalSponsors = o; set(ref(db, 'padel/sponsors'), o); }
+                    else if (kind === 'sp') { ensureSponsorLogosArray(); const o = { logos: state.sponsorLogos.slice(0, 10) }; ensureSponsorInfosArray(); o.infos = state.sponsorInfos.slice(0, 10); ensureSponsorQrs(); o.qrs = state.sponsorQrs.slice(0, 10); o.qrDescs = state.sponsorQrDescs.slice(0, 10); globalSponsors = o; set(ref(db, 'padel/sponsors'), o); }
                 } catch (e) { console.error(e); }
             }
             for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
@@ -3345,6 +3372,7 @@
         (function anInit() {
             const BL = [['serve', 'Подача і прийом (очки, % на подачі/прийомі)'], ['key', 'Ключові очки (брейк-пойнти, золоті, переваги)'], ['games', 'Гейми (холди, брейки, «насухо», тайбрейки)'], ['streak', 'Серії (очки, гейми, найдовший гейм)'], ['timing', 'Час (між очками, паузи, гейми, сети, матч)'], ['mom', 'Графік моментуму']];
             const cfg = () => { if (!state.anCfg || typeof state.anCfg !== 'object') state.anCfg = { show: false, scale: 100, bgOpacity: 92, c1: '#38bdf8', c2: '#fb923c', bg1: '#0b1220', bg2: '#131c33', blocks: {} }; if (!state.anCfg.blocks) state.anCfg.blocks = {}; return state.anCfg; };
+            window.toggleAnalyticsBetween = function () { const c = cfg(); c.between = !c.between; set(matchRef, state); };
             window.toggleAnalytics = function () { const c = cfg(); c.show = !c.show; set(matchRef, state); };
             const t = document.getElementById('ticker-enabled-checkbox'); const anchor = t && t.closest('.card'); if (!anchor) return;
             const card = document.createElement('div'); card.className = 'card'; card.id = 'an-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
@@ -3354,6 +3382,10 @@
                 '<div class="row"><span style="font-size:11px; color:#ccc;">Масштаб: <b id="an-v-scale"></b></span><input type="range" data-k="scale" min="40" max="150"></div>' +
                 '<div class="row"><span style="font-size:11px; color:#ccc;">Фон 0–100%: <b id="an-v-bgOpacity"></b></span><input type="range" data-k="bgOpacity" min="0" max="100"></div>' +
                 '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px; color:#ccc;"><label>Колір команди 1 <input type="color" data-k="c1"></label><label>Колір команди 2 <input type="color" data-k="c2"></label><label>Фон (верх) <input type="color" data-k="bg1"></label><label>Фон (низ) <input type="color" data-k="bg2"></label></div>' +
+                '<div style="border-top:1px dashed #444; padding-top:8px; font-size:11px; font-weight:700;">📊 Плашка між геймами (зліва внизу)</div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Показувати кожні (гейми):</span><input type="number" data-kn="betweenEvery" min="1" max="20" style="width:70px; ' + inp + '"></div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Кожен показник (с):</span><input type="number" data-kn="betweenSec" min="1" max="30" style="width:70px; ' + inp + '"></div>' +
+                '<div style="font-size:10px; color:#888;">Вмикається кнопкою «АНАЛІТИКА МІЖ ГЕЙМАМИ» на головному екрані. Блоки беруться з прапорців вище (графік моментуму не показується).</div>' +
                 '<div style="border-top:1px dashed #444; padding-top:8px; font-size:11px; font-weight:700;">🏁 Після завершення матчу</div>' +
                 '<label style="font-size:12px; display:flex; gap:6px; align-items:center;"><input type="checkbox" data-kc="autoEnd"> Автоматично: переможець → статистика → аналітика → сховати все</label>' +
                 '<div class="row"><span style="font-size:11px; color:#ccc;">1) Хто виграв — показувати (с):</span><input type="number" data-kn="endWin" min="1" max="300" style="width:70px; ' + inp + '"></div>' +
@@ -3364,13 +3396,14 @@
             const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📈 Аналітика матчу: блоки й вигляд</span><span class="tcol-arrow">▸</span>';
             head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
             anchor.before(head); anchor.before(card);
-            function fill() { const c = cfg(); card.querySelectorAll('[data-kc]').forEach(e => { e.checked = c[e.dataset.kc] !== false; }); card.querySelectorAll('[data-kn]').forEach(e => { if (document.activeElement !== e) e.value = c[e.dataset.kn] !== undefined ? c[e.dataset.kn] : ({ endWin: 7, endStats: 10, endDur: 15 })[e.dataset.kn]; }); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
+            function fill() { const c = cfg(); card.querySelectorAll('[data-kc]').forEach(e => { e.checked = c[e.dataset.kc] !== false; }); card.querySelectorAll('[data-kn]').forEach(e => { if (document.activeElement !== e) e.value = c[e.dataset.kn] !== undefined ? c[e.dataset.kn] : ({ endWin: 7, endStats: 10, endDur: 15, betweenEvery: 3, betweenSec: 3 })[e.dataset.kn]; }); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
             card.querySelectorAll('[data-kc]').forEach(e => e.addEventListener('change', () => { cfg()[e.dataset.kc] = e.checked; set(matchRef, state); }));
             card.querySelectorAll('[data-kn]').forEach(e => e.addEventListener('input', () => { cfg()[e.dataset.kn] = parseFloat(e.value) || 0; set(matchRef, state); }));
             card.querySelectorAll('[data-b]').forEach(e => e.addEventListener('change', () => { cfg().blocks[e.dataset.b] = e.checked; set(matchRef, state); }));
             card.querySelectorAll('[data-k]').forEach(e => e.addEventListener('input', () => { const c = cfg(), k = e.dataset.k; c[k] = e.type === 'range' ? parseInt(e.value) : e.value; fill(); set(matchRef, state); }));
             card.querySelector('#an-clear').onclick = () => { if (confirm('Очистити журнал очок цього корту? Аналітика почнеться з нуля.')) { state.pointLog = []; set(matchRef, state); } };
-            setInterval(() => { const b = document.getElementById('btn-analytics'); if (b) { const on = !!(state.anCfg && state.anCfg.show); b.innerText = on ? '📈 СХОВАТИ АНАЛІТИКУ МАТЧУ' : '📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ'; b.classList.toggle('tb-live', on); } if (card.style.display !== 'none') fill(); }, 600);
+            setInterval(() => { const bb = document.getElementById('btn-anbetween'); if (bb) { const on2 = !!(state.anCfg && state.anCfg.between); bb.innerText = on2 ? '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВКЛ' : '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВИМК'; bb.classList.toggle('tb-live', on2); }
+                const b = document.getElementById('btn-analytics'); if (b) { const on = !!(state.anCfg && state.anCfg.show); b.innerText = on ? '📈 СХОВАТИ АНАЛІТИКУ МАТЧУ' : '📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ'; b.classList.toggle('tb-live', on); } if (card.style.display !== 'none') fill(); }, 600);
             fill();
         })();
 
@@ -3855,6 +3888,7 @@
                     const statusEl = document.getElementById('sponsor-logo-status-' + i);
                     if (statusEl && statusEl.innerText !== '⏳') statusEl.innerText = val ? "✅" : "";
                 }
+                try { refreshSponsorQrSelects(); } catch (e) {}
                 const sv = (id, v) => { const e = document.getElementById(id); if (e && document.activeElement !== e) e.value = v; };
                 const ck = document.getElementById('sponsor-info-show-checkbox'); if (ck) ck.checked = !!state.sponsorInfoShow;
                 { const ps = document.getElementById('sponsor-info-pos-select'); if (ps && document.activeElement !== ps) ps.value = state.sponsorInfoPos || 'left'; }
