@@ -3949,7 +3949,8 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/bars'), (snap) => { __globalBars = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/qr'), (snap) => { __globalQr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
-            onValue(ref(db, 'padel/mascots'), (snap) => { try { MS.setData(snap.val()); } catch (e) { console.error(e); } });
+            { let __m0 = null, __m1 = null; const __mm = () => { try { MS.setData({ items: Object.assign({}, (__m1 || {}).items || {}, (__m0 || {}).items || {}), def: Object.assign({}, (__m1 || {}).def || {}, (__m0 || {}).def || {}) }); } catch (e) { console.error(e); } };
+            onValue(ref(db, 'padel/mascots'), (snap) => { __m0 = snap.val(); __mm(); }); onValue(ref(db, 'padel/courts/mascots'), (snap) => { __m1 = snap.val(); __mm(); }); }
             onValue(ref(db, 'padel/ranking'), (snap) => { __globalRk = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/introCard'), (snap) => { __globalIc = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/groups'), (snap) => { __globalGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
