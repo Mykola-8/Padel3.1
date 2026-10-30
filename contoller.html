@@ -113,6 +113,7 @@
             pointer-events: none !important;
             opacity: 0.55;
         }
+        body.helper .nav-tabs, body.helper .settings-gear-btn { display: none !important; }
         .controls-locked #court-selector, .controls-locked #modal-court-badge, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
             pointer-events: auto !important;
             opacity: 1 !important;
@@ -1111,7 +1112,9 @@
             mySessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
             localStorage.setItem('padel_session_id', mySessionId);
         }
-        const isAdmin = new URLSearchParams(window.location.search).get('admin') === '1';
+        const __qs = new URLSearchParams(window.location.search), helperKey = (__qs.get('k') || '').trim(), isHelper = !!helperKey;
+        if (__qs.get('owner') === '1') { try { localStorage.setItem('padel_owner', '1'); } catch (e) {} }
+        const isAdmin = __qs.get('admin') === '1' && !isHelper;
 
         function isControllerLocked() {
             if (isAdmin) return false;
@@ -1438,10 +1441,11 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} } else { resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
+            if (window.__accCourtLock && window.__accCourtLock !== String(v)) { const cs = document.getElementById('court-selector'); if (cs) cs.value = window.__accCourtLock; return; }
             const nUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?court=' + v;
             window.history.pushState({ path: nUrl }, '', nUrl); initCourtConnection();
         }
@@ -4544,6 +4548,94 @@
                 document.getElementById('action-toggles-admin').style.display = 'none';
             }
         });
+        // ===== ДОСТУП ПОМІЧНИКІВ: посилання з ключем (?k=...), блокування/видалення, строк, обмеження кортом =====
+        (function accInit() {
+            const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            let prim = null, primLoaded = false;
+            const owner = () => { try { return localStorage.getItem('padel_owner') === '1'; } catch (e) { return false; } };
+            const data = () => { const v = prim || (state && state.accessCfg) || {}; return { lock: !!v.lock, links: (v.links && typeof v.links === 'object') ? v.links : {} }; };
+            const okRec = r => !!r && r.a !== 0 && (!r.e || Date.now() < r.e);
+            // ---- екран блокування ----
+            let gate = null;
+            function gateShow(title, sub) {
+                if (!gate) { gate = document.createElement('div'); gate.style.cssText = 'position:fixed; inset:0; z-index:999999; background:#0a0a0a; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:24px; font-family:sans-serif;'; document.body.appendChild(gate); }
+                gate.innerHTML = '<div style="font-size:46px;">🔒</div><div style="font-size:20px; font-weight:800;">' + title + '</div><div style="font-size:13px; color:#aaa;">' + sub + '</div>'; gate.style.display = 'flex';
+            }
+            function gateHide() { if (gate) gate.style.display = 'none'; }
+            function check() {
+                if (isHelper) {
+                    document.body.classList.add('helper');
+                    if (!primLoaded && !(state && state.accessCfg)) { gateShow('Перевірка доступу…', 'Зачекайте'); return; }
+                    const r = data().links[helperKey];
+                    if (!r) return gateShow('Доступ закрито', 'Це посилання недійсне або видалене організатором.');
+                    if (r.a === 0) return gateShow('Доступ заблоковано', 'Організатор вимкнув це посилання.');
+                    if (r.e && Date.now() >= r.e) return gateShow('Строк дії закінчився', 'Попросіть організатора нове посилання.');
+                    const c = r.c && r.c !== 'all' ? String(r.c) : '';
+                    window.__accCourtLock = c;
+                    const cs = document.getElementById('court-selector'); if (cs) cs.disabled = !!c;
+                    if (c && courtId !== c) { courtId = c; const u = new URL(location.href); u.searchParams.set('court', c); history.replaceState(null, '', u); initCourtConnection(); }
+                    gateHide();
+                } else if (!owner() && data().lock && primLoaded) {
+                    gateShow('Пульт захищено', 'Відкрийте особисте посилання, яке видав організатор.');
+                } else gateHide();
+            }
+            window.__accOnState = check;
+            onValue(ref(db, 'padel/access'), snap => { prim = snap.val(); primLoaded = true; check(); try { renderOwner(); } catch (e) {} });
+            setInterval(() => { try { check(); renderOwner(); } catch (e) {} }, 15000);
+            if (isHelper) { check(); return; }
+            // ---- картка організатора (вкладка «Профіль») ----
+            const tab = document.getElementById('tab-profile'); if (!tab) return;
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'acc-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            tab.appendChild(card);
+            const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            card.innerHTML = '<div style="font-size:12px; font-weight:800;">🔑 Доступ помічників</div>' +
+                '<div style="font-size:10px; color:#999;">Створіть окреме посилання для кожної людини. Потім його можна заблокувати або видалити — пульт у неї одразу закриється.</div>' +
+                '<div style="display:flex; gap:6px; flex-wrap:wrap;"><input id="acc-name" placeholder="Ім’я помічника" style="flex:2; min-width:120px; ' + inp + '">' +
+                '<select id="acc-court" style="flex:1; ' + inp + '"><option value="all">Усі корти</option>' + Array.from({ length: 10 }, (_, i) => '<option value="' + (i + 1) + '">Корт ' + (i + 1) + '</option>').join('') + '</select>' +
+                '<input id="acc-hours" type="number" min="0" value="12" title="Годин (0 = без обмеження)" style="width:70px; ' + inp + '"></div>' +
+                '<div style="font-size:10px; color:#888;">Число справа — скільки годин діє посилання (0 = без обмеження за часом).</div>' +
+                '<button class="btn btn-green" id="acc-add" style="padding:10px; font-weight:800;">➕ Створити посилання</button>' +
+                '<div id="acc-st" style="font-size:11px;"></div><div id="acc-list" style="display:flex; flex-direction:column; gap:6px;"></div>' +
+                '<div style="border-top:1px dashed #444; padding-top:8px; display:flex; flex-direction:column; gap:6px;">' +
+                '<label style="font-size:11px; color:#ccc; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="acc-lock"> Закрити пульт без ключа (відкривається лише на моїх пристроях)</label>' +
+                '<button class="btn btn-gray" id="acc-mine" style="padding:6px; font-size:11px;">📱 Позначити цей пристрій як мій</button>' +
+                '<div style="font-size:10px; color:#888;">На іншому своєму пристрої один раз відкрийте пульт із <b>?owner=1</b> в адресі. Пристрій, де ви створили перше посилання, позначається автоматично.</div></div>';
+            const st = (ok, m) => { const e = card.querySelector('#acc-st'); e.innerText = m || ''; e.style.color = ok ? '#7c7' : '#f66'; };
+            function save(d) {
+                prim = d; state.accessCfg = d;
+                const fail = () => { try { for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/accessCfg'), d); st(true, 'padel/access відхилено — працює через корти'); } catch (e) { st(false, e.message); } };
+                try { set(ref(db, 'padel/access'), d).then(() => st(true, '☁️ Збережено ✅'), fail); } catch (e) { fail(); }
+                renderOwner();
+            }
+            const rnd = () => { const a = new Uint8Array(12); crypto.getRandomValues(a); return Array.from(a, b => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join(''); };
+            const linkOf = (k, r) => { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('k', k); if (r.c && r.c !== 'all') u.searchParams.set('court', r.c); return u.toString(); };
+            const fmt = r => r.a === 0 ? '⛔ заблоковано' : (r.e ? (Date.now() >= r.e ? '⌛ прострочено' : '✅ до ' + new Date(r.e).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) : '✅ без обмеження за часом');
+            function renderOwner() {
+                const d = data(), host = card.querySelector('#acc-list'), keys = Object.keys(d.links);
+                const lk = card.querySelector('#acc-lock'); if (lk && document.activeElement !== lk) lk.checked = d.lock;
+                if (!keys.length) { host.innerHTML = '<div style="font-size:11px; color:#777;">Посилань ще немає.</div>'; return; }
+                host.innerHTML = ''; keys.sort((a, b) => (d.links[b].t || 0) - (d.links[a].t || 0)).forEach(k => {
+                    const r = d.links[k], row = document.createElement('div'); row.style.cssText = 'background:#1a1a1a; border-radius:6px; padding:8px; display:flex; flex-direction:column; gap:6px;';
+                    row.innerHTML = '<div style="font-size:12px; font-weight:700;"></div><div style="font-size:11px; color:#aaa;">' + (r.c && r.c !== 'all' ? 'Корт ' + r.c : 'Усі корти') + ' • ' + fmt(r) + '</div><div style="display:flex; gap:6px;"></div>';
+                    row.firstChild.innerText = r.n || 'Без імені';
+                    const bx = row.lastChild, mk = (t, bg, fn) => { const b = document.createElement('button'); b.className = 'btn'; b.style.cssText = 'flex:1; padding:7px; font-size:11px; background:' + bg + ';'; b.innerText = t; b.onclick = fn; bx.appendChild(b); };
+                    mk('📋 Копіювати', '#2563eb', () => { const u = linkOf(k, r); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => st(true, 'Посилання скопійовано'), () => prompt('Скопіюйте посилання:', u)); });
+                    mk(r.a === 0 ? '▶ Розблокувати' : '⏸ Заблокувати', r.a === 0 ? '#15803d' : '#b45309', () => { const n = JSON.parse(JSON.stringify(data())); n.links[k].a = r.a === 0 ? 1 : 0; save(n); });
+                    mk('🗑 Видалити', '#b91c1c', () => { if (!confirm('Видалити посилання «' + (r.n || '') + '»?')) return; const n = JSON.parse(JSON.stringify(data())); delete n.links[k]; save(n); });
+                    host.appendChild(row);
+                });
+            }
+            card.querySelector('#acc-add').onclick = () => {
+                const name = card.querySelector('#acc-name').value.trim() || 'Помічник', h = parseFloat(card.querySelector('#acc-hours').value) || 0, c = card.querySelector('#acc-court').value;
+                const n = JSON.parse(JSON.stringify(data())), k = rnd(); n.links[k] = { n: name, c: c, a: 1, t: Date.now(), e: h > 0 ? Date.now() + h * 3600000 : 0 };
+                if (!Object.keys(data().links).length) { n.lock = true; try { localStorage.setItem('padel_owner', '1'); } catch (e) {} }
+                save(n); card.querySelector('#acc-name').value = '';
+                const u = linkOf(k, n.links[k]); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => st(true, 'Створено, посилання скопійовано'), () => prompt('Скопіюйте посилання:', u));
+            };
+            card.querySelector('#acc-lock').onchange = e => { const n = JSON.parse(JSON.stringify(data())); n.lock = e.target.checked; if (n.lock) { try { localStorage.setItem('padel_owner', '1'); } catch (x) {} } save(n); };
+            card.querySelector('#acc-mine').onclick = () => { try { localStorage.setItem('padel_owner', '1'); st(true, 'Цей пристрій позначено як ваш'); } catch (e) { st(false, 'Не вдалося'); } };
+            renderOwner();
+        })();
         initCourtConnection();
     </script>
 </body>
