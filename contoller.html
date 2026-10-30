@@ -113,7 +113,9 @@
             pointer-events: none !important;
             opacity: 0.55;
         }
-        body.helper .nav-tabs, body.helper .settings-gear-btn { display: none !important; }
+        body.helper .nav-tabs { display: none !important; }
+        body.helper #btn-break, body.helper #btn-toggle-stats, body.helper #btn-analytics, body.helper #btn-anbetween, body.helper #modal-court-badge, body.helper #match-actions button[onclick="resetMatch()"], body.helper #admin-unlock-btn { display: none !important; }
+        body.helper #settings-modal > div:not(.modal-header) > :not(.hk) { display: none !important; }
         .controls-locked #court-selector, .controls-locked #modal-court-badge, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
             pointer-events: auto !important;
             opacity: 1 !important;
@@ -4572,6 +4574,8 @@
                     if (r.e && Date.now() >= r.e) return gateShow('Строк дії закінчився', 'Попросіть організатора нове посилання.');
                     const c = r.c && r.c !== 'all' ? String(r.c) : '';
                     window.__accCourtLock = c;
+                    window.__hOp = window.__hOp || {}; const helperOpened = window.__hOp;
+                    ['p1-name-input', 'mode-americano-checkbox', 'deuce-classic', 'match-actions'].forEach(id => { let e = document.getElementById(id); while (e && e.parentElement && e.parentElement.id !== 'settings-modal' && !(e.parentElement.parentElement && e.parentElement.parentElement.id === 'settings-modal')) e = e.parentElement; if (e) { e.classList.add('hk'); const hd = e.previousElementSibling; if (hd && hd.classList.contains('tcol-head')) { hd.classList.add('hk'); if (!helperOpened[id]) { helperOpened[id] = 1; e.style.display = ''; hd.classList.add('open'); } } } });
                     const cs = document.getElementById('court-selector'); if (cs) cs.disabled = !!c;
                     if (c && courtId !== c) { courtId = c; const u = new URL(location.href); u.searchParams.set('court', c); history.replaceState(null, '', u); initCourtConnection(); }
                     gateHide();
