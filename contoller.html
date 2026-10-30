@@ -114,7 +114,7 @@
             opacity: 0.55;
         }
         body.helper .nav-tabs { display: none !important; }
-        body.helper #btn-break, body.helper #btn-toggle-stats, body.helper #btn-analytics, body.helper #btn-anbetween, body.helper #modal-court-badge, body.helper #match-actions button[onclick="resetMatch()"], body.helper #admin-unlock-btn { display: none !important; }
+        body.helper #btn-break, body.helper #btn-toggle-stats, body.helper #btn-analytics, body.helper #btn-anbetween, body.helper #mascot-panel, body.helper #modal-court-badge, body.helper #match-actions button[onclick="resetMatch()"], body.helper #admin-unlock-btn { display: none !important; }
         body.helper #settings-modal > div:not(.modal-header) > :not(.hk) { display: none !important; }
         .controls-locked #court-selector, .controls-locked #modal-court-badge, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
             pointer-events: auto !important;
@@ -215,6 +215,7 @@
         <button class="btn" id="btn-toggle-stats" style="width:100%; background:#15803d; padding:14px; font-weight:800;" onclick="toggleStatsManual()">📊 ПОКАЗАТИ СТАТИСТИКУ В OBS (РУЧНА)</button>
         <button class="btn" id="btn-analytics" style="width:100%; background:#4338ca; padding:14px; font-weight:800;" onclick="toggleAnalytics()">📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ</button>
         <button class="btn" id="btn-anbetween" style="width:100%; background:#4338ca; padding:12px; font-weight:800;" onclick="toggleAnalyticsBetween()">📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВИМК</button>
+        <div id="mascot-panel" style="display:flex; flex-direction:column; gap:6px; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:8px;"></div>
         <div class="status-badge" id="mode-status">Режим: Сет 1</div>
 
         <!-- ===== БЛОКИ ADMIN ===== -->
@@ -3410,7 +3411,8 @@
             card.querySelectorAll('[data-b]').forEach(e => e.addEventListener('change', () => { cfg().blocks[e.dataset.b] = e.checked; set(matchRef, state); }));
             card.querySelectorAll('[data-k]').forEach(e => e.addEventListener('input', () => { const c = cfg(), k = e.dataset.k; c[k] = e.type === 'range' ? parseInt(e.value) : e.value; fill(); set(matchRef, state); }));
             card.querySelector('#an-clear').onclick = () => { if (confirm('Очистити журнал очок цього корту? Аналітика почнеться з нуля.')) { state.pointLog = []; set(matchRef, state); } };
-            setInterval(() => { const bb = document.getElementById('btn-anbetween'); if (bb) { const on2 = !!(state.anCfg && state.anCfg.between); bb.innerText = on2 ? '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВКЛ' : '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВИМК'; bb.classList.toggle('tb-live', on2); }
+            setInterval(() => { 
+                const bb = document.getElementById('btn-anbetween'); if (bb) { const on2 = !!(state.anCfg && state.anCfg.between); bb.innerText = on2 ? '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВКЛ' : '📊 АНАЛІТИКА МІЖ ГЕЙМАМИ: ВИМК'; bb.classList.toggle('tb-live', on2); }
                 const b = document.getElementById('btn-analytics'); if (b) { const on = !!(state.anCfg && state.anCfg.show); b.innerText = on ? '📈 СХОВАТИ АНАЛІТИКУ МАТЧУ' : '📈 ПОКАЗАТИ АНАЛІТИКУ МАТЧУ'; b.classList.toggle('tb-live', on); } if (card.style.display !== 'none') fill(); }, 600);
             fill();
         })();
@@ -4550,6 +4552,58 @@
                 document.getElementById('action-toggles-admin').style.display = 'none';
             }
         });
+        // ===== ТАЛІСМАНИ (кілька анімацій/картинок; список спільний для всіх кортів: padel/mascots) =====
+        (function msInit() {
+            const host = document.getElementById('mascot-panel'); if (!host) return;
+            let G = { items: {}, def: {} };
+            const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            host.innerHTML = '<div style="font-size:12px; font-weight:800;">🐦 Талісмани</div><div id="ms-list" style="display:flex; flex-direction:column; gap:6px;"></div>' +
+                '<details><summary style="font-size:11px; color:#aaa; cursor:pointer;">➕ Додати талісман</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">' +
+                '<input id="ms-name" placeholder="Назва" style="' + inp + '"><input id="ms-url" placeholder="Посилання на .webm / .gif / .png / .webp (або завантажте файл нижче)" style="' + inp + '">' +
+                '<div style="display:flex; gap:6px;"><button class="btn" id="ms-file-btn" style="flex:1; padding:8px; font-size:11px; background:#444;">📁 Завантажити файл</button><button class="btn btn-green" id="ms-add" style="flex:1; padding:8px; font-size:11px;">➕ Додати</button></div>' +
+                '<input type="file" id="ms-file" accept="video/webm,video/mp4,image/*" style="display:none"><div style="font-size:10px; color:#888;">Прозорий фон дає лише WebM (VP9 alpha), GIF, PNG або WebP. Файл до ~3 МБ, краще менше. MP4 — без прозорості.</div></div></details><div id="ms-st" style="font-size:11px;"></div>';
+            const st = (ok, m) => { const e = host.querySelector('#ms-st'); e.innerText = m || ''; e.style.color = ok ? '#7c7' : '#f66'; };
+            const items = () => Object.keys(G.items || {}).map(k => Object.assign({ id: k }, G.items[k])).sort((a, b) => (a.t || 0) - (b.t || 0));
+            const setF = (path, v) => set(ref(db, 'padel/mascots/' + path), v).catch(e => st(false, 'Не збережено: ' + (e && e.message || e)));
+            const cur = () => state.mascotId || 'def';
+            function play(id) { state.mascotId = id; state.mascotTs = Date.now(); state.mascotLoop = false; set(matchRef, state); }
+            function loop(id) { if (state.mascotLoop && cur() === id) state.mascotLoop = false; else { state.mascotId = id; state.mascotLoop = true; } set(matchRef, state); }
+            function render() {
+                const list = host.querySelector('#ms-list'); if (list.contains(document.activeElement) && document.activeElement.type === 'range') return;
+                const rows = [{ id: 'def', name: 'Ворон (стандартний)', size: G.def.size === undefined ? 420 : G.def.size, x: G.def.x || 0, y: G.def.y || 0, type: 'video' }].concat(items());
+                list.innerHTML = '';
+                rows.forEach(r => {
+                    const on = !!state.mascotLoop && cur() === r.id, w = document.createElement('div'); w.style.cssText = 'background:#222; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;';
+                    w.innerHTML = '<div style="display:flex; gap:6px; align-items:center;"><div style="flex:1; font-size:12px; font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc(r.name || 'Без назви') + '</div></div>' +
+                        '<details><summary style="font-size:10px; color:#999; cursor:pointer;">Розмір і позиція</summary>' +
+                        [['size', 'Розмір (px)', 120, 1200, 10, r.size === undefined ? 420 : r.size], ['x', 'Горизонталь (вправо +)', -1600, 400, 10, r.x || 0], ['y', 'Вертикаль (вгору +)', -100, 900, 10, r.y || 0]].concat(r.type === 'image' ? [['dur', 'Тривалість показу (с)', 1, 30, 1, r.dur || 5]] : []).map(f => '<label style="display:flex; flex-direction:column; gap:1px;"><span style="font-size:10px; color:#ccc;">' + f[1] + ': <b>' + f[5] + '</b></span><input type="range" data-f="' + f[0] + '" min="' + f[2] + '" max="' + f[3] + '" step="' + f[4] + '" value="' + f[5] + '"></label>').join('') + '</details>';
+                    const bx = w.firstChild, mk = (t, bg, fn) => { const b = document.createElement('button'); b.className = 'btn' + (t.startsWith('🔁') && on ? ' tb-live' : ''); b.style.cssText = 'padding:7px 9px; font-size:11px; font-weight:800; background:' + bg + ';'; b.innerText = t; b.onclick = fn; bx.appendChild(b); };
+                    mk('▶', '#0f766e', () => play(r.id)); mk(on ? '🔁 ВКЛ' : '🔁', '#374151', () => loop(r.id));
+                    if (r.id !== 'def') mk('✕', '#b91c1c', () => { if (!confirm('Видалити «' + (r.name || '') + '»?')) return; if (state.mascotId === r.id) { state.mascotId = 'def'; state.mascotLoop = false; set(matchRef, state); } setF('items/' + r.id, null); });
+                    w.querySelectorAll('input[type=range]').forEach(el => { el.oninput = () => { el.previousElementSibling.querySelector('b').innerText = el.value; clearTimeout(el._t); el._t = setTimeout(() => setF((r.id === 'def' ? 'def/' : 'items/' + r.id + '/') + el.dataset.f, parseInt(el.value)), 250); }; });
+                    list.appendChild(w);
+                });
+            }
+            let pending = null;
+            host.querySelector('#ms-file-btn').onclick = () => host.querySelector('#ms-file').click();
+            host.querySelector('#ms-file').onchange = e => {
+                const f = e.target.files[0]; if (!f) return;
+                if (f.size > 3.5 * 1024 * 1024) { st(false, 'Файл завеликий (' + (f.size / 1048576).toFixed(1) + ' МБ). Стисніть до ~3 МБ.'); return; }
+                const fr = new FileReader(); fr.onload = () => { pending = { src: fr.result, type: f.type.startsWith('video') ? 'video' : 'image' }; if (!host.querySelector('#ms-name').value) host.querySelector('#ms-name').value = f.name.replace(/\.[^.]+$/, ''); st(true, 'Файл готовий: ' + f.name + ' — натисніть «Додати»'); }; fr.readAsDataURL(f);
+            };
+            host.querySelector('#ms-add').onclick = () => {
+                const url = host.querySelector('#ms-url').value.trim(), name = host.querySelector('#ms-name').value.trim() || 'Талісман';
+                let src = pending ? pending.src : url, type = pending ? pending.type : (/\.(webm|mp4|mov)(\?|#|$)/i.test(url) ? 'video' : 'image');
+                if (!src) { st(false, 'Вкажіть посилання або завантажте файл'); return; }
+                const id = 'm' + Date.now().toString(36);
+                set(ref(db, 'padel/mascots/items/' + id), { name: name, src: src, type: type, size: 420, x: 0, y: 0, dur: 5, t: Date.now() }).then(() => st(true, 'Додано ✅'), e2 => st(false, 'Не збережено: ' + (e2 && e2.message || e2)));
+                pending = null; host.querySelector('#ms-url').value = ''; host.querySelector('#ms-name').value = ''; host.querySelector('#ms-file').value = '';
+            };
+            onValue(ref(db, 'padel/mascots'), snap => { const v = snap.val() || {}; G = { items: v.items || {}, def: v.def || {} }; render(); });
+            setInterval(render, 2000);
+        })();
+
         // ===== ДОСТУП ПОМІЧНИКІВ: посилання з ключем (?k=...), блокування/видалення, строк, обмеження кортом =====
         (function accInit() {
             const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
