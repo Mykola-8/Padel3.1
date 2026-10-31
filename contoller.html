@@ -618,7 +618,8 @@
 
             <div class="card">
                 <div class="switch-row"><span>Режим Американо:</span><input type="checkbox" id="mode-americano-checkbox" onchange="toggleAmericanoMode(this.checked)"></div>
-                <div class="row" id="americano-limit-row" style="display:none;"><span>Очок:</span><input type="number" id="s-americano-limit" value="21" onchange="updateAmericanoLimit(this.value)"></div>
+                <div class="row" id="americano-limit-row" style="display:none; flex-wrap:wrap;"><span>Очок:</span><input type="number" id="s-americano-limit" value="17" onchange="updateAmericanoLimit(this.value)">
+                    <select id="s-americano-variant" onchange="updateAmericanoVariant(this.value)" style="flex:1; min-width:150px;"><option value="to">Americano to N (хто перший набере N)</option><option value="total">Total Americano N (гра до суми N очок)</option></select></div>
                 <div class="switch-row"><span>Режим Мексикано:</span><input type="checkbox" id="mode-mexicano-checkbox" onchange="toggleMexicanoMode(this.checked)"></div>
                 <div class="row" id="mexicano-limit-row" style="display:none;"><span>Очок:</span><select id="s-mexicano-limit" onchange="updateMexicanoLimit(this.value)"><option value="16">16</option><option value="24" selected>24</option><option value="32">32</option></select></div>
                 <div class="switch-row"><span>Режим Pro-Set:</span><input type="checkbox" id="mode-proset-checkbox" onchange="toggleProSetMode(this.checked)"></div>
@@ -1577,7 +1578,7 @@
             const freshCourtState = {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 scale: 1, posX: 30, posY: 30, tournamentStage: "",
-                isTiebreak: false, isAmericano: false, americanoLimit: 21,
+                isTiebreak: false, isAmericano: false, americanoLimit: 17, americanoTotal: false,
                 isMexicano: false, mexicanoLimit: 24,
                 isProSet: false, proSetLimit: 8, isTotalSet: false, totalTbLimit: 5,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
@@ -2374,14 +2375,19 @@
             set(matchRef, newState).then(() => closeModalSettings());
         }
 
-        window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
+        // Усі налаштування пульта й турнірні таблиці (не рахунок): зберігаються при скиданні корту й у локальній копії
+        function settingKeys() {
+            return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
+                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
+        }
+        window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
 
         function resetMatchWithoutConfirm() {
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
-            set(matchRef, {
+            const __fresh = {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
                 scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30, tournamentStage: "",
-                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 21, 
+                isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 17, americanoTotal: !!state.americanoTotal, 
                 isMexicano: state.isMexicano || false, mexicanoLimit: state.mexicanoLimit || 24, 
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, isTotalSet: state.isTotalSet || false, totalTbLimit: state.totalTbLimit || 5, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
@@ -2408,8 +2414,41 @@
                 promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
                 t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
                 animation: { team: 0, type: "", ts: 0 }
-            }).then(() => closeModalSettings());
+            };
+            settingKeys().forEach(k => { if (state && state[k] !== undefined && state[k] !== null) __fresh[k] = JSON.parse(JSON.stringify(state[k])); });
+            __fresh.pointLog = []; __fresh.matchEndTs = 0;
+            set(matchRef, __fresh).then(() => closeModalSettings());
         }
+
+        // ===== ЛОКАЛЬНА КОПІЯ НАЛАШТУВАНЬ ПУЛЬТА (на цьому пристрої) =====
+        (function bkInit() {
+            if (isHelper) return;
+            const key = () => 'padel_settings_backup_c' + courtId;
+            let lastJson = '';
+            const pick = () => { const o = {}; settingKeys().forEach(k => { if (state && state[k] !== undefined && state[k] !== null) o[k] = state[k]; }); return o; };
+            function save() {
+                try {
+                    if (!state || !Object.keys(state).length) return;
+                    const j = JSON.stringify(pick()); if (j === lastJson || j.length > 4.5e6) return; lastJson = j;
+                    localStorage.setItem(key(), JSON.stringify({ ts: Date.now(), data: JSON.parse(j) })); upd();
+                } catch (e) {}
+            }
+            const m = document.getElementById('settings-modal'), inner = m && Array.from(m.children).find(el => !el.classList.contains('modal-header'));
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'bk-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:6px;';
+            card.innerHTML = '<div style="font-size:13px; font-weight:800; color:#e0b878;">💾 Збереження налаштувань</div><div style="font-size:11px; color:#aaa;">Усі налаштування (включно з титрами, спонсорами, організаторами, QR, бігучим і рекламним рядком, аналітикою) зберігаються в базі й не зникають при виході з пульта. Додатково на цьому пристрої щохвилини робиться резервна копія.</div><div id="bk-st" style="font-size:11px; color:#9bd;"></div><button class="btn" id="bk-restore" style="padding:10px; font-weight:800; background:#374151;">♻️ Відновити налаштування з копії цього пристрою</button>';
+            if (inner) inner.appendChild(card);
+            function upd() { try { const r = JSON.parse(localStorage.getItem(key()) || 'null'); card.querySelector('#bk-st').innerText = r ? 'Остання копія: ' + new Date(r.ts).toLocaleString('uk-UA') : 'Копії ще немає'; } catch (e) {} }
+            card.querySelector('#bk-restore').onclick = () => {
+                try {
+                    const r = JSON.parse(localStorage.getItem(key()) || 'null'); if (!r || !r.data) { alert('Копії ще немає.'); return; }
+                    if (!confirm('Відновити налаштування корту №' + courtId + ' з копії від ' + new Date(r.ts).toLocaleString('uk-UA') + '?\nРахунок не зміниться.')) return;
+                    Object.keys(r.data).forEach(k => { state[k] = r.data[k]; }); set(matchRef, state).then(() => { try { saveSponsorsGlobal(); saveQrGlobal(); } catch (e) {} });
+                    card.querySelector('#bk-st').innerText = '✅ Відновлено';
+                } catch (e) { alert('Не вдалося: ' + e.message); }
+            };
+            upd(); setTimeout(save, 8000); setInterval(save, 60000);
+            window.addEventListener('pagehide', save); document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+        })();
 
         // ===== ЗБЕРЕЖЕННЯ / ЗАВАНТАЖЕННЯ ТУРНІРУ (файл JSON) =====
         const TS_CONTENT_KEYS = ['matchIntro', 'teamRanking', 'playoff', 'groups', 'introCard'];
@@ -2422,7 +2461,7 @@
             'adBarSlides', 'adBarEnabled', 'adBarTextColor', 'adBarRemoveBg', 'adBarOffsetY', 'adBarHeight', 'adBarGap', 'adBarBgColor', 'adBarBgAlpha', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration',
             'tickerEnabled', 'tickerTextColor', 'tickerSpeed', 'tickerOffsetY', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerContentHTML', 'tickerBgColor', 'tickerBgAlpha',
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
-            'americanoLimit', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
+            'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
         window.tsExport = function() {
             try {
@@ -3677,7 +3716,7 @@
             // 2. Режим гри
             let modeText = "";
             if (state.isSuperTiebreak) modeText = `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit || 10})`;
-            else if (state.isAmericano) modeText = `АМЕРИКАНО (${state.americanoLimit || 21})`;
+            else if (state.isAmericano) modeText = (state.americanoTotal ? 'ТОТАЛ АМЕРИКАНО' : 'АМЕРИКАНО ДО') + ` ${state.americanoLimit || 17}`;
             else if (state.isMexicano) modeText = `МЕКСИКАНО (${state.mexicanoLimit || 24})`;
             else if (state.isTotalSet) modeText = `СУМА ГЕМІВ (${state.proSetLimit || 8})`;
             else if (state.isProSet) modeText = `PRO-SET (${state.proSetLimit || 8})`;
@@ -4011,7 +4050,7 @@
             let isGolden = !state.isAmericano && !state.isMexicano && !state.isTiebreak && state.p1Index === 3 && state.p2Index === 3 && isGoldenDeuce(state.deuceStyle, state.deuceCounter);
             if (state.isMatchFinished) badge.innerText = "🏁 МАТЧ ЗАВЕРШЕНО";
             else if (isGolden) badge.innerText = "🔥 STAR POINT! 🔥";
-            else badge.innerText = state.isSuperTiebreak ? `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit||10})` : (state.isAmericano ? `АМЕРИКАНО (${state.americanoLimit||21})` : (state.isMexicano ? `МЕКСИКАНО (${state.mexicanoLimit||24})` : (state.isTiebreak ? "TIEBREAK" : `Сет ${state.currentSet||1}`)));
+            else badge.innerText = state.isSuperTiebreak ? `СУПЕР-ТАЙБРЕЙК (${state.superTiebreakLimit||10})` : (state.isAmericano ? `${state.americanoTotal ? 'ТОТАЛ АМЕРИКАНО' : 'АМЕРИКАНО ДО'} ${state.americanoLimit||17}` : (state.isMexicano ? `МЕКСИКАНО (${state.mexicanoLimit||24})` : (state.isTiebreak ? "TIEBREAK" : `Сет ${state.currentSet||1}`)));
 
             if (state.isAmericano || state.isMexicano || state.isTiebreak || state.isSuperTiebreak) {
                 document.getElementById('view-p1-pts').innerText = state.p1Index; document.getElementById('view-p2-pts').innerText = state.p2Index;
@@ -4063,6 +4102,7 @@
             document.getElementById('btn-hide-board').innerText = state.showMainBoard === false ? '👁 ПОКАЗАТИ ТАБЛО' : '👁 СХОВАТИ ТАБЛО';
             document.getElementById('btn-break').innerText = state.showBreak ? '▶ ПРОДОВЖИТИ' : '☕ ПЕРЕРВА';
             document.getElementById('americano-limit-row').style.display = state.isAmericano ? 'flex' : 'none';
+            { const av = document.getElementById('s-americano-variant'); if (av && document.activeElement !== av) av.value = state.americanoTotal ? 'total' : 'to'; const al = document.getElementById('s-americano-limit'); if (al && document.activeElement !== al) al.value = state.americanoLimit || 17; }
             document.getElementById('mexicano-limit-row').style.display = state.isMexicano ? 'flex' : 'none';
             document.getElementById('proset-limit-row').style.display = (state.isProSet && !state.isTotalSet) ? 'flex' : 'none';
             { const a = document.getElementById('totalset-limit-row'), b = document.getElementById('totalset-tb-row'); if (a) a.style.display = state.isTotalSet ? 'flex' : 'none'; if (b) b.style.display = state.isTotalSet ? 'flex' : 'none';
@@ -4151,7 +4191,7 @@
             } else if (state.isAmericano) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 2 === 1) state.currentServer = state.currentServer === 1 ? 2 : 1;
-                if ((state.p1Index + state.p2Index) >= (parseInt(state.americanoLimit) || 21)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
+                if ((state.americanoTotal ? (state.p1Index + state.p2Index) : Math.max(state.p1Index, state.p2Index)) >= (parseInt(state.americanoLimit) || 17)) { state['t1_s'+state.currentSet]=state.p1Index; state['t2_s'+state.currentSet]=state.p2Index; state.p1Index=0; state.p2Index=0; state.currentSet++; }
             } else if (state.isMexicano) {
                 if (tIndex === 1) state.p1Index++; else state.p2Index++;
                 if ((state.p1Index + state.p2Index) % 4 === 0) state.currentServer = state.currentServer === 1 ? 2 : 1;
@@ -4383,7 +4423,8 @@
                 state.isTiebreak = false; state.deuceCounter = 0;
             }
             state.isSuperTiebreak = c; if(c){state.isTotalSet=false; state.isAmericano=false; state.isProSet=false; state.isMexicano=false;} modeAfter(state, __b); set(matchRef, state); }
-        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||21; set(matchRef, state); }
+        window.updateAmericanoLimit = function(v) { state.americanoLimit = parseInt(v)||17; set(matchRef, state); }
+        window.updateAmericanoVariant = function(v) { state.americanoTotal = (v === 'total'); set(matchRef, state); }
         window.toggleTotalSetMode = function(c) { const __b = modeBefore(state); state.isTotalSet = c; state.isProSet = c; if (c) { state.isAmericano = false; state.isSuperTiebreak = false; state.isMexicano = false; if (!state.proSetLimit) state.proSetLimit = 8; if (!state.totalTbLimit) state.totalTbLimit = 5; } modeAfter(state, __b); set(matchRef, state); }
         window.updateTotalSetLimit = function(v) { state.proSetLimit = Math.max(2, parseInt(v) || 8); set(matchRef, state); }
         window.updateTotalTbLimit = function(v) { state.totalTbLimit = Math.max(1, parseInt(v) || 5); set(matchRef, state); }
