@@ -3155,7 +3155,7 @@
                         { k: 'typeMs', l: 'Швидкість друку (мс на літеру)', t: 'rng', min: 8, max: 150, u: ' мс' }] }
             };
             const inp = 'width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;';
-            const data = {}, timers = {}, cards = {}, loaded = {}, prim = {};
+            const data = {}, timers = {}, cards = {}, loaded = {}, prim = {}, dirty = {};
             Object.keys(CFG).forEach(key => {
                 data[key] = JSON.parse(JSON.stringify(CFG[key].def));
                 const card = document.createElement('div'); card.className = 'card'; card.id = key + '-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; tab.appendChild(card); cards[key] = card;
@@ -3168,7 +3168,7 @@
                     const fail = (e) => { const m = (e && e.message) || String(e); try { try { state[mk] = data[key]; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/' + mk), data[key]); st(key, true, 'padel/' + (key === 'crew' ? 'crew' : 'spcard') + ' відхилено (' + m + '), збережено в кортах (резерв)'); } catch (e2) { st(key, false, m); } };
                     try { set(ref(db, CFG[key].path), data[key]).then(() => st(key, true), fail); } catch (e) { fail(e); }
                 };
-                clearTimeout(timers[key]); if (now) run(); else timers[key] = setTimeout(run, 250);
+                dirty[key] = Date.now(); clearTimeout(timers[key]); if (now) run(); else timers[key] = setTimeout(run, 250);
             }
             function st(key, ok, msg) { const e = document.getElementById(key + '-st'); if (e) { e.innerText = ok ? ('☁️ Збережено ✅' + (msg ? ' — ' + msg : '')) : '⚠️ ' + msg; e.style.color = ok ? '#7c7' : '#f66'; } }
             function field(key, f) {
@@ -3239,10 +3239,13 @@
                 onValue(ref(db, CFG[key].path), snap => { const v0 = snap.val(); loaded[key] = true; prim[key] = !!v0; if (!v0) { applyMirror(); return; } apply(v0); }, () => { loaded[key] = true; applyMirror(); });   // помилка читання (правила) — не блокуємо збереження
                 setTimeout(() => { loaded[key] = true; }, 3000);
                 function apply(v) {
+                    // поки користувач друкує (або збереження ще не повернулось із бази) не підміняємо рядки — інакше нові рядки «відриваються» від полів і імена/описи не зберігаються
+                    if (cards[key].contains(document.activeElement) || Date.now() - (dirty[key] || 0) < 3000) return;
                     const old = JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items);
-                    data[key] = Object.assign({}, CFG[key].def, v);
                     const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-                    if (key === 'crew') data.crew.rows = A(v.rows); else data.spcard.items = A(v.items);
+                    const curArr = key === 'crew' ? data.crew.rows : data.spcard.items, newArr = A(key === 'crew' ? v.rows : v.items), same = JSON.stringify(curArr) === JSON.stringify(newArr);
+                    data[key] = Object.assign({}, CFG[key].def, v);
+                    if (key === 'crew') data.crew.rows = same ? curArr : newArr; else data.spcard.items = same ? curArr : newArr;
                     if (JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items) !== old && !cards[key].contains(document.activeElement)) listUi(key);
                     refresh(key);
                 }
@@ -3265,7 +3268,7 @@
                 { k: 'logoSize', l: 'Розмір логотипів', t: 'rng', min: 30, max: 250 }, { k: 'width', l: 'Ширина колонки', t: 'rng', min: 40, max: 170 },
                 { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовків', t: 'col' }, { k: 'role', l: 'Колір посад', t: 'col' }, { k: 'text', l: 'Колір тексту', t: 'col' }
             ];
-            let d = JSON.parse(JSON.stringify(DEF)), timer, crLoaded = false, crPrim = false;
+            let d = JSON.parse(JSON.stringify(DEF)), timer, crLoaded = false, crPrim = false, crDirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const card = document.createElement('div'); card.id = 'cr-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
             const anchor = document.getElementById('spcard-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
@@ -3276,7 +3279,7 @@
                     const fail = (e) => { try { try { state.creditsCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/creditsCfg'), data); st(true, 'padel/credits відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
                     try { set(ref(db, 'padel/credits'), data).then(() => st(true), fail); } catch (e) { fail(e); }
                 };
-                clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+                crDirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
             }
             function st(ok, m) { const e = card.querySelector('#cr-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
             function lab(t) { return '<span style="font-size:11px; color:#ccc;">' + t + '</span>'; }
@@ -3323,7 +3326,7 @@
                 card.querySelector('#cr-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#cr-off').style.outline = d.show ? 'none' : '3px solid #fff';
             }
             list(); refresh();
-            const crApply = v => { const old = JSON.stringify(d.sections); d = Object.assign({}, DEF, v); d.sections = A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); };
+            const crApply = v => { if (card.contains(document.activeElement) || Date.now() - crDirty < 3000) return; const old = JSON.stringify(d.sections); const keepS = JSON.stringify(d.sections) === JSON.stringify(A(v.sections)) ? d.sections : null; d = Object.assign({}, DEF, v); d.sections = keepS || A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); };
             const crMirror = () => { const m = state && state.creditsCfg; if (!m || crPrim || !crLoaded || JSON.stringify(m) === JSON.stringify(d)) return; crApply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { crMirror(); } catch (e) {} }; }
             onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); crLoaded = true; crPrim = !!v; if (!v) { crMirror(); return; } crApply(v); }, () => { crLoaded = true; crMirror(); });
