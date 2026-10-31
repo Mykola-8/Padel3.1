@@ -2375,16 +2375,11 @@
             set(matchRef, newState).then(() => closeModalSettings());
         }
 
-        // Усі налаштування пульта й турнірні таблиці (не рахунок): зберігаються при скиданні корту й у локальній копії
-        function settingKeys() {
-            return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
-                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
-        }
-        window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
+        window.resetMatch = function() { if (confirm("Скинути поточний корт?")) resetMatchWithoutConfirm(); }
 
         function resetMatchWithoutConfirm() {
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
-            const __fresh = {
+            set(matchRef, {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1, 
                 scale: state.scale || 1, posX: state.posX || 30, posY: state.posY || 30, tournamentStage: "",
                 isTiebreak: false, isAmericano: state.isAmericano || false, americanoLimit: state.americanoLimit || 17, americanoTotal: !!state.americanoTotal, 
@@ -2414,41 +2409,8 @@
                 promoText: "", promoTypeIsText: false, promoTextColor: "#ffffff", promoTextSize: 60, promoTransparentBg: false,
                 t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
                 animation: { team: 0, type: "", ts: 0 }
-            };
-            settingKeys().forEach(k => { if (state && state[k] !== undefined && state[k] !== null) __fresh[k] = JSON.parse(JSON.stringify(state[k])); });
-            __fresh.pointLog = []; __fresh.matchEndTs = 0;
-            set(matchRef, __fresh).then(() => closeModalSettings());
+            }).then(() => closeModalSettings());
         }
-
-        // ===== ЛОКАЛЬНА КОПІЯ НАЛАШТУВАНЬ ПУЛЬТА (на цьому пристрої) =====
-        (function bkInit() {
-            if (isHelper) return;
-            const key = () => 'padel_settings_backup_c' + courtId;
-            let lastJson = '';
-            const pick = () => { const o = {}; settingKeys().forEach(k => { if (state && state[k] !== undefined && state[k] !== null) o[k] = state[k]; }); return o; };
-            function save() {
-                try {
-                    if (!state || !Object.keys(state).length) return;
-                    const j = JSON.stringify(pick()); if (j === lastJson || j.length > 4.5e6) return; lastJson = j;
-                    localStorage.setItem(key(), JSON.stringify({ ts: Date.now(), data: JSON.parse(j) })); upd();
-                } catch (e) {}
-            }
-            const m = document.getElementById('settings-modal'), inner = m && Array.from(m.children).find(el => !el.classList.contains('modal-header'));
-            const card = document.createElement('div'); card.className = 'card'; card.id = 'bk-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:6px;';
-            card.innerHTML = '<div style="font-size:13px; font-weight:800; color:#e0b878;">💾 Збереження налаштувань</div><div style="font-size:11px; color:#aaa;">Усі налаштування (включно з титрами, спонсорами, організаторами, QR, бігучим і рекламним рядком, аналітикою) зберігаються в базі й не зникають при виході з пульта. Додатково на цьому пристрої щохвилини робиться резервна копія.</div><div id="bk-st" style="font-size:11px; color:#9bd;"></div><button class="btn" id="bk-restore" style="padding:10px; font-weight:800; background:#374151;">♻️ Відновити налаштування з копії цього пристрою</button>';
-            if (inner) inner.appendChild(card);
-            function upd() { try { const r = JSON.parse(localStorage.getItem(key()) || 'null'); card.querySelector('#bk-st').innerText = r ? 'Остання копія: ' + new Date(r.ts).toLocaleString('uk-UA') : 'Копії ще немає'; } catch (e) {} }
-            card.querySelector('#bk-restore').onclick = () => {
-                try {
-                    const r = JSON.parse(localStorage.getItem(key()) || 'null'); if (!r || !r.data) { alert('Копії ще немає.'); return; }
-                    if (!confirm('Відновити налаштування корту №' + courtId + ' з копії від ' + new Date(r.ts).toLocaleString('uk-UA') + '?\nРахунок не зміниться.')) return;
-                    Object.keys(r.data).forEach(k => { state[k] = r.data[k]; }); set(matchRef, state).then(() => { try { saveSponsorsGlobal(); saveQrGlobal(); } catch (e) {} });
-                    card.querySelector('#bk-st').innerText = '✅ Відновлено';
-                } catch (e) { alert('Не вдалося: ' + e.message); }
-            };
-            upd(); setTimeout(save, 8000); setInterval(save, 60000);
-            window.addEventListener('pagehide', save); document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
-        })();
 
         // ===== ЗБЕРЕЖЕННЯ / ЗАВАНТАЖЕННЯ ТУРНІРУ (файл JSON) =====
         const TS_CONTENT_KEYS = ['matchIntro', 'teamRanking', 'playoff', 'groups', 'introCard'];
