@@ -3538,11 +3538,11 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (o.shown && sig !== o.sig && vis) { o.sig = sig; if (o === crew) buildCrew(); else buildSpc(); }
                 o.sig = sig; setVis(o, vis);
             }
-            const src = (o) => o.gcfg || o.mcfg || null;
+            const src = (o) => { const a = o.gcfg, b = o.mcfg; if (a && b) return (b.ts || 0) > (a.ts || 0) ? b : a; return a || b || null; };   // з двох джерел береться свіже
             onValue(ref(db, 'padel/crew'), s => { crew.gcfg = s.val(); apply(crew, src(crew)); }, () => { crew.gcfg = null; });
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
-            const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '').length : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; if (!o.gcfg) apply(o, o.mcfg); };
+            const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
             window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
