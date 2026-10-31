@@ -3191,8 +3191,8 @@
                     '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-off">■ СХОВАТИ</button></div>' +
                     '<div id="' + key + '-st" style="font-size:11px;"></div>' + list +
                     '<div style="display:flex; flex-direction:column; gap:6px;">' + fields.map(f => field(key, f)).join('') + '</div>';
-                card.querySelector('#' + key + '-on').onclick = () => { data[key].show = true; save(key, true); };
-                card.querySelector('#' + key + '-off').onclick = () => { data[key].show = false; save(key, true); };
+                card.querySelector('#' + key + '-on').onclick = () => { data[key].show = true; refresh(key); save(key, true); };
+                card.querySelector('#' + key + '-off').onclick = () => { data[key].show = false; refresh(key); save(key, true); };
                 card.querySelectorAll('[data-k]').forEach(el => {
                     const f = fields.find(x => x.k === el.getAttribute('data-k'));
                     const handler = () => {
@@ -3406,6 +3406,7 @@
         (function tbHighlight() {
             const css = document.createElement('style');
             css.textContent = '.tb-live { background:#16a34a !important; color:#fff !important; font-weight:800 !important; box-shadow:0 0 0 3px #fff, 0 0 18px 2px #22c55e !important; position:relative; }' +
+                '.tb-offlive { box-shadow:0 0 0 3px #fff, 0 0 18px 2px #ef4444 !important; font-weight:800 !important; position:relative; }' +
                 '.tb-dim { opacity:.45; }' +
                 '.tb-last { box-shadow:0 0 0 3px #fbbf24 !important; }';
             document.head.appendChild(css);
@@ -3421,7 +3422,7 @@
                         const A = document.getElementById(a), B = document.getElementById(b); if (!A || !B) return;
                         const aOn = (A.style.outline || '').indexOf('solid') >= 0;
                         A.classList.toggle('tb-live', aOn); A.classList.toggle('tb-dim', !aOn);
-                        B.classList.toggle('tb-dim', aOn); B.classList.remove('tb-live');
+                        B.classList.toggle('tb-dim', aOn); B.classList.toggle('tb-offlive', !aOn); B.classList.remove('tb-live');
                     });
                 } catch (e) {}
             }
