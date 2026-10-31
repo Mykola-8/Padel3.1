@@ -1386,7 +1386,10 @@
             ensureSponsorQrs();
             const obj = { logos: state.sponsorLogos.slice(0, 10), infos: state.sponsorInfos.slice(0, 10), qrs: state.sponsorQrs.slice(0, 10), qrDescs: state.sponsorQrDescs.slice(0, 10) };
             globalSponsors = obj;
-            set(ref(db, 'padel/sponsors'), obj); set(matchRef, state);
+            set(ref(db, 'padel/sponsors'), obj).catch(() => {   // правила відхилили спільний шлях — зберігаємо логотипи й описи в кожному корті
+                for (let i = 1; i <= 10; i++) { const b = 'padel/courts/court_' + i + '/'; set(ref(db, b + 'sponsorLogos'), obj.logos); set(ref(db, b + 'sponsorInfos'), obj.infos); set(ref(db, b + 'sponsorQrs'), obj.qrs); set(ref(db, b + 'sponsorQrDescs'), obj.qrDescs); }
+            });
+            set(matchRef, state);
         }
         onValue(ref(db, 'padel/sponsors'), (snap) => { globalSponsors = snap.val(); gLoaded.sp = true; try { bootGlobals(); } catch (e) {} if (globalSponsors && typeof state === 'object' && state) { mergeGlobalSponsors(); try { renderUI(); } catch (e) {} } });
 
@@ -1445,7 +1448,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2463,13 +2466,16 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        window.tsExport = function() {
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        window.tsExport = async function() {
             try {
+                const extra = {};
+                await Promise.all(TS_EXTRA.map(([k, path, mk]) => get(ref(db, path)).then(s => { let v = s.val(); if (!v && mk && state[mk]) v = state[mk]; if (v) extra[k] = v; }).catch(() => { if (mk && state[mk]) extra[k] = state[mk]; })));
                 const court = {}; TS_CONTENT_KEYS.concat(TS_SETTING_KEYS).forEach(k => { if (state[k] !== undefined) court[k] = JSON.parse(JSON.stringify(state[k])); });
                 ensureSponsorLogosArray();
                 const data = {
                     app: 'padel-tournament', version: 1, exportedAt: new Date().toISOString(), courtId: courtId,
-                    global: { sponsors: { logos: state.sponsorLogos.slice(0, 10), infos: (Array.isArray(state.sponsorInfos) ? state.sponsorInfos : []).slice(0, 10), show: !!state.showSponsorLogos, mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' } },
+                    global: { sponsors: { logos: state.sponsorLogos.slice(0, 10), infos: (Array.isArray(state.sponsorInfos) ? state.sponsorInfos : []).slice(0, 10), qrs: (Array.isArray(state.sponsorQrs) ? state.sponsorQrs : []).slice(0, 10), qrDescs: (Array.isArray(state.sponsorQrDescs) ? state.sponsorQrDescs : []).slice(0, 10), show: !!state.showSponsorLogos, mode: state.sponsorLogoDisplayMode || 'carousel', intervalSec: state.sponsorLogoIntervalSec || 4, anim: state.sponsorLogoAnimStyle || 'squeeze' }, extra: extra },
                     court: court,
                     players: allPlayersData || {}
                 };
@@ -2497,8 +2503,11 @@
                         let a = Array.isArray(sp.logos) ? sp.logos.slice() : Object.values(sp.logos || {}); while (a.length < 10) a.push('');
                         state.sponsorLogos = a.slice(0, 10); if (sp.infos) { state.sponsorInfos = Array.isArray(sp.infos) ? sp.infos.slice(0, 10) : Object.values(sp.infos); } state.showSponsorLogos = !!sp.show; state.sponsorLogoDisplayMode = sp.mode || 'carousel';
                         state.sponsorLogoIntervalSec = sp.intervalSec || 4; state.sponsorLogoAnimStyle = sp.anim || 'squeeze';
+                        if (sp.qrs) state.sponsorQrs = Array.isArray(sp.qrs) ? sp.qrs.slice(0, 10) : Object.values(sp.qrs); if (sp.qrDescs) state.sponsorQrDescs = Array.isArray(sp.qrDescs) ? sp.qrDescs.slice(0, 10) : Object.values(sp.qrDescs);
                         saveSponsorsGlobal();
                     }
+                    const ex = data.global && data.global.extra;
+                    if (ex) for (const [k, path, mk] of TS_EXTRA) { if (ex[k] === undefined) continue; try { await set(ref(db, path), ex[k]); } catch (e) { if (mk) { state[mk] = ex[k]; for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/' + mk), ex[k]); } } }
                     saveBarsGlobal(); saveQrGlobal(); saveRankingGlobal(true); syncGroupsGlobal(true); syncPlayoffGlobal(true); if (icIsMaster()) syncIntroGlobal(true); else if (state.introCard) state.introCard.own = true;
                     await set(matchRef, state);
                     if (toAll) {
@@ -3146,13 +3155,14 @@
                         { k: 'typeMs', l: 'Швидкість друку (мс на літеру)', t: 'rng', min: 8, max: 150, u: ' мс' }] }
             };
             const inp = 'width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;';
-            const data = {}, timers = {}, cards = {};
+            const data = {}, timers = {}, cards = {}, loaded = {}, prim = {};
             Object.keys(CFG).forEach(key => {
                 data[key] = JSON.parse(JSON.stringify(CFG[key].def));
                 const card = document.createElement('div'); card.className = 'card'; card.id = key + '-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; tab.appendChild(card); cards[key] = card;
             });
             function save(key, now) {
                 const run = () => {
+                    if (!loaded[key]) { setTimeout(run, 500); return; }
                     data[key].ts = Date.now();
                     const mk = key === 'crew' ? 'crewCfg' : 'spcardCfg';
                     const fail = (e) => { const m = (e && e.message) || String(e); try { try { state[mk] = data[key]; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/' + mk), data[key]); st(key, true, 'padel/' + (key === 'crew' ? 'crew' : 'spcard') + ' відхилено (' + m + '), збережено в кортах (резерв)'); } catch (e2) { st(key, false, m); } };
@@ -3224,15 +3234,17 @@
             }
             Object.keys(CFG).forEach(key => {
                 build(key);
-                onValue(ref(db, CFG[key].path), snap => {
-                    const v = snap.val(); if (!v) return;
+                const applyMirror = () => { const m = state && state[key === 'crew' ? 'crewCfg' : 'spcardCfg']; if (!m || prim[key] || !loaded[key]) return; if (JSON.stringify(m) === JSON.stringify(data[key])) return; apply(m); };
+                const prevMs = window.__mirrorSync; window.__mirrorSync = () => { if (prevMs) prevMs(); try { applyMirror(); } catch (e) {} };
+                onValue(ref(db, CFG[key].path), snap => { const v0 = snap.val(); loaded[key] = true; prim[key] = !!v0; if (!v0) { applyMirror(); return; } apply(v0); });
+                function apply(v) {
                     const old = JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items);
                     data[key] = Object.assign({}, CFG[key].def, v);
                     const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
                     if (key === 'crew') data.crew.rows = A(v.rows); else data.spcard.items = A(v.items);
                     if (JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items) !== old && !cards[key].contains(document.activeElement)) listUi(key);
                     refresh(key);
-                });
+                }
             });
         })();
 
@@ -3252,12 +3264,13 @@
                 { k: 'logoSize', l: 'Розмір логотипів', t: 'rng', min: 30, max: 250 }, { k: 'width', l: 'Ширина колонки', t: 'rng', min: 40, max: 170 },
                 { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовків', t: 'col' }, { k: 'role', l: 'Колір посад', t: 'col' }, { k: 'text', l: 'Колір тексту', t: 'col' }
             ];
-            let d = JSON.parse(JSON.stringify(DEF)), timer;
+            let d = JSON.parse(JSON.stringify(DEF)), timer, crLoaded = false, crPrim = false;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const card = document.createElement('div'); card.id = 'cr-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
             const anchor = document.getElementById('spcard-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
             function save(now) {
                 const run = () => {
+                    if (!crLoaded) { setTimeout(run, 500); return; }
                     const data = JSON.parse(JSON.stringify(d));
                     const fail = (e) => { try { try { state.creditsCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/creditsCfg'), data); st(true, 'padel/credits відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
                     try { set(ref(db, 'padel/credits'), data).then(() => st(true), fail); } catch (e) { fail(e); }
@@ -3309,7 +3322,10 @@
                 card.querySelector('#cr-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#cr-off').style.outline = d.show ? 'none' : '3px solid #fff';
             }
             list(); refresh();
-            onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); if (!v) return; const old = JSON.stringify(d.sections); d = Object.assign({}, DEF, v); d.sections = A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); });
+            const crApply = v => { const old = JSON.stringify(d.sections); d = Object.assign({}, DEF, v); d.sections = A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); };
+            const crMirror = () => { const m = state && state.creditsCfg; if (!m || crPrim || !crLoaded || JSON.stringify(m) === JSON.stringify(d)) return; crApply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { crMirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); crLoaded = true; crPrim = !!v; if (!v) { crMirror(); return; } crApply(v); });
         })();
 
         // ===== АВТО-РОЗКЛАД (картка) =====
