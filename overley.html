@@ -2872,6 +2872,8 @@
             sponsorInfoDelayTimer = setTimeout(() => { sponsorInfoPending = false; t.textContent = txt; fitSponsorInfoText(); p.classList.add('in'); sponsorInfoShownIdx = idx; }, 750);
         }
 
+        function __amLbl(s, ua) { const n = parseInt(s.americanoLimit) || 17; return s.americanoTotal ? (ua ? 'ТОТАЛ АМЕРИКАНО ' : 'TOTAL AMERICANO ') + n : (ua ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + n; }
+
         function startSponsorLogoCarousel(urls, intervalSec, animStyle) {
             clearInterval(sponsorLogoTimer);
             sponsorLogoActiveUrls = urls;
@@ -3231,7 +3233,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const tags = [];
             if (st.isSuperTiebreak) tags.push((uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10)); else if (st.isTiebreak) tags.push(uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK');
             if (st.isTotalSet) tags.push(st.isTiebreak ? 'TIE-BREAK TO ' + (st.totalTbLimit || 5) : 'TOTAL SET ' + (st.proSetLimit || 8)); else if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
-            if (st.isMexicano) tags.push((uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24)); else if (st.isAmericano) tags.push((uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21));
+            if (st.isMexicano) tags.push((uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24)); else if (st.isAmericano) tags.push(__amLbl(st, uaL));
             const rb = document.getElementById('ribbon-match'); let plate = '', pt = '';
             if (rb && rb.classList.contains('visible')) {
                 pt = st.activeMatchRibbon || '';
@@ -3354,7 +3356,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             else if (st.isTiebreak) modes.push('<b class="tb">' + (uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK') + '</b>');
             if (st.isTotalSet) modes.push('<b>' + (st.isTiebreak ? 'TIE-BREAK TO ' + (st.totalTbLimit || 5) : 'TOTAL SET ' + (st.proSetLimit || 8)) + '</b>'); else if (st.isProSet) modes.push('<b>PRO-SET ' + (st.proSetLimit || 8) + '</b>');
             if (st.isMexicano) modes.push('<b class="am">' + (uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24) + '</b>');
-            else if (st.isAmericano) modes.push('<b class="am">' + (uaL ? 'АМЕРИКАНО ДО ' : 'AMERICANO TO ') + (st.americanoLimit || 21) + '</b>');
+            else if (st.isAmericano) modes.push('<b class="am">' + __amLbl(st, uaL) + '</b>');
             const modeHtml = modes.length ? '<div class="tl-mode">' + modes.join('') + '</div>' : '';
             h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + modeHtml + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
             const spx = Math.max(0, Math.min(100, cfg.spX === undefined ? 50 : parseFloat(cfg.spX) || 0)), spy = Math.max(0, Math.min(100, cfg.spY === undefined ? 50 : parseFloat(cfg.spY) || 0));
@@ -4295,7 +4297,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (state.isSuperTiebreak) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'СУПЕР-ТАЙБРЕЙК ДО':'SUPER TIEBREAK TO'} ${state.superTiebreakLimit||10}`; ribbonProset.classList.add('visible'); }
                 else if (state.isProSet) { ribbonProset.innerText = state.isTotalSet ? (state.isTiebreak ? `TIE-BREAK TO ${state.totalTbLimit||5}` : `TOTAL SET ${state.proSetLimit||8}`) : `PRO-SET ${state.proSetLimit||8}`; ribbonProset.classList.add('visible'); }
                 else if (state.isMexicano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'МЕКСИКАНО ДО':'MEXICANO TO'} ${state.mexicanoLimit||24}`; ribbonProset.classList.add('visible'); }
-                else if (state.isAmericano) { ribbonProset.innerText = `${state.cornerSlideLang==='ua'?'АМЕРИКАНО ДО':'AMERICANO TO'} ${state.americanoLimit||21}`; ribbonProset.classList.add('visible'); }
+                else if (state.isAmericano) { ribbonProset.innerText = __amLbl(state, state.cornerSlideLang === 'ua'); ribbonProset.classList.add('visible'); }
                 else ribbonProset.classList.remove('visible');
 
                 const mfb = document.getElementById('match-finished-board');
