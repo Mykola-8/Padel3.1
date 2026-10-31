@@ -3236,7 +3236,8 @@
                 build(key);
                 const applyMirror = () => { const m = state && state[key === 'crew' ? 'crewCfg' : 'spcardCfg']; if (!m || prim[key] || !loaded[key]) return; if (JSON.stringify(m) === JSON.stringify(data[key])) return; apply(m); };
                 const prevMs = window.__mirrorSync; window.__mirrorSync = () => { if (prevMs) prevMs(); try { applyMirror(); } catch (e) {} };
-                onValue(ref(db, CFG[key].path), snap => { const v0 = snap.val(); loaded[key] = true; prim[key] = !!v0; if (!v0) { applyMirror(); return; } apply(v0); });
+                onValue(ref(db, CFG[key].path), snap => { const v0 = snap.val(); loaded[key] = true; prim[key] = !!v0; if (!v0) { applyMirror(); return; } apply(v0); }, () => { loaded[key] = true; applyMirror(); });   // помилка читання (правила) — не блокуємо збереження
+                setTimeout(() => { loaded[key] = true; }, 3000);
                 function apply(v) {
                     const old = JSON.stringify(key === 'crew' ? data.crew.rows : data.spcard.items);
                     data[key] = Object.assign({}, CFG[key].def, v);
@@ -3325,7 +3326,8 @@
             const crApply = v => { const old = JSON.stringify(d.sections); d = Object.assign({}, DEF, v); d.sections = A(v.sections); if (JSON.stringify(d.sections) !== old && !card.contains(document.activeElement)) list(); refresh(); };
             const crMirror = () => { const m = state && state.creditsCfg; if (!m || crPrim || !crLoaded || JSON.stringify(m) === JSON.stringify(d)) return; crApply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { crMirror(); } catch (e) {} }; }
-            onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); crLoaded = true; crPrim = !!v; if (!v) { crMirror(); return; } crApply(v); });
+            onValue(ref(db, 'padel/credits'), snap => { const v = snap.val(); crLoaded = true; crPrim = !!v; if (!v) { crMirror(); return; } crApply(v); }, () => { crLoaded = true; crMirror(); });
+            setTimeout(() => { crLoaded = true; }, 3000);
         })();
 
         // ===== АВТО-РОЗКЛАД (картка) =====
