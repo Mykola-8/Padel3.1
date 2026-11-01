@@ -710,6 +710,15 @@
         #mascot-video.hid, #mascot-img.hid { opacity: 0 !important; width: 2px !important; height: 2px !important; }
         #mascot-img { position: fixed; right: 40px; bottom: 0; z-index: 9100; pointer-events: none; opacity: 0; transition: opacity .35s ease; }
 
+        /* Підсвічування команди, що виграла гейм (усі теми, крім золотої) */
+        html[class*="theme-"] .team-names.gw-win::before { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.42); pointer-events: none; animation: gwLight var(--gw-dur, 3.5s) ease forwards; }
+        html[class*="theme-"] .team-names.gw-win > span { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.65); }
+        html.theme-transparent .team-names.gw-win::before { background: rgba(255,255,255,0.28); }
+        /* Сіро-темна тема: команда-переможець гейму — світло-сірий фон і темний текст */
+        html.theme-graydark .team-names.gw-win::before { background: linear-gradient(to bottom, #e5e7eb, #cbd5e1); }
+        html.theme-graydark .team-names.gw-win > span, html.theme-graydark .team-names.gw-win > span * { color: #111827 !important; text-shadow: none !important; }
+        @keyframes gwLight { 0% { opacity: 0; } 10% { opacity: 1; } 78% { opacity: 1; } 100% { opacity: 0; } }
+
         /* ===== ГРУПОВИЙ ЕТАП ===== */
         .gr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10002; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; font-family: var(--gr-font, 'Montserrat'), sans-serif; color: var(--gr-text, #fff); }
         .gr-wrap.visible { opacity: 1; visibility: visible; }
@@ -3905,6 +3914,28 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             return { apply, setData };
         })();
 
+        // ===== ПІДСВІТКА КОМАНДИ, ЩО ВИГРАЛА ГЕЙМ =====
+        const GW = (function () {
+            let prevCnt = null, pg1 = 0, pg2 = 0, timers = {};
+            const games = (st, k) => { let n = 0; for (let i = 1; i <= 9; i++) n += parseInt(st['t' + k + '_s' + i]) || 0; return n; };
+            function flash(team, sec) {
+                const el = document.getElementById('block-anim-' + team); if (!el) return;
+                el.style.setProperty('--gw-dur', sec + 's'); el.classList.remove('gw-win'); void el.offsetWidth; el.classList.add('gw-win');
+                clearTimeout(timers[team]); timers[team] = setTimeout(() => el.classList.remove('gw-win'), sec * 1000 + 80);
+            }
+            function onState(st) {
+                const cnt = parseInt(st.completedGamesCount) || 0, g1 = games(st, 1), g2 = games(st, 2);
+                if (prevCnt === null) { prevCnt = cnt; pg1 = g1; pg2 = g2; return; }
+                if (cnt > prevCnt && st.showMainBoard !== false && !st.isMatchFinished) {
+                    let w = g1 > pg1 ? 1 : (g2 > pg2 ? 2 : 0);
+                    if (!w) { const L = Array.isArray(st.pointLog) ? st.pointLog : []; const last = L.length ? L[L.length - 1] : null; if (last && last[5] > 0) w = last[0]; }
+                    if (w === 1 || w === 2) flash(w, Math.max(1, parseFloat((st.gwCfg && st.gwCfg.sec) || 3.5)));
+                }
+                prevCnt = cnt; pg1 = g1; pg2 = g2;
+            }
+            return { onState };
+        })();
+
         // ===== АНАЛІТИКА МІЖ ГЕЙМАМИ =====
         const AB = (function () {
             const wrap = document.getElementById('anb-wrap'), plate = document.getElementById('anb-plate');
@@ -4083,6 +4114,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 try { window.__brkMirror && window.__brkMirror(state); BRK.apply(state, newBreakActive); } catch (e) { console.error(e); }
                 try { AN.render(state); } catch (e) { console.error(e); }
                 try { AB.onState(state); } catch (e) { console.error(e); }
+                try { GW.onState(state); } catch (e) { console.error(e); }
                 try { MS.apply(state); } catch (e) { console.error(e); }
 
                 const boardWrapper = document.getElementById('main-scoreboard');
