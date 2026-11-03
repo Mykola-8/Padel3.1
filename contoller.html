@@ -4659,12 +4659,13 @@
                     w.querySelector('details').addEventListener('toggle', e => { openIds[r.id] = e.target.open; });
                     const bx = w.firstChild, mk = (t, bg, fn) => { const b = document.createElement('button'); b.className = 'btn' + (on && t.startsWith('🔁') ? ' tb-live' : ''); b.style.cssText = 'padding:8px 12px; font-size:12px; font-weight:800; background:' + bg + ';'; b.innerText = t; b.onclick = fn; bx.appendChild(b); };
                     mk('▶', '#0f766e', () => play(r.id)); mk(on ? '🔁 ВКЛ' : '🔁', '#374151', () => loop(r.id));
-                    if (r.id !== 'def') mk('✕', '#b91c1c', () => { if (!confirm('Видалити «' + (r.name || '') + '»?')) return; if (state.mascotId === r.id) { state.mascotId = 'def'; state.mascotLoop = false; set(matchRef, state); } PATHS.forEach(pp => set(ref(db, pp + '/items/' + r.id), null).catch(() => {})); });
+                    if (r.id !== 'def') mk('✕', '#b91c1c', () => { if (!confirm('Видалити «' + (r.name || '') + '»?')) return; if (state.mascotId === r.id) { state.mascotId = 'def'; state.mascotLoop = false; set(matchRef, state); } PATHS.forEach(pp => { set(ref(db, pp + '/items/' + r.id), null).catch(() => {}); set(ref(db, pp + '/index/' + r.id), null).catch(() => {}); }); });
                     const kc = w.querySelector('[data-kc]'); if (kc) kc.onchange = () => write('items/' + r.id + '/key', kc.checked);
                     w.querySelectorAll('input[type=range]').forEach(el => { el.oninput = () => { el.previousElementSibling.querySelector('b').innerText = el.value; clearTimeout(el._t); el._t = setTimeout(() => { const v = parseInt(el.value); write((r.id === 'def' ? 'def/' : 'items/' + r.id + '/') + el.dataset.f, v); }, 200); }; });
                     list.appendChild(w);
                 });
             }
+            const backfilled = {};
             let pending = null; const fst = t => { host.querySelector('#ms-file-st').innerText = t || ''; };
             host.querySelector('#ms-file-btn').onclick = () => host.querySelector('#ms-file').click();
             host.querySelector('#ms-file').onchange = e => {
@@ -4684,10 +4685,10 @@
                 const src = pending ? pending.src : url, type = pending ? pending.type : (/\.(webm|mp4|mov)(\?|#|$)/i.test(url) ? 'video' : 'image');
                 if (!src) { st(false, 'Вкажіть посилання або завантажте файл'); return; }
                 const id = 'm' + Date.now().toString(36);
-                write('items/' + id, { name: name, src: src, type: type, size: 420, x: 0, y: 0, dur: 5, key: host.querySelector('#ms-key').checked, keyTol: 40, t: Date.now() }).then(() => { openIds[id] = true; render(true); });
+                write('items/' + id, { name: name, src: src, type: type, size: 420, x: 0, y: 0, dur: 5, key: host.querySelector('#ms-key').checked, keyTol: 40, t: Date.now() }).then(() => { write('index/' + id, name); openIds[id] = true; render(true); });
                 pending = null; fst(''); host.querySelector('#ms-url').value = ''; host.querySelector('#ms-name').value = ''; host.querySelector('#ms-file').value = '';
             };
-            PATHS.forEach((pp, i) => onValue(ref(db, pp), snap => { D[i] = snap.val() || {}; if (i === 0 && snap.val()) base = 0; render(); }));
+            PATHS.forEach((pp, i) => onValue(ref(db, pp), snap => { D[i] = snap.val() || {}; if (i === 0 && snap.val()) base = 0; render(); try { const g = G(), ix = Object.assign({}, (D[1] || {}).index || {}, (D[0] || {}).index || {}); Object.keys(g.items).forEach(k => { if (!ix[k] && !backfilled[k]) { backfilled[k] = 1; write('index/' + k, g.items[k].name || 'Талісман'); } }); } catch (e) {} }));
             setInterval(() => render(), 1500);
             render(true);
         })();
