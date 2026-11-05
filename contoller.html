@@ -237,79 +237,6 @@
             <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
 
-        <div class="card" id="admin-tournament-panel" style="display:none; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
-            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 ADMIN — Стадія турніру (Tournament)</div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">FINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="FINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">SEMIFINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="SEMIFINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">1/4 QUARTER-FINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="1/4 QUARTER-FINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP A</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP A" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP B</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP B" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP C</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP C" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP D</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP D" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #b91c1c;">
-                    <span style="font-size:11px; font-weight:800; color:#ef4444;">Вимкнути (Сховати)</span>
-                    <input type="radio" name="tournament-stage-opt" id="ts-opt-off" value="" onchange="setTournamentStage(this.value)">
-                </label>
-            </div>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
-                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
-                <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
-            </div>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px; display:flex; flex-direction:column; gap:10px;">
-                <span style="font-size:10px; color:#aaa; display:block;">Вигляд і положення плашки на трансляції:</span>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="stage-fontsize-value" style="color:#e0b878;">13px</b></span>
-                    <input type="range" id="stage-fontsize-slider" min="8" max="40" step="1" value="13" oninput="updateStageFontSize(this.value)">
-                </label>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Зсув по горизонталі: <b id="stage-offsetx-value" style="color:#e0b878;">0px</b></span>
-                    <input type="range" id="stage-offsetx-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
-                </label>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Зсув по вертикалі: <b id="stage-offsety-value" style="color:#e0b878;">0px</b></span>
-                    <input type="range" id="stage-offsety-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
-                </label>
-
-                <div style="display:flex; gap:12px;">
-                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                        <span style="font-size:11px; color:#ccc;">Колір фону</span>
-                        <input type="color" id="stage-bgcolor-input" value="#a6a6a6" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
-                    </label>
-                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                        <span style="font-size:11px; color:#ccc;">Колір напису</span>
-                        <input type="color" id="stage-textcolor-input" value="#ffffff" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
-                    </label>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="tab-tournament" class="tab-content">
@@ -732,6 +659,80 @@
                     <button class="btn btn-red" style="padding:6px; font-size:9px;" onclick="clearLogoData()">Скинути лого</button>
                 </div>
             </div>
+
+                    <div class="card" id="admin-tournament-panel" style="display:flex; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 Стадія турніру (плашка на трансляції)</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">SEMIFINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="SEMIFINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">1/4 QUARTER-FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="1/4 QUARTER-FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP A</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP A" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP B</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP B" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP C</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP C" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP D</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP D" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #b91c1c;">
+                    <span style="font-size:11px; font-weight:800; color:#ef4444;">Вимкнути (Сховати)</span>
+                    <input type="radio" name="tournament-stage-opt" id="ts-opt-off" value="" onchange="setTournamentStage(this.value)">
+                </label>
+            </div>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
+                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
+                <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
+            </div>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px; display:flex; flex-direction:column; gap:10px;">
+                <span style="font-size:10px; color:#aaa; display:block;">Вигляд і положення плашки на трансляції:</span>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="stage-fontsize-value" style="color:#e0b878;">13px</b></span>
+                    <input type="range" id="stage-fontsize-slider" min="8" max="40" step="1" value="13" oninput="updateStageFontSize(this.value)">
+                </label>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Зсув по горизонталі: <b id="stage-offsetx-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="stage-offsetx-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
+                </label>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Зсув по вертикалі: <b id="stage-offsety-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="stage-offsety-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
+                </label>
+
+                <div style="display:flex; gap:12px;">
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір фону</span>
+                        <input type="color" id="stage-bgcolor-input" value="#a6a6a6" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір напису</span>
+                        <input type="color" id="stage-textcolor-input" value="#ffffff" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                </div>
+            </div>
+        </div>
 
             <div class="card" style="border: 2px solid #f472b6; background: #241019;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло (анонс/реклама)</div>
@@ -3060,8 +3061,10 @@
         (function smcolInit() {
             const modal = document.getElementById('settings-modal'); if (!modal) return;
             const inner = Array.from(modal.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
+            { const sp = document.getElementById('admin-tournament-panel'); if (sp && !isAdmin) sp.remove(); }
             const cards = Array.from(inner.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
+            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '🏆 Стадія турніру (плашка)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
+            if (!isAdmin) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('smcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
@@ -3336,12 +3339,12 @@
         // ===== РЕГЛАМЕНТ ТУРНІРУ (padel/rules) =====
         (function rlInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'РЕГЛАМЕНТ ТУРНІРУ', text: '', autoHide: 0, textSize: 100, width: 100, dim: 45, speed: 40, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', textColor: '#ffffff' };
+            const DEF = { show: false, court: 'all', title: 'РЕГЛАМЕНТ ТУРНІРУ', text: '', autoHide: 0, textSize: 100, width: 100, scale: 80, dim: 45, speed: 40, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', textColor: '#ffffff' };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel' }, { k: 'title', l: 'Заголовок', t: 'txt' },
                 { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num' },
-                { k: 'textSize', l: 'Розмір тексту, %', t: 'rng', min: 50, max: 220 }, { k: 'width', l: 'Ширина вікна, %', t: 'rng', min: 50, max: 150 },
+                { k: 'textSize', l: 'Розмір тексту, %', t: 'rng', min: 50, max: 220 }, { k: 'scale', l: 'Масштаб табла регламенту, %', t: 'rng', min: 30, max: 150 }, { k: 'width', l: 'Ширина вікна, %', t: 'rng', min: 50, max: 150 },
                 { k: 'dim', l: 'Затемнення ефіру, %', t: 'rng', min: 0, max: 100 }, { k: 'speed', l: 'Швидкість прокрутки довгого тексту', t: 'rng', min: 10, max: 150 },
                 { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовків', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
             ];
@@ -3649,7 +3652,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
@@ -4774,7 +4777,6 @@
                 document.getElementById('admin-badge').classList.add('visible');
                 document.getElementById('admin-unlock-btn').style.display = 'block';
                 document.getElementById('admin-camera-panel').style.display = 'flex';
-                document.getElementById('admin-tournament-panel').style.display = 'flex';
                 document.getElementById('admin-promo-broadcast-row').style.display = 'flex';
             } else {
                 // Для звичайного користувача (без ?admin=1) — ховаємо смеш / від сітки / Por Tres / Por Cuatro / Dormilona та чекбокси анімації/текстів
