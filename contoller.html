@@ -2466,7 +2466,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -3398,6 +3398,106 @@
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { rlMirror(); } catch (e) {} }; }
             onValue(ref(db, 'padel/rules'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { rlMirror(); return; } rlApply(v); }, () => { loaded = true; rlMirror(); });
             setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+        // ===== ПОСЛІДОВНИЙ ПОКАЗ ТАБЛО (padel/seq) =====
+        (function seqInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const S = () => (typeof state === 'object' && state) || {};
+            // id, назва, чи увімкнене зараз, як увімкнути/вимкнути
+            const FB = { 'ic-btn-show': () => window.icToggle && window.icToggle(), 'gr-btn-show': () => window.grToggle && window.grToggle(), 'po-btn-upper': () => window.poToggle && window.poToggle('upper'), 'po-btn-lower': () => window.poToggle && window.poToggle('lower'), 'btn-mi-toggle': () => window.miToggle && window.miToggle(), 'btn-rk-toggle': () => window.rkToggle && window.rkToggle() };
+            const clickId = id => { const b = document.getElementById(id); if (b) b.click(); else if (FB[id]) { try { FB[id](); } catch (e) {} } };
+            const TOG = (btn, fn) => ({ on: () => { try { return !!fn(S()); } catch (e) { return false; } }, set(w) { if (this.on() !== w) clickId(btn); } });
+            const EXP = (onB, offB) => ({ set(w) { clickId(w ? onB : offB); } });
+            const P = {
+                icard: Object.assign({ name: '🎬 Вступне табло' }, TOG('ic-btn-show', s => s.introCard && s.introCard.show)),
+                intro: Object.assign({ name: '🎙 Хто грає' }, TOG('btn-mi-toggle', s => s.matchIntro && s.matchIntro.show)),
+                crew: Object.assign({ name: '👔 Організатори турніру' }, EXP('crew-on', 'crew-off')),
+                spcard: Object.assign({ name: '🤝 Спонсори: лого й опис' }, EXP('spcard-on', 'spcard-off')),
+                rules: Object.assign({ name: '📜 Регламент турніру' }, EXP('rl-on', 'rl-off')),
+                rank: Object.assign({ name: '🏆 Рейтинг команд' }, TOG('btn-rk-toggle', s => s.teamRanking && s.teamRanking.show)),
+                groups: Object.assign({ name: '👥 Групи' }, TOG('gr-btn-show', s => s.groups && s.groups.show)),
+                poU: Object.assign({ name: '🏁 Play-off: верх' }, TOG('po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
+                poL: Object.assign({ name: '🏁 Play-off: низ' }, TOG('po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
+                credits: Object.assign({ name: '🎞 Титри турніру' }, EXP('cr-on', 'cr-off'))
+            };
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
+            const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: id === 'rank' ? 20 : (id === 'credits' ? 60 : 7) })) });
+            const norm = v => {
+                const base = DEFD(); if (!v || typeof v !== 'object') return base;
+                const arr = Array.isArray(v.items) ? v.items : (v.items && typeof v.items === 'object' ? Object.values(v.items) : []);
+                const seen = {}, items = [];
+                arr.forEach(it => { if (it && P[it.id] && !seen[it.id]) { seen[it.id] = 1; items.push({ id: it.id, on: !!it.on, dur: Math.max(1, parseFloat(it.dur) || 7) }); } });
+                base.items.forEach(it => { if (!seen[it.id]) items.push(it); });
+                return { gap: Math.max(0, parseFloat(v.gap) >= 0 ? parseFloat(v.gap) : 3), loop: v.loop !== false, items: items };
+            };
+            let d = norm(null), timer = null, loaded = false, dirty = 0, token = 0, running = false, cur = null;
+            try { const ls = localStorage.getItem('padel_seq'); if (ls) d = norm(JSON.parse(ls)); } catch (e) {}
+            const inp = 'padding:5px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'seq-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('rl-card') || document.getElementById('cr-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">⏯ Послідовний показ табло</div>' +
+                '<div style="font-size:10px; color:#9bd;">Познач галочкою табло, задай секунди показу й порядок (▲▼). Табло йдуть по черзі: показ → закриття → пауза → наступне. Без галочки — не показується. Пульт має лишатися відкритим, поки йде послідовність.</div>' +
+                '<div id="seq-list" style="display:flex; flex-direction:column; gap:5px;"></div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Пауза між табло (сек):</span><input type="number" min="0" id="seq-gap" style="' + inp + ' width:80px;"></div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Повторювати по колу:</span><input type="checkbox" id="seq-loop"></div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="seq-go">▶ ЗАПУСТИТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="seq-stop">■ ЗУПИНИТИ</button></div>' +
+                '<div id="seq-st" style="font-size:12px; font-weight:700;"></div>';
+            const st = (m, col) => { const e = card.querySelector('#seq-st'); e.innerText = m; e.style.color = col || '#ccc'; };
+            function save() {
+                try { localStorage.setItem('padel_seq', JSON.stringify(d)); } catch (e) {}
+                dirty = Date.now(); clearTimeout(timer);
+                timer = setTimeout(() => { try { set(ref(db, 'padel/seq'), JSON.parse(JSON.stringify(d))).catch(() => {}); } catch (e) {} }, 400);
+            }
+            function list() {
+                const host = card.querySelector('#seq-list'); host.innerHTML = '';
+                d.items.forEach((it, i) => {
+                    const w = document.createElement('div'); w.style.cssText = 'display:flex; gap:6px; align-items:center; background:#1a1a1a; border-radius:6px; padding:5px 6px;';
+                    w.dataset.id = it.id;
+                    const ck = document.createElement('input'); ck.type = 'checkbox'; ck.checked = it.on; ck.onchange = () => { it.on = ck.checked; save(); };
+                    const nm = document.createElement('span'); nm.style.cssText = 'flex:1; font-size:12px;'; nm.innerText = P[it.id].name;
+                    const du = document.createElement('input'); du.type = 'number'; du.min = 1; du.value = it.dur; du.style.cssText = inp + ' width:60px;'; du.oninput = () => { it.dur = Math.max(1, parseFloat(du.value) || 1); save(); };
+                    const sc = document.createElement('span'); sc.style.cssText = 'font-size:11px; color:#999;'; sc.innerText = 'с';
+                    const mv = dir => { const b = document.createElement('button'); b.type = 'button'; b.innerText = dir < 0 ? '▲' : '▼'; b.style.cssText = 'padding:4px 8px; border:0; border-radius:4px; background:#444; color:#fff;'; b.onclick = () => { const j = i + dir; if (j < 0 || j >= d.items.length) return; [d.items[i], d.items[j]] = [d.items[j], d.items[i]]; list(); save(); }; return b; };
+                    w.append(ck, nm, du, sc, mv(-1), mv(1)); host.appendChild(w);
+                });
+                paint();
+            }
+            function paint() {
+                card.querySelectorAll('#seq-list > div').forEach(w => { w.style.outline = (running && cur === w.dataset.id) ? '2px solid #4ade80' : 'none'; });
+                card.querySelector('#seq-go').style.outline = running ? '3px solid #fff' : 'none'; card.querySelector('#seq-stop').style.outline = running ? 'none' : '3px solid #fff';
+            }
+            const sleep = (ms, tk) => new Promise(res => { const t0 = Date.now(); const iv = setInterval(() => { if (tk !== token || Date.now() - t0 >= ms) { clearInterval(iv); res(); } }, 200); });
+            const hideAll = () => { d.items.forEach(it => { try { if (P[it.id].on ? P[it.id].on() : true) P[it.id].set(false); } catch (e) {} }); };
+            async function run() {
+                const tk = ++token; running = true; paint();
+                const act = () => d.items.filter(it => it.on);
+                if (!act().length) { running = false; st('Познач хоча б одне табло галочкою', '#f66'); paint(); return; }
+                hideAll(); await sleep(600, tk);
+                while (tk === token) {
+                    const items = act(); if (!items.length) break;
+                    for (let k = 0; k < items.length && tk === token; k++) {
+                        const it = items[k], p = P[it.id]; cur = it.id; paint();
+                        p.set(true); const end = Date.now() + it.dur * 1000;
+                        while (tk === token && Date.now() < end) { st('▶ ' + p.name + ' — ще ' + Math.ceil((end - Date.now()) / 1000) + ' с', '#4ade80'); await sleep(500, tk); }
+                        p.set(false); cur = null; paint();
+                        if (tk !== token) break;
+                        const gapEnd = Date.now() + d.gap * 1000;
+                        while (tk === token && Date.now() < gapEnd) { st('⏸ Пауза ' + Math.ceil((gapEnd - Date.now()) / 1000) + ' с', '#fbbf24'); await sleep(500, tk); }
+                    }
+                    if (!d.loop) break;
+                }
+                if (tk === token) { running = false; cur = null; st('✔ Послідовність завершено', '#7c7'); paint(); }
+            }
+            function stop() { const was = running; token++; running = false; if (cur) { try { P[cur].set(false); } catch (e) {} } cur = null; paint(); st(was ? '■ Зупинено' : '', '#ccc'); }
+            card.querySelector('#seq-go').onclick = () => { if (!running) run(); };
+            card.querySelector('#seq-stop').onclick = stop;
+            card.querySelector('#seq-gap').oninput = e => { d.gap = Math.max(0, parseFloat(e.target.value) || 0); save(); };
+            card.querySelector('#seq-loop').onchange = e => { d.loop = e.target.checked; save(); };
+            const fill = () => { card.querySelector('#seq-gap').value = d.gap; card.querySelector('#seq-loop').checked = d.loop; list(); };
+            fill();
+            window.__seqState = () => ({ running, cur, d });
+            onValue(ref(db, 'padel/seq'), snap => { loaded = true; const v = snap.val(); if (!v || Date.now() - dirty < 3000 || card.contains(document.activeElement) || running) return; const n = norm(v); if (JSON.stringify(n) !== JSON.stringify(d)) { d = n; try { localStorage.setItem('padel_seq', JSON.stringify(d)); } catch (e) {} fill(); } }, () => { loaded = true; });
         })();
 
         // ===== АВТО-РОЗКЛАД (картка) =====
