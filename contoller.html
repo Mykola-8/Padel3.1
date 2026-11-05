@@ -2381,7 +2381,7 @@
         // Усі налаштування пульта й турнірні таблиці (не рахунок): зберігаються при скиданні корту й у локальній копії
         function settingKeys() {
             return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
-                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
+                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
         }
         window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
 
@@ -2466,7 +2466,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -3333,6 +3333,73 @@
             setTimeout(() => { crLoaded = true; }, 3000);
         })();
 
+        // ===== РЕГЛАМЕНТ ТУРНІРУ (padel/rules) =====
+        (function rlInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', title: 'РЕГЛАМЕНТ ТУРНІРУ', text: '', autoHide: 0, textSize: 100, width: 100, dim: 45, speed: 40, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', textColor: '#ffffff' };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel' }, { k: 'title', l: 'Заголовок', t: 'txt' },
+                { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num' },
+                { k: 'textSize', l: 'Розмір тексту, %', t: 'rng', min: 50, max: 220 }, { k: 'width', l: 'Ширина вікна, %', t: 'rng', min: 50, max: 150 },
+                { k: 'dim', l: 'Затемнення ефіру, %', t: 'rng', min: 0, max: 100 }, { k: 'speed', l: 'Швидкість прокрутки довгого тексту', t: 'rng', min: 10, max: 150 },
+                { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовків', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
+            ];
+            const DEFV = Object.assign({}, DEF, { text: '' });
+            let d = JSON.parse(JSON.stringify(DEFV));
+            let timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'rl-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('cr-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'rl-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + COURTS.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">📜 Регламент турніру (показ на екрані)</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rl-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rl-off">■ СХОВАТИ</button></div>' +
+                '<div id="rl-st" style="font-size:11px;"></div>' +
+                '<div style="font-size:10px; color:#9bd;">Кожен рядок окремо. «# Назва» — підзаголовок, «- текст» — пункт зі значком. Довгий текст прокручується сам.</div>' +
+                '<textarea id="rl-text" rows="10" placeholder="# Формат&#10;- Групи по 4 команди&#10;- Гейм до 4, золотий пункт на 40:40&#10;&#10;# Нарахування очок&#10;- Перемога — 2 очки, поразка — 0" style="' + inp + ' font-family:inherit;"></textarea>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            function st(ok, m) { const e = card.querySelector('#rl-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.rulesCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/rulesCfg'), data); st(true, 'padel/rules відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/rules'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function keyOf(f) { return f.k; }
+            function refresh() {
+                F.forEach(f => { const el = card.querySelector('#rl-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[keyOf(f)]; el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rl-f-' + f.k + '-v'); if (lv) lv.innerText = v + '%'; });
+                const ta = card.querySelector('#rl-text'); if (document.activeElement !== ta) ta.value = d.text || '';
+                card.querySelector('#rl-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#rl-off').style.outline = d.show ? 'none' : '3px solid #fff';
+            }
+            card.querySelector('#rl-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            card.querySelector('#rl-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelector('#rl-text').addEventListener('input', e => { d.text = e.target.value; save(false); });
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = (f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value; d[f.k] = v;
+                    const lv = card.querySelector('#rl-f-' + f.k + '-v'); if (lv) lv.innerText = v + '%'; save(false);
+                });
+            });
+            refresh();
+            const rlApply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEFV, v); refresh(); };
+            const rlMirror = () => { const m = state && state.rulesCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; rlApply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { rlMirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/rules'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { rlMirror(); return; } rlApply(v); }, () => { loaded = true; rlMirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== АВТО-РОЗКЛАД (картка) =====
         (function schInit() {
             const items = [['ticker', '📰 Бігучий рядок'], ['adbar', '📢 Рекламний рядок'], ['qr', '🔳 QR-код']];
@@ -3413,7 +3480,7 @@
             const SINGLE = [['btn-mi-toggle', s => s.matchIntro && s.matchIntro.show], ['btn-rk-toggle', s => s.teamRanking && s.teamRanking.show],
                 ['po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show], ['po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show],
                 ['gr-btn-show', s => s.groups && s.groups.show], ['ic-btn-show', s => s.introCard && s.introCard.show]];
-            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off']];
+            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off']];
             function tick() {
                 try {
                     const s = (typeof state === 'object' && state) || {};
