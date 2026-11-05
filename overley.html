@@ -626,8 +626,8 @@
         .rl-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10005; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: var(--rl-font, 'Montserrat', sans-serif); }
         .rl-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
         .rl-dim { position: absolute; inset: 0; background: #000; opacity: var(--rl-dim, .45); }
-        .rl-box { position: absolute; left: 50%; top: 50%; width: var(--rl-w, 1300px); max-height: 900px; transform: translate(-50%, -46%) scale(.97); transition: transform .6s ease; background: linear-gradient(180deg, var(--rl-bg1, #0b1226), var(--rl-bg2, #101c3d)); border: 3px solid var(--rl-acc, #f5c542); border-radius: 22px; box-shadow: 0 20px 70px rgba(0,0,0,.6); padding: 44px 60px; color: var(--rl-text, #fff); overflow: hidden; display: flex; flex-direction: column; }
-        .rl-wrap.on .rl-box { transform: translate(-50%, -50%) scale(1); }
+        .rl-box { position: absolute; left: 50%; top: 50%; width: var(--rl-w, 1300px); max-height: 900px; transform: translate(-50%, -46%) scale(calc(var(--rl-sc, .8) * .97)); transition: transform .6s ease; background: linear-gradient(180deg, var(--rl-bg1, #0b1226), var(--rl-bg2, #101c3d)); border: 3px solid var(--rl-acc, #f5c542); border-radius: 22px; box-shadow: 0 20px 70px rgba(0,0,0,.6); padding: 44px 60px; color: var(--rl-text, #fff); overflow: hidden; display: flex; flex-direction: column; }
+        .rl-wrap.on .rl-box { transform: translate(-50%, -50%) scale(var(--rl-sc, .8)); }
         .rl-title { font-size: calc(58px * var(--rl-ts, 1)); font-weight: 900; letter-spacing: 5px; text-transform: uppercase; text-align: center; color: var(--rl-acc, #f5c542); padding-bottom: 20px; margin-bottom: 24px; border-bottom: 3px solid var(--rl-acc, #f5c542); flex: none; }
         .rl-view { flex: 1; min-height: 0; overflow: hidden; position: relative; }
         .rl-body { will-change: transform; }
@@ -3592,6 +3592,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 s.setProperty('--rl-bg1', g(cfg.bg1, '#0b1226')); s.setProperty('--rl-bg2', g(cfg.bg2, '#101c3d')); s.setProperty('--rl-acc', g(cfg.accent, '#f5c542')); s.setProperty('--rl-text', g(cfg.textColor, '#ffffff'));
                 s.setProperty('--rl-ts', Math.max(40, Math.min(250, parseInt(g(cfg.textSize, 100)))) / 100);
                 s.setProperty('--rl-w', Math.round(1300 * Math.max(40, Math.min(150, parseInt(g(cfg.width, 100)))) / 100) + 'px');
+                s.setProperty('--rl-sc', Math.max(30, Math.min(150, parseInt(g(cfg.scale, 80)))) / 100);
                 s.setProperty('--rl-dim', Math.max(0, Math.min(100, parseInt(g(cfg.dim, 45)))) / 100);
             }
             function build() {
@@ -3623,7 +3624,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     lastTs = ts; running = true; build(); wrap.classList.add('on'); clearTimeout(endT);
                     const ah = parseFloat(g(cfg.autoHide, 0)); if (ah > 0) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; }, ah * 1000);
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); }
-                else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.text, cfg.textSize, cfg.width, cfg.speed]); if (s2 !== sig) build(); sig = s2; }
+                else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.text, cfg.textSize, cfg.width, cfg.speed, cfg.scale]); if (s2 !== sig) build(); sig = s2; }
             }
             onValue(ref(db, 'padel/rules'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
             window.__rlMirror = (st) => { const v = st && st.rulesCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
