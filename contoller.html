@@ -316,6 +316,17 @@
                 </div>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🎨 Тема табла «Хто грає»
+                    <select data-mi="theme" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
+                        <option value="classic">Класична (світла шапка, темне поле)</option><option value="auto">Як табло рахунку (поточна тема)</option>
+                        <option value="graydark">Сіро-темна</option><option value="gold">Золото</option><option value="courtgreen">Корт (салатова)</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора</option><option value="padelblue">Padel Blue</option><option value="championship">Championship (Navy/Orange)</option><option value="mono">Монохром</option><option value="stonesand">Stone/Sand</option><option value="skewlime">Lime / Pro Tour</option>
+                    </select></label>
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🔗 Імена на табло рахунку — з табла «Хто грає»
+                    <select data-mi="syncNames" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="on">Синхронізувати (в обидва боки)</option><option value="off">Не синхронізувати</option></select></label>
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">Формат імені на табло рахунку
+                    <select data-mi="nameFmt" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="last">Прізвище</option><option value="initial">І. Прізвище</option><option value="full">Ім'я Прізвище</option></select></label>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
             <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">✨ Анімація виходу / зникнення табла
                 <select data-mi="anim" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
                     <option value="slide">Виїзд знизу (стандартна)</option>
@@ -3786,7 +3797,7 @@
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
-            show: false, title: "FIP PLATINUM LYON 2026", court: "PISTE CENTRALE", round: "MEN - FINAL", vs: "VS", date: "",
+            show: false, title: "", court: "", round: "", vs: "VS", date: "", theme: "classic", syncNames: "on", nameFmt: "last",
             x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "", anim: "slide", animDur: 6, bgOpacity: 100,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
@@ -3864,6 +3875,57 @@
             const btn = document.getElementById('btn-mi-toggle');
             if (btn) btn.innerText = (state.matchIntro && state.matchIntro.show) ? '🛑 СХОВАТИ ТАБЛО «ХТО ГРАЄ»' : '🎬 ПОКАЗАТИ ТАБЛО «ХТО ГРАЄ»';
         }
+
+        // ===== СИНХРОНІЗАЦІЯ ІМЕН: табло рахунку ↔ табло «Хто грає» =====
+        (function miNameSync() {
+            const mem = {}; let busyUntil = 0;
+            const nameOf = (pl, fmt) => {
+                const f = String((pl && pl.f) || '').trim(), l = String((pl && pl.l) || '').trim();
+                if (!f && !l) return '';
+                if (fmt === 'full') return (f + ' ' + l).trim();
+                if (fmt === 'initial') return f ? (f.charAt(0).toUpperCase() + '. ' + (l || '')).trim() : l;
+                return l || f;
+            };
+            const teamName = (tm, fmt) => [nameOf(tm && tm.p1, fmt), nameOf(tm && tm.p2, fmt)].filter(Boolean).join(' / ');
+            function reverse(tm, v, fmt) {   // «А / Б» → гравці табла «Хто грає»
+                const parts = String(v || '').split(/\s*\/\s*/).map(s => s.trim());
+                if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+                ['p1', 'p2'].forEach((k, i) => {
+                    tm[k] = tm[k] || {}; const cur = nameOf(tm[k], fmt); if (cur === parts[i]) return;
+                    const tk = parts[i].split(/\s+/);
+                    if (fmt === 'last' || tk.length < 2) tm[k].l = parts[i];
+                    else { tm[k].f = tk[0].replace(/\.$/, ''); tm[k].l = tk.slice(1).join(' '); }
+                });
+                return true;
+            }
+            function tick() {
+                try {
+                    if (typeof state !== 'object' || !state || Date.now() < busyUntil) return;
+                    if (!state.matchIntro && [state.p1name, state.p2name].some(v => /\S\s*\/\s*\S/.test(String(v || '')))) { try { miEnsure(); } catch (e) {} }
+                    const mi = state.matchIntro; if (!mi || mi.syncNames === 'off') return;
+                    const fmt = mi.nameFmt || 'last'; let changed = false;
+                    [1, 2].forEach(n => {
+                        const tm = mi['t' + n]; if (!tm) return;
+                        const key = 'p' + n + 'name', cur = state[key], iName = teamName(tm, fmt), m = mem[n];
+                        if (!m) {   // перший прохід: «Хто грає» — джерело, якщо там вже є імена; інакше заповнюємо його з табла рахунку
+                            if (iName) { if (iName !== cur) { state[key] = iName; changed = true; } }
+                            else if (reverse(tm, cur, fmt)) changed = true;
+                        } else {
+                            const nameCh = cur !== m.name, introCh = iName !== m.intro;
+                            if (introCh && iName) { if (iName !== cur) { state[key] = iName; changed = true; } }
+                            else if (nameCh && !introCh) { if (reverse(tm, cur, fmt)) changed = true; }
+                        }
+                        mem[n] = { name: state[key], intro: teamName(tm, fmt) };
+                    });
+                    if (changed) {
+                        busyUntil = Date.now() + 1800; try { miSave(true); } catch (e) {}
+                        [1, 2].forEach(n => { const el = document.getElementById('p' + n + '-name-input'); if (el && document.activeElement !== el && el.value !== state['p' + n + 'name']) el.value = state['p' + n + 'name']; });
+                        try { renderMatchIntroUI(); } catch (e) {}
+                    }
+                } catch (e) {}
+            }
+            setInterval(tick, 700);
+        })();
 
         // блокуємо прокрутку основної сторінки, поки відкрито будь-яке меню/модальне вікно
         (function () {
