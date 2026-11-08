@@ -397,6 +397,9 @@
         @keyframes tlFlip { from { opacity: 0; transform: rotateX(90deg); } to { opacity: 1; transform: none; } }
         @keyframes tlFade { from { opacity: 0; transform: translateY(1.5vh); } to { opacity: 1; transform: none; } }
         #tv-led .tl-sep { position: relative; overflow: visible; }
+        #tv-led .tl-stage { position: absolute; right: 0; top: 50%; transform: translateY(-50%); padding: 0.5vh 2vw; border-radius: 999px; font-weight: 900; font-size: min(3.6vh, 2.4vw); letter-spacing: 0.08em; white-space: nowrap; z-index: 2; box-shadow: 0 0 1.5vh rgba(0,0,0,.5); }
+        #tv-led:not(.themed) .tl-cell.pt { color: var(--tl-pt, #ffd54a); }
+        #tv-led.themed.ptc .tl-cell.pt { color: var(--tl-pt) !important; }
         #tv-led .tl-plate { position: static; z-index: 3; padding: 0.6vh 3vw; border-radius: 99px; font-weight: 900; font-size: min(4.6vh, 3vw); letter-spacing: 0.12em; color: #fff; white-space: nowrap; box-shadow: 0 0 2vh rgba(0,0,0,0.7); animation: tlFade 0.5s ease; }
         html.tvled .scoreboard-wrapper { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
         html.tvled #tv-led { display: flex; flex-direction: column; position: fixed; left: 3vw; top: 3vh; width: 94vw; height: 94vh; z-index: 5; font-family: 'Montserrat', sans-serif; color: #fff; transition: opacity 0.3s; }
@@ -626,6 +629,7 @@
         .cb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear 1s; }
         .cb-wrap.on { opacity: var(--cb-op, .92); visibility: visible; transition: opacity .5s ease; }
         .cb-plane { position: absolute; left: 0; top: 0; width: 1000px; height: 500px; transform-origin: 0 0; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        html.tv .cb-wrap, html.tvled .cb-wrap { display: none !important; }
         .cb-bg { position: absolute; inset: 0; }
         .cb-box { position: absolute; overflow: hidden; }
         .cb-f { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transform: scale(.12); transform-origin: var(--cb-or, 0% 50%); transition: opacity .8s ease, transform 1s cubic-bezier(.2,.8,.2,1); }
@@ -3292,6 +3296,8 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const cA = cfg.teamAColor || '#3dff6b', cB = cfg.teamBColor || '#ff4040';
             const uaL = st.cornerSlideLang === 'ua';
             const tags = [];
+            { const stg = String(st.tournamentStage || '').trim().toUpperCase(); if (stg) tags.push(stg.replace(/</g, '&lt;')); }
+            const ptC = cfg.ptColor || '#ffd54a';
             if (st.isSuperTiebreak) tags.push((uaL ? 'СУПЕР-ТАЙБРЕЙК ДО ' : 'SUPER TIEBREAK TO ') + (st.superTiebreakLimit || 10)); else if (st.isTiebreak) tags.push(uaL ? 'ТАЙБРЕЙК' : 'TIEBREAK');
             if (st.isTotalSet) tags.push(st.isTiebreak ? 'TIE-BREAK TO ' + (st.totalTbLimit || 5) : 'TOTAL SET ' + (st.proSetLimit || 8)); else if (st.isProSet) tags.push('PRO-SET ' + (st.proSetLimit || 8));
             if (st.isMexicano) tags.push((uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24)); else if (st.isAmericano) tags.push(__amLbl(st, uaL));
@@ -3324,13 +3330,13 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const nm = id => txt(id).replace(/</g, '&lt;');
             const html =
                 '<div class="sb-panel' + (hid ? ' hidden' : '') + '" style="height:calc(94vh - ' + (reserve + spH / 100 * window.innerHeight) + 'px)">' +
-                '<div class="sb-side"><div class="sb-name"><span>' + nm('name-display-t1') + '</span>' + icon(s1) + '</div><div class="sb-big" style="border-color:' + cA + '">' + sbNum(p1, cA, 2) + (fx && String(fx.team) === '1' ? '<div class="sb-fx ' + fx.cls + '">' + fx.text + '</div>' : '') + '</div></div>' +
+                '<div class="sb-side"><div class="sb-name"><span>' + nm('name-display-t1') + '</span>' + icon(s1) + '</div><div class="sb-big" style="border-color:' + cA + '">' + sbNum(p1, ptC, 2) + (fx && String(fx.team) === '1' ? '<div class="sb-fx ' + fx.cls + '">' + fx.text + '</div>' : '') + '</div></div>' +
                 '<div class="sb-mid"><div class="sb-clock">' + clk + '</div><div class="sb-lab">' + (uaL ? 'ГЕЙМИ' : 'GAMES') + (sets.length > 1 ? ' · ' + (uaL ? 'СЕТ ' : 'SET ') + cur.n : '') + '</div>' +
                 '<div class="sb-games"><div class="sb-g' + (String(cur.h1).length > 1 ? '' : ' one') + '" style="border-color:' + cA + '">' + sbNum(cur.h1, cA, String(cur.h1).length > 1 ? 2 : 1) + '</div><div class="sb-g' + (String(cur.h2).length > 1 ? '' : ' one') + '" style="border-color:' + cB + '">' + sbNum(cur.h2, cB, String(cur.h2).length > 1 ? 2 : 1) + '</div></div>' +
                 (prev ? '<div class="sb-prev">' + prev + '</div>' : '') +
                 (plate ? '<div class="sb-plate" style="background:' + (PL[pt] || '#374151') + (pt === 'GOLDEN_POINT' ? ';color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') +
                 tags.map(t => '<div class="sb-tag">' + t + '</div>').join('') + '</div>' +
-                '<div class="sb-side"><div class="sb-name"><span>' + nm('name-display-t2') + '</span>' + icon(s2) + '</div><div class="sb-big" style="border-color:' + cB + '">' + sbNum(p2, cB, 2) + (fx && String(fx.team) === '2' ? '<div class="sb-fx ' + fx.cls + '">' + fx.text + '</div>' : '') + '</div></div></div>' +
+                '<div class="sb-side"><div class="sb-name"><span>' + nm('name-display-t2') + '</span>' + icon(s2) + '</div><div class="sb-big" style="border-color:' + cB + '">' + sbNum(p2, ptC, 2) + (fx && String(fx.team) === '2' ? '<div class="sb-fx ' + fx.cls + '">' + fx.text + '</div>' : '') + '</div></div></div>' +
                 (logos.length ? '<div class="sb-spons ' + dp + '" style="--sbsp:' + (spH / 100 * window.innerHeight) + 'px;bottom:' + (reserve + 4) + 'px">' + (spRow ? logos.map(lgH).join('') : lgH(logos[spIdx])) + '</div>' : '');
             sb.style.display = 'block';
             sb.style.backgroundColor = cfg.bgColor || '#000';
@@ -3389,7 +3395,8 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const fx = (window.__tvFx && window.__tvFx.until > Date.now()) ? window.__tvFx : null;
             const stNow = window.__tvState || {};
             const icType = stNow.serverIconType || 'ball', icColor = stNow.serverIconColor || '#b28a55';
-            const sig = JSON.stringify([fx ? fx.until : 0, !!stNow.isTiebreak, !!stNow.isSuperTiebreak, !!stNow.isProSet, !!stNow.isTotalSet, !!stNow.isAmericano, !!stNow.isMexicano, stNow.cornerSlideLang, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0, JSON.stringify(lgMeta), cfg.spDescPos, st.proSetLimit, st.americanoLimit, st.superTiebreakLimit]);
+            const stageTxt = String(stNow.tournamentStage || '').trim().toUpperCase();
+            const sig = JSON.stringify([stageTxt, stNow.stageBgColor, stNow.stageTextColor, cfg.ptColor, fx ? fx.until : 0, !!stNow.isTiebreak, !!stNow.isSuperTiebreak, !!stNow.isProSet, !!stNow.isTotalSet, !!stNow.isAmericano, !!stNow.isMexicano, stNow.cornerSlideLang, icType, icColor, stNow.showServerIndicator, reserve, spPos, cfg.spX, cfg.spY, cfg.tvTheme, cfgSrc, txt('name-display-t1'), txt('name-display-t2'), p1, p2, s1, s2, sets, plate, showSrv, logos.length, spIdx, spRow, bgSig, logos.length ? logos[0].length : 0, JSON.stringify(lgMeta), cfg.spDescPos, st.proSetLimit, st.americanoLimit, st.superTiebreakLimit]);
             if (root.__sig === sig) return; root.__sig = sig;
             const bg = document.getElementById('tv-bg');
             if (bg) {
@@ -3398,6 +3405,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 bg.style.backgroundImage = cfg.bgImg ? 'linear-gradient(rgba(0,0,0,' + dim + '),rgba(0,0,0,' + dim + ')),url("' + cfg.bgImg + '")' : 'none';
             }
             root.classList.toggle('themed', cfg.style !== 'led');
+            root.style.setProperty('--tl-pt', cfg.ptColor || '#ffd54a'); root.classList.toggle('ptc', !!cfg.ptColor);
             root.style.setProperty('--tl-a', cfg.teamAColor || '#ff4040'); root.style.setProperty('--tl-b', cfg.teamBColor || '#3dff6b');
             root.style.setProperty('--sp-h', (parseInt(cfg.spH) || 14) + 'vh');
             // висота рядка рахунку = (94vh − заголовок − 2 назви − смуга спонсорів − відступи) / 2; цифри ≈ 80% висоти
@@ -3419,7 +3427,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             if (st.isMexicano) modes.push('<b class="am">' + (uaL ? 'МЕКСИКАНО ДО ' : 'MEXICANO TO ') + (st.mexicanoLimit || 24) + '</b>');
             else if (st.isAmericano) modes.push('<b class="am">' + __amLbl(st, uaL) + '</b>');
             const modeHtml = modes.length ? '<div class="tl-mode">' + modes.join('') + '</div>' : '';
-            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + modeHtml + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
+            h += team('a', txt('name-display-t1'), p1, s1, 'h1') + '<div class="tl-sep">' + modeHtml + (stageTxt ? '<div class="tl-stage" style="background:' + (stNow.stageBgColor || '#a6a6a6') + ';color:' + (stNow.stageTextColor || '#ffffff') + '">' + stageTxt.replace(/</g, '&lt;') + '</div>' : '') + (plate ? '<div class="tl-plate" style="background:' + (PL[plateType] || '#374151') + ';' + (plateType === 'GOLDEN_POINT' ? 'color:#111' : '') + '">' + plate.replace(/</g, '&lt;') + '</div>' : '') + '</div>' + team('b', txt('name-display-t2'), p2, s2, 'h2');
             const spx = Math.max(0, Math.min(100, cfg.spX === undefined ? 50 : parseFloat(cfg.spX) || 0)), spy = Math.max(0, Math.min(100, cfg.spY === undefined ? 50 : parseFloat(cfg.spY) || 0));
             if (logos.length) {
                 const spBase = parseInt(cfg.spH) || 14, dp = (cfg.spDescPos === 'left' || cfg.spDescPos === 'right') ? cfg.spDescPos : 'bottom';
@@ -3617,6 +3625,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
         /* ===== БАНЕР У КУТІ З ПЕРСПЕКТИВОЮ (padel/cornerBanner) ===== */
         const CB = (function () {
             const wrap = document.getElementById('cb-wrap'); if (!wrap) return {};
+            if (/[?&]tv=[12]/.test(location.search)) return {};   // на ТВ-оверлеї банер у куті не показуємо
             const plane = document.getElementById('cb-plane'), box = document.getElementById('cb-box');
             const PW = 1000, PH = 500;
             const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
