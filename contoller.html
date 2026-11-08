@@ -4784,6 +4784,122 @@
                 document.getElementById('action-toggles-admin').style.display = 'none';
             }
         });
+        // ===== ПРИБИРАННЯ ФОНУ / ХРОМАКЕЙ ДЛЯ ЛОГОТИПІВ І ЗОБРАЖЕНЬ =====
+        (function bgkInit() {
+            if (isHelper) return;
+            const LS = 'padel_bgk';
+            let cfg = { mode: 'off', color: '#00ff00', tol: 30, soft: 6, everywhere: false, trim: true };
+            try { Object.assign(cfg, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+            const persist = () => { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} };
+            const hex = h => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || ''); return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [0, 255, 0]; };
+            function loadImg(file) { return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('img')); }; im.src = u; }); }
+            // Основний алгоритм: повертає canvas з прозорим фоном
+            function keyCanvas(im, o) {
+                const k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)), W = Math.max(1, Math.round(im.naturalWidth * k)), H = Math.max(1, Math.round(im.naturalHeight * k));
+                const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0, W, H);
+                const img = cx.getImageData(0, 0, W, H), d = img.data, N = W * H;
+                const thr = o.tol * 2.55, band = Math.max(0, o.soft) * 2.55 + 0.001;
+                const px = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+                // ключові кольори
+                let keys = [];
+                if (o.mode === 'auto') {
+                    const pts = [[0, 0], [W - 1, 0], [0, H - 1], [W - 1, H - 1]], cols = pts.map(p => { let r = 0, g = 0, b = 0, a = 0, n = 0; for (let dy = 0; dy < 5; dy++)for (let dx = 0; dx < 5; dx++) { const x = Math.min(W - 1, Math.max(0, p[0] + (p[0] ? -dx : dx))), y = Math.min(H - 1, Math.max(0, p[1] + (p[1] ? -dy : dy))); const q = px(x, y); r += q[0]; g += q[1]; b += q[2]; a += q[3]; n++; } return [r / n, g / n, b / n, a / n]; });
+                    if (cols.every(q => q[3] < 20)) return null;   // уже прозоре
+                    cols.forEach(q => { if (q[3] >= 20 && !keys.some(z => Math.hypot(z[0] - q[0], z[1] - q[1], z[2] - q[2]) < thr)) keys.push(q); });
+                } else if (o.mode === 'white') keys = [[255, 255, 255]];
+                else if (o.mode === 'black') keys = [[0, 0, 0]];
+                else keys = [hex(o.color)];
+                const dist = (i, key) => Math.hypot(d[i] - key[0], d[i + 1] - key[1], d[i + 2] - key[2]);
+                const nearest = i => { let m = 1e9; for (const key of keys) { const v = dist(i, key); if (v < m) m = v; } return m; };
+                const gone = new Uint8Array(N);
+                if (o.everywhere) {
+                    for (let p = 0; p < N; p++) if (nearest(p * 4) <= thr) gone[p] = 1;
+                } else {
+                    const stack = new Int32Array(N); let sp = 0;
+                    const seed = p => { if (!gone[p] && d[p * 4 + 3] >= 20 && nearest(p * 4) <= thr) { gone[p] = 1; stack[sp++] = p; } else if (!gone[p] && d[p * 4 + 3] < 20) { gone[p] = 1; stack[sp++] = p; } };
+                    for (let x = 0; x < W; x++) { seed(x); seed((H - 1) * W + x); }
+                    for (let y = 0; y < H; y++) { seed(y * W); seed(y * W + W - 1); }
+                    while (sp) {
+                        const p = stack[--sp], x = p % W, y = (p / W) | 0;
+                        if (x > 0) seed(p - 1); if (x < W - 1) seed(p + 1); if (y > 0) seed(p - W); if (y < H - 1) seed(p + W);
+                    }
+                }
+                // м'який край + прибирання відблиску ключового кольору
+                const out = new Uint8ClampedArray(d);
+                const greenKey = o.mode === 'green' || (o.mode === 'custom' && hex(o.color)[1] > 150 && hex(o.color)[0] < 120 && hex(o.color)[2] < 120);
+                for (let p = 0; p < N; p++) {
+                    const i = p * 4;
+                    if (gone[p]) { out[i + 3] = 0; continue; }
+                    const x = p % W, y = (p / W) | 0;
+                    const nb = (x > 0 && gone[p - 1]) || (x < W - 1 && gone[p + 1]) || (y > 0 && gone[p - W]) || (y < H - 1 && gone[p + W]);
+                    if (nb || o.everywhere) {
+                        const v = nearest(i);
+                        if (v <= thr + band) {
+                            const a = Math.max(0, Math.min(1, (v - thr) / band)); out[i + 3] = Math.round(d[i + 3] * a);
+                            if (greenKey) { const m = Math.max(d[i], d[i + 2]); if (out[i + 1] > m) out[i + 1] = m; }
+                        }
+                    }
+                }
+                // ще одне згладжування: 1 px по краю
+                const res = new ImageData(out, W, H); cx.putImageData(res, 0, 0);
+                if (!o.trim) return cv;
+                let x0 = W, y0 = H, x1 = -1, y1 = -1;
+                for (let y = 0; y < H; y++)for (let x = 0; x < W; x++) if (out[(y * W + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+                if (x1 < 0) return cv;   // усе стерлося — лишаємо як є
+                const pad = 2; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+                const c2 = document.createElement('canvas'); c2.width = x1 - x0 + 1; c2.height = y1 - y0 + 1; c2.getContext('2d').drawImage(cv, x0, y0, c2.width, c2.height, 0, 0, c2.width, c2.height); return c2;
+            }
+            const toBlob = cv => new Promise(r => cv.toBlob(r, 'image/png'));
+            async function processFile(f) {
+                const im = await loadImg(f), cv = keyCanvas(im, cfg); if (!cv) return f;
+                const b = await toBlob(cv); return new File([b], (f.name || 'logo').replace(/\.[^.]+$/, '') + '.png', { type: 'image/png', lastModified: Date.now() });
+            }
+            let toastEl, toastT;
+            function toast(m) { if (!toastEl) { toastEl = document.createElement('div'); toastEl.style.cssText = 'position:fixed; left:50%; bottom:70px; transform:translateX(-50%); background:#111; color:#fff; border:1px solid #c69f66; padding:8px 14px; border-radius:20px; font-size:12px; z-index:100000; pointer-events:none;'; document.body.appendChild(toastEl); } toastEl.innerText = m; toastEl.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => { toastEl.style.display = 'none'; }, 2200); }
+            // Перехоплення: усі завантаження зображень проходять через фільтр, якщо режим увімкнено
+            document.addEventListener('change', async e => {
+                const t = e.target; if (!t || t.tagName !== 'INPUT' || t.type !== 'file' || t.__bgk || cfg.mode === 'off') return;
+                const acc = t.getAttribute('accept') || '', oc = t.getAttribute('onchange') || '';
+                if (!/image/.test(acc) || t.id === 'ms-file' || t.id === 'ts-file' || t.id === 'bgk-test' || /photo|bgImg|Promo|data-nokey/i.test(oc) || t.hasAttribute('data-nokey')) return;
+                const list = Array.from(t.files || []); if (!list.length || !list.every(f => /^image\/(png|jpe?g|webp|bmp)$/i.test(f.type))) return;
+                e.stopImmediatePropagation(); e.preventDefault();
+                toast('🪄 Прибираю фон…');
+                try {
+                    const out = []; for (const f of list) { try { out.push(await processFile(f)); } catch (er) { out.push(f); } }
+                    const dt = new DataTransfer(); out.forEach(f => dt.items.add(f)); t.files = dt.files; toast('🪄 Фон прибрано');
+                } catch (er) { toast('⚠️ Не вдалося прибрати фон — завантажено як є'); }
+                t.__bgk = true; try { t.dispatchEvent(new Event('change', { bubbles: true })); } finally { t.__bgk = false; }
+            }, true);
+            // Картка налаштувань
+            const m = document.getElementById('settings-modal'), inner = m && Array.from(m.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
+            const card = document.createElement('div'); card.className = 'card'; card.id = 'bgk-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px; border:2px solid #7c5cff; background:#16122a;';
+            const inp = 'padding:5px; border-radius:6px; border:1px solid #444; background:#222; color:#fff;';
+            card.innerHTML = '<details><summary style="cursor:pointer; font-size:12px; font-weight:800; color:#b8a4ff; text-transform:uppercase;">🪄 Прибирання фону / хромакей (лого й зображення)</summary>' +
+                '<div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">' +
+                '<div style="font-size:10px; color:#aaa;">Коли режим увімкнено, фон прибирається автоматично в усіх логотипах і зображеннях, які ви завантажуєте (лого спонсора, карусель, організатори, спонсори, групи, вступне табло, рейтинг тощо). Результат — PNG з прозорим фоном. Уже завантажені картинки не змінюються — завантажте їх ще раз. Фото гравців і рекламні картинки на весь екран не чіпаються.</div>' +
+                '<div class="row"><span>Режим:</span><select id="bgk-mode"><option value="off">Вимкнено</option><option value="auto">Авто (колір фону з кутів)</option><option value="white">Білий фон</option><option value="black">Чорний фон</option><option value="green">Зелений хромакей</option><option value="custom">Свій колір</option></select></div>' +
+                '<div class="row" id="bgk-col-row"><span>Колір фону:</span><input type="color" id="bgk-color" style="width:60px; height:30px; padding:0;"></div>' +
+                '<div class="row"><span>Допуск кольору: <b id="bgk-tol-v"></b></span><input type="range" id="bgk-tol" min="2" max="80"></div>' +
+                '<div class="row"><span>М\'якість краю: <b id="bgk-soft-v"></b></span><input type="range" id="bgk-soft" min="0" max="20"></div>' +
+                '<div class="row"><span>Прибирати цей колір усюди (не лише від країв):</span><input type="checkbox" id="bgk-every"></div>' +
+                '<div class="row"><span>Обрізати порожні краї:</span><input type="checkbox" id="bgk-trim"></div>' +
+                '<div style="border-top:1px dashed #444; padding-top:8px; display:flex; flex-direction:column; gap:6px;"><span style="font-size:11px; color:#ccc;">🔍 Перевірити на зображенні (нічого не завантажується):</span>' +
+                '<input type="file" id="bgk-test" accept="image/*" style="font-size:11px;">' +
+                '<div id="bgk-prev" style="display:none; min-height:120px; border-radius:8px; background-color:#fff; background-image:linear-gradient(45deg,#bbb 25%,transparent 25%,transparent 75%,#bbb 75%),linear-gradient(45deg,#bbb 25%,transparent 25%,transparent 75%,#bbb 75%); background-size:16px 16px; background-position:0 0,8px 8px; padding:8px; text-align:center;"><img id="bgk-img" style="max-width:100%; max-height:220px;"></div>' +
+                '<a id="bgk-dl" style="display:none; font-size:11px; color:#9bd;" download="logo.png">⬇ Завантажити PNG без фону</a></div></div></details>';
+            inner.appendChild(card);
+            const $ = id => card.querySelector('#' + id);
+            function sync() { $('bgk-mode').value = cfg.mode; $('bgk-color').value = cfg.color; $('bgk-tol').value = cfg.tol; $('bgk-soft').value = cfg.soft; $('bgk-tol-v').innerText = cfg.tol; $('bgk-soft-v').innerText = cfg.soft; $('bgk-every').checked = !!cfg.everywhere; $('bgk-trim').checked = !!cfg.trim; $('bgk-col-row').style.display = cfg.mode === 'custom' ? 'flex' : 'none'; }
+            let lastTest = null;
+            async function preview() {
+                if (!lastTest) return; const prev = $('bgk-prev'), dl = $('bgk-dl');
+                try { const o = Object.assign({}, cfg, { mode: cfg.mode === 'off' ? 'auto' : cfg.mode }); const im = await loadImg(lastTest), cv = keyCanvas(im, o) || (() => { const c0 = document.createElement('canvas'); c0.width = im.naturalWidth; c0.height = im.naturalHeight; c0.getContext('2d').drawImage(im, 0, 0); return c0; })(); const b = await toBlob(cv); const u = URL.createObjectURL(b); $('bgk-img').src = u; dl.href = u; prev.style.display = 'block'; dl.style.display = 'inline'; } catch (e) {}
+            }
+            card.addEventListener('input', e => { const id = e.target.id; if (id === 'bgk-tol') cfg.tol = parseInt(e.target.value); else if (id === 'bgk-soft') cfg.soft = parseInt(e.target.value); else if (id === 'bgk-color') cfg.color = e.target.value; else return; persist(); sync(); preview(); });
+            card.addEventListener('change', e => { const id = e.target.id; if (id === 'bgk-mode') cfg.mode = e.target.value; else if (id === 'bgk-every') cfg.everywhere = e.target.checked; else if (id === 'bgk-trim') cfg.trim = e.target.checked; else if (id === 'bgk-test') { lastTest = e.target.files[0] || null; preview(); return; } else return; persist(); sync(); preview(); });
+            sync();
+        })();
+
         // ===== ТАЛІСМАНИ (кілька анімацій/картинок; список спільний для всіх кортів: padel/mascots) =====
         (function msInit() {
             const host = document.getElementById('mascot-panel'); if (!host) return;
