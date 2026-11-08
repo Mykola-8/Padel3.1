@@ -184,6 +184,7 @@
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Повернення (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3 (К1)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_cuatro')">🚀 Por Cuatro - X4 (К1)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'killer_ball')">☠️ Killer ball (К1)</button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
                 <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки (К2)</button>
@@ -192,6 +193,7 @@
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Повернення (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3 (К2)</button>
                 <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_cuatro')">🚀 Por Cuatro - X4 (К2)</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'killer_ball')">☠️ Killer ball (К2)</button>
             </div>
         </div>
         <div id="action-toggles-admin" style="display:flex; gap:4px; margin-top:2px;">
@@ -1598,7 +1600,7 @@
                 isProSet: false, proSetLimit: 8, isTotalSet: false, totalTbLimit: 5,
                 isSuperTiebreak: false, superTiebreakLimit: 10,
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Killer: 0, p2Killer: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
@@ -2374,7 +2376,7 @@
                 p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 isTiebreak: false, deuceCounter: 0,
                 activeMatchRibbon: "NONE",
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Killer: 0, p2Killer: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
                 completedGamesCount: 0, statsAutoTrigger: 0, pointLog: [], matchEndTs: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [],
@@ -2393,7 +2395,7 @@
         // Усі налаштування пульта й турнірні таблиці (не рахунок): зберігаються при скиданні корту й у локальній копії
         function settingKeys() {
             return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
-                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
+                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'cbCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
         }
         window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
 
@@ -2407,7 +2409,7 @@
                 isProSet: state.isProSet || false, proSetLimit: state.proSetLimit || 8, isTotalSet: state.isTotalSet || false, totalTbLimit: state.totalTbLimit || 5, 
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
-                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Aces: 0, p2Aces: 0,
+                p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Killer: 0, p2Killer: 0, p1Aces: 0, p2Aces: 0,
                 showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
@@ -2478,7 +2480,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -3514,6 +3516,116 @@
             onValue(ref(db, 'padel/seq'), snap => { loaded = true; const v = snap.val(); if (!v || Date.now() - dirty < 3000 || card.contains(document.activeElement) || running) return; const n = norm(v); if (JSON.stringify(n) !== JSON.stringify(d)) { d = n; try { localStorage.setItem('padel_seq', JSON.stringify(d)); } catch (e) {} fill(); } }, () => { loaded = true; });
         })();
 
+        // ===== БАНЕР У КУТІ З ПЕРСПЕКТИВОЮ (padel/cornerBanner) =====
+        (function cbInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, ts: 0, court: 'all', shape: 'triR', q: [[60.4, 0.9], [99.5, 0.7], [99.5, 30.6], [60.4, 13.9]],
+                useText: true, text: 'LIVE', text2: '', useLogos: true, useStrip: true, durText: 5, durLogo: 4, durStrip: 12, speed: 60,
+                textSize: 100, opacity: 92, bgOpacity: 100, fade: 10, bg: 'dark', accent: '#f5c542', textColor: '#ffffff', plate: 'no' };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const norm = v => {
+                const d = Object.assign({}, DEF, v || {});
+                let q = d.q; if (q && !Array.isArray(q) && typeof q === 'object') q = Object.values(q);
+                q = (Array.isArray(q) ? q : []).map(p => (p && !Array.isArray(p) && typeof p === 'object') ? Object.values(p) : p);
+                d.q = (q.length === 4 && q.every(p => p && p.length >= 2 && !isNaN(+p[0]) && !isNaN(+p[1]))) ? q.map(p => [+p[0], +p[1]]) : DEF.q.map(p => p.slice());
+                return d;
+            };
+            let d = norm(null), timer, loaded = false, prim = false, dirty = 0, REF = '';
+            try { REF = localStorage.getItem('padel_cb_ref') || ''; } catch (e) {}
+            const inp = 'padding:5px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'cb-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('seq-card') || document.getElementById('rl-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS },
+                { k: 'shape', l: 'Форма', t: 'sel', o: [['triR', 'Трикутник (прямий кут справа зверху)'], ['triL', 'Трикутник (прямий кут зліва зверху)'], ['quad', 'Чотирикутник']] },
+                { k: 'bg', l: 'Фон банера', t: 'sel', o: [['dark', 'Темний'], ['glass', 'Скляний'], ['accent', 'Колір акценту'], ['none', 'Без фону (лише контент)']] },
+                { k: 'plate', l: 'Біла підкладка під логотипи', t: 'sel', o: [['no', 'Ні'], ['yes', 'Так (для темних лого)']] },
+                { k: 'text', l: 'Текст 1 (напр. LIVE)', t: 'txt' }, { k: 'text2', l: 'Текст 2 (напр. назва турніру)', t: 'txt' },
+                { k: 'durText', l: 'Секунд: текст', t: 'num' }, { k: 'durLogo', l: 'Секунд: кожен логотип', t: 'num' }, { k: 'durStrip', l: 'Секунд: рядок з логотипами', t: 'num' },
+                { k: 'speed', l: 'Швидкість рядка з логотипами', t: 'rng', min: 15, max: 300 }, { k: 'textSize', l: 'Розмір тексту, %', t: 'rng', min: 40, max: 250 },
+                { k: 'bgOpacity', l: 'Фон банера: 0 = без фону, 100 = суцільний, %', t: 'rng', min: 0, max: 100 }, { k: 'opacity', l: 'Прозорість усього банера, %', t: 'rng', min: 10, max: 100 }, { k: 'fade', l: 'Згасання до дальнього краю, %', t: 'rng', min: 0, max: 60 },
+                { k: 'accent', l: 'Колір акценту', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
+            ];
+            function fld(f) {
+                const id = 'cb-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="1" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' width:80px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' width:100%;"></div>';
+            }
+            const chk = (k, l) => '<div class="row">' + lab(l) + '<input type="checkbox" data-c="' + k + '" id="cb-c-' + k + '"></div>';
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">📐 Банер у куті (перспектива: розтягнутий і віддалений)</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="cb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="cb-off">■ СХОВАТИ</button></div>' +
+                '<div id="cb-st" style="font-size:11px;"></div>' +
+                '<div style="font-size:10px; color:#9bd;">Перетягни 4 точки (1 — зліва зверху, 2 — справа зверху, 3 — справа знизу, 4 — зліва знизу) на вільну область кадру. Лівий край зроби меншим за правий — тоді логотипи й текст зменшуються, ніби віддаляються. Можна завантажити кадр камери для підгонки (він лишається лише в пульті).</div>' +
+                '<div id="cb-prev" style="position:relative; width:100%; aspect-ratio:16/9; background:#1b2a44; border-radius:8px; overflow:hidden; touch-action:none; background-size:cover; background-position:center;"><svg id="cb-svg" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;"><polygon id="cb-poly" fill="rgba(245,197,66,.28)" stroke="#f5c542" stroke-width=".5" vector-effect="non-scaling-stroke"/><polygon id="cb-quad" fill="none" stroke="#fff" stroke-dasharray="2 1.5" stroke-width=".3" vector-effect="non-scaling-stroke"/></svg></div>' +
+                '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="file" id="cb-ref" accept="image/*" style="font-size:11px; max-width:190px;" data-nokey="1"><button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" id="cb-ref-x">✖ прибрати кадр</button><button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" id="cb-reset">↺ стандартне положення</button></div>' +
+                chk('useText', 'Показувати текст') + chk('useLogos', 'Логотипи спонсорів по черзі') + chk('useStrip', 'Рекламний рядок з логотипами') +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = s => card.querySelector(s);
+            function st(ok, m) { const e = $('#cb-st'); e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = e => { try { try { state.cbCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/cbCfg'), data); st(true, 'padel/cornerBanner відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/cornerBanner'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const TRI = { triR: [0, 1, 2], triL: [0, 1, 3] };
+            function drawPrev() {
+                const q = d.q, prev = $('#cb-prev');
+                prev.style.backgroundImage = REF ? 'url(' + REF + ')' : 'none';
+                $('#cb-quad').setAttribute('points', q.map(p => p.join(',')).join(' '));
+                const tri = TRI[d.shape];
+                $('#cb-poly').setAttribute('points', (tri ? tri.map(i => q[i]) : q).map(p => p.join(',')).join(' '));
+                prev.querySelectorAll('.cb-h').forEach((h, i) => { h.style.left = q[i][0] + '%'; h.style.top = q[i][1] + '%'; });
+            }
+            ['1', '2', '3', '4'].forEach((n, i) => {
+                const h = document.createElement('div'); h.className = 'cb-h'; h.innerText = n;
+                h.style.cssText = 'position:absolute; width:26px; height:26px; margin:-13px 0 0 -13px; border-radius:50%; background:#f5c542; color:#000; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; cursor:grab; box-shadow:0 0 0 2px #000; touch-action:none;';
+                h.addEventListener('pointerdown', e => {
+                    e.preventDefault(); h.setPointerCapture(e.pointerId); dirty = Date.now();
+                    const mv = ev => { const r = $('#cb-prev').getBoundingClientRect(); d.q[i] = [Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100)), Math.max(0, Math.min(100, (ev.clientY - r.top) / r.height * 100))].map(v => Math.round(v * 10) / 10); drawPrev(); };
+                    const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up); save(false); };
+                    h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+                });
+                $('#cb-prev').appendChild(h);
+            });
+            function refresh() {
+                F.forEach(f => { const el = $('#cb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; el.value = (v === undefined || v === null) ? '' : v; const lv = $('#cb-f-' + f.k + '-v'); if (lv) lv.innerText = v; });
+                ['useText', 'useLogos', 'useStrip'].forEach(k => { $('#cb-c-' + k).checked = d[k] !== false; });
+                $('#cb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('#cb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                drawPrev();
+            }
+            $('#cb-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            $('#cb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            $('#cb-reset').onclick = () => { d.q = DEF.q.map(p => p.slice()); save(true); refresh(); };
+            $('#cb-ref-x').onclick = () => { REF = ''; try { localStorage.removeItem('padel_cb_ref'); } catch (e) {} drawPrev(); };
+            $('#cb-ref').addEventListener('change', e => {
+                const f = e.target.files && e.target.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image();
+                im.onload = () => { const k = Math.min(1, 960 / im.naturalWidth), cv = document.createElement('canvas'); cv.width = Math.round(im.naturalWidth * k); cv.height = Math.round(im.naturalHeight * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); REF = cv.toDataURL('image/jpeg', .7); try { localStorage.setItem('padel_cb_ref', REF); } catch (e2) {} URL.revokeObjectURL(u); drawPrev(); };
+                im.src = u;
+            });
+            card.querySelectorAll('[data-c]').forEach(el => el.addEventListener('change', () => { d[el.getAttribute('data-c')] = el.checked; save(false); }));
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = (f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value; d[f.k] = v;
+                    const lv = $('#cb-f-' + f.k + '-v'); if (lv) lv.innerText = v; if (f.k === 'shape') drawPrev(); save(false);
+                });
+            });
+            refresh();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = norm(v); refresh(); };
+            const mirror = () => { const m = state && state.cbCfg; if (!m || prim || !loaded || JSON.stringify(norm(m)) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/cornerBanner'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== АВТО-РОЗКЛАД (картка) =====
         (function schInit() {
             const items = [['ticker', '📰 Бігучий рядок'], ['adbar', '📢 Рекламний рядок'], ['qr', '🔳 QR-код']];
@@ -3594,7 +3706,7 @@
             const SINGLE = [['btn-mi-toggle', s => s.matchIntro && s.matchIntro.show], ['btn-rk-toggle', s => s.teamRanking && s.teamRanking.show],
                 ['po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show], ['po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show],
                 ['gr-btn-show', s => s.groups && s.groups.show], ['ic-btn-show', s => s.introCard && s.introCard.show]];
-            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off']];
+            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off'], ['cb-on', 'cb-off']];
             function tick() {
                 try {
                     const s = (typeof state === 'object' && state) || {};
@@ -3663,7 +3775,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
@@ -4407,7 +4519,8 @@
                 por_tres:   { f: 'PorTres',   t: 'por_tres' },
                 por_cuatro: { f: 'PorCuatro', t: 'por_cuatro' },
                 ace:        { f: 'Aces', t: 'ace' },
-                dormilona:  { f: 'Dormilona', t: 'dormilona' }
+                dormilona:  { f: 'Dormilona', t: 'dormilona' },
+                killer_ball: { f: 'Killer', t: 'killer_ball' }
             };
             const km = kindMap[kind] || { f: 'Smashes', t: 'smash' };
             const cntKey = 'p' + team + km.f;
