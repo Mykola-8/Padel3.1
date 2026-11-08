@@ -869,14 +869,26 @@
         #match-intro-wrap[data-anim=centerSides].visible .mi-left, #match-intro-wrap[data-anim=centerSides].visible .mi-right { transform: none; clip-path: inset(0 0 0 0); transition-delay: var(--mi-step); }
         #match-intro-wrap[data-anim=centerSides] { transition-delay: calc(var(--mi-step) + var(--mi-d) * 0.3), calc(var(--mi-step) + var(--mi-d)); }
         #match-intro-wrap[data-anim=centerSides].visible { transition-delay: 0s, 0s; }
-        .mi-head { height: 17%; flex: none; display: flex; align-items: center; gap: 1.2cqw; padding: 0 2cqw; position: relative; z-index: 0; color: #111; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: min(2.5cqw, 10cqh); }
+        .mi-head { height: 17%; flex: none; display: flex; align-items: center; gap: 1.2cqw; padding: 0 2cqw; position: relative; z-index: 0; color: var(--mih-t, #111); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: min(2.5cqw, 10cqh); }
         .mi-head img { height: 72%; max-width: 12cqw; object-fit: contain; display: none; }
         .mi-title, .mi-court { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mi-spacer { flex: 1; }
         .mi-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 24cqw minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); position: relative; z-index: 0; }
-        .mi-head::before { content: ''; position: absolute; inset: 0; background: linear-gradient(#f6f6f6, #cdcdcd); opacity: var(--mi-op, 1); z-index: -1; }
-        .mi-body::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, #1c1c1c, #050505); opacity: var(--mi-op, 1); z-index: -1; }
+        .mi-head::before { content: ''; position: absolute; inset: 0; background: linear-gradient(var(--mih-a, #f6f6f6), var(--mih-b, #cdcdcd)); opacity: var(--mi-op, 1); z-index: -1; }
+        .mi-body::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, var(--mib-a, #1c1c1c), var(--mib-b, #050505)); opacity: var(--mi-op, 1); z-index: -1; }
         .mi-team { display: flex; align-items: stretch; gap: 1.4cqw; padding: 0 1.8cqw; min-width: 0; min-height: 0; overflow: hidden; }
+        /* --- теми табла «Хто грає» (data-mi-theme на #match-intro-wrap) --- */
+        #match-intro-wrap[data-mi-theme] #match-intro-board { border-color: var(--mi-acc); }
+        #match-intro-wrap[data-mi-theme=gold] { --mih-a: #f2d38a; --mih-b: #c9a24d; --mih-t: #1a1203; --mib-a: #1d1608; --mib-b: #070503; --mi-tx: #ffffff; --mi-sub: #f3e3bd; --mi-dt: #e6d3a3; --mi-acc: #c69f66; --mi-vs-a: #2a2010; --mi-vs-b: #0e0a04; --mi-vst: #f2d38a; }
+        #match-intro-wrap[data-mi-theme=graydark] { --mih-a: #d1d5db; --mih-b: #9ca3af; --mih-t: #111827; --mib-a: #374151; --mib-b: #0b1220; --mi-tx: #f3f4f6; --mi-sub: #d1d5db; --mi-dt: #cbd5e1; --mi-acc: #d1d5db; --mi-vs-a: #1f2937; --mi-vs-b: #0b1220; --mi-vst: #f3f4f6; }
+        #match-intro-wrap[data-mi-theme=courtgreen] { --mih-a: #a3e635; --mih-b: #7fbf1c; --mih-t: #1a2a05; --mib-a: #5c402c; --mib-b: #2a1c12; --mi-tx: #f7ffe0; --mi-sub: #e6f7c0; --mi-dt: #d9efab; --mi-acc: #a3e635; --mi-vs-a: #3a281b; --mi-vs-b: #1c120a; --mi-vst: #f7ffe0; }
+        #match-intro-wrap[data-mi-theme=lightgray] { --mih-a: #f3f4f6; --mih-b: #d1d5db; --mih-t: #111111; --mib-a: #e5e7eb; --mib-b: #cbd1d6; --mi-tx: #000000; --mi-sub: #374151; --mi-dt: #4b5563; --mi-acc: #4b5563; --mi-vs-a: #f3f4f6; --mi-vs-b: #d1d5db; --mi-vst: #111111; }
+        #match-intro-wrap[data-mi-theme=transparent] { --mih-a: rgba(45,45,45,.55); --mih-b: rgba(25,25,25,.6); --mih-t: #ffffff; --mib-a: rgba(45,45,45,.45); --mib-b: rgba(25,25,25,.5); --mi-tx: #ffffff; --mi-sub: #e5e5e5; --mi-dt: #e5e5e5; --mi-acc: #ffffff; --mi-vs-a: rgba(45,45,45,.55); --mi-vs-b: rgba(25,25,25,.6); --mi-vst: #ffffff; }
+        #match-intro-wrap[data-mi-theme=padelblue] { --mih-a: #00f0ff; --mih-b: #00c4d4; --mih-t: #04243a; --mib-a: #1565d8; --mib-b: #0b3d91; --mi-tx: #ffffff; --mi-sub: #d6ecff; --mi-dt: #d6ecff; --mi-acc: #00f0ff; --mi-vs-a: #0b3d91; --mi-vs-b: #06275e; --mi-vst: #00f0ff; }
+        #match-intro-wrap[data-mi-theme=championship] { --mih-a: #ff6a1a; --mih-b: #e55300; --mih-t: #ffffff; --mib-a: #112647; --mib-b: #060f1e; --mi-tx: #ffffff; --mi-sub: #ffd6bd; --mi-dt: #ffd6bd; --mi-acc: #ff6a1a; --mi-vs-a: #112647; --mi-vs-b: #060f1e; --mi-vst: #ff8a4a; }
+        #match-intro-wrap[data-mi-theme=mono] { --mih-a: #f5f5f5; --mih-b: #cfcfcf; --mih-t: #000000; --mib-a: #1c1c1c; --mib-b: #040404; --mi-tx: #ffffff; --mi-sub: #d4d4d4; --mi-dt: #cfcfcf; --mi-acc: #e8e8e8; --mi-vs-a: #232323; --mi-vs-b: #0d0d0d; --mi-vst: #ffffff; }
+        #match-intro-wrap[data-mi-theme=stonesand] { --mih-a: #e3d2b5; --mih-b: #c4ac86; --mih-t: #3a2d1c; --mib-a: #7a6d5a; --mib-b: #584d3e; --mi-tx: #fdf8f0; --mi-sub: #ecdfc8; --mi-dt: #ecdfc8; --mi-acc: #c2703d; --mi-vs-a: #584d3e; --mi-vs-b: #3d3428; --mi-vst: #fdf8f0; }
+        #match-intro-wrap[data-mi-theme=skewlime] { --mih-a: #c4ea4c; --mih-b: #a6cf34; --mih-t: #111111; --mib-a: #1d1d1d; --mib-b: #0a0a0a; --mi-tx: #ffffff; --mi-sub: #d9f08a; --mi-dt: #d9f08a; --mi-acc: #b7e23f; --mi-vs-a: #c4ea4c; --mi-vs-b: #a6cf34; --mi-vst: #111111; }
         .mi-photo { display: none; align-self: center; height: 62%; max-width: 13cqw; aspect-ratio: 1; object-fit: cover; border-radius: 1cqw; border: 2px solid rgba(255,255,255,0.35); flex: none; }
         .mi-players { flex: 1; min-width: 0; display: flex; flex-direction: column; }
         .mi-pl { flex: 1; display: flex; align-items: center; gap: 1.2cqw; min-height: 0; min-width: 0; }
@@ -884,12 +896,12 @@
         .mi-right .mi-pl { flex-direction: row-reverse; text-align: right; }
         .mi-flag { height: min(3.2cqw, 12cqh); width: auto; display: none; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,0.25); flex: none; }
         .mi-nm { min-width: 0; line-height: 1.05; }
-        .mi-first { font-size: min(1.6cqw, 6.6cqh); color: #e9e9e9; text-transform: uppercase; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mi-last { font-size: min(3cqw, 12cqh); color: #fff; text-transform: uppercase; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mi-first { font-size: min(1.6cqw, 6.6cqh); color: var(--mi-sub, #e9e9e9); text-transform: uppercase; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mi-last { font-size: min(3cqw, 12cqh); color: var(--mi-tx, #fff); text-transform: uppercase; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mi-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqh; min-width: 0; }
-        .mi-round { font-size: min(1.5cqw, 6.2cqh); font-style: italic; font-weight: 800; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-        .mi-vs { width: 80%; height: 46%; display: flex; align-items: center; justify-content: center; border: 2px solid #7a7a7a; border-radius: min(1cqw, 4cqh); background: linear-gradient(#232323, #0d0d0d); color: #fff; font-weight: 900; font-size: min(5.4cqw, 22cqh); line-height: 1; overflow: hidden; white-space: nowrap; }
-        .mi-date { font-size: min(1.4cqw, 5.6cqh); color: #cfcfcf; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .mi-round { font-size: min(1.5cqw, 6.2cqh); font-style: italic; font-weight: 800; color: var(--mi-tx, #fff); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .mi-vs { width: 80%; height: 46%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--mi-acc, #7a7a7a); border-radius: min(1cqw, 4cqh); background: linear-gradient(var(--mi-vs-a, #232323), var(--mi-vs-b, #0d0d0d)); color: var(--mi-vst, #fff); font-weight: 900; font-size: min(5.4cqw, 22cqh); line-height: 1; overflow: hidden; white-space: nowrap; }
+        .mi-date { font-size: min(1.4cqw, 5.6cqh); color: var(--mi-dt, #cfcfcf); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
         /* DORMILONA (смеш з поверненням) — м'яч зигзагом летить вправо до "скла" і повертається назад */
         .ball-fx.fx-dormilona {
@@ -2693,6 +2705,8 @@
             };
             setTxt('mi-title', mi.title); setTxt('mi-court', mi.court);
             setTxt('mi-round', mi.round); setTxt('mi-vs', g(mi.vs, 'VS')); setTxt('mi-date', mi.date);
+            { const hasHead = !!(mi.title || mi.court || mi.logoL || mi.logoR); const hd = board.querySelector('.mi-head'); if (hd) hd.style.display = hasHead ? '' : 'none'; }
+            { const tv = g(mi.theme, 'classic'), tn = (tv === 'auto') ? (st.boardTheme || 'graydark') : tv; if (tn && tn !== 'classic' && tn !== 'default') wrap.setAttribute('data-mi-theme', tn); else wrap.removeAttribute('data-mi-theme'); }
             document.getElementById('mi-round').style.display = mi.round ? '' : 'none';
             document.getElementById('mi-date').style.display = mi.date ? '' : 'none';
             setImg('mi-logo-l', mi.logoL); setImg('mi-logo-r', mi.logoR);
