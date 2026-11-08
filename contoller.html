@@ -1035,6 +1035,7 @@
                     <div class="row"><span>Фото фону:</span>
                         <span style="display:flex; gap:6px; align-items:center;"><label class="btn" style="padding:5px 10px !important; font-size:11px !important; cursor:pointer; margin:0;">Завантажити<input type="file" accept="image/*" style="display:none" onchange="tvBgUpload(this)"></label><button type="button" class="btn btn-gray" style="padding:5px 10px !important; font-size:11px !important;" onclick="tvSet('bgImg','')">✕</button><span id="tv-bgImg-st" style="font-size:11px;"></span></span></div>
                     <div class="row"><span>Затемнення фото: <b id="tv-bgDim-v">0%</b></span><input type="range" id="tv-bgDim" min="0" max="90" step="5" oninput="tvSet('bgDim', parseInt(this.value))" style="width:55%"></div>
+                    <div class="row"><span>Колір очків 15 / 30 / 40:</span><input type="color" id="tv-ptColor" value="#ffd54a" oninput="tvSet('ptColor', this.value)" style="width:60px; height:30px; padding:0;"></div>
                     <div class="row"><span>Колір команди A:</span><input type="color" id="tv-teamAColor" oninput="tvSet('teamAColor', this.value)" style="width:60px; height:30px; padding:0;"></div>
                     <div class="row"><span>Колір команди B:</span><input type="color" id="tv-teamBColor" oninput="tvSet('teamBColor', this.value)" style="width:60px; height:30px; padding:0;"></div>
                     <div class="switch-row"><span>🎾 Показувати, хто подає</span><input type="checkbox" id="tv-showServer" onchange="tvSet('showServer', this.checked)"></div>
@@ -1279,7 +1280,7 @@
         window.tvSet = function(k, v) { tvCfg[k] = v; tvSave(); tvUiRefresh(); };
         function tvUiRefresh() {
             const g = id => document.getElementById(id); if (!g('tv-card')) return;
-            ['tvTheme', 'spPos', 'spX', 'spY', 'spAnim', 'style', 'bgColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode', 'spDescPos'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
+            ['tvTheme', 'spPos', 'spX', 'spY', 'spAnim', 'style', 'bgColor', 'ptColor', 'teamAColor', 'teamBColor', 'bgDim', 'spSec', 'spH', 'spMode', 'spDescPos'].forEach(k => { const e = g('tv-' + k); if (e && document.activeElement !== e) e.value = tvCfg[k]; });
             ['showServer', 'showBreak', 'showGolden', 'showSetMatch', 'showGame'].forEach(k => { const e = g('tv-' + k); if (e) e.checked = !!tvCfg[k]; });
             if (g('tv-bgDim-v')) g('tv-bgDim-v').innerText = (tvCfg.bgDim || 0) + '%';
             if (g('tv-spX-v')) g('tv-spX-v').innerText = (tvCfg.spX === undefined ? 50 : tvCfg.spX) + '%';
