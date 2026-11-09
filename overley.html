@@ -732,6 +732,12 @@
         .an-chart svg { width: 100%; height: 230px; display: block; } .an-chart svg * { vector-effect: non-scaling-stroke; }
         body.an-end-1 #statistics-panel, body.an-end-1 #statistics-panel-manual, body.an-end-1 #match-finished-board, body.an-end-1 #main-scoreboard,
         body.an-end-2 #statistics-panel, body.an-end-2 #statistics-panel-manual, body.an-end-2 #match-finished-board, body.an-end-2 #main-scoreboard, body.an-end-2 .an-wrap { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+        /* TV: кінець матчу — табло рахунку вимкнено, результат / статистика / аналітика на весь екран */
+        body.tv-end #main-scoreboard, body.tv-end #tv-led, body.tv-end .scoreboard-wrapper, body.tv-end #corner-slide-wrapper { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+        html.tv .match-finished-board, html.tvled .match-finished-board, html.tv .statistics-overlay-manual, html.tvled .statistics-overlay-manual { background: rgba(6, 10, 22, 0.98) !important; backdrop-filter: none !important; border-radius: 0; }
+        html.tv .mfb-winner, html.tvled .mfb-winner { font-size: 1.15em; }
+        html.tv .an-panel, html.tvled .an-panel { zoom: 1.1; left: 69px; top: 12px; }
+        html.tv .an-panel::before, html.tvled .an-panel::before { opacity: 1; }
         .an-empty { padding: 60px; text-align: center; font-size: 30px; opacity: .7; }
 
         /* ===== АНАЛІТИКА МІЖ ГЕЙМАМИ: плашка зліва внизу ===== */
@@ -3943,6 +3949,17 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
         })();
 
         // ===== АНАЛІТИКА МАТЧУ: розрахунок із журналу очок =====
+        // TV: підганяємо панелі кінця матчу під весь екран (великі цифри й літери)
+        if (TV_LED || TV_MODE) setInterval(() => {
+            try {
+                if (!document.body.classList.contains('tv-end')) return;
+                ['match-finished-board', 'statistics-panel-manual'].forEach(id => {
+                    const el = document.getElementById(id); if (!el || !el.offsetWidth || !el.offsetHeight) return;
+                    const k = Math.min(window.innerWidth * 0.94 / el.offsetWidth, window.innerHeight * 0.92 / el.offsetHeight);
+                    el.style.setProperty('--stats-scale', k.toFixed(3));
+                });
+            } catch (e) {}
+        }, 300);
         const AN = (function () {
             const wrap = document.getElementById('an-wrap'), panel = document.getElementById('an-panel');
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
@@ -4046,6 +4063,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             function render(st) {
                 const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 'done' ? false : (ph === 'an' || !!cfg.show);
                 if (ph !== lastPh) { lastPh = ph; enterPhase(ph); }
+                document.body.classList.toggle('tv-end', (TV_LED || TV_MODE) && (ph === 'win' || ph === 'stats' || ph === 'an' || ph === 'done'));
                 document.body.classList.toggle('an-end-1', ph === 'an'); document.body.classList.toggle('an-end-2', ph === 'done');
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
