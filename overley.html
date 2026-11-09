@@ -1549,6 +1549,9 @@
         .fullscreen-media-content.active {
             display: block;
         }
+        .fullscreen-media-overlay.keyed-mode { background-color: transparent !important; }
+        .fullscreen-media-content.keyed-src { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; display: block; }
+        #promo-key-canvas { object-fit: contain; }
         .fullscreen-media-overlay.transparent-bg-mode .fullscreen-media-content {
             object-fit: contain;
         }
@@ -1915,6 +1918,7 @@
         </div>
         <img id="promo-img" class="fullscreen-media-content" src="">
         <video id="promo-video" class="fullscreen-media-content" loop muted playsinline></video>
+        <canvas id="promo-key-canvas" class="fullscreen-media-content"></canvas>
         <div id="promo-text" class="fullscreen-text-content"></div>
     </div>
 
@@ -2860,6 +2864,41 @@
         let lastAnimationTs = 0, currentQrUrl = "", cornerSlideTimeout = null;
         const GOLD_STYLES = ['one-golden', 'golden-2', 'double'];
         let lastCalloutTxt = '', lastCornerRibbon = null, lastCornerDeuce = 0, lastCornerTiebreak = false, lastPromoSource = "", lastPromoIsVideoFlag = null;
+        // ===== Заставка-відео: хромакей (прозорий фон) і «показати один раз» =====
+        let promoDone = false, promoKeyRaf = 0, promoKeyCol = null, promoKeyCfg = null;
+        setTimeout(() => { const pv = document.getElementById('promo-video'); if (pv) pv.addEventListener('ended', () => { if (!pv.loop) { promoDone = true; const po = document.getElementById('fullscreen-promo-overlay'); if (po) po.classList.remove('visible'); promoKeyStop(); } }); }, 0);
+        const promoKeyHex = h => { h = String(h || '#00ff00').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+        function promoKeyStop() { cancelAnimationFrame(promoKeyRaf); promoKeyRaf = 0; }
+        function promoKeyLoop() {
+            const v = document.getElementById('promo-video'), cv = document.getElementById('promo-key-canvas'), cfg = promoKeyCfg;
+            if (!v || !cv || !cfg) { promoKeyRaf = 0; return; }
+            if (v.readyState >= 2 && v.videoWidth) {
+                const sc = Math.min(1, 960 / v.videoWidth), w = Math.round(v.videoWidth * sc), h = Math.round(v.videoHeight * sc);
+                if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; promoKeyCol = null; }
+                const cx = cv.getContext('2d', { willReadFrequently: true });
+                cx.drawImage(v, 0, 0, w, h);
+                let im; try { im = cx.getImageData(0, 0, w, h); } catch (e) { return void (promoKeyRaf = requestAnimationFrame(promoKeyLoop)); }
+                const d = im.data;
+                if (!promoKeyCol) {
+                    const m = cfg.mode;
+                    if (m === 'green') promoKeyCol = [0, 255, 0]; else if (m === 'blue') promoKeyCol = [0, 0, 255]; else if (m === 'black') promoKeyCol = [0, 0, 0]; else if (m === 'white') promoKeyCol = [255, 255, 255]; else if (m === 'custom') promoKeyCol = promoKeyHex(cfg.color);
+                    else { // авто: середній колір чотирьох кутів
+                        let r = 0, g = 0, b = 0, n = 0; const S = Math.max(2, Math.round(Math.min(w, h) * 0.03));
+                        [[0, 0], [w - S, 0], [0, h - S], [w - S, h - S]].forEach(p => { for (let y = p[1]; y < p[1] + S; y++) for (let x = p[0]; x < p[0] + S; x++) { const i = (y * w + x) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; } });
+                        promoKeyCol = [r / n, g / n, b / n];
+                    }
+                }
+                const kr = promoKeyCol[0], kg = promoKeyCol[1], kb = promoKeyCol[2], tol = Math.max(0, +cfg.tol || 70), soft = Math.max(0, +cfg.soft || 0);
+                const t2 = tol * tol, s2 = (tol + soft) * (tol + soft);
+                for (let i = 0; i < d.length; i += 4) {
+                    const dr = d[i] - kr, dg = d[i + 1] - kg, db = d[i + 2] - kb, q = dr * dr + dg * dg + db * db;
+                    if (q <= t2) d[i + 3] = 0;
+                    else if (q < s2 && soft > 0) d[i + 3] = Math.round(d[i + 3] * (Math.sqrt(q) - tol) / soft);
+                }
+                cx.putImageData(im, 0, 0);
+            }
+            promoKeyRaf = requestAnimationFrame(promoKeyLoop);
+        }
         let replayLabelTimer = null, lastReplayLabelTrigger = 0;
         let serverChangeBannerTimer = null, serverChangeBannerDelayTimer = null, lastServerChangeTrigger = 0;
         let sponsorLogoTimer = null, sponsorLogoIndex = 0, sponsorLogoActiveUrls = [], lastSponsorLogosSignature = "", sponsorInfoList = [], sponsorInfoOn = false, sponsorInfoDelayTimer = null, sponsorInfoPending = false, sponsorInfoShownIdx = -2;
@@ -3827,7 +3866,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 s.transform = 'translate(-50%, -50%) scale(' + (Math.min(window.innerWidth / 1920, window.innerHeight / 1080)) + ')';
                 s.setProperty('--cr-bg1', g(c.bg1, '#000000')); s.setProperty('--cr-bg2', g(c.bg2, '#0a1230')); s.setProperty('--cr-acc', g(c.accent, '#f5c542')); s.setProperty('--cr-text', g(c.text, '#ffffff')); s.setProperty('--cr-role', g(c.role, '#ffe08a'));
-                s.setProperty('--cr-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 85)))) / 100);
+                s.setProperty('--cr-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 0)))) / 100);
                 s.setProperty('--cr-ts', Math.max(40, Math.min(250, parseInt(g(cfg.textSize, 100)))) / 100 * (parseInt(g(cfg.scale, 100)) / 100));
                 s.setProperty('--cr-ls', Math.max(30, Math.min(250, parseInt(g(cfg.logoSize, 100)))) / 100);
                 s.setProperty('--cr-w', Math.round(1100 * (parseInt(g(cfg.width, 100)) / 100)) + 'px');
@@ -4285,10 +4324,10 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     }
                 }
 
-                if (!!state.showFullscreenPromo) {
+                if (!!state.showFullscreenPromo && !promoDone) {
                     promoOverlay.classList.toggle('transparent-bg-mode', !!state.promoTransparentBg);
                     if (!!state.promoTypeIsText) {
-                        promoImg.classList.remove('active'); promoVideo.classList.remove('active'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null;
+                        promoImg.classList.remove('active'); promoVideo.classList.remove('active', 'keyed-src'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoKeyStop(); document.getElementById('promo-key-canvas').classList.remove('active'); promoOverlay.classList.remove('keyed-mode');
                         promoTextEl.innerText = state.promoText || "";
                         promoTextEl.style.color = state.promoTextColor || "#ffffff";
                         promoTextEl.style.fontSize = (state.promoTextSize || 60) + "px";
@@ -4297,22 +4336,33 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                         promoTextEl.classList.remove('active');
                         let mediaUrl = state.promoUrl || state.promoSrc || "";
                         let isVideo = mediaUrl.includes("video/") || mediaUrl.match(/\.(mp4|webm|mov|avi)/i) || !!state.promoTypeIsVideo;
+                        const pkc = state.promoKey || {}, keyed = !!(isVideo && pkc.on), once = !!(isVideo && state.promoOnce !== false);
+                        const keySig = JSON.stringify([pkc.mode, pkc.color]);
+                        if (keyed && promoKeyCfg && JSON.stringify([promoKeyCfg.mode, promoKeyCfg.color]) !== keySig) promoKeyCol = null;
+                        promoKeyCfg = keyed ? pkc : null;
+                        const keyCv = document.getElementById('promo-key-canvas');
+                        promoOverlay.classList.toggle('keyed-mode', keyed);
                         if (mediaUrl && (mediaUrl !== lastPromoSource || isVideo !== lastPromoIsVideoFlag)) {
-                            lastPromoSource = mediaUrl; lastPromoIsVideoFlag = isVideo;
+                            lastPromoSource = mediaUrl; lastPromoIsVideoFlag = isVideo; promoKeyCol = null;
                             if (isVideo) {
                                 promoImg.classList.remove('active');
-                                promoVideo.loop = true; promoVideo.muted = true;
+                                promoVideo.loop = !once; promoVideo.muted = true;
                                 promoVideo.src = mediaUrl; promoVideo.load();
                                 promoVideo.classList.add('active');
                                 promoVideo.play().catch(e => console.log("OBS Autoplay pending"));
                             } else {
-                                promoVideo.classList.remove('active'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
+                                promoVideo.classList.remove('active', 'keyed-src'); promoVideo.pause(); promoImg.src = mediaUrl; promoImg.classList.add('active');
                             }
                         }
+                        if (isVideo) promoVideo.loop = !once;
+                        // хромакей: відео грає приховано, на екрані — полотно з прозорим фоном
+                        if (keyed) { promoVideo.classList.add('active', 'keyed-src'); keyCv.classList.add('active'); if (!promoKeyRaf) promoKeyRaf = requestAnimationFrame(promoKeyLoop); }
+                        else { promoVideo.classList.remove('keyed-src'); keyCv.classList.remove('active'); promoKeyStop(); }
                     }
                     promoOverlay.classList.add('visible');
                 } else {
-                    promoOverlay.classList.remove('visible'); promoVideo.pause(); lastPromoSource = ""; lastPromoIsVideoFlag = null; promoTextEl.classList.remove('active');
+                    promoOverlay.classList.remove('visible'); promoVideo.pause(); promoTextEl.classList.remove('active'); promoKeyStop();
+                    if (!state.showFullscreenPromo) { lastPromoSource = ""; lastPromoIsVideoFlag = null; promoDone = false; promoOverlay.classList.remove('keyed-mode'); }
                 }
 
                 document.documentElement.classList.toggle('theme-courtgreen', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'courtgreen');
