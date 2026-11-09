@@ -320,7 +320,7 @@
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
                 <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🎨 Тема табла «Хто грає»
                     <select data-mi="theme" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;">
-                        <option value="classic">Класична (світла шапка, темне поле)</option><option value="auto">Як табло рахунку (поточна тема)</option>
+                        <option value="auto">Як табло рахунку (поточна тема)</option><option value="classic">Класична (світла шапка, темне поле)</option>
                         <option value="graydark">Сіро-темна</option><option value="gold">Золото</option><option value="courtgreen">Корт (салатова)</option><option value="lightgray">Світло-сіра</option><option value="transparent">Прозора</option><option value="padelblue">Padel Blue</option><option value="championship">Championship (Navy/Orange)</option><option value="mono">Монохром</option><option value="stonesand">Stone/Sand</option><option value="skewlime">Lime / Pro Tour</option>
                     </select></label>
                 <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🔗 Імена на табло рахунку — з табла «Хто грає»
@@ -340,15 +340,16 @@
                     <option value="fade">Плавно (fade)</option>
                     <option value="none">Без анімації</option>
                 </select></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Фон табла: 0% = прозорий, 100% = суцільний: <b id="mi-val-bgOpacity" style="color:#e0b878;">100</b></span><input type="range" data-mi="bgOpacity" min="0" max="100" step="1" value="100" oninput="miInput(this)"></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Тривалість анімації: <b id="mi-val-animDur" style="color:#e0b878;">0.6 с</b></span><input type="range" data-mi="animDur" min="1" max="30" step="1" value="6" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">◐ Фон табла: 0% = прозорий, 100% = суцільний: <b id="mi-val-bgOpacity" style="color:#e0b878;">80</b></span><input type="range" data-mi="bgOpacity" min="0" max="100" step="1" value="80" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⏱ Тривалість анімації: <b id="mi-val-animDur" style="color:#e0b878;">1.5 с</b></span><input type="range" data-mi="animDur" min="1" max="30" step="1" value="15" oninput="miInput(this)"></label>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
             <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі (%): <b id="mi-val-x" style="color:#e0b878;">50</b></span><input type="range" data-mi="x" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="mi-val-y" style="color:#e0b878;">82</b></span><input type="range" data-mi="y" min="0" max="100" step="1" value="82" oninput="miInput(this)"></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="mi-val-scale" style="color:#e0b878;">100</b></span><input type="range" data-mi="scale" min="30" max="200" step="1" value="100" oninput="miInput(this)"></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇔ Ширина табло (% екрана): <b id="mi-val-w" style="color:#e0b878;">62</b></span><input type="range" data-mi="w" min="30" max="100" step="1" value="62" oninput="miInput(this)"></label>
-            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇕ Висота табло (% екрана): <b id="mi-val-h" style="color:#e0b878;">28</b></span><input type="range" data-mi="h" min="10" max="60" step="1" value="28" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі (%): <b id="mi-val-y" style="color:#e0b878;">80</b></span><input type="range" data-mi="y" min="0" max="100" step="1" value="80" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб (%): <b id="mi-val-scale" style="color:#e0b878;">70</b></span><input type="range" data-mi="scale" min="30" max="200" step="1" value="70" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔠 Розмір імен гравців (%): <b id="mi-val-nameScale" style="color:#e0b878;">100</b></span><input type="range" data-mi="nameScale" min="50" max="300" step="1" value="100" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇔ Ширина табло (% екрана): <b id="mi-val-w" style="color:#e0b878;">50</b></span><input type="range" data-mi="w" min="30" max="100" step="1" value="50" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇕ Висота табло (% екрана): <b id="mi-val-h" style="color:#e0b878;">25</b></span><input type="range" data-mi="h" min="10" max="60" step="1" value="25" oninput="miInput(this)"></label>
             </div>
             <button class="btn btn-gray" style="font-size:11px !important;" onclick="miResetLayout()">↺ Скинути позицію і розмір</button>
         </div>
@@ -3910,8 +3911,8 @@
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
-            show: false, title: "", court: "", round: "", vs: "VS", date: "", theme: "classic", syncNames: "on", nameFmt: "last",
-            x: 50, y: 82, scale: 100, w: 62, h: 28, logoL: "", logoR: "", anim: "slide", animDur: 6, bgOpacity: 100,
+            show: false, title: "", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", nameFmt: "full",
+            x: 50, y: 80, scale: 70, w: 50, h: 25, nameScale: 100, logoL: "", logoR: "", anim: "wipe", animDur: 15, bgOpacity: 80,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
         };
@@ -3999,27 +4000,27 @@
                 if (fmt === 'initial') return f ? (f.charAt(0).toUpperCase() + '. ' + (l || '')).trim() : l;
                 return l || f;
             };
-            const teamName = (tm, fmt) => [nameOf(tm && tm.p1, fmt), nameOf(tm && tm.p2, fmt)].filter(Boolean).join(' / ');
+            const SPLIT = /\s*\/\s*|\s+[-–—]\s+/;
+            const teamName = (tm, fmt, sep) => [nameOf(tm && tm.p1, fmt), nameOf(tm && tm.p2, fmt)].filter(Boolean).join(sep || ' / ');
             function reverse(tm, v, fmt) {   // «А / Б» → гравці табла «Хто грає»
-                const parts = String(v || '').split(/\s*\/\s*/).map(s => s.trim());
+                const parts = String(v || '').split(SPLIT).map(s => s.trim());
                 if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
                 ['p1', 'p2'].forEach((k, i) => {
                     tm[k] = tm[k] || {}; const cur = nameOf(tm[k], fmt); if (cur === parts[i]) return;
-                    const tk = parts[i].split(/\s+/);
-                    if (fmt === 'last' || tk.length < 2) tm[k].l = parts[i];
-                    else { tm[k].f = tk[0].replace(/\.$/, ''); tm[k].l = tk.slice(1).join(' '); }
+                    tm[k].l = parts[i]; tm[k].f = '';   // ім'я гравця — одним рядком, однаковим жирним шрифтом
                 });
                 return true;
             }
             function tick() {
                 try {
                     if (typeof state !== 'object' || !state || Date.now() < busyUntil) return;
-                    if (!state.matchIntro && [state.p1name, state.p2name].some(v => /\S\s*\/\s*\S/.test(String(v || '')))) { try { miEnsure(); } catch (e) {} }
+                    if (!state.matchIntro && [state.p1name, state.p2name].some(v => /\S\s*\/\s*\S|\S\s+[-–—]\s+\S/.test(String(v || '')))) { try { miEnsure(); } catch (e) {} }
                     const mi = state.matchIntro; if (!mi || mi.syncNames === 'off') return;
                     const fmt = mi.nameFmt || 'last'; let changed = false;
+                    const sepOf = v => /\s[-–—]\s/.test(String(v || '')) ? ' - ' : (/\//.test(String(v || '')) ? ' / ' : null);
                     [1, 2].forEach(n => {
                         const tm = mi['t' + n]; if (!tm) return;
-                        const key = 'p' + n + 'name', cur = state[key], iName = teamName(tm, fmt), m = mem[n];
+                        const key = 'p' + n + 'name', cur = state[key], sp = sepOf(cur); if (sp) mi['sep' + n] = sp; const sep = mi['sep' + n] || ' / ', iName = teamName(tm, fmt, sep), m = mem[n];
                         if (!m) {   // перший прохід: «Хто грає» — джерело, якщо там вже є імена; інакше заповнюємо його з табла рахунку
                             if (iName) { if (iName !== cur) { state[key] = iName; changed = true; } }
                             else if (reverse(tm, cur, fmt)) changed = true;
@@ -4028,7 +4029,7 @@
                             if (introCh && iName) { if (iName !== cur) { state[key] = iName; changed = true; } }
                             else if (nameCh && !introCh) { if (reverse(tm, cur, fmt)) changed = true; }
                         }
-                        mem[n] = { name: state[key], intro: teamName(tm, fmt) };
+                        mem[n] = { name: state[key], intro: teamName(tm, fmt, sep) };
                     });
                     if (changed) {
                         busyUntil = Date.now() + 1800; try { miSave(true); } catch (e) {}
