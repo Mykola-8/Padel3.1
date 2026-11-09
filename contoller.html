@@ -356,6 +356,80 @@
             <button class="btn btn-gray" style="font-size:11px !important;" onclick="miResetLayout()">↺ Скинути позицію і розмір</button>
         </div>
 
+        <div class="card" id="admin-tournament-panel" style="display:flex; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 Стадія турніру (плашка на трансляції)</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">SEMIFINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="SEMIFINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">1/4 QUARTER-FINAL</span>
+                    <input type="radio" name="tournament-stage-opt" value="1/4 QUARTER-FINAL" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP A</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP A" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP B</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP B" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP C</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP C" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
+                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP D</span>
+                    <input type="radio" name="tournament-stage-opt" value="GROUP D" onchange="setTournamentStage(this.value)">
+                </label>
+                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #b91c1c;">
+                    <span style="font-size:11px; font-weight:800; color:#ef4444;">Вимкнути (Сховати)</span>
+                    <input type="radio" name="tournament-stage-opt" id="ts-opt-off" value="" onchange="setTournamentStage(this.value)">
+                </label>
+            </div>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
+                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
+                <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
+            </div>
+
+            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px; display:flex; flex-direction:column; gap:10px;">
+                <span style="font-size:10px; color:#aaa; display:block;">Вигляд і положення плашки на трансляції:</span>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="stage-fontsize-value" style="color:#e0b878;">13px</b></span>
+                    <input type="range" id="stage-fontsize-slider" min="8" max="40" step="1" value="13" oninput="updateStageFontSize(this.value)">
+                </label>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Зсув по горизонталі: <b id="stage-offsetx-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="stage-offsetx-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
+                </label>
+
+                <label style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:11px; color:#ccc;">Зсув по вертикалі: <b id="stage-offsety-value" style="color:#e0b878;">0px</b></span>
+                    <input type="range" id="stage-offsety-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
+                </label>
+
+                <div style="display:flex; gap:12px;">
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір фону</span>
+                        <input type="color" id="stage-bgcolor-input" value="#a6a6a6" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                        <span style="font-size:11px; color:#ccc;">Колір напису</span>
+                        <input type="color" id="stage-textcolor-input" value="#ffffff" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <div class="card" style="display:flex; flex-direction:column; gap:8px;">
             <div style="font-size:11px; font-weight:700;">🏆 Рейтинг гравців / команд (OBS):</div>
             <button class="btn" id="btn-rk-toggle" onclick="rkToggle()">🏆 ПОКАЗАТИ РЕЙТИНГ КОМАНД</button>
@@ -676,79 +750,7 @@
                 </div>
             </div>
 
-                    <div class="card" id="admin-tournament-panel" style="display:flex; border: 2px solid #c69f66; background: #1f1b13; flex-direction:column; gap:10px;">
-            <div style="font-size:12px; font-weight:800; color:#e0b878; text-transform:uppercase;">🏆 Стадія турніру (плашка на трансляції)</div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">FINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="FINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">SEMIFINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="SEMIFINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">1/4 QUARTER-FINAL</span>
-                    <input type="radio" name="tournament-stage-opt" value="1/4 QUARTER-FINAL" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP A</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP A" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP B</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP B" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP C</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP C" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #333;">
-                    <span style="font-size:11px; font-weight:800; color:#fff;">GROUP D</span>
-                    <input type="radio" name="tournament-stage-opt" value="GROUP D" onchange="setTournamentStage(this.value)">
-                </label>
-                <label class="switch-row" style="background:#2a2a2a; padding:8px 10px; border-radius:6px; margin:0; border:1px solid #b91c1c;">
-                    <span style="font-size:11px; font-weight:800; color:#ef4444;">Вимкнути (Сховати)</span>
-                    <input type="radio" name="tournament-stage-opt" id="ts-opt-off" value="" onchange="setTournamentStage(this.value)">
-                </label>
-            </div>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px;">
-                <span style="font-size:10px; color:#aaa; display:block; margin-bottom:4px;">Або введіть власний напис кастомно:</span>
-                <input type="text" id="tournament-stage-custom-input" placeholder="Наприклад: 1/8 FINAL, QUALIFICATION..." oninput="updateTournamentStageCustom(this.value)">
-            </div>
-
-            <div style="border-top:1px dashed #444; padding-top:8px; margin-top:4px; display:flex; flex-direction:column; gap:10px;">
-                <span style="font-size:10px; color:#aaa; display:block;">Вигляд і положення плашки на трансляції:</span>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Розмір тексту: <b id="stage-fontsize-value" style="color:#e0b878;">13px</b></span>
-                    <input type="range" id="stage-fontsize-slider" min="8" max="40" step="1" value="13" oninput="updateStageFontSize(this.value)">
-                </label>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Зсув по горизонталі: <b id="stage-offsetx-value" style="color:#e0b878;">0px</b></span>
-                    <input type="range" id="stage-offsetx-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
-                </label>
-
-                <label style="display:flex; flex-direction:column; gap:4px;">
-                    <span style="font-size:11px; color:#ccc;">Зсув по вертикалі: <b id="stage-offsety-value" style="color:#e0b878;">0px</b></span>
-                    <input type="range" id="stage-offsety-slider" min="-300" max="300" step="1" value="0" oninput="updateStageOffset()">
-                </label>
-
-                <div style="display:flex; gap:12px;">
-                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                        <span style="font-size:11px; color:#ccc;">Колір фону</span>
-                        <input type="color" id="stage-bgcolor-input" value="#a6a6a6" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
-                    </label>
-                    <label style="display:flex; flex-direction:column; gap:4px; flex:1;">
-                        <span style="font-size:11px; color:#ccc;">Колір напису</span>
-                        <input type="color" id="stage-textcolor-input" value="#ffffff" oninput="updateStageColors()" style="width:100%; height:30px; border:none; border-radius:6px; padding:0; background:none;">
-                    </label>
-                </div>
-            </div>
-        </div>
+                    
 
             <div class="card" style="border: 2px solid #f472b6; background: #241019;">
                 <div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#f9a8d4; text-transform:uppercase;">📋 Інформаційна панель під табло (анонс/реклама)</div>
@@ -1000,6 +1002,29 @@
                         <input type="checkbox" id="promo-transparent-bg-checkbox" style="width:18px; height:18px;" onchange="togglePromoTransparentBg(this.checked)">
                     </div>
                     <div style="font-size:9px; color:#777; margin-top:-6px;">Замість суцільного чорного фону — напівпрозорий, і фото вписується цілком без обрізання. Добре для таблиць сітки/розкладу.</div>
+
+                    <div style="border:1px solid #5b3aa8; border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px; background:rgba(124,58,237,0.08);">
+                        <div class="switch-row">
+                            <span style="font-size:11px; color:#ddd; font-weight:700;">🎞 Відео: показати один раз і вимкнути</span>
+                            <input type="checkbox" id="promo-once-checkbox" style="width:18px; height:18px;" onchange="promoOnceSet(this.checked)">
+                        </div>
+                        <div class="switch-row">
+                            <span style="font-size:11px; color:#ddd; font-weight:700;">🟩 Прибрати фон відео (хромакей)</span>
+                            <input type="checkbox" id="promo-key-on" style="width:18px; height:18px;" onchange="promoKeySet('on', this.checked)">
+                        </div>
+                        <select id="promo-key-mode" onchange="promoKeySet('mode', this.value)" style="width:100%; box-sizing:border-box;">
+                            <option value="auto">Авто (колір фону по кутах відео)</option>
+                            <option value="green">Зелений (#00FF00)</option>
+                            <option value="blue">Синій (#0000FF)</option>
+                            <option value="black">Чорний</option>
+                            <option value="white">Білий</option>
+                            <option value="custom">Свій колір…</option>
+                        </select>
+                        <input type="color" id="promo-key-color" value="#00ff00" oninput="promoKeySet('color', this.value)" style="width:100%; height:30px;">
+                        <label style="font-size:11px; color:#ccc; display:flex; flex-direction:column; gap:2px;">Допуск кольору: <b id="promo-key-tol-v">70</b><input type="range" id="promo-key-tol" min="5" max="200" value="70" oninput="promoKeySet('tol', parseInt(this.value))"></label>
+                        <label style="font-size:11px; color:#ccc; display:flex; flex-direction:column; gap:2px;">М’якість країв: <b id="promo-key-soft-v">40</b><input type="range" id="promo-key-soft" min="0" max="120" value="40" oninput="promoKeySet('soft', parseInt(this.value))"></label>
+                        <div style="font-size:9px; color:#888;">Відео при завантаженні автоматично стискається (менший обсяг). Хромакей працює на трансляції — фон стає прозорим.</div>
+                    </div>
 
                     <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 4px;">
                         <span style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">Варіант 3. Написати текст на екрані (замість фото/відео):</span>
@@ -1633,26 +1658,60 @@
             });
         }
 
+        // Стискання відео в браузері: зменшуємо роздільність і бітрейт (MediaRecorder), щоб ролик був малим
+        async function compressPromoVideo(file, statusEl) {
+            if (file.size > 80 * 1024 * 1024) throw new Error('Файл завеликий (понад 80 MB). Скоротіть ролик.');
+            const MIMES = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+            const mime = (window.MediaRecorder && MediaRecorder.isTypeSupported) ? MIMES.find(m => MediaRecorder.isTypeSupported(m)) : null;
+            const small = file.size <= 2.5 * 1024 * 1024;
+            const url = URL.createObjectURL(file);
+            const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+            await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('Браузер не може прочитати це відео')); });
+            const dur = v.duration;
+            const readAsUrl = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); });
+            const canCompress = mime && v.videoWidth && isFinite(dur) && dur > 0 && typeof HTMLCanvasElement.prototype.captureStream === 'function';
+            if (!canCompress) {
+                URL.revokeObjectURL(url);
+                if (!small) throw new Error('Цей браузер не вміє стискати відео. Завантажте ролик до 2.5 MB або використайте посилання (URL).');
+                return { dataUrl: await readAsUrl(file), bytes: file.size, dur: isFinite(dur) ? dur : 0 };
+            }
+            if (dur > 60) { URL.revokeObjectURL(url); throw new Error('Відео задовге (' + Math.round(dur) + ' с). Для заставки — до 60 с.'); }
+            const MAXW = 960, sc = Math.min(1, MAXW / v.videoWidth), w = Math.max(2, Math.round(v.videoWidth * sc / 2) * 2), h = Math.max(2, Math.round(v.videoHeight * sc / 2) * 2);
+            const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d');
+            const bps = Math.max(150000, Math.min(1800000, Math.round(1.3 * 1024 * 1024 * 8 / dur * 0.85)));
+            const rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime, videoBitsPerSecond: bps });
+            const chunks = []; rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+            const done = new Promise(res => { rec.onstop = res; });
+            rec.start(250); let raf = 0;
+            const draw = () => { cx.drawImage(v, 0, 0, w, h); if (statusEl) statusEl.innerText = '⏳ Стискання відео… ' + Math.min(99, Math.round(v.currentTime / dur * 100)) + '%'; raf = requestAnimationFrame(draw); };
+            const ended = new Promise(res => { v.onended = res; });
+            await v.play(); draw(); await ended; cancelAnimationFrame(raf); cx.drawImage(v, 0, 0, w, h);
+            rec.stop(); await done; URL.revokeObjectURL(url);
+            const blob = new Blob(chunks, { type: mime.split(';')[0] });
+            if (blob.size > 3.5 * 1024 * 1024) throw new Error('Після стискання ролик усе ще великий (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB). Скоротіть його.');
+            if (small && blob.size >= file.size) return { dataUrl: await readAsUrl(file), bytes: file.size, dur: dur };   // і так малий — лишаємо оригінал
+            return { dataUrl: await readAsUrl(blob), bytes: blob.size, dur: dur };
+        }
+        window.promoOnceSet = function(c) { state.promoOnce = !!c; set(matchRef, state); };
+        window.promoKeySet = function(k, v) {
+            const pk = state.promoKey = Object.assign({ on: false, mode: 'auto', color: '#00ff00', tol: 70, soft: 40 }, state.promoKey || {}); pk[k] = v;
+            const tv = document.getElementById('promo-key-tol-v'), sv = document.getElementById('promo-key-soft-v'); if (tv) tv.innerText = pk.tol; if (sv) sv.innerText = pk.soft;
+            set(matchRef, state);
+        };
+        let promoAutoOffT = null;
         window.uploadAndCompressPromoFile = function(e) {
             const file = e.target.files[0]; if (!file) return;
             const statusEl = document.getElementById('promo-file-status');
             const isVideo = file.type.startsWith('video/');
             
             if (isVideo) {
-                if (file.size > 2.5 * 1024 * 1024) {
-                    alert("⚠️ Відео занадто важке! Для збереження швидкості пульта завантажуйте ролики розміром до 2.5 MB, або використовуйте посилання (URL).");
-                    statusEl.innerText = "❌ Помилка: Відео більше 2.5MB";
-                    return;
-                }
-                statusEl.innerText = "⏳ Обробка відео...";
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    state.promoSrc = evt.target.result; state.promoUrl = ""; 
+                compressPromoVideo(file, statusEl).then(res => {
+                    state.promoSrc = res.dataUrl; state.promoUrl = ""; state.promoTypeIsText = false; state.promoDur = res.dur;
                     state.promoTypeIsVideo = true; document.getElementById('promo-type-video-checkbox').checked = true;
                     document.getElementById('promo-url-input').value = "";
-                    statusEl.innerText = "✅ Відео додано"; set(matchRef, state);
-                };
-                reader.readAsDataURL(file);
+                    statusEl.innerText = "✅ Відео стиснуто: " + (res.bytes / 1024 / 1024).toFixed(2) + " MB (було " + (file.size / 1024 / 1024).toFixed(1) + " MB), " + Math.round(res.dur) + " с";
+                    set(matchRef, state);
+                }).catch(err => { console.error(err); statusEl.innerText = "❌ " + (err && err.message ? err.message : 'Не вдалося обробити відео'); });
             } else {
                 statusEl.innerText = "⏳ Стиснення фото...";
                 const reader = new FileReader();
@@ -1682,7 +1741,14 @@
             }
         };
 
-        window.toggleFullscreenPromo = function(c) { saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state); };
+        window.toggleFullscreenPromo = function(c) {
+            saveToHistory(state); state.showFullscreenPromo = c; set(matchRef, state);
+            clearTimeout(promoAutoOffT);
+            // «один раз»: вимикаємо заставку-відео після завершення ролика
+            if (c && state.promoTypeIsVideo && state.promoOnce !== false && state.promoDur > 0) {
+                promoAutoOffT = setTimeout(() => { if (state.showFullscreenPromo) { state.showFullscreenPromo = false; set(matchRef, state); const cb = document.getElementById('promo-visibility-checkbox'); if (cb) cb.checked = false; } }, Math.round(state.promoDur * 1000) + 1500);
+            }
+        };
         window.updatePromoUrl = function(url) {
             state.promoUrl = url; state.promoSrc = ""; state.promoTypeIsText = false;
             document.getElementById('promo-type-text-checkbox').checked = false;
@@ -1732,7 +1798,8 @@
                 promoUrl: state.promoUrl || "", promoSrc: state.promoSrc || "", promoTypeIsVideo: !!state.promoTypeIsVideo,
                 promoText: state.promoText || "", promoTypeIsText: !!state.promoTypeIsText,
                 promoTextColor: state.promoTextColor || "#ffffff", promoTextSize: state.promoTextSize || 60,
-                promoTransparentBg: !!state.promoTransparentBg
+                promoTransparentBg: !!state.promoTransparentBg,
+                promoKey: state.promoKey || null, promoOnce: state.promoOnce !== false, promoDur: state.promoDur || 0
             };
 
             const writes = [];
@@ -3080,8 +3147,7 @@
             const inner = Array.from(modal.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
             { const sp = document.getElementById('admin-tournament-panel'); if (sp && !isAdmin) sp.remove(); }
             const cards = Array.from(inner.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '🏆 Стадія турніру (плашка)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
-            if (!isAdmin) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
+            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('smcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
@@ -3276,7 +3342,7 @@
         (function crInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-            const DEF = { show: false, court: 'all', title: 'ТИТРИ ТУРНІРУ', endText: 'Дякуємо за увагу!', sections: [{ kind: 'crew', title: 'Організатори', on: true }, { kind: 'groups', title: '', on: true }, { kind: 'teams', title: '', on: false }, { kind: 'sponsors', title: 'Наші партнери', on: true }, { kind: 'custom', title: 'Подяка', text: 'Дякуємо глядачам і волонтерам', on: false }], speed: 90, loop: false, autoClose: true, scale: 100, width: 100, textSize: 100, logoSize: 100, bgOpacity: 85, bg1: '#000000', bg2: '#0a1230', accent: '#f5c542', role: '#ffe08a', text: '#ffffff', ts: 0 };
+            const DEF = { show: false, court: 'all', title: 'ТИТРИ ТУРНІРУ', endText: 'Дякуємо за увагу!', sections: [{ kind: 'crew', title: 'Організатори', on: true }, { kind: 'groups', title: '', on: true }, { kind: 'teams', title: '', on: false }, { kind: 'sponsors', title: 'Наші партнери', on: true }, { kind: 'custom', title: 'Подяка', text: 'Дякуємо глядачам і волонтерам', on: false }], speed: 90, loop: false, autoClose: true, scale: 100, width: 100, textSize: 100, logoSize: 100, bgOpacity: 0, bg1: '#000000', bg2: '#0a1230', accent: '#f5c542', role: '#ffe08a', text: '#ffffff', ts: 0 };
             const KINDS = [['crew', '👔 Організатори (з панелі «Організатори»)'], ['sponsors', '🤝 Спонсори (з панелі «Спонсори»)'], ['groups', '👥 Команди по групах'], ['teams', '🏆 Усі команди (рейтинг)'], ['custom', '✏️ Свій текст («Роль | Ім’я»)']];
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
@@ -3762,7 +3828,11 @@
                 '<button type="button" class="btn btn-gray" id="an-clear" style="padding:8px; font-size:11px;">🗑 Очистити журнал очок цього корту</button>';
             const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📈 Аналітика матчу: блоки й вигляд</span><span class="tcol-arrow">▸</span>';
             head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
-            anchor.before(head); anchor.before(card);
+            // порядок: «Аналітика матчу» → потім «Бігучий рядок» (перед його заголовком, а не між заголовком і вмістом)
+            const anchorHead = (anchor.previousElementSibling && anchor.previousElementSibling.classList.contains('tcol-head')) ? anchor.previousElementSibling : anchor;
+            anchorHead.before(head); anchorHead.before(card);
+            // кнопка «Аналітика між геймами» — тепер тут, під блоком «Плашка між геймами»
+            { const bb = document.getElementById('btn-anbetween'), r = card.querySelector('[data-kn="betweenSec"]'); const rw = r && r.closest('.row'); if (bb && rw) { bb.style.marginTop = '2px'; rw.after(bb); } }
             function fill() { const c = cfg(); card.querySelectorAll('[data-kc]').forEach(e => { e.checked = c[e.dataset.kc] !== false; }); card.querySelectorAll('[data-kn]').forEach(e => { if (document.activeElement !== e) e.value = c[e.dataset.kn] !== undefined ? c[e.dataset.kn] : ({ endWin: 7, endStats: 10, endAnEn: 10, endAnUa: 5, betweenEvery: 3, betweenSec: 5 })[e.dataset.kn]; }); card.querySelectorAll('[data-b]').forEach(e => { e.checked = c.blocks[e.dataset.b] !== false; }); card.querySelectorAll('[data-k]').forEach(e => { if (document.activeElement === e) return; const v = c[e.dataset.k]; if (v !== undefined) e.value = v; }); ['scale', 'bgOpacity'].forEach(k => { const el = card.querySelector('#an-v-' + k); if (el) el.innerText = (c[k] === undefined ? (k === 'scale' ? 100 : 92) : c[k]) + '%'; }); }
             card.querySelectorAll('[data-kc]').forEach(e => e.addEventListener('change', () => { cfg()[e.dataset.kc] = e.checked; set(matchRef, state); }));
             card.querySelectorAll('[data-kn]').forEach(e => e.addEventListener('input', () => { cfg()[e.dataset.kn] = parseFloat(e.value) || 0; set(matchRef, state); }));
@@ -3779,7 +3849,8 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            if (!document.getElementById('admin-tournament-panel')) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
@@ -4429,6 +4500,10 @@
                 if (!state.promoSrc) document.getElementById('promo-url-input').value = state.promoUrl || "";
                 document.getElementById('promo-type-video-checkbox').checked = !!state.promoTypeIsVideo;
                 document.getElementById('promo-transparent-bg-checkbox').checked = !!state.promoTransparentBg;
+                { const pk = Object.assign({ on: false, mode: 'auto', color: '#00ff00', tol: 70, soft: 40 }, state.promoKey || {}), g = id => document.getElementById(id);
+                  if (g('promo-once-checkbox')) g('promo-once-checkbox').checked = state.promoOnce !== false;
+                  if (g('promo-key-on')) { g('promo-key-on').checked = !!pk.on; g('promo-key-mode').value = pk.mode; g('promo-key-color').value = pk.color; g('promo-key-color').style.display = pk.mode === 'custom' ? '' : 'none';
+                    if (document.activeElement !== g('promo-key-tol')) g('promo-key-tol').value = pk.tol; if (document.activeElement !== g('promo-key-soft')) g('promo-key-soft').value = pk.soft; g('promo-key-tol-v').innerText = pk.tol; g('promo-key-soft-v').innerText = pk.soft; } }
                 if (document.activeElement !== document.getElementById('promo-text-input')) document.getElementById('promo-text-input').value = state.promoText || "";
                 document.getElementById('promo-type-text-checkbox').checked = !!state.promoTypeIsText;
                 document.getElementById('promo-text-color-input').value = state.promoTextColor || "#ffffff";
@@ -5109,7 +5184,14 @@
         (function msInit() {
             const host = document.getElementById('mascot-panel'); if (!host) return;
             const inner = (() => { const m = document.getElementById('settings-modal'); return m && Array.from(m.children).find(el => !el.classList.contains('modal-header')); })();
-            if (inner) { host.className = 'card'; host.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; inner.appendChild(host); }   // у самий низ налаштувань
+            if (inner) { host.className = 'card'; host.style.cssText = 'display:flex; flex-direction:column; gap:8px;'; inner.appendChild(host);   // у самий низ налаштувань
+                // згортання блоку (за замовчуванням згорнуто)
+                const mh = document.createElement('button'); mh.type = 'button'; mh.className = 'tcol-head'; mh.innerHTML = '<span>🐦 Талісмани (анімація на трансляції)</span><span class="tcol-arrow">▸</span>';
+                let mo = false; try { mo = localStorage.getItem('msColOpen') === '1'; } catch (e) {}
+                const mapply = o => { host.style.display = o ? 'flex' : 'none'; mh.classList.toggle('open', o); try { localStorage.setItem('msColOpen', o ? '1' : '0'); } catch (e) {} };
+                mh.onclick = () => mapply(host.style.display === 'none');
+                inner.insertBefore(mh, host); mapply(mo);
+            }
             const PATHS = ['padel/mascots', 'padel/courts/mascots'];   // основний шлях і запасний, якщо правила бази відхиляють перший
             let D = [{}, {}], base = 0;
             const G = () => { const a = D[0] || {}, b = D[1] || {}; return { items: Object.assign({}, b.items || {}, a.items || {}), def: Object.assign({}, b.def || {}, a.def || {}) }; };
