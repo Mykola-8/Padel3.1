@@ -1217,8 +1217,8 @@
         .sm-header { text-align: center; font-size: calc(26px * var(--stats-text-k, 1)); font-weight: 800; color: #c69f66; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; line-height: 1.1; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
         .sm-table { width: 100%; display: flex; flex-direction: column; gap: 5px; }
         .sm-row { display: grid; grid-template-columns: 1fr 440px 1fr; align-items: center; text-align: center; column-gap: 12px; }
-        .sm-team-left { text-align: left; font-weight: 800; font-size: calc(30px * var(--stats-text-k, 1)); line-height: 1.05; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
-        .sm-team-right { text-align: right; font-weight: 800; font-size: calc(30px * var(--stats-text-k, 1)); line-height: 1.05; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .sm-team-left { text-align: center; font-weight: 800; font-size: calc(30px * var(--stats-text-k, 1)); line-height: 1.05; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
+        .sm-team-right { text-align: center; font-weight: 800; font-size: calc(30px * var(--stats-text-k, 1)); line-height: 1.05; overflow: hidden; white-space: normal; word-break: break-word; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
         .sm-label { font-size: calc(24px * var(--stats-text-k, 1)); line-height: 1.05; font-weight: 800; color: #f0f0f0; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .sm-val { font-size: calc(36px * var(--stats-text-k, 1)); line-height: 1.05; font-weight: 800; color: #ffffff; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
         .sm-val.gold { color: #c69f66; font-size: calc(26px * var(--stats-text-k, 1)); letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
@@ -4376,7 +4376,17 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 document.documentElement.classList.toggle('theme-skewlime', (tvThemeOv(state) || state.boardTheme || 'graydark') === 'skewlime');
                 isMatchFinishedCurrently = !!state.isMatchFinished;
 
-                if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || activeServer>0) && !matchTimerStarted && !state.isMatchFinished) {
+                // Відлік часу починається з першого очка або з натискання «зміна подаючого» (а не просто з відкриття оверлея)
+                const srvTrig = state.serverChangeTrigger || 0;
+                const serverBtnPressed = (typeof window.__srvTrigPrev !== 'undefined') && srvTrig !== window.__srvTrigPrev;
+                window.__srvTrigPrev = srvTrig;
+                { // скидання матчу (рахунок повернувся в нуль) — обнуляємо й таймери, відлік почнеться знову з першого очка
+                    let anyG = false; for (let q = 1; q <= 9; q++) { if ((state['t1_s' + q] || 0) > 0 || (state['t2_s' + q] || 0) > 0) { anyG = true; break; } }
+                    const hasScore = (state.p1Index || 0) > 0 || (state.p2Index || 0) > 0 || anyG;
+                    if (window.__prevHadScore && !hasScore && !state.isMatchFinished) { totalSeconds = 0; setSeconds = 0; gameSeconds = 0; matchTimerStarted = false; lastGamesCountTracked = 0; lastSetTracked = 1; setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"]; }
+                    window.__prevHadScore = hasScore;
+                }
+                if (((state.p1Index||0)>0 || (state.p2Index||0)>0 || (state.t1_s1||0)>0 || (state.t2_s1||0)>0 || serverBtnPressed) && !matchTimerStarted && !state.isMatchFinished) {
                     matchTimerStarted = true;
                 }
                 if (state.isMatchFinished) matchTimerStarted = false;
