@@ -116,7 +116,7 @@
         body.helper .nav-tabs { display: none !important; }
         body.helper #btn-break, body.helper #btn-toggle-stats, body.helper #btn-analytics, body.helper #btn-anbetween, body.helper #mascot-panel, body.helper #modal-court-badge, body.helper #match-actions button[onclick="resetMatch()"], body.helper #admin-unlock-btn { display: none !important; }
         body.helper #settings-modal > div:not(.modal-header) > :not(.hk) { display: none !important; }
-        .controls-locked #court-selector, .controls-locked #modal-court-badge, .controls-locked .settings-gear-btn, .controls-locked .modal-close-btn {
+        .controls-locked #court-selector, .controls-locked #modal-court-badge, .controls-locked .settings-gear-btn, .controls-locked .nav-gear, .controls-locked .modal-close-btn {
             pointer-events: auto !important;
             opacity: 1 !important;
             filter: none !important;
@@ -133,19 +133,20 @@
 
     <nav class="nav-tabs">
         <button class="nav-btn active" onclick="switchTab('tab-remote')"><span>🎮</span>Пульт</button>
+        <button class="nav-btn nav-gear" id="nav-gear" onclick="openModalSettings()"><span>⚙️</span>Налашт.</button>
         <button class="nav-btn" onclick="switchTab('tab-tournament')"><span>🏆</span>Tournament</button>
         <button class="nav-btn" onclick="switchTab('tab-players')"><span>📊</span>Гравці</button>
         <button class="nav-btn" onclick="switchTab('tab-profile')"><span>👤</span>Профіль</button>
     </nav>
 
     <div id="tab-remote" class="tab-content active">
-        <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:6px; flex-wrap:nowrap;" id="top-row">
+            <style>#top-row #court-selector{min-width:0;padding:8px 4px;font-size:13px}#top-row .settings-gear-btn{flex-shrink:0;white-space:nowrap;padding:8px 7px;font-size:11px}#top-row #btn-mi-quick{border-color:#4ade80;color:#4ade80}@media(max-width:430px){#top-row .gear-txt{display:none}}</style>
             <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
                 <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
                 <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
             </select>
-            <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
-            <button class="settings-gear-btn" id="btn-mi-quick" onclick="miQuick()" style="border-color:#4ade80; color:#4ade80;">🎙 Хто грає</button>
+            <button class="settings-gear-btn" id="btn-mi-quick" onclick="miQuick()">🎙 Хто грає</button>
             <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
                 <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
                 <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
@@ -3912,7 +3913,7 @@
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
-            show: false, title: "", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", nameFmt: "full",
+            show: false, title: "Товариська гра", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", nameFmt: "full",
             x: 50, y: 80, scale: 70, w: 50, h: 25, nameScale: 100, logoL: "", logoR: "", anim: "wipe", animDur: 15, bgOpacity: 80,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
@@ -3944,11 +3945,11 @@
             }
             miSave(false);
         };
-        window.miToggle = function() { const mi = miEnsure(); mi.show = !mi.show; miSave(true); };
+        window.miToggle = function() { const mi = miEnsure(); if (!mi.show) miAutoFill(); mi.show = !mi.show; miSave(true); };
         // Швидкий показ «Хто грає»: на 7 секунд, потім закривається автоматично
         let miQTimer = null, miQTick = null;
         window.miQuick = function () {
-            const SEC = 7, btn = document.getElementById('btn-mi-quick'), mi = miEnsure();
+            const SEC = 7, btn = document.getElementById('btn-mi-quick'), mi = miEnsure(); miAutoFill();
             clearTimeout(miQTimer); clearInterval(miQTick);
             mi.show = true; miSave(true);
             let left = SEC;
@@ -3989,7 +3990,18 @@
             };
             reader.readAsDataURL(file);
         };
+        // Автозаповнення: корт, дата (з телефона), назва турніру за замовчуванням
+        function miAutoFill() {
+            const mi = miEnsure(); let ch = false;
+            const d = new Date(), p = n => String(n).padStart(2, '0'), today = p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear();
+            const ct = 'Корт №' + courtId;
+            if (!mi.court || /^Корт №\d+$/.test(mi.court)) { if (mi.court !== ct) { mi.court = ct; ch = true; } }
+            if (!mi.date || /^\d{2}\.\d{2}\.\d{4}$/.test(mi.date)) { if (mi.date !== today) { mi.date = today; ch = true; } }
+            if (!mi.title) { mi.title = 'Товариська гра'; ch = true; }
+            return ch;
+        }
         function renderMatchIntroUI() {
+            try { if (miAutoFill()) miSave(false); } catch (e) {}
             const mi = state.matchIntro || MI_DEFAULT;
             document.querySelectorAll('[data-mi]').forEach(el => {
                 if (document.activeElement === el) return;
