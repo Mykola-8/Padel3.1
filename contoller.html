@@ -139,12 +139,13 @@
     </nav>
 
     <div id="tab-remote" class="tab-content active">
-        <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px;">
+        <div class="card" style="border: 2px solid #c69f66; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <select id="court-selector" onchange="switchCourt(this.value)" style="flex:1; font-weight:800; color:#fff; background:#15803d; text-align:center;">
                 <option value="1">Корт №1</option><option value="2">Корт №2</option><option value="3">Корт №3</option><option value="4">Корт №4</option><option value="5">Корт №5</option>
                 <option value="6">Корт №6</option><option value="7">Корт №7</option><option value="8">Корт №8</option><option value="9">Корт №9</option><option value="10">Корт №10</option>
             </select>
             <button class="settings-gear-btn" onclick="openModalSettings()">⚙️ Налаштування</button>
+            <button class="settings-gear-btn" id="btn-mi-quick" onclick="miQuick()" style="border-color:#4ade80; color:#4ade80;">🎙 Хто грає</button>
             <div style="display:flex; flex-shrink:0; border:1px solid #444; border-radius:6px; overflow:hidden;">
                 <button type="button" id="lang-btn-ua" onclick="updateOverlayLang('ua')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#c69f66; color:#1c1c1c;">UA</button>
                 <button type="button" id="lang-btn-en" onclick="updateOverlayLang('en')" style="padding:8px 12px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#2a2a2a; color:#ccc;">EN</button>
@@ -3944,6 +3945,21 @@
             miSave(false);
         };
         window.miToggle = function() { const mi = miEnsure(); mi.show = !mi.show; miSave(true); };
+        // Швидкий показ «Хто грає»: на 7 секунд, потім закривається автоматично
+        let miQTimer = null, miQTick = null;
+        window.miQuick = function () {
+            const SEC = 7, btn = document.getElementById('btn-mi-quick'), mi = miEnsure();
+            clearTimeout(miQTimer); clearInterval(miQTick);
+            mi.show = true; miSave(true);
+            let left = SEC;
+            const paint = () => { if (btn) { btn.innerText = '🎙 ' + left + ' с'; btn.style.background = '#14532d'; } };
+            paint();
+            miQTick = setInterval(() => { left--; if (left > 0) paint(); }, 1000);
+            miQTimer = setTimeout(() => {
+                clearInterval(miQTick); const m = miEnsure(); m.show = false; miSave(true);
+                if (btn) { btn.innerText = '🎙 Хто грає'; btn.style.background = ''; }
+            }, SEC * 1000);
+        };
         window.miClear = function(path) {
             const mi = miEnsure(); miSetPath(mi, path, ""); const st = document.getElementById('mi-st-' + path); if (st) st.innerText = "";
             miSave(true);
