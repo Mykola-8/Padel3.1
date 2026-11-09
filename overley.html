@@ -4471,8 +4471,14 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                         const adRound = (state.deuceCounter || 0) + 1;
                         const adText = "AD" + ((adMax > 0 && adRound <= adMax) ? adRound : "");
 
-                        pbT1.innerText = (p1 === 4) ? adText : ((p2 === 4) ? "" : pointSequence[p1]);
-                        pbT2.innerText = (p2 === 4) ? adText : ((p1 === 4) ? "" : pointSequence[p2]);
+                        // 40:40 → D1/D1, D2/D2…; золота (star) точка → SP/SP; той, хто програє перевагу, бачить «-» (без порожніх місць)
+                        const dStyle0 = state.deuceStyle || 'classic', dN0 = state.deuceCounter || 0;
+                        const golden0 = dStyle0 === 'one-golden' || dStyle0 === 'golden-2' || dStyle0 === 'double';
+                        const goldenDeuce0 = dStyle0 === 'one-golden' || (dStyle0 === 'golden-2' && dN0 >= 1) || (dStyle0 === 'double' && dN0 >= 2);
+                        let t1Txt = pointSequence[p1], t2Txt = pointSequence[p2];
+                        if (p1 === 3 && p2 === 3 && golden0) { t1Txt = t2Txt = goldenDeuce0 ? 'SP' : 'D' + (dN0 + 1); }
+                        pbT1.innerText = (p1 === 4) ? adText : ((p2 === 4) ? "-" : t1Txt);
+                        pbT2.innerText = (p2 === 4) ? adText : ((p1 === 4) ? "-" : t2Txt);
                         pbT1.classList.toggle('ad-active', p1 === 4);
                         pbT2.classList.toggle('ad-active', p2 === 4);
 
