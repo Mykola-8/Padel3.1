@@ -3652,6 +3652,88 @@
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
+        // ===== ІМПОРТ З RANKEDIN (вставка тексту сторінок) =====
+        (function rdnInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const card = document.createElement('div'); card.id = 'rdn-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('rkm-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:11px;';
+            const GL = 'ABCDEFGHIJ'.split('');
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">🌐 Імпорт з Rankedin (вставка тексту сторінки)</div>' +
+                '<div style="font-size:10px; color:#9bd;">Відкрийте сторінку турніру на rankedin.com → виділіть усе на сторінці (Вибрати все) → Копіювати → вставте сюди → «Імпортувати». Перед записом пульт покаже, що саме розпізнано.</div>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🏆 Players → «Рейтинг команд»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><textarea id="rdn-pl" rows="5" placeholder="1&#10;Andrii Melnychyn&#10;Svyatoslav Ilnytskyy&#10;5580&#10;2&#10;..." style="' + inp + '"></textarea><label style="font-size:11px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="rdn-pl-rep" checked> Замінити весь список команд (інакше — оновити/додати)</label><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-pl-go">⬇ Імпортувати рейтинг</button><div id="rdn-pl-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">📊 Draws (група) → «Групи»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div class="row"><span style="font-size:11px; color:#ccc;">У яку групу записати:</span><select id="rdn-gr-sel">' + GL.map((l, i) => '<option value="' + i + '">Група ' + l + '</option>').join('') + '</select></div><textarea id="rdn-gr" rows="6" placeholder="Olexandr Bohdan / Yaroslav Sadoviy&#10;Khang Nguyen / Ivan Shkodiak&#10;...&#10;1-0&#10;6-1 ..." style="' + inp + '"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-gr-go">⬇ Імпортувати групу</button><div id="rdn-gr-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🥇 Плей-оф</summary><div style="font-size:11px; color:#ddd; margin-top:6px;">Надішліть мені скопійований текст сторінки плей-оф з Rankedin — і я додам окремий розбір сітки.</div></details>';
+            const $ = id => card.querySelector('#' + id);
+            const nm = s => String(s == null ? '' : s).trim().toLowerCase();
+            const clean = s => String(s).replace(/[*?]/g, '').replace(/\s+/g, ' ').trim();
+            // ---- Players ----
+            function parsePlayers(text) {
+                const raw = String(text || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+                const noise = /^(name|seed|rank|all|compare skills|pro|x padel|players|man|woman|mix|followed|matches|create|search|i admin|info|draws|scoreboard|video|timetable|classes|results)\b|rankedin|^[-–—?*]+$/i;
+                const it = [];
+                raw.forEach(l => { if (/^\d+([.,]\d+)?$/.test(l)) it.push({ t: 'n', v: parseFloat(l.replace(',', '.')) }); else { const c = clean(l); if (c && !noise.test(c)) it.push({ t: 's', v: c }); } });
+                const out = []; let i = 0;
+                while (i < it.length) {
+                    if (!(it[i].t === 'n' && it[i + 1] && it[i + 1].t === 's')) { i++; continue; }
+                    i++; const names = []; while (i < it.length && it[i].t === 's') { names.push(it[i].v); i++; }
+                    const run = []; while (i < it.length && it[i].t === 'n') { run.push(it[i].v); i++; }
+                    const hasNext = i < it.length && it[i].t === 's';
+                    const rank = hasNext ? (run.length >= 2 ? run[run.length - 2] : null) : run[run.length - 1];
+                    if (hasNext && run.length) { i--; /* останнє число — позиція наступної команди */ }
+                    if (names.length && rank !== null && rank !== undefined) out.push({ n: names.slice(0, 2).join(' / '), r: rank });
+                }
+                return out;
+            }
+            $('rdn-pl-go').onclick = () => {
+                const st = $('rdn-pl-st'), res = parsePlayers($('rdn-pl').value);
+                if (!res.length) { st.style.color = '#f66'; st.innerText = '⚠️ Нічого не розпізнано. Вставте текст сторінки Players (позиція, імена, Rank).'; return; }
+                const rep = $('rdn-pl-rep').checked;
+                if (!confirm('Розпізнано ' + res.length + ' команд:\n\n' + res.slice(0, 25).map((t, i) => (i + 1) + '. ' + t.n + ' — ' + t.r).join('\n') + (res.length > 25 ? '\n…' : '') + '\n\n' + (rep ? 'Список «Рейтинг команд» буде ЗАМІНЕНО.' : 'Рейтинги буде оновлено/додано.'))) return;
+                const rk = rkEnsure();
+                if (rep) rk.teams = res.map(t => ({ n: t.n, r: t.r }));
+                else res.forEach(t => { const f = rk.teams.find(x => nm(x.n) === nm(t.n)); if (f) f.r = t.r; else rk.teams.push({ n: t.n, r: t.r }); });
+                rkRebuildRows(); rkSave(true);
+                st.style.color = '#7c7'; st.innerText = '✅ Імпортовано ' + res.length + ' команд у «Рейтинг команд».';
+            };
+            // ---- Draws (групи) ----
+            function parseDraw(text) {
+                const lines = String(text || '').split(/\r?\n/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+                const teams = []; let i = 0;
+                for (; i < lines.length; i++) {
+                    const L = lines[i];
+                    if (/\s\/\s/.test(L) && !/^\d/.test(L) && L.length < 90) teams.push(clean(L));
+                    else if (teams.length >= 2 && !/^bye$|^[A-Z]$/i.test(L)) break;
+                }
+                const N = teams.length; if (N < 2) return { teams, cells: [], err: 'Не знайшов назв команд у вигляді «Ім’я / Ім’я» (шапка таблиці).' };
+                const sc = /^\d+\s*[-–:]\s*\d+(?:[^\d\s]\d*)?$/, cellsByRow = Array.from({ length: N }, () => []);
+                let row = -1;
+                for (; i < lines.length; i++) {
+                    const L = lines[i];
+                    if (/^\d+$/.test(L) && parseInt(L) === row + 2 && row + 1 < N && !(lines[i + 1] && sc.test(lines[i + 1]))) { row++; continue; }
+                    if (row < 0) continue;
+                    if (sc.test(L)) cellsByRow[row].push(L.replace(/[^\d\-–:]/g, '').replace(/[–:]/g, '-'));
+                }
+                const res = {}, info = []; let warn = '';
+                for (let r = 0; r < N; r++) {
+                    const tk = cellsByRow[r]; if (tk.length !== 2 * (N - 1)) { if (tk.length) warn += '\nРядок ' + (r + 1) + ': ' + tk.length + ' значень замість ' + 2 * (N - 1) + ' (незіграні матчі?)'; }
+                    for (let k = 0; k * 2 + 1 < tk.length; k++) { const j = k < r ? k : k + 1; if (j > r && j < N) { res[r + '_' + j] = tk[k * 2 + 1]; info.push(teams[r] + ' – ' + teams[j] + ': ' + tk[k * 2 + 1]); } }
+                }
+                return { teams, res, info, warn };
+            }
+            $('rdn-gr-go').onclick = () => {
+                const st = $('rdn-gr-st'), p = parseDraw($('rdn-gr').value);
+                if (p.err || p.teams.length < 2) { st.style.color = '#f66'; st.innerText = '⚠️ ' + (p.err || 'Замало команд.'); return; }
+                const gi = parseInt($('rdn-gr-sel').value) || 0;
+                if (!confirm('Група ' + GL[gi] + ': ' + p.teams.length + ' команд\n' + p.teams.map((t, i) => (i + 1) + '. ' + t).join('\n') + '\n\nРезультатів: ' + Object.keys(p.res).length + '\n' + p.info.slice(0, 12).join('\n') + (p.warn ? '\n\n⚠️' + p.warn : '') + '\n\nЗаписати у групу ' + GL[gi] + '? (команди й результати цієї групи буде замінено)')) return;
+                const c = grEnsure(), g = c.g[gi];
+                g.t = ['', '', '', '', '', '', '', ''].map((_, i) => p.teams[i] || ''); g.res = p.res;
+                if (c.count < gi + 1) c.count = gi + 1; if (c.teamsPer < p.teams.length) c.teamsPer = Math.min(8, p.teams.length); c.cross = true;
+                try { grRefreshUI(); } catch (e) {} grSave(true);
+                st.style.color = '#7c7'; st.innerText = '✅ Група ' + GL[gi] + ' записана (' + Object.keys(p.res).length + ' результатів). Перехресна таблиця увімкнена.';
+            };
+        })();
+
         // ===== ПОСЛІДОВНИЙ ПОКАЗ ТАБЛО (padel/seq) =====
         (function seqInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
