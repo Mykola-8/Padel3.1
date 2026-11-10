@@ -3499,6 +3499,8 @@
             const FB = { 'ic-btn-show': () => window.icToggle && window.icToggle(), 'gr-btn-show': () => window.grToggle && window.grToggle(), 'po-btn-upper': () => window.poToggle && window.poToggle('upper'), 'po-btn-lower': () => window.poToggle && window.poToggle('lower'), 'btn-mi-toggle': () => window.miToggle && window.miToggle(), 'btn-rk-toggle': () => window.rkToggle && window.rkToggle() };
             const clickId = id => { const b = document.getElementById(id); if (b) b.click(); else if (FB[id]) { try { FB[id](); } catch (e) {} } };
             const TOG = (btn, fn) => ({ on: () => { try { return !!fn(S()); } catch (e) { return false; } }, set(w) { if (this.on() !== w) clickId(btn); } });
+            // Табло, спільні для всього турніру (рейтинг, групи, play-off): послідовність показує/ховає їх одразу на ВСІХ кортах
+            const ALL = (kind, fn) => ({ all: true, on: () => { try { return !!fn(S()); } catch (e) { return false; } }, set(w) { if (window.showAllCourts) window.showAllCourts(kind, !!w); } });
             const EXP = (onB, offB) => ({ set(w) { clickId(w ? onB : offB); } });
             const P = {
                 icard: Object.assign({ name: '🎬 Вступне табло' }, TOG('ic-btn-show', s => s.introCard && s.introCard.show)),
@@ -3506,10 +3508,10 @@
                 crew: Object.assign({ name: '👔 Організатори турніру' }, EXP('crew-on', 'crew-off')),
                 spcard: Object.assign({ name: '🤝 Спонсори: лого й опис' }, EXP('spcard-on', 'spcard-off')),
                 rules: Object.assign({ name: '📜 Регламент турніру' }, EXP('rl-on', 'rl-off')),
-                rank: Object.assign({ name: '🏆 Рейтинг команд' }, TOG('btn-rk-toggle', s => s.teamRanking && s.teamRanking.show)),
-                groups: Object.assign({ name: '👥 Групи' }, TOG('gr-btn-show', s => s.groups && s.groups.show)),
-                poU: Object.assign({ name: '🏁 Play-off: верх' }, TOG('po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
-                poL: Object.assign({ name: '🏁 Play-off: низ' }, TOG('po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
+                rank: Object.assign({ name: '🏆 Рейтинг команд (усі корти)' }, ALL('rk', s => s.teamRanking && s.teamRanking.show)),
+                groups: Object.assign({ name: '👥 Групи (усі корти)' }, ALL('gr', s => s.groups && s.groups.show)),
+                poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
+                poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
                 credits: Object.assign({ name: '🎞 Титри турніру' }, EXP('cr-on', 'cr-off'))
             };
             const ORDER = ['icard', 'crew', 'rules', 'rank', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
@@ -3559,7 +3561,7 @@
                 card.querySelector('#seq-go').style.outline = running ? '3px solid #fff' : 'none'; card.querySelector('#seq-stop').style.outline = running ? 'none' : '3px solid #fff';
             }
             const sleep = (ms, tk) => new Promise(res => { const t0 = Date.now(); const iv = setInterval(() => { if (tk !== token || Date.now() - t0 >= ms) { clearInterval(iv); res(); } }, 200); });
-            const hideAll = () => { d.items.forEach(it => { try { if (P[it.id].on ? P[it.id].on() : true) P[it.id].set(false); } catch (e) {} }); };
+            const hideAll = () => { d.items.forEach(it => { try { if (P[it.id].all || (P[it.id].on ? P[it.id].on() : true)) P[it.id].set(false); } catch (e) {} }); };
             async function run() {
                 const tk = ++token; running = true; paint();
                 const act = () => d.items.filter(it => it.on);
