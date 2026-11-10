@@ -333,7 +333,7 @@
         .scoreboard-wrapper {
             display: flex; flex-direction: row; align-items: flex-start; width: max-content;
             transform-origin: top left; transition: transform 0.2s ease, opacity 0.2s ease, visibility 0.4s;
-            filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: var(--board-opacity, 1); visibility: visible; will-change: transform;
+             filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.6)); position: absolute; top: 0; left: 0; opacity: var(--board-opacity, 1); visibility: visible; will-change: transform;
         }
         .scoreboard-wrapper.hidden { opacity: 0; visibility: hidden; }
         /* ?tv=1 — режим для телевізора: суцільний фон, табло на весь екран (великі цифри), та сама тема й анімації */
@@ -774,8 +774,8 @@
 
         /* ===== АНАЛІТИКА МІЖ ГЕЙМАМИ: плашка зліва внизу ===== */
         .anb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 5000; pointer-events: none; font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden; }
-        .anb-plate { position: absolute; left: 50%; top: 0; width: 860px; border-radius: 0 0 20px 20px; padding: 8px 6px 6px; background: rgba(8, 14, 30, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 10px 34px rgba(0,0,0,.4); transform: translate(-50%, -106%); transition: transform .7s cubic-bezier(.2,.85,.25,1); }
-        .anb-plate.in { transform: translate(-50%, 0); }
+        .anb-plate { position: absolute; left: 50%; top: 0; width: 860px; border-radius: 0 0 20px 20px; padding: 8px 6px 6px; background: rgba(8, 14, 30, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: none; visibility: hidden; transform: translate(-50%, -130%); transition: transform .7s cubic-bezier(.2,.85,.25,1), visibility 0s linear .7s; }
+        .anb-plate.in { transform: translate(-50%, 0); visibility: visible; box-shadow: 0 10px 34px rgba(0,0,0,.4); transition: transform .7s cubic-bezier(.2,.85,.25,1), visibility 0s; }
         .anb-plate .an-card { background: transparent; padding: 6px 16px 4px; }
         .anb-teams { display: flex; justify-content: space-between; gap: 12px; padding: 2px 16px 0; font-size: 18px; font-weight: 800; }
         .anb-teams span { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .anb-teams .t1 { color: var(--an-c1, #38bdf8); } .anb-teams .t2 { color: var(--an-c2, #fb923c); }
@@ -1899,7 +1899,7 @@
         html.theme-skewlime .mfb-table th, html.theme-skewlime .mfb-table td, html.theme-skewlime .sm-val, html.theme-skewlime .h-set-score, html.theme-skewlime .sr-score, html.theme-skewlime .sr-team { color: var(--panel-text); }
         html.theme-skewlime .mfb-table th, html.theme-skewlime .mfb-table td { border-bottom-color: rgba(183, 226, 63, 0.25); }
         html.theme-skewlime .break-label, html.theme-skewlime .break-score-sep { color: var(--accent); }
-    </style>
+</style>
 </head>
 <body>
 
