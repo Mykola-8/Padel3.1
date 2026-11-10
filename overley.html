@@ -726,13 +726,14 @@
         .an-row { display: grid; grid-template-columns: 170px 1fr 170px; align-items: center; gap: 10px; padding: 2px 0; }
         .an-row .v { font-size: 22px; font-weight: 800; white-space: nowrap; } .an-row .v1 { text-align: left; color: var(--an-c1, #38bdf8); } .an-row .v2 { text-align: right; color: var(--an-c2, #fb923c); }
         .an-row .lb { text-align: center; font-size: 17px; font-weight: 600; opacity: .85; line-height: 1.15; }
-        .an-bar { height: 7px; border-radius: 4px; display: flex; overflow: hidden; background: rgba(255,255,255,.1); margin-top: 3px; }
+        .an-bar { height: 7px; border-radius: 4px; display: flex; justify-content: center; overflow: hidden; background: rgba(255,255,255,.1); margin-top: 3px; }
         .an-bar i { display: block; height: 100%; transition: width 1.4s cubic-bezier(.2,.8,.2,1); }
         .an-panel .an-grid > .an-card { opacity: 0; transform: translateY(18px) scale(.97); }
         .an-panel .an-grid > .an-card.in { opacity: 1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
         .an-panel .an-grid > .an-card .an-chart { clip-path: inset(0 100% 0 0); }
         .an-panel .an-grid > .an-card.in .an-chart { clip-path: inset(0 0 0 0); transition: clip-path 2s ease-out .15s; }
         .an-chart { position: relative; }
+        body.srv-off .server-change-banner, body.match-fin .server-change-banner { display: none !important; }
         .an-mk { position: absolute; width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,.6); }
         .an-ml { position: absolute; transform: translate(-50%, -140%); font-size: 17px; font-weight: 800; padding: 1px 8px; border-radius: 10px; background: rgba(0,0,0,.55); white-space: nowrap; }
         .an-legend { display: flex; gap: 18px; font-size: 15px; opacity: .75; padding-top: 4px; }
@@ -751,12 +752,12 @@
 
         /* ===== АНАЛІТИКА МІЖ ГЕЙМАМИ: плашка зліва внизу ===== */
         .anb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 5000; pointer-events: none; font-family: 'Montserrat', sans-serif; color: #fff; overflow: hidden; }
-        .anb-plate { position: absolute; left: 0; bottom: 130px; width: 600px; border-radius: 0 18px 18px 0; padding: 8px 6px 6px; background: rgba(8, 14, 30, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 10px 34px rgba(0,0,0,.4); transform: translateX(-104%); transition: transform .6s cubic-bezier(.2,.85,.25,1); }
-        .anb-plate.in { transform: translateX(0); }
+        .anb-plate { position: absolute; left: 50%; top: 0; width: 860px; border-radius: 0 0 20px 20px; padding: 8px 6px 6px; background: rgba(8, 14, 30, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 10px 34px rgba(0,0,0,.4); transform: translate(-50%, -106%); transition: transform .7s cubic-bezier(.2,.85,.25,1); }
+        .anb-plate.in { transform: translate(-50%, 0); }
         .anb-plate .an-card { background: transparent; padding: 6px 16px 4px; }
         .anb-teams { display: flex; justify-content: space-between; gap: 12px; padding: 2px 16px 0; font-size: 18px; font-weight: 800; }
         .anb-teams span { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .anb-teams .t1 { color: var(--an-c1, #38bdf8); } .anb-teams .t2 { color: var(--an-c2, #fb923c); }
-        .anb-plate .an-row { grid-template-columns: 130px 1fr 130px; } .anb-plate .an-row .v { font-size: 20px; } .anb-plate .an-row .lb { font-size: 15px; }
+        .anb-plate .an-row { grid-template-columns: 190px 1fr 190px; } .anb-plate .an-row .v { font-size: 20px; } .anb-plate .an-row .lb { font-size: 15px; }
         .anb-plate .an-single { font-size: 17px; }
 
         #mascot-video { position: fixed; right: 40px; bottom: 0; z-index: 9100; pointer-events: none; opacity: 0; transition: opacity .35s ease; background: transparent; }
@@ -4167,6 +4168,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 'done' ? false : (ph === 'an' || !!cfg.show);
                 if (ph !== lastPh) { lastPh = ph; enterPhase(ph); }
                 document.body.classList.toggle('tv-end', (TV_LED || TV_MODE) && (ph === 'win' || ph === 'stats' || ph === 'an' || ph === 'done'));
+                document.body.classList.toggle('srv-off', !!st.serverBannerOff); document.body.classList.toggle('match-fin', !!st.isMatchFinished);
                 document.body.classList.toggle('an-end-1', ph === 'an'); document.body.classList.toggle('an-end-2', ph === 'done');
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
@@ -4195,7 +4197,19 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             }
             window.addEventListener('resize', () => { if (window.__lastAnState) { lastSig = ''; render(window.__lastAnState); } });
             setInterval(() => { if (window.__lastAnState && window.__lastAnState.isMatchFinished) render(window.__lastAnState); }, 500);
-            return { render: st => { window.__lastAnState = st; render(st); }, compute, plateHtml };
+            // плашка між геймами: повзунки розгортаються від центру, цифри ростуть від 0
+            function animateIn(root) {
+                root.querySelectorAll('.an-bar i').forEach(el => { el.style.transition = 'none'; el.style.width = '0%'; });
+                void root.offsetWidth;
+                requestAnimationFrame(() => root.querySelectorAll('.an-bar i').forEach(el => { el.style.transition = ''; el.style.width = (parseFloat(el.getAttribute('data-w')) || 0) + '%'; }));
+                root.querySelectorAll('.an-row .v').forEach(el => {
+                    const tx = el.textContent, mt = /^(\d+)(.*)$/.exec(tx); if (!mt || tx.indexOf(':') >= 0) return;
+                    const N = parseInt(mt[1]), rest = mt[2]; if (!(N > 0) || N > 9999) return;
+                    const t0 = performance.now(), D = 1400; el.textContent = '0' + rest;
+                    (function step(now) { const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(N * e) + rest; if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = tx; })(t0);
+                });
+            }
+            return { render: st => { window.__lastAnState = st; render(st); }, compute, plateHtml, animateIn };
         })();
 
         // ===== ТАЛІСМАНИ (padel/mascots + state.mascotId/mascotTs/mascotLoop) =====
@@ -4299,8 +4313,9 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (!active || idx >= bl.length || !gated(st)) { if (idx >= bl.length) active = false; retract(); return; }
                 plate.innerHTML = AN.plateHtml(st, bl[idx]);
                 void plate.offsetWidth; plate.classList.add('in'); showing = true; clearTimeout(timer);
+                setTimeout(() => { try { AN.animateIn(plate); } catch (e) {} }, 450);   // після виїзду зверху — повзунки й цифри оживають
                 const sec = Math.max(1, parseFloat(g(st.anCfg.betweenSec, 5)));
-                timer = setTimeout(() => {          // вихід вліво, потім наступна таблиця так само
+                timer = setTimeout(() => {          // плашка їде вгору, потім наступна так само
                     plate.classList.remove('in');
                     timer = setTimeout(() => { idx++; if (idx >= blocks(last).length) { active = false; showing = false; timer = null; } else showNext(); }, 750);
                 }, sec * 1000);
@@ -4795,6 +4810,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                         const triggeredP1Name = state.p1name, triggeredP2Name = state.p2name, triggeredLang = state.cornerSlideLang;
                         clearTimeout(serverChangeBannerDelayTimer);
                         serverChangeBannerDelayTimer = setTimeout(() => {
+                            const ls = window.__lastAnState || {}; if (ls.serverBannerOff || ls.isMatchFinished) return;
                             const banner = document.getElementById('server-change-banner');
                             const nameEl = document.getElementById('server-change-banner-name');
                             const labelEl = document.getElementById('server-change-banner-label');
