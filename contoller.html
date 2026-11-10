@@ -606,6 +606,7 @@
                 <div style="font-size:9px; color:#888; margin-top:4px;">Парна гра — розділяйте гравців знаком "/", напр. "Лель / Герреро". На трансляції гравець, що зараз подає, підсвічується.</div>
 
                 <div class="switch-row" style="margin-top:8px;"><span>Показувати індикатор подачі на трансляції:</span><input type="checkbox" id="server-indicator-checkbox" checked onchange="toggleServerIndicator(this.checked)"></div>
+                <div class="switch-row" style="margin-top:8px;"><span>Плашка «ПОДАЄ» знизу зліва (після кінця матчу сама ховається):</span><input type="checkbox" id="server-banner-checkbox" checked onchange="toggleServerBanner(this.checked)"></div>
 
                 <div class="row" style="margin-top:8px;">
                     <span>Значок подачі:</span>
@@ -1185,6 +1186,10 @@
             }
         };
 
+        window.toggleServerBanner = function(checked) {
+            state.serverBannerOff = !checked;
+            set(matchRef, state);
+        };
         window.toggleServerIndicator = function(checked) {
             saveToHistory(state);
             state.showServerIndicator = checked;
@@ -4338,6 +4343,7 @@
 
             const serverIndicatorCheckbox = document.getElementById('server-indicator-checkbox');
             if (serverIndicatorCheckbox) serverIndicatorCheckbox.checked = state.showServerIndicator !== false;
+            { const sbc = document.getElementById('server-banner-checkbox'); if (sbc) sbc.checked = !state.serverBannerOff; }
 
             const ballAnimCheckbox = document.getElementById('ball-anim-checkbox');
             if (ballAnimCheckbox) ballAnimCheckbox.checked = state.showBallAnimations !== false;
