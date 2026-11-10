@@ -3184,6 +3184,8 @@
                 paths.push(['groups/show', v]);
                 if (v) { paths.push(['playoff/upper/show', false]); paths.push(['playoff/lower/show', false]); }
             } else if (kind === 'sp') paths.push(['showSponsorLogos', v]);
+            else if (kind === 'ic') paths.push(['introCard/show', v]);   // шаблон вступного табла спільний (padel/introCard), показ — на кожному корті
+            else if (kind === 'mi') paths.push(['matchIntro/show', v]);   // «Хто грає»: кожен корт показує власні імена
             else if (kind === 'ticker') { updateTickerEnabled(v); const cb = document.getElementById('ticker-enabled-checkbox'); if (cb) cb.checked = v; return; }   // бігучий рядок і так спільний (padel/bars)
             else if (kind === 'adbar') { updateAdBarEnabled(v); const cb = document.getElementById('adbar-enabled-checkbox'); if (cb) cb.checked = v; return; }
             else return;
@@ -3501,18 +3503,23 @@
             const TOG = (btn, fn) => ({ on: () => { try { return !!fn(S()); } catch (e) { return false; } }, set(w) { if (this.on() !== w) clickId(btn); } });
             // Табло, спільні для всього турніру (рейтинг, групи, play-off): послідовність показує/ховає їх одразу на ВСІХ кортах
             const ALL = (kind, fn) => ({ all: true, on: () => { try { return !!fn(S()); } catch (e) { return false; } }, set(w) { if (window.showAllCourts) window.showAllCourts(kind, !!w); } });
-            const EXP = (onB, offB) => ({ set(w) { clickId(w ? onB : offB); } });
+            const EXP = (onB, offB) => ({ set(w) {
+                if (w) { try { // послідовність показує табло на ВСІХ кортах: перемикаємо вибір корту в картці на «Усі корти»
+                    const b = document.getElementById(onB), cd = b && b.closest('.card'), sel = cd && Array.from(cd.querySelectorAll('select')).find(s => Array.from(s.options).some(o => o.value === 'all'));
+                    if (sel && sel.value !== 'all') { sel.value = 'all'; sel.dispatchEvent(new Event('change', { bubbles: true })); sel.dispatchEvent(new Event('input', { bubbles: true })); }
+                } catch (e) {} }
+                clickId(w ? onB : offB); } });
             const P = {
-                icard: Object.assign({ name: '🎬 Вступне табло' }, TOG('ic-btn-show', s => s.introCard && s.introCard.show)),
-                intro: Object.assign({ name: '🎙 Хто грає' }, TOG('btn-mi-toggle', s => s.matchIntro && s.matchIntro.show)),
-                crew: Object.assign({ name: '👔 Організатори турніру' }, EXP('crew-on', 'crew-off')),
-                spcard: Object.assign({ name: '🤝 Спонсори: лого й опис' }, EXP('spcard-on', 'spcard-off')),
-                rules: Object.assign({ name: '📜 Регламент турніру' }, EXP('rl-on', 'rl-off')),
+                icard: Object.assign({ name: '🎬 Вступне табло (усі корти)' }, ALL('ic', s => s.introCard && s.introCard.show)),
+                intro: Object.assign({ name: '🎙 Хто грає (усі корти)' }, ALL('mi', s => s.matchIntro && s.matchIntro.show)),
+                crew: Object.assign({ name: '👔 Організатори турніру (усі корти)' }, EXP('crew-on', 'crew-off')),
+                spcard: Object.assign({ name: '🤝 Спонсори: лого й опис (усі корти)' }, EXP('spcard-on', 'spcard-off')),
+                rules: Object.assign({ name: '📜 Регламент турніру (усі корти)' }, EXP('rl-on', 'rl-off')),
                 rank: Object.assign({ name: '🏆 Рейтинг команд (усі корти)' }, ALL('rk', s => s.teamRanking && s.teamRanking.show)),
                 groups: Object.assign({ name: '👥 Групи (усі корти)' }, ALL('gr', s => s.groups && s.groups.show)),
                 poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
-                credits: Object.assign({ name: '🎞 Титри турніру' }, EXP('cr-on', 'cr-off'))
+                credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
             const ORDER = ['icard', 'crew', 'rules', 'rank', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
             const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: id === 'rank' ? 20 : (id === 'credits' ? 60 : 7) })) });
