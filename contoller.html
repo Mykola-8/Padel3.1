@@ -3520,12 +3520,12 @@
             return (r && r.data && r.data.text) || '';
         }
         // підключає вибір файлу / вставку фото (Ctrl+V) до textarea; після розпізнавання викликає done()
-        function ocrBind(box, ta, fileIn, stEl, done) {
+        function ocrBind(box, ta, fileIn, stEl, done, norm) {
             const run = async (file) => {
                 if (!file) return; stEl.style.color = '#9bd'; stEl.innerText = '⏳ Розпізнаю фото…';
                 try {
                     const txt = await ocrImage(file, (s, p) => { stEl.innerText = '⏳ ' + (s === 'recognizing text' ? 'Розпізнаю текст ' : 'Завантажую модуль ') + Math.round(p * 100) + '%'; });
-                    ta.value = ocrNorm(txt); stEl.style.color = '#7c7'; stEl.innerText = '✅ Фото розпізнано — перевірте нижче'; if (done) done();
+                    ta.value = (norm || ocrNorm)(txt); stEl.style.color = '#7c7'; stEl.innerText = '✅ Фото розпізнано — перевірте нижче'; if (done) done();
                 } catch (e) { stEl.style.color = '#f66'; stEl.innerText = '⚠️ ' + ((e && e.message) || 'помилка розпізнавання'); }
             };
             fileIn.addEventListener('change', () => { const f = fileIn.files && fileIn.files[0]; fileIn.value = ''; run(f); });
@@ -3704,9 +3704,9 @@
             const GL = 'ABCDEFGHIJ'.split('');
             card.innerHTML = '<div style="font-size:11px; font-weight:700;">🌐 Імпорт з Rankedin (вставка тексту сторінки)</div>' +
                 '<div style="font-size:10px; color:#9bd;">Відкрийте сторінку турніру на rankedin.com → виділіть усе на сторінці (Вибрати все) → Копіювати → вставте сюди → «Імпортувати». Перед записом пульт покаже, що саме розпізнано.</div>' +
-                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🏆 Players → «Рейтинг команд»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><textarea id="rdn-pl" rows="5" placeholder="1&#10;Andrii Melnychyn&#10;Svyatoslav Ilnytskyy&#10;5580&#10;2&#10;..." style="' + inp + '"></textarea><label style="font-size:11px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="rdn-pl-rep" checked> Замінити весь список команд (інакше — оновити/додати)</label><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-pl-go">⬇ Імпортувати рейтинг</button><div id="rdn-pl-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
-                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">📊 Draws (група) → «Групи»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div class="row"><span style="font-size:11px; color:#ccc;">У яку групу записати:</span><select id="rdn-gr-sel">' + GL.map((l, i) => '<option value="' + i + '">Група ' + l + '</option>').join('') + '</select></div><textarea id="rdn-gr" rows="6" placeholder="Olexandr Bohdan / Yaroslav Sadoviy&#10;Khang Nguyen / Ivan Shkodiak&#10;...&#10;1-0&#10;6-1 ..." style="' + inp + '"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-gr-go">⬇ Імпортувати групу</button><div id="rdn-gr-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
-                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🥇 Плей-оф</summary><div style="font-size:11px; color:#ddd; margin-top:6px;">Надішліть мені скопійований текст сторінки плей-оф з Rankedin — і я додам окремий розбір сітки.</div></details>';
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🏆 Players → «Рейтинг команд»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО сторінки (Ctrl+V у цьому розділі або вибір файлу) чи скопійований текст.</div><input type="file" accept="image/*" id="rdn-pl-file" style="font-size:11px;"><div id="rdn-pl-ocr" style="font-size:11px;"></div><textarea id="rdn-pl" rows="5" placeholder="1&#10;Andrii Melnychyn&#10;Svyatoslav Ilnytskyy&#10;5580&#10;2&#10;..." style="' + inp + '"></textarea><label style="font-size:11px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="rdn-pl-rep" checked> Замінити весь список команд (інакше — оновити/додати)</label><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-pl-go">⬇ Імпортувати рейтинг</button><div id="rdn-pl-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">📊 Draws (група) → «Групи»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div class="row"><span style="font-size:11px; color:#ccc;">У яку групу записати:</span><select id="rdn-gr-sel">' + GL.map((l, i) => '<option value="' + i + '">Група ' + l + '</option>').join('') + '</select></div><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО таблиці групи (Ctrl+V у цьому розділі або вибір файлу) чи скопійований текст.</div><input type="file" accept="image/*" id="rdn-gr-file" style="font-size:11px;"><div id="rdn-gr-ocr" style="font-size:11px;"></div><textarea id="rdn-gr" rows="6" placeholder="Olexandr Bohdan / Yaroslav Sadoviy&#10;Khang Nguyen / Ivan Shkodiak&#10;...&#10;1-0&#10;6-1 ..." style="' + inp + '"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-gr-go">⬇ Імпортувати групу</button><div id="rdn-gr-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">🥇 Плей-оф (сітка) → табло «Play-off»</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО сітки (Ctrl+V у цьому розділі або вибір файлу) чи скопійований текст сторінки. Береться 1-й стовпець (пари за порядком) та переможці з рахунками; сітка 4, 8 або 16 команд.</div><div class="row"><span style="font-size:11px; color:#ccc;">Куди записати:</span><select id="rdn-po-sel"><option value="upper">Верхня сітка</option><option value="lower">Нижня сітка</option></select></div><input type="file" accept="image/*" id="rdn-po-file" style="font-size:11px;"><div id="rdn-po-ocr" style="font-size:11px;"></div><textarea id="rdn-po" rows="6" placeholder="1&#10;Olexandr&#10;Bohdan&#10;Yaroslav&#10;Sadoviy&#10;2&#10;..." style="' + inp + '"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="rdn-po-go">⬇ Імпортувати сітку</button><div id="rdn-po-st" style="font-size:11px; white-space:pre-wrap;"></div></div></details>';
             const $ = id => card.querySelector('#' + id);
             const nm = s => String(s == null ? '' : s).trim().toLowerCase();
             const clean = s => String(s).replace(/[*?]/g, '').replace(/\s+/g, ' ').trim();
@@ -3728,8 +3728,18 @@
                 }
                 return out;
             }
+            function parsePlayers2(text) {
+                const lines = ocrNorm(text).split('\n').map(x => x.trim()).filter(Boolean);
+                const noise = /^(name|seed|rank|all|compare skills|pro|x padel|players|man|woman|mix|followed|matches|create|search|i admin|info|draws|scoreboard|video|timetable|classes|results)\b|rankedin|^[^A-Za-zА-Яа-яІіЇїЄєҐґ0-9]+$/i;
+                const out = []; let names = [];
+                lines.forEach(l => {
+                    if (/^\d+([.,]\d+)?$/.test(l)) { if (names.length) { out.push({ n: names.slice(0, 2).join(' / '), r: parseFloat(l.replace(',', '.')) }); names = []; } return; }
+                    const c = clean(l); if (c && !noise.test(c)) names.push(c);
+                });
+                return out;
+            }
             $('rdn-pl-go').onclick = () => {
-                const st = $('rdn-pl-st'), res = parsePlayers($('rdn-pl').value);
+                const st = $('rdn-pl-st'); let res = parsePlayers2($('rdn-pl').value); if (!res.length) res = parsePlayers($('rdn-pl').value);
                 if (!res.length) { st.style.color = '#f66'; st.innerText = '⚠️ Нічого не розпізнано. Вставте текст сторінки Players (позиція, імена, Rank).'; return; }
                 const rep = $('rdn-pl-rep').checked;
                 if (!confirm('Розпізнано ' + res.length + ' команд:\n\n' + res.slice(0, 25).map((t, i) => (i + 1) + '. ' + t.n + ' — ' + t.r).join('\n') + (res.length > 25 ? '\n…' : '') + '\n\n' + (rep ? 'Список «Рейтинг команд» буде ЗАМІНЕНО.' : 'Рейтинги буде оновлено/додано.'))) return;
@@ -3775,6 +3785,67 @@
                 try { grRefreshUI(); } catch (e) {} grSave(true);
                 st.style.color = '#7c7'; st.innerText = '✅ Група ' + GL[gi] + ' записана (' + Object.keys(p.res).length + ' результатів). Перехресна таблиця увімкнена.';
             };
+            // ---- Плей-оф (сітка) ----
+            const lev = (a, b) => { const m = a.length, n = b.length, d = []; for (let i = 0; i <= m; i++) { d[i] = [i]; } for (let j = 1; j <= n; j++) d[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; };
+            const lastW = u => nm(String(u).trim().split(' ').pop());
+            function parseBracket(text) {
+                const raw = String(text || '').split(/\r?\n/).map(x => x.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/\(\d+\)/g, ' ').replace(/[−–—]/g, '-').replace(/\s+/g, ' ').trim()).filter(Boolean);
+                const items = [];
+                raw.forEach(l => {
+                    if (/^\(?\d+(\/\d+)?\)?$/.test(l) || /^[^A-Za-zА-Яа-яІіЇїЄєҐґ0-9]+$/.test(l) || /hide ads|advertisement|rankedin/i.test(l)) return;
+                    const pairs = []; l.replace(/(\d+)\s*-\s*(\d+)/g, (m, a, b) => { pairs.push([+a, +b]); return m; });
+                    if (pairs.length && !/[A-Za-zА-Яа-яІіЇїЄєҐґ]{2,}/.test(l)) { items.push({ t: 'sc', p: pairs }); return; }
+                    const c = clean(l); if (c.length > 1) items.push({ t: 'n', v: c });
+                });
+                // імена: «Ім’я» + «Прізвище» окремими рядками → зливаємо
+                const units = [];
+                for (let i = 0; i < items.length; i++) {
+                    const it = items[i];
+                    if (it.t === 'n' && it.v.indexOf(' ') < 0 && items[i + 1] && items[i + 1].t === 'n' && items[i + 1].v.indexOf(' ') < 0) { units.push({ t: 'n', v: it.v + ' ' + items[i + 1].v }); i++; } else units.push(it);
+                }
+                const teams = []; let buf = [];
+                units.forEach(u => {
+                    if (u.t === 'n') { buf.push(u.v); if (buf.length === 2) { teams.push({ n: buf.join(' / '), sc: [] }); buf = []; } }
+                    else if (teams.length && !buf.length) teams[teams.length - 1].sc.push(u.p);
+                });
+                const seeds = teams.filter(t => !t.sc.length), wins = teams.filter(t => t.sc.length);
+                const N = seeds.length >= 16 ? 16 : (seeds.length >= 8 ? 8 : (seeds.length >= 4 ? 4 : 0));
+                if (!N) return { err: 'Знайшов лише ' + seeds.length + ' команд у 1-му стовпці (потрібно 4, 8 або 16).' };
+                const S = seeds.slice(0, N);
+                const same = (a, b) => { const sa = a.split(' / ').map(lastW), sb = b.split(' / ').map(lastW); return sa.every(x => sb.some(y => x === y || (x.length > 4 && lev(x, y) <= 1))) || sb.every(x => sa.some(y => x === y || (x.length > 4 && lev(x, y) <= 1))); };
+                const idxOf = n => S.findIndex(t => same(t.n, n));
+                const seen = {}, res = [];   // res[round] = [{seed, pairs}]
+                wins.forEach(w => { const si = idxOf(w.n); if (si < 0) return; const r = (seen[si] = (seen[si] || 0) + 1) - 1; const tk = w.sc.length > 1 ? w.sc.slice(1) : w.sc; (res[r] = res[r] || []).push({ seed: si, pairs: [].concat.apply([], tk) }); });
+                const rounds = N === 16 ? ['r16', 'qf', 'sf', 'f'] : (N === 8 ? ['qf', 'sf', 'f'] : ['sf', 'f']);
+                const M = {}; let prev = S.map((t, i) => ({ seed: i }));   // учасники поточного раунду (за номером місця в сітці)
+                rounds.forEach((rk, r) => {
+                    const cnt = N / Math.pow(2, r + 1), arrM = [], nextPrev = [];
+                    for (let k = 0; k < cnt; k++) {
+                        const A = prev[2 * k], B = prev[2 * k + 1], m = { a: A ? S[A.seed].n : '', b: B ? S[B.seed].n : '', sa: '', sb: '' };
+                        const w = (res[r] || []).find(x => (A && x.seed === A.seed) || (B && x.seed === B.seed));
+                        if (w) { const aw = A && w.seed === A.seed; const f = w.pairs.map(p => p[0]).join(' '), l = w.pairs.map(p => p[1]).join(' '); m.sa = aw ? f : l; m.sb = aw ? l : f; nextPrev.push({ seed: w.seed }); } else nextPrev.push(null);
+                        arrM.push(m);
+                    }
+                    M[rk] = arrM; prev = nextPrev;
+                });
+                return { N, S, M, rounds };
+            }
+            $('rdn-po-go').onclick = () => {
+                const st = $('rdn-po-st'), p = parseBracket($('rdn-po').value);
+                if (p.err) { st.style.color = '#f66'; st.innerText = '⚠️ ' + p.err; return; }
+                const key = $('rdn-po-sel').value, L = p.rounds.map(rk => rk.toUpperCase() + ':\n' + p.M[rk].map(m => '  ' + (m.a || '—') + '  ' + (m.sa || '') + ' : ' + (m.sb || '') + '  ' + (m.b || '—')).join('\n')).join('\n');
+                if (!confirm('Розпізнано сітку на ' + p.N + ' команд:\n\n' + L + '\n\nЗаписати у ' + (key === 'upper' ? 'ВЕРХНЮ' : 'НИЖНЮ') + ' сітку? (поточні матчі цих раундів буде замінено)')) return;
+                const c = poEnsure(key);
+                p.rounds.forEach(rk => { const n = (PO_ROUNDS.find(x => x[0] === rk) || [0, 1])[1]; c.m[rk] = Array.from({ length: n }, (_, i) => Object.assign(PO_EMPTY(), p.M[rk][i] || {})); });
+                ['r16', 'qf', 'sf', 'f'].forEach(rk => { if (p.rounds.indexOf(rk) < 0 && rk !== 'f' && p.N < 16 && rk === 'r16') { c.m.r16 = Array.from({ length: 8 }, PO_EMPTY); } });
+                try { poRefreshUI(); } catch (e) {} poSave(true);
+                st.style.color = '#7c7'; st.innerText = '✅ Сітку записано (' + (key === 'upper' ? 'верхня' : 'нижня') + '). Перевірте її в блоці Play-off.';
+            };
+            // ---- OCR для фото ----
+            ocrBind($('rdn-pl-go').parentNode, $('rdn-pl'), $('rdn-pl-file'), $('rdn-pl-ocr'), () => $('rdn-pl-go').click(), s => s);
+            ocrBind($('rdn-gr-go').parentNode, $('rdn-gr'), $('rdn-gr-file'), $('rdn-gr-ocr'), () => $('rdn-gr-go').click(), s => s);
+            ocrBind($('rdn-po-go').parentNode, $('rdn-po'), $('rdn-po-file'), $('rdn-po-ocr'), () => $('rdn-po-go').click(), s => s);
+            window.__rdnParseBracket = parseBracket;
         })();
 
         // ===== ТАБЛИЦЯ РАХУНКІВ (padel/scoretable) =====
