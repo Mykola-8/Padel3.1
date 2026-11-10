@@ -3496,7 +3496,7 @@
         // ===== РУХ У РЕЙТИНГУ (padel/rkmove) =====
         (function rmInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'РУХ У РЕЙТИНГУ', anim: 'move', x: 50, y: 50, scale: 100, width: 100, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showRating: false, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', base: [], baseAt: '' };
+            const DEF = { show: false, court: 'all', title: 'СТАДІЯ ТУРНІРУ', anim: 'move', x: 50, y: 50, scale: 100, width: 100, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', list: [], items: [], from: [], shown: [], logo: '', logoSize: 100 };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
@@ -3506,7 +3506,7 @@
                 { k: 'maxRows', l: 'Скільки команд показувати (рядків)', t: 'num', step: 1 },
                 { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
                 { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'bgOpacity', l: 'Прозорість фону (непрозорість)', t: 'rng', min: 0, max: 100, u: '%' },
-                { k: 'showArrow', l: 'Показувати стрілки ▲▼ зміни позиції', t: 'chk' }, { k: 'showRating', l: 'Показувати число рейтингу (за замовчуванням — ні)', t: 'chk' }, { k: 'upper', l: 'Назви ВЕЛИКИМИ літерами', t: 'chk' },
+                { k: 'showArrow', l: 'Показувати трикутники ▲▼ зміни позиції', t: 'chk' }, { k: 'logoSize', l: 'Розмір логотипу (мінімізований, по центру шапки)', t: 'rng', min: 30, max: 250, u: '%' }, { k: 'upper', l: 'Назви ВЕЛИКИМИ літерами', t: 'chk' },
                 { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовка й позицій', t: 'col' }, { k: 'up', l: 'Колір підйому (+)', t: 'col' }, { k: 'dn', l: 'Колір падіння (−)', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
@@ -3524,12 +3524,12 @@
                 return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
             }
             card.innerHTML = '<div style="font-size:11px; font-weight:700;">📊 Рух у рейтингу (хто піднявся / опустився)</div>' +
-                '<div style="font-size:10px; color:#9bd;">Команди беруться з табла «Рейтинг команд». Табло порівнює поточний рейтинг із ЗАФІКСОВАНОЮ базою: показує нову позицію (▲▼) і зміну рейтингу (+23 / −4). Число рейтингу на табло не показується (можна ввімкнути). Рейтинг змінюєте в блоці «Рейтинг команд» — табло оновлюється саме.</div>' +
+                '<div style="font-size:10px; color:#9bd;">Імена команд беруться з табла «Рейтинг команд». Тут ви самі ставите порядок (кнопки ▲▼) і зміну рейтингу (+23 / −4 — може бути мінус, а команда все одно лишиться вгорі, якщо ви так поставили). Натисніть «ПОКАЗАТИ» — табло проанімує переїзд з ПОПЕРЕДНЬОГО показаного порядку в новий (зелений трикутник вгору, червоний вниз; + зелені, − червоні). Після показу новий порядок запам’ятовується, +/− обнуляються — наступна зміна рахується вже від оновленого списку.</div>' +
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rkm-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rkm-off">■ СХОВАТИ</button></div>' +
                 '<div id="rkm-st" style="font-size:11px;"></div>' +
-                '<button class="btn" style="padding:10px; font-weight:800;" id="rkm-base">📌 Зафіксувати поточний рейтинг як базу (точка відліку)</button>' +
-                '<button class="btn" style="padding:6px; font-size:11px;" id="rkm-clear">Очистити базу</button>' +
-                '<div id="rkm-prev" style="font-size:11px; color:#ddd; line-height:1.5; background:#1a1a1a; border-radius:6px; padding:8px;"></div>' +
+                '<div id="rkm-list" style="display:flex; flex-direction:column; gap:4px; background:#1a1a1a; border-radius:6px; padding:6px;"></div>' +
+                '<div style="display:flex; gap:6px;"><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="rkm-sort">↕ Впорядкувати за рейтингом</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="rkm-zero">0 Скинути +/−</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="rkm-forget">🗑 Забути збережений порядок</button></div>' +
+                '<div class="row">' + lab('Логотип табла (по центру шапки; порожньо = логотип з табла «Рейтинг команд»):') + '<input type="text" id="rkm-logo-url" placeholder="URL логотипу" style="' + inp + '"><div style="display:flex; gap:6px; margin-top:4px;"><input type="file" accept="image/*" id="rkm-logo-file" style="flex:1; font-size:11px;"><button class="btn" style="padding:4px 10px; font-size:11px;" id="rkm-logo-clear">✕</button></div></div>' +
                 '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
             function st(ok, m) { const e = card.querySelector('#rkm-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
             function save(now) {
@@ -3544,28 +3544,54 @@
             const arrOf = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const nm = s => String(s == null ? '' : s).trim().toLowerCase();
             const curTeams = () => arrOf(state && state.teamRanking && state.teamRanking.teams).filter(t => t && String(t.n || '').trim()).map((t, i) => ({ n: String(t.n).trim(), r: Number(t.r) || 0, i }));
-            function preview() {
-                const el = card.querySelector('#rkm-prev'); if (!el) return;
-                const sort = !(state && state.teamRanking && state.teamRanking.sort === false), ord = a => { const r = a.slice(); if (sort) r.sort((x, y) => (y.r - x.r) || (x.i - y.i)); return r; };
-                const cur = ord(curTeams()), base = ord(arrOf(d.base).filter(b => b && String(b.n || '').trim()).map((b, i) => ({ n: String(b.n).trim(), r: Number(b.r) || 0, i })));
-                if (!cur.length) { el.innerText = 'Додайте команди в блоці «Рейтинг команд».'; return; }
-                const bp = {}, br = {}; base.forEach((b, p) => { bp[nm(b.n)] = p; br[nm(b.n)] = b.r; });
-                const head = base.length ? '📌 База: ' + base.length + ' команд' + (d.baseAt ? ' (' + d.baseAt + ')' : '') : '⚠️ База ще не зафіксована — натисни «Зафіксувати…» (зараз рух не відображається)';
-                el.innerHTML = head + '<br>' + cur.slice(0, 20).map((t, p) => { const has = nm(t.n) in bp, dp = has ? bp[nm(t.n)] - p : 0, dl = has ? t.r - br[nm(t.n)] : null; return (p + 1) + '. ' + t.n.replace(/</g, '&lt;') + ' — ' + (has ? (dp > 0 ? '<span style="color:#4ade80">▲' + dp + '</span>' : (dp < 0 ? '<span style="color:#f87171">▼' + (-dp) + '</span>' : '●')) + ' <b>' + (dl > 0 ? '+' + dl : (dl < 0 ? '−' + (-dl) : '0')) + '</b>' : 'нова'); }).join('<br>');
+            const sortOn = () => !(state && state.teamRanking && state.teamRanking.sort === false);
+            function reconcile() {
+                if (!loaded) return false; const cur = curTeams(); if (!cur.length) return false;
+                let l = arrOf(d.list).filter(x => x && nm(x.n)).map(x => ({ n: String(x.n).trim(), d: Number(x.d) || 0 })); const before = JSON.stringify(l);
+                l = l.filter(x => cur.some(t => nm(t.n) === nm(x.n)));
+                const seen = {}; l = l.filter(x => { const k = nm(x.n); if (seen[k]) return false; seen[k] = 1; return true; });
+                const so = sortOn(); cur.filter(t => !l.some(x => nm(x.n) === nm(t.n))).sort((a, b) => (so ? b.r - a.r : 0) || a.i - b.i).forEach(t => l.push({ n: t.n, d: 0 }));
+                d.list = l; return JSON.stringify(l) !== before;
             }
-            function refresh() {
-                F.forEach(f => { const el = card.querySelector('#rkm-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = (f.k === 'showRating') ? v === true : v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+            const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            function preview(force) {
+                const el = card.querySelector('#rkm-list'); if (!el) return;
+                if (!force && el.contains(document.activeElement)) return;
+                const l = arrOf(d.list), sh = arrOf(d.shown).map(nm);
+                if (!l.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Додайте команди в блоці «Рейтинг команд».</div>'; return; }
+                const bs = 'width:34px; height:30px; padding:0; font-size:15px; font-weight:800;';
+                el.innerHTML = l.map((t, i) => { const was = sh.indexOf(nm(t.n)), dp = was >= 0 ? was - i : 0; const mk = dp > 0 ? '<span style="color:#4ade80">▲' + dp + '</span>' : (dp < 0 ? '<span style="color:#f87171">▼' + (-dp) + '</span>' : ''); return '<div style="display:flex; align-items:center; gap:5px;"><b style="width:22px; text-align:right; font-size:12px;">' + (i + 1) + '</b><span style="flex:1; min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc2(t.n) + '</span><span style="font-size:11px; width:34px;">' + mk + '</span><button class="btn" style="' + bs + '" data-mv="' + i + '" data-dir="-1">▲</button><button class="btn" style="' + bs + '" data-mv="' + i + '" data-dir="1">▼</button><input type="number" step="1" data-dl="' + i + '" value="' + (Number(t.d) || 0) + '" style="width:62px; padding:5px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box;" placeholder="±"></div>'; }).join('');
+            }
+            card.querySelector('#rkm-list').addEventListener('click', e => {
+                const b = e.target.closest('[data-mv]'); if (!b) return; const i = parseInt(b.getAttribute('data-mv')), j = i + parseInt(b.getAttribute('data-dir')); const l = arrOf(d.list).slice(); if (j < 0 || j >= l.length) return;
+                const t = l[i]; l[i] = l[j]; l[j] = t; d.list = l; preview(true); save(false);
+            });
+            card.querySelector('#rkm-list').addEventListener('input', e => { const x = e.target.closest('[data-dl]'); if (!x) return; const i = parseInt(x.getAttribute('data-dl')); const l = arrOf(d.list).slice(); if (!l[i]) return; l[i] = { n: l[i].n, d: parseInt(x.value) || 0 }; d.list = l; save(false); });
+            function refresh(force) {
+                F.forEach(f => { const el = card.querySelector('#rkm-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
                 card.querySelector('#rkm-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#rkm-off').style.outline = d.show ? 'none' : '3px solid #fff';
-                preview();
+                { const u = card.querySelector('#rkm-logo-url'); if (u && document.activeElement !== u) u.value = String(d.logo || '').indexOf('data:') === 0 ? '(завантажено файл)' : (d.logo || ''); }
+                preview(force);
             }
-            card.querySelector('#rkm-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
-            card.querySelector('#rkm-off').onclick = () => { d.show = false; save(true); refresh(); };
-            card.querySelector('#rkm-base').onclick = () => {
-                const t = curTeams(); if (!t.length) { alert('Спершу додайте команди в блоці «Рейтинг команд».'); return; }
-                d.base = t.map(x => ({ n: x.n, r: x.r })); d.baseAt = new Date().toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                save(true); refresh();
+            card.querySelector('#rkm-on').onclick = () => {
+                reconcile(); const l = arrOf(d.list).map(x => ({ n: x.n, d: Number(x.d) || 0 }));
+                if (!l.length) { alert('Спершу додайте команди в блоці «Рейтинг команд».'); return; }
+                const names = l.map(x => x.n);
+                d.from = (arrOf(d.shown).length ? arrOf(d.shown) : names).slice(); d.items = l; d.shown = names.slice(); d.list = l.map(x => ({ n: x.n, d: 0 }));
+                d.show = true; d.ts = Date.now(); save(true); refresh(true);
             };
-            card.querySelector('#rkm-clear').onclick = () => { if (confirm('Очистити базу? Рух у рейтингу не відображатиметься, доки не зафіксуєте нову.')) { d.base = []; d.baseAt = ''; save(true); refresh(); } };
+            card.querySelector('#rkm-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelector('#rkm-sort').onclick = () => { const cur = curTeams(), rt = {}; cur.forEach(t => { rt[nm(t.n)] = t.r; }); d.list = arrOf(d.list).slice().sort((a, b) => ((rt[nm(b.n)] || 0) - (rt[nm(a.n)] || 0))); save(true); refresh(true); };
+            card.querySelector('#rkm-zero').onclick = () => { d.list = arrOf(d.list).map(x => ({ n: x.n, d: 0 })); save(true); refresh(true); };
+            card.querySelector('#rkm-forget').onclick = () => { if (confirm('Забути збережений (показаний) порядок? Наступний показ не матиме руху — команди просто з’являться на своїх місцях.')) { d.shown = []; save(true); refresh(true); } };
+            const lgUrl = card.querySelector('#rkm-logo-url');
+            lgUrl.addEventListener('change', () => { d.logo = lgUrl.value.trim(); save(true); });
+            card.querySelector('#rkm-logo-clear').onclick = () => { d.logo = ''; lgUrl.value = ''; save(true); };
+            card.querySelector('#rkm-logo-file').addEventListener('change', function () {
+                const file = this.files && this.files[0]; if (!file) return; const input = this; const rd = new FileReader();
+                rd.onload = ev => { const img = new Image(); img.onload = () => { const sc = Math.min(400 / img.width, 160 / img.height, 1), cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); d.logo = cv.toDataURL('image/png'); lgUrl.value = '(завантажено файл)'; save(true); input.value = ''; }; img.src = ev.target.result; };
+                rd.readAsDataURL(file);
+            });
             card.querySelectorAll('[data-k]').forEach(el => {
                 const f = F.find(x => x.k === el.getAttribute('data-k'));
                 el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', () => {
@@ -3573,7 +3599,7 @@
                     const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
                 });
             });
-            refresh(); setInterval(() => { try { if (!card.contains(document.activeElement)) preview(); } catch (e) {} }, 2000);
+            refresh(); setInterval(() => { try { if (!card.contains(document.activeElement)) { if (reconcile()) save(false); preview(); } } catch (e) {} }, 2000);
             const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(); };
             const mirror = () => { const m = state && state.rkmCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
