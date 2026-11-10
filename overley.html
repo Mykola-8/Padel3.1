@@ -687,6 +687,29 @@
         .rm-colhead { display: flex; justify-content: flex-end; padding: 10px 22px 0; font-size: calc(20px * var(--rm-ts, 1)); font-weight: 800; letter-spacing: 3px; color: var(--rm-acc, #f5c542); opacity: .85; }
         .rm-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
 
+        /* ===== ТАБЛИЦЯ РАХУНКІВ (padel/scoretable) ===== */
+        .sc-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--sc-text, #fff); }
+        .sc-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
+        .sc-board { position: absolute; left: calc(var(--sc-x, 50) * 1%); top: calc(var(--sc-y, 50) * 1%); width: var(--sc-w, 1200px); transform: translate(-50%, -50%) scale(calc(var(--sc-sc, 1) * .96)); transition: transform .7s cubic-bezier(.2,.85,.25,1); padding: 26px 34px 20px; border-radius: 24px; background: linear-gradient(180deg, var(--sc-bg1, rgba(11,18,38,.9)), var(--sc-bg2, rgba(16,28,61,.9))); border: 2px solid var(--sc-acc, #f5c542); box-sizing: border-box; }
+        .sc-wrap.on .sc-board { transform: translate(-50%, -50%) scale(var(--sc-sc, 1)); }
+        .sc-title { font-size: calc(48px * var(--sc-ts, 1)); font-weight: 900; letter-spacing: 5px; text-transform: uppercase; text-align: center; color: var(--sc-acc, #f5c542); padding-bottom: 12px; border-bottom: 3px solid var(--sc-acc, #f5c542); margin-bottom: 8px; }
+        .sc-head, .sc-row { display: grid; align-items: center; column-gap: 14px; box-sizing: border-box; }
+        .sc-head { padding: 6px 20px; font-size: calc(24px * var(--sc-ts, 1)); font-weight: 800; color: var(--sc-acc, #f5c542); opacity: .9; }
+        .sc-head span, .sc-row > span { text-align: center; } .sc-head .sc-hn, .sc-row .sc-name { text-align: left; }
+        .sc-row { height: calc(96px * var(--sc-ts, 1)); padding: 0 20px; margin-top: 6px; border-radius: 14px; background: rgba(255,255,255,.07); font-size: calc(32px * var(--sc-ts, 1)); font-weight: 800; font-variant-numeric: tabular-nums; }
+        .sc-row:nth-child(even) { background: rgba(255,255,255,.04); }
+        .sc-row.pre { opacity: 0; transform: translateX(-60px); }
+        .sc-row.in { opacity: 1; transform: none; transition: opacity .6s ease, transform .7s cubic-bezier(.2,.85,.25,1); }
+        .sc-row.fade.pre { transform: none; }
+        .sc-pos span { display: inline-flex; align-items: center; justify-content: center; width: calc(52px * var(--sc-ts, 1)); height: calc(52px * var(--sc-ts, 1)); border-radius: 50%; }
+        .sc-pos .m1 { background: linear-gradient(135deg, #ffe27a, #d9a400); color: #4a3500; } .sc-pos .m2 { background: linear-gradient(135deg, #f2f2f2, #9da3ad); color: #333; } .sc-pos .m3 { background: linear-gradient(135deg, #e8a36e, #a5622d); color: #3a1c05; }
+        .sc-name { display: flex; flex-direction: column; justify-content: center; line-height: 1.12; min-width: 0; }
+        .sc-name b { font-weight: 800; font-size: .88em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sc-elo.pos, .sc-wdl .w { color: var(--sc-up, #4ade80); } .sc-elo.neg, .sc-wdl .l { color: var(--sc-dn, #f87171); } .sc-wdl .d { color: #fb923c; } .sc-wdl { opacity: 1; } .sc-wdl u { text-decoration: none; opacity: .7; padding: 0 .25em; }
+        .sc-pts em { font-style: normal; display: inline-block; min-width: calc(64px * var(--sc-ts, 1)); padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,.12); font-weight: 900; }
+        .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
+        .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
+
         /* ===== ТИТРИ ТУРНІРУ (padel/credits) ===== */
         .cr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10006; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .7s; font-family: var(--cr-font, 'Montserrat'), sans-serif; }
         .cr-wrap.on { opacity: 1; visibility: visible; transition: opacity .7s ease; }
@@ -2031,6 +2054,7 @@
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
     <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
+    <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
@@ -3694,7 +3718,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -3867,6 +3891,65 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
         })();
 
         // ===== РУХ У РЕЙТИНГУ: команди (синхронно з табло «Рейтинг команд»), стрілки позицій і +/- рейтингу =====
+        const SC = (function () {
+            const wrap = document.getElementById('sc-wrap'); if (!wrap) return {};
+            const titleEl = document.getElementById('sc-title'), headEl = document.getElementById('sc-head'), list = document.getElementById('sc-list'), foot = document.getElementById('sc-foot');
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, mcfg = null, mj = '', running = false, lastTs = 0, endT = null, sig = '', timers = [];
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            const sgn = v => v > 0 ? '+' + v : (v < 0 ? '−' + Math.abs(v) : '0');
+            function look() {
+                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), ts = Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100, op = Math.max(0, Math.min(100, num(cfg.bgOpacity, 90))) / 100;
+                s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+                s.setProperty('--sc-bg1', rgba(g(cfg.bg1, '#0b1226'), op)); s.setProperty('--sc-bg2', rgba(g(cfg.bg2, '#101c3d'), op));
+                s.setProperty('--sc-acc', g(cfg.accent, '#f5c542')); s.setProperty('--sc-up', g(cfg.up, '#4ade80')); s.setProperty('--sc-dn', g(cfg.dn, '#f87171')); s.setProperty('--sc-text', g(cfg.textColor, '#ffffff'));
+                s.setProperty('--sc-ts', ts); s.setProperty('--sc-w', Math.round(1200 * Math.max(40, Math.min(160, num(cfg.width, 100))) / 100) + 'px');
+                s.setProperty('--sc-sc', Math.max(30, Math.min(200, num(cfg.scale, 100))) / 100); s.setProperty('--sc-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--sc-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
+            }
+            function clearT() { timers.forEach(clearTimeout); timers = []; }
+            function rowsModel() {
+                let r = arr(cfg.rows).filter(t => t && String(t.n || '').trim()).map((t, i) => ({ n: String(t.n).trim(), elo: num(t.elo, 0), w: num(t.w, 0), d: num(t.d, 0), l: num(t.l, 0), diff: num(t.diff, 0), pts: num(t.pts, 0), i }));
+                if (cfg.sort !== false) r.sort((a, b) => (b.pts - a.pts) || (b.diff - a.diff) || (b.elo - a.elo) || (a.i - b.i));
+                return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
+            }
+            function countTo(el, to, dur) { const t0 = performance.now(); (function step(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = String(Math.round(to * e)); if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = String(to); })(t0); }
+            function build() {
+                clearT(); look(); titleEl.textContent = g(cfg.title, 'ТАБЛИЦЯ РАХУНКІВ'); titleEl.style.display = titleEl.textContent ? '' : 'none';
+                const m = rowsModel(), sE = cfg.showElo !== false, sW = cfg.showWdl !== false, sD = cfg.showDiff !== false;
+                if (!m.length) { headEl.style.display = 'none'; foot.style.display = 'none'; list.innerHTML = '<div class="sc-empty">Додайте рядки на пульті (Таблиця рахунків)</div>'; return; }
+                headEl.style.display = ''; const cols = ['86px', '1fr'].concat(sE ? ['120px'] : [], sW ? ['210px'] : [], sD ? ['100px'] : [], ['110px']).join(' ');
+                headEl.style.gridTemplateColumns = cols;
+                headEl.innerHTML = '<span>#</span><span class="sc-hn">' + esc(g(cfg.hPlayers, 'Гравці')) + '</span>' + (sE ? '<span>ELO</span>' : '') + (sW ? '<span>В-Н-П</span>' : '') + (sD ? '<span>±</span>' : '') + '<span>О</span>';
+                const anim = g(cfg.anim, 'slide'), st = Math.max(0, num(cfg.stagger, 0.15)) * 1000, dur = Math.max(300, num(cfg.dur, 1.2) * 1000);
+                list.innerHTML = m.map((t, p) => {
+                    const nn = t.n.split(/\s+\/\s+/).slice(0, 2).map(x => '<b>' + esc(x) + '</b>').join('');
+                    return '<div class="sc-row ' + (anim === 'none' ? 'in' : 'pre ' + anim) + '" style="grid-template-columns:' + cols + '"><span class="sc-pos"><span class="' + (cfg.medals !== false && p < 3 ? 'm' + (p + 1) : '') + '">' + (p + 1) + '</span></span><span class="sc-name">' + nn + '</span>' +
+                        (sE ? '<span class="sc-elo ' + (t.elo > 0 ? 'pos' : (t.elo < 0 ? 'neg' : '')) + '">' + sgn(t.elo) + '</span>' : '') + (sW ? '<span class="sc-wdl"><i class="w">' + t.w + '</i><u>-</u><i class="d">' + t.d + '</i><u>-</u><i class="l">' + t.l + '</i></span>' : '') +
+                        (sD ? '<span class="sc-diff">' + sgn(t.diff) + '</span>' : '') + '<span class="sc-pts"><em>' + (anim === 'none' ? t.pts : 0) + '</em></span></div>';
+                }).join('');
+                foot.style.display = cfg.showLegend === false ? 'none' : ''; foot.textContent = '± Різниця · О Очки' + (sE ? ' · ELO' : '') + (sW ? ' · В-Н-П: перемоги / нічиї / поразки' : '');
+                if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); const em = row.querySelector('.sc-pts em'); if (em) countTo(em, m[j].pts, dur); }, 250 + j * st)));
+            }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function apply(c) {
+                cfg = c || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v && (!running || ts !== lastTs)) {
+                    lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
+                    const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; clearT(); }, ah * 1000);
+                } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
+                else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); } }
+            }
+            onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            return { apply };
+        })();
+
         const RM = (function () {
             const wrap = document.getElementById('rm-wrap'); if (!wrap) return {};
             const board = document.getElementById('rm-board'), titleEl = document.getElementById('rm-title'), list = document.getElementById('rm-list');
