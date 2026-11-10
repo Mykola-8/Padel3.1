@@ -3895,7 +3895,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 return items.map((t, p) => { const i = from.indexOf(norm(t.n)); return { n: t.n, r: 0, cur: p, old: i >= 0 ? i : p, delta: t.d, isNew: false }; });
             }
             const mTitle = () => { const t = g(cfg.title, ''); return (!t || t === 'РУХ У РЕЙТИНГУ') ? 'СТАДІЯ ТУРНІРУ' : t; };
-            const fmtDelta = d => d === null ? '' : (d > 0 ? '+' + d : (d < 0 ? '−' + Math.abs(d) : '0'));
+            const fmtDelta = d => d === null ? '' : (d > 0 ? '+' + d : (d < 0 ? '−' + Math.abs(d) : ''));
             function clearT() { timers.forEach(clearTimeout); timers = []; clearTimeout(replayT); }
             function countTo(el, from, to, dur, fmt) { const t0 = performance.now(); (function step(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = fmt(to); })(t0); }
             function settle(row, it, first) {
@@ -3913,7 +3913,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             function build() {
                 clearT(); look(); { const lg = document.getElementById('rm-logo'), rk0 = ((lastKnownState || {}).teamRanking) || {}, src = String(g(cfg.logo, '') || rk0.logoL || '').trim(); if (lg) { if (src) { if (lg.getAttribute('src') !== src) lg.src = src; lg.classList.remove('off'); } else { lg.classList.add('off'); } wrap.style.setProperty('--rm-ls', Math.max(30, Math.min(250, num(cfg.logoSize, 100))) / 100); } } titleEl.textContent = mTitle(); titleEl.style.display = titleEl.textContent ? '' : 'none';
                 const m = model(), maxR = Math.max(1, Math.min(60, Math.round(num(cfg.maxRows, 12)))), rows = Math.max(1, Math.min(maxR, m.length));
-                list.style.height = (rows * rh()) + 'px';
+                list.style.height = (rows * rh()) + 'px'; { const ch = document.getElementById('rm-colhead'); if (ch) ch.style.display = m.some(it => it.delta) ? '' : 'none'; }
                 if (!m.length) { list.style.height = 'auto'; list.innerHTML = '<div class="rm-empty">Додайте команди на пульті (Рух у рейтингу)</div>'; tsig = ''; return; }
                 const showR = false, showA = cfg.showArrow !== false, up = cfg.upper !== false, cas = g(cfg.anim, 'move') === 'cascade';
                 list.innerHTML = m.map(it => '<div class="rm-row' + (cas ? ' pre' : '') + '" style="transform:translateY(calc(var(--rm-rh) * ' + it.old + '));' + (up ? '' : '') + '"><span class="rm-pos">' + (it.old + 1) + '</span><span class="rm-name"' + (up ? ' style="text-transform:uppercase"' : '') + '>' + esc(it.n) + '</span>' + (showR ? '<span class="rm-rt">' + it.r + '</span>' : '') + (showA ? '<span class="rm-arrow"></span>' : '') + '<span class="rm-delta"></span></div>').join('');
