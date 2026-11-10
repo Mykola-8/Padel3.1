@@ -2471,7 +2471,7 @@
         // Усі налаштування пульта й турнірні таблиці (не рахунок): зберігаються при скиданні корту й у локальній копії
         function settingKeys() {
             return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
-                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'cbCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
+                'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'rkmCfg', 'cbCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
         }
         window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
 
@@ -2556,7 +2556,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -3493,6 +3493,94 @@
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
+        // ===== РУХ У РЕЙТИНГУ (padel/rkmove) =====
+        (function rmInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', title: 'РУХ У РЕЙТИНГУ', anim: 'move', x: 50, y: 50, scale: 100, width: 100, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showRating: false, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', base: [], baseAt: '' };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
+                { k: 'anim', l: 'Анімація', t: 'sel', o: [['move', 'Рядки переїжджають на нові місця'], ['cascade', 'Спершу рядки з’являються по черзі, потім переїжджають']] },
+                { k: 'dur', l: 'Тривалість руху (сек)', t: 'num', step: 0.1 }, { k: 'delay', l: 'Пауза перед рухом (сек)', t: 'num', step: 0.1 }, { k: 'stagger', l: 'Затримка між рядками (сек)', t: 'num', step: 0.05 },
+                { k: 'replay', l: 'Повторювати анімацію через (сек, 0 = без повтору)', t: 'num', step: 1 }, { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 },
+                { k: 'maxRows', l: 'Скільки команд показувати (рядків)', t: 'num', step: 1 },
+                { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
+                { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'bgOpacity', l: 'Прозорість фону (непрозорість)', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'showArrow', l: 'Показувати стрілки ▲▼ зміни позиції', t: 'chk' }, { k: 'showRating', l: 'Показувати число рейтингу (за замовчуванням — ні)', t: 'chk' }, { k: 'upper', l: 'Назви ВЕЛИКИМИ літерами', t: 'chk' },
+                { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовка й позицій', t: 'col' }, { k: 'up', l: 'Колір підйому (+)', t: 'col' }, { k: 'dn', l: 'Колір падіння (−)', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'rkm-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('ic-ui'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'rkm-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'chk') return '<div class="row">' + lab(f.l + ':') + '<input type="checkbox" data-k="' + f.k + '" id="' + id + '" style="width:20px; height:20px;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" step="' + (f.step || 1) + '" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">📊 Рух у рейтингу (хто піднявся / опустився)</div>' +
+                '<div style="font-size:10px; color:#9bd;">Команди беруться з табла «Рейтинг команд». Табло порівнює поточний рейтинг із ЗАФІКСОВАНОЮ базою: показує нову позицію (▲▼) і зміну рейтингу (+23 / −4). Число рейтингу на табло не показується (можна ввімкнути). Рейтинг змінюєте в блоці «Рейтинг команд» — табло оновлюється саме.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rkm-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rkm-off">■ СХОВАТИ</button></div>' +
+                '<div id="rkm-st" style="font-size:11px;"></div>' +
+                '<button class="btn" style="padding:10px; font-weight:800;" id="rkm-base">📌 Зафіксувати поточний рейтинг як базу (точка відліку)</button>' +
+                '<button class="btn" style="padding:6px; font-size:11px;" id="rkm-clear">Очистити базу</button>' +
+                '<div id="rkm-prev" style="font-size:11px; color:#ddd; line-height:1.5; background:#1a1a1a; border-radius:6px; padding:8px;"></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            function st(ok, m) { const e = card.querySelector('#rkm-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.rkmCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/rkmCfg'), data); st(true, 'padel/rkmove відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/rkmove'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const arrOf = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const nm = s => String(s == null ? '' : s).trim().toLowerCase();
+            const curTeams = () => arrOf(state && state.teamRanking && state.teamRanking.teams).filter(t => t && String(t.n || '').trim()).map((t, i) => ({ n: String(t.n).trim(), r: Number(t.r) || 0, i }));
+            function preview() {
+                const el = card.querySelector('#rkm-prev'); if (!el) return;
+                const sort = !(state && state.teamRanking && state.teamRanking.sort === false), ord = a => { const r = a.slice(); if (sort) r.sort((x, y) => (y.r - x.r) || (x.i - y.i)); return r; };
+                const cur = ord(curTeams()), base = ord(arrOf(d.base).filter(b => b && String(b.n || '').trim()).map((b, i) => ({ n: String(b.n).trim(), r: Number(b.r) || 0, i })));
+                if (!cur.length) { el.innerText = 'Додайте команди в блоці «Рейтинг команд».'; return; }
+                const bp = {}, br = {}; base.forEach((b, p) => { bp[nm(b.n)] = p; br[nm(b.n)] = b.r; });
+                const head = base.length ? '📌 База: ' + base.length + ' команд' + (d.baseAt ? ' (' + d.baseAt + ')' : '') : '⚠️ База ще не зафіксована — натисни «Зафіксувати…» (зараз рух не відображається)';
+                el.innerHTML = head + '<br>' + cur.slice(0, 20).map((t, p) => { const has = nm(t.n) in bp, dp = has ? bp[nm(t.n)] - p : 0, dl = has ? t.r - br[nm(t.n)] : null; return (p + 1) + '. ' + t.n.replace(/</g, '&lt;') + ' — ' + (has ? (dp > 0 ? '<span style="color:#4ade80">▲' + dp + '</span>' : (dp < 0 ? '<span style="color:#f87171">▼' + (-dp) + '</span>' : '●')) + ' <b>' + (dl > 0 ? '+' + dl : (dl < 0 ? '−' + (-dl) : '0')) + '</b>' : 'нова'); }).join('<br>');
+            }
+            function refresh() {
+                F.forEach(f => { const el = card.querySelector('#rkm-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = (f.k === 'showRating') ? v === true : v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+                card.querySelector('#rkm-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#rkm-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                preview();
+            }
+            card.querySelector('#rkm-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            card.querySelector('#rkm-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelector('#rkm-base').onclick = () => {
+                const t = curTeams(); if (!t.length) { alert('Спершу додайте команди в блоці «Рейтинг команд».'); return; }
+                d.base = t.map(x => ({ n: x.n, r: x.r })); d.baseAt = new Date().toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                save(true); refresh();
+            };
+            card.querySelector('#rkm-clear').onclick = () => { if (confirm('Очистити базу? Рух у рейтингу не відображатиметься, доки не зафіксуєте нову.')) { d.base = []; d.baseAt = ''; save(true); refresh(); } };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                    const v = f.t === 'chk' ? el.checked : ((f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value); d[f.k] = v;
+                    const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh(); setInterval(() => { try { if (!card.contains(document.activeElement)) preview(); } catch (e) {} }, 2000);
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(); };
+            const mirror = () => { const m = state && state.rkmCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/rkmove'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== ПОСЛІДОВНИЙ ПОКАЗ ТАБЛО (padel/seq) =====
         (function seqInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -3515,14 +3603,15 @@
                 crew: Object.assign({ name: '👔 Організатори турніру (усі корти)' }, EXP('crew-on', 'crew-off')),
                 spcard: Object.assign({ name: '🤝 Спонсори: лого й опис (усі корти)' }, EXP('spcard-on', 'spcard-off')),
                 rules: Object.assign({ name: '📜 Регламент турніру (усі корти)' }, EXP('rl-on', 'rl-off')),
+                rkm: Object.assign({ name: '📊 Рух у рейтингу (усі корти)' }, EXP('rkm-on', 'rkm-off')),
                 rank: Object.assign({ name: '🏆 Рейтинг команд (усі корти)' }, ALL('rk', s => s.teamRanking && s.teamRanking.show)),
                 groups: Object.assign({ name: '👥 Групи (усі корти)' }, ALL('gr', s => s.groups && s.groups.show)),
                 poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
                 credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
-            const ORDER = ['icard', 'crew', 'rules', 'rank', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
-            const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: id === 'rank' ? 20 : (id === 'credits' ? 60 : 7) })) });
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
+            const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm') ? 20 : (id === 'credits' ? 60 : 7) })) });
             const norm = v => {
                 const base = DEFD(); if (!v || typeof v !== 'object') return base;
                 const arr = Array.isArray(v.items) ? v.items : (v.items && typeof v.items === 'object' ? Object.values(v.items) : []);
@@ -3790,7 +3879,7 @@
             const SINGLE = [['btn-mi-toggle', s => s.matchIntro && s.matchIntro.show], ['btn-rk-toggle', s => s.teamRanking && s.teamRanking.show],
                 ['po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show], ['po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show],
                 ['gr-btn-show', s => s.groups && s.groups.show], ['ic-btn-show', s => s.introCard && s.introCard.show]];
-            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off'], ['cb-on', 'cb-off']];
+            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off'], ['rkm-on', 'rkm-off'], ['cb-on', 'cb-off']];
             function tick() {
                 try {
                     const s = (typeof state === 'object' && state) || {};
@@ -3864,7 +3953,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
             if (!document.getElementById('admin-tournament-panel')) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
