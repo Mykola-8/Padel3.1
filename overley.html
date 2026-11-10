@@ -712,7 +712,7 @@
         /* ===== АНАЛІТИКА МАТЧУ (state.anCfg) ===== */
         .an-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10005; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: #fff; }
         .an-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
-        .an-panel { position: absolute; left: 150px; top: 60px; width: 1620px; max-height: 960px; border-radius: 22px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.5); display: flex; flex-direction: column; }
+        .an-panel { position: absolute; left: 150px; top: 60px; width: 1620px; max-height: none; border-radius: 22px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.5); display: flex; flex-direction: column; }
         .an-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--an-bg1, #0b1220), var(--an-bg2, #131c33)); opacity: var(--an-op, .92); z-index: 0; }
         .an-panel > * { position: relative; z-index: 1; }
         .an-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 36px; border-bottom: 2px solid rgba(255,255,255,.14); }
@@ -727,7 +727,16 @@
         .an-row .v { font-size: 22px; font-weight: 800; white-space: nowrap; } .an-row .v1 { text-align: left; color: var(--an-c1, #38bdf8); } .an-row .v2 { text-align: right; color: var(--an-c2, #fb923c); }
         .an-row .lb { text-align: center; font-size: 17px; font-weight: 600; opacity: .85; line-height: 1.15; }
         .an-bar { height: 7px; border-radius: 4px; display: flex; overflow: hidden; background: rgba(255,255,255,.1); margin-top: 3px; }
-        .an-bar i { display: block; height: 100%; } .an-bar i:first-child { background: var(--an-c1, #38bdf8); } .an-bar i:last-child { background: var(--an-c2, #fb923c); }
+        .an-bar i { display: block; height: 100%; transition: width 1.4s cubic-bezier(.2,.8,.2,1); }
+        .an-panel .an-grid > .an-card { opacity: 0; transform: translateY(18px) scale(.97); }
+        .an-panel .an-grid > .an-card.in { opacity: 1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+        .an-panel .an-grid > .an-card .an-chart { clip-path: inset(0 100% 0 0); }
+        .an-panel .an-grid > .an-card.in .an-chart { clip-path: inset(0 0 0 0); transition: clip-path 2s ease-out .15s; }
+        .an-chart { position: relative; }
+        .an-mk { position: absolute; width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,.6); }
+        .an-ml { position: absolute; transform: translate(-50%, -140%); font-size: 17px; font-weight: 800; padding: 1px 8px; border-radius: 10px; background: rgba(0,0,0,.55); white-space: nowrap; }
+        .an-legend { display: flex; gap: 18px; font-size: 15px; opacity: .75; padding-top: 4px; }
+        .an-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; margin-right: 6px; vertical-align: -1px; background: #888; } .an-bar i:first-child { background: var(--an-c1, #38bdf8); } .an-bar i:last-child { background: var(--an-c2, #fb923c); }
         .an-single { display: flex; justify-content: space-between; gap: 16px; font-size: 19px; padding: 3px 0; } .an-single b { font-weight: 800; }
         .an-chart svg { width: 100%; height: 230px; display: block; } .an-chart svg * { vector-effect: non-scaling-stroke; }
         body.an-end-1 #statistics-panel, body.an-end-1 #statistics-panel-manual, body.an-end-1 #match-finished-board, body.an-end-1 #main-scoreboard,
@@ -4009,6 +4018,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 total: ['Total points won', 'Всього виграно очок'], srvw: ['Points won on serve', 'Очки на своїй подачі'], retw: ['Points won on return', 'Очки на прийомі'],
                 bpc: ['Break points converted', 'Брейк-пойнти реалізовано'], bps: ['Break points saved', 'Брейк-пойнти відбито'], gp: ['Golden points won', 'Золоті очки'], adv: ['Advantage converted', 'Переваги реалізовано'], kp: ['Key points won', 'Ключові очки (BP/GP/SP/MP)'],
                 hold: ['Service games held', 'Свої подачі втримано'], brk: ['Breaks', 'Брейки'], love: ['Games won to love', 'Гейми «насухо»'], tbw: ['Tie-breaks won', 'Тайбрейки виграно'],
+                shots: ['Shots', 'Удари'], df: ['Double faults', 'Дабл-фоли'], smash: ['Smashes', 'Смеші'], ptr: ['Por tres', 'Пор трес'], pcu: ['Por cuatro', 'Пор куатро'], dorm: ['Dormilona', 'Дормілона'], kill: ['Killer ball', 'Killer ball'], netc: ['Net cord', 'Від сітки'], press: ['Pressure points', 'Тиск-очки'], pr1: ['At 30:30', 'При 30:30'], pr2: ['At 40:40 (deuce)', 'При 40:40 (рівно)'], pr3: ['On advantage', 'При перевазі'], prall: ['All pressure points', 'Усі тиск-очки'], mkBrk: ['Break of serve', 'Брейк'], mkLead: ['Biggest lead', 'Найбільший відрив'], nopress: ['Collected from new points', 'Зʼявиться з нових очок'],
                 sp: ['Longest point streak', 'Найдовша серія очків'], sg: ['Longest game streak', 'Найдовша серія геймів'],
                 avgp: ['Avg time between points', 'Середній час між очками'], longp: ['Longest point', 'Найдовше очко'], longpause: ['Longest pause', 'Найдовша пауза'], avgg: ['Avg game duration', 'Середній гейм'], longg: ['Longest game', 'Найдовший гейм'], shortg: ['Shortest game', 'Найкоротший гейм'], longgp: ['Longest game (points)', 'Найдовший гейм (очок)'], sets: ['Set durations', 'Тривалість сетів'], match: ['Match time', 'Час матчу'], none: ['No data yet', 'Даних ще немає']
             };
@@ -4016,11 +4026,13 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             function compute(st) {
                 const log = arr(st.pointLog).filter(e => Array.isArray(e) || (e && typeof e === 'object')).map(e => Array.isArray(e) ? e : Object.values(e));
                 const T = [null, { pts: 0, sPts: 0, sTot: 0, rPts: 0, rTot: 0, bpO: 0, bpC: 0, bpF: 0, bpS: 0, gp: 0, avO: 0, avC: 0, kp: 0, holds: 0, sg: 0, breaks: 0, tb: 0, sp: 0, gs: 0 }, { pts: 0, sPts: 0, sTot: 0, rPts: 0, rTot: 0, bpO: 0, bpC: 0, bpF: 0, bpS: 0, gp: 0, avO: 0, avC: 0, kp: 0, holds: 0, sg: 0, breaks: 0, tb: 0, sp: 0, gs: 0 }];
+                const PR = { a: { n: 0, 1: 0, 2: 0 }, b: { n: 0, 1: 0, 2: 0 }, c: { n: 0, 1: 0, 2: 0 } }, BRK = [];
                 let gpTot = 0, kpTot = 0, run = 0, runW = 0, gRun = 0, gRunW = 0, ptsInGame = 0, longGP = 0, diff = 0; const mom = [], marks = [], gDur = [], sDur = [], gaps = [];
                 let lastGameEnd = log.length ? log[0][2] - 0 : 0, lastSetEnd = lastGameEnd, prevT = null;
                 log.forEach((e, i) => {
                     const w = e[0], s = e[1], t = e[2], rc = e[3], av = e[4], en = e[5], m = e[6]; if (w !== 1 && w !== 2) return; const l = w === 1 ? 2 : 1;
                     T[w].pts++;
+                    if (m !== 2 && typeof e[7] === 'number' && e[7] >= 0) { const cat = e[7] === 22 ? 'a' : (e[7] === 33 ? 'b' : ((e[7] === 43 || e[7] === 34) ? 'c' : null)); if (cat) { PR[cat].n++; PR[cat][w]++; } }
                     if (m !== 2) {
                         if (s === w) { T[w].sPts++; T[w].sTot++; T[l].rTot++; } else { T[w].rPts++; T[w].rTot++; T[s].sTot++; }
                         if (rc === 'B') { const rcv = s === 1 ? 2 : 1; T[rcv].bpO++; T[s].bpF++; if (w === rcv) T[rcv].bpC++; else T[s].bpS++; }
@@ -4033,6 +4045,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     if (prevT !== null) { const d = (t - prevT) / 1000; gaps.push({ d, set: en === 2 }); } prevT = t;
                     if (en >= 1) {
                         marks.push({ i: mom.length - 1, set: en === 2 });
+                        if (m === 0 && s !== w) BRK.push({ i: mom.length - 1, w: w });
                         if (m === 0) { T[w].sg++; if (s === w) T[s].holds++; else T[w].breaks++; if (gRunW === w) gRun++; else { gRunW = w; gRun = 1; } if (gRun > T[w].gs) T[w].gs = gRun; if (ptsInGame > longGP) longGP = ptsInGame; }
                         else if (m === 1) { T[w].tb++; if (gRunW === w) gRun++; else { gRunW = w; gRun = 1; } if (gRun > T[w].gs) T[w].gs = gRun; }
                         gDur.push((t - lastGameEnd) / 1000); lastGameEnd = t; ptsInGame = 0;
@@ -4046,9 +4059,9 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
                 // «любов»: гейми, виграні всуху, беремо з лічильників пульта (t?_lg_s*)
                 let love1 = 0, love2 = 0; for (let k = 1; k <= 9; k++) { love1 += st['t1_lg_s' + k] || 0; love2 += st['t2_lg_s' + k] || 0; }
-                return { n: log.length, T, gpTot, kpTot, mom, marks, love: [0, love1, love2], longGP, time: { avgP: avg(ptsGaps), longP: ptsGaps.length ? Math.max.apply(null, ptsGaps) : 0, longPause: allGaps.length ? Math.max.apply(null, allGaps) : 0, avgG: avg(gDur), longG: gDur.length ? Math.max.apply(null, gDur) : 0, shortG: gDur.length ? Math.min.apply(null, gDur) : 0, sets: sDur, match: log.length > 1 ? (log[log.length - 1][2] - log[0][2]) / 1000 : 0 } };
+                return { n: log.length, T, PR, BRK, gpTot, kpTot, mom, marks, love: [0, love1, love2], longGP, time: { avgP: avg(ptsGaps), longP: ptsGaps.length ? Math.max.apply(null, ptsGaps) : 0, longPause: allGaps.length ? Math.max.apply(null, allGaps) : 0, avgG: avg(gDur), longG: gDur.length ? Math.max.apply(null, gDur) : 0, shortG: gDur.length ? Math.min.apply(null, gDur) : 0, sets: sDur, match: log.length > 1 ? (log[log.length - 1][2] - log[0][2]) / 1000 : 0 } };
             }
-            function row(lab, a, b, ta, tb) { const sum = (a + b) || 1; return '<div><div class="an-row"><div class="v v1">' + esc(ta) + '</div><div class="lb">' + esc(lab) + '</div><div class="v v2">' + esc(tb) + '</div></div><div class="an-bar"><i style="width:' + (a / sum * 100) + '%"></i><i style="width:' + (b / sum * 100) + '%"></i></div></div>'; }
+            function row(lab, a, b, ta, tb) { const sum = (a + b) || 1; return '<div><div class="an-row"><div class="v v1">' + esc(ta) + '</div><div class="lb">' + esc(lab) + '</div><div class="v v2">' + esc(tb) + '</div></div><div class="an-bar"><i data-w="' + (a / sum * 100) + '"></i><i data-w="' + (b / sum * 100) + '"></i></div></div>'; }
             const pct = (n, d) => d ? Math.round(n / d * 100) + '%' : '–';
             const ratio = (n, d) => (d ? n + '/' + d : '–');
             function rowRatio(lab, n1, d1, n2, d2) { return row(lab, d1 ? n1 / d1 : 0, d2 ? n2 / d2 : 0, d1 ? pct(n1, d1) + ' (' + n1 + '/' + d1 + ')' : '–', d2 ? pct(n2, d2) + ' (' + n2 + '/' + d2 + ')' : '–'); }
@@ -4060,7 +4073,12 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 c.marks.forEach(k => { svg += '<line x1="' + x(k.i) + '" y1="0" x2="' + x(k.i) + '" y2="' + H + '" stroke="rgba(255,255,255,' + (k.set ? '.55' : '.14') + ')" stroke-width="' + (k.set ? 3 : 1) + '"/>'; });
                 svg += '<polyline points="' + pts + '" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>';
                 svg += '<defs><clipPath id="anUp"><rect x="0" y="0" width="' + W + '" height="' + H / 2 + '"/></clipPath><clipPath id="anDn"><rect x="0" y="' + H / 2 + '" width="' + W + '" height="' + H / 2 + '"/></clipPath></defs><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c1,#38bdf8)" opacity=".32" clip-path="url(#anUp)"/><polygon points="' + x(0) + ',' + H / 2 + ' ' + pts + ' ' + x(m.length - 1) + ',' + H / 2 + '" fill="var(--an-c2,#fb923c)" opacity=".32" clip-path="url(#anDn)"/></svg>';
-                return svg;
+                let mk = ''; const px = i => (x(i) / W * 100).toFixed(2), py = v => (y(v) / H * 100).toFixed(2);
+                (c.BRK || []).forEach(k => { if (k.i >= 0 && k.i < m.length) mk += '<span class="an-mk" style="left:' + px(k.i) + '%;top:' + py(m[k.i]) + '%;background:var(--an-c' + k.w + ')"></span>'; });
+                let hi = 0, hiI = -1, lo = 0, loI = -1; m.forEach((v, i) => { if (v > hi) { hi = v; hiI = i; } if (v < lo) { lo = v; loI = i; } });
+                if (hi >= 3) mk += '<span class="an-ml" style="left:' + px(hiI) + '%;top:' + py(hi) + '%;color:var(--an-c1)">+' + hi + '</span>';
+                if (lo <= -3) mk += '<span class="an-ml" style="left:' + px(loI) + '%;top:' + py(lo) + '%;transform:translate(-50%,-125%);color:var(--an-c2)">+' + (-lo) + '</span>';
+                return svg + mk;
             }
             // Компактна плашка одного блоку для показу між геймами
             function plateHtml(st, key) {
@@ -4082,7 +4100,9 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (!st.isMatchFinished) { localEnd = 0; return 'none'; }
                 if (cfg.autoEnd === false) return 'none';
                 let t0 = parseInt(st.matchEndTs) || 0; if (!t0) { if (!localEnd) localEnd = Date.now(); t0 = localEnd; }
-                const e = (Date.now() - t0) / 1000, w = parseFloat(g(cfg.endWin, 7)), s = parseFloat(g(cfg.endStats, 10)), en = parseFloat(g(cfg.endAnEn, 10)), ua = parseFloat(g(cfg.endAnUa, 5)), d = en + ua;
+                const e = (Date.now() - t0) / 1000, w = parseFloat(g(cfg.endWin, 7)), s = parseFloat(g(cfg.endStats, 10)), en0 = parseFloat(g(cfg.endAnEn, 10)), ua0 = parseFloat(g(cfg.endAnUa, 5)), need = (['serve', 'key', 'games', 'streak', 'timing', 'mom', 'shots', 'press'].filter(q => (cfg.blocks || {})[q] !== false).length) * Math.max(0, parseFloat(g(cfg.revealSec, 2)) || 0) + 3;
+                let en = en0, ua = ua0; if (need > 3) { if (en > 0) en = Math.max(en, need); else ua = Math.max(ua, need); }
+                const d = en + ua;
                 endLang = e < w + s + en ? 0 : 1;
                 if (e < w) return 'win'; if (e < w + s) return 'stats'; if (e < w + s + d) return 'an'; return cfg.endHide === false ? 'none' : 'done';
             }
@@ -4099,6 +4119,50 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                     else if (ph === 'an' || ph === 'done') { statsAfterFinishLocallyDismissed = true; updateManualStatsPanelVisibility(); refreshBoardVisibility(); }
                 } catch (e) {}
             }
+            // ===== Живе табло: блоки відкриваються по черзі, повзунки «виростають», цифри рахуються =====
+            let revShown = false, revSince = 0, revLastW = {}, revCounted = {};
+            const revSec = () => { const cf = (window.__lastAnState && window.__lastAnState.anCfg) || {}; const v = parseFloat(g(cf.revealSec, 2)); return isFinite(v) ? Math.max(0, v) : 2; };
+            const revN = () => { const sec = revSec(); return sec <= 0 ? 999 : Math.floor((Date.now() - revSince) / (sec * 1000)) + 1; };
+            function setBars(card, animate) {
+                const key = card.getAttribute('data-k');
+                card.querySelectorAll('.an-bar').forEach((bar, bi) => bar.querySelectorAll('i').forEach((el, ii) => {
+                    const id = key + ':' + bi + ':' + ii, to = parseFloat(el.getAttribute('data-w')) || 0;
+                    if (!animate) { el.style.width = (revLastW[id] !== undefined ? revLastW[id] : 0) + '%'; return; }
+                    revLastW[id] = to; el.style.width = to + '%';
+                }));
+            }
+            function countUp(card) {
+                card.querySelectorAll('.an-row .v').forEach(el => {
+                    const tx = el.textContent, mt = /^(\d+)(.*)$/.exec(tx); if (!mt || tx.indexOf(':') >= 0) return;
+                    const N = parseInt(mt[1]), rest = mt[2]; if (!(N > 0) || N > 9999) return;
+                    const t0 = performance.now(), D = 1300; el.textContent = '0' + rest;
+                    (function step(now) { const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(N * e) + rest; if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = tx; })(t0);
+                });
+            }
+            // після перебудови: вже відкриті блоки показуємо одразу (без повторної появи), повзунки плавно доїжджають до нових значень
+            function afterBuild(k) {
+                const n = revN(), cards = panel.querySelectorAll('.an-grid > .an-card');
+                cards.forEach((card, i) => {
+                    const key = card.getAttribute('data-k');
+                    if (i < n && revCounted[key]) { card.classList.add('in'); setBars(card, false); }
+                });
+                panel.style.transform = 'none';
+                const z = parseFloat(getComputedStyle(panel).zoom) || 1, avail = (z > 1 ? 1056 : 960);
+                const nat = panel.getBoundingClientRect().height / (k || 1);
+                const f = Math.min(1, avail / (nat || avail));
+                panel.style.transformOrigin = 'top center'; panel.style.transform = f < 1 ? 'scale(' + f.toFixed(4) + ')' : 'none';
+                requestAnimationFrame(() => requestAnimationFrame(() => revealTick()));
+            }
+            function revealTick() {
+                if (!wrap.classList.contains('on')) return;
+                const n = revN(), cards = panel.querySelectorAll('.an-grid > .an-card');
+                cards.forEach((card, i) => {
+                    const key = card.getAttribute('data-k');
+                    if (i < n && !revCounted[key]) { revCounted[key] = true; card.classList.add('in'); setBars(card, false); requestAnimationFrame(() => setBars(card, true)); countUp(card); }
+                    else if (i < n && revCounted[key]) { setBars(card, true); }
+                });
+            }
+            setInterval(revealTick, 250);
             function render(st) {
                 const cfg = st.anCfg || {}, ph = endPhase(st, cfg), show = ph === 'done' ? false : (ph === 'an' || !!cfg.show);
                 if (ph !== lastPh) { lastPh = ph; enterPhase(ph); }
@@ -4107,23 +4171,27 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
-                if (!show) return;
+                if (!show) { revShown = false; revLastW = {}; revCounted = {}; lastSig = ''; return; }
+                if (!revShown) { revShown = true; revSince = Date.now(); lastSig = ''; }
                 const s = wrap.style, lang = ph === 'an' ? endLang : (st.cornerSlideLang === 'ua' ? 1 : 0), t = key => L[key][lang];
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
                 const B = cfg.blocks || {}, on = key => B[key] !== false;
-                const sig = JSON.stringify([ph, st.pointLog, st.p1Aces, st.p2Aces, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
+                const sig = JSON.stringify([ph, st.pointLog, st.p1Aces, st.p2Aces, st.p1DoubleFaults, st.p2DoubleFaults, st.p1Smashes, st.p2Smashes, st.p1NetCords, st.p2NetCords, st.p1PorTres, st.p2PorTres, st.p1PorCuatro, st.p2PorCuatro, st.p1Dormilona, st.p2Dormilona, st.p1Killer, st.p2Killer, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
                 if (sig === lastSig) return; lastSig = sig;
                 const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="an-head"><div class="an-team t1">' + esc(st.p1name || 'Team 1') + '</div><div class="an-title">' + t('title') + '</div><div class="an-team t2">' + esc(st.p2name || 'Team 2') + '</div></div>';
                 if (!c.n) { panel.innerHTML = h + '<div class="an-empty">' + t('none') + '</div>'; return; }
                 h += '<div class="an-grid">';
-                if (on('serve')) h += '<div class="an-card"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + ((st.p1Aces || st.p2Aces) ? row(t('aces'), st.p1Aces || 0, st.p2Aces || 0, st.p1Aces || 0, st.p2Aces || 0) : '') + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
-                if (on('key')) h += '<div class="an-card"><div class="an-ct">' + t('key') + '</div>' + rowRatio(t('bpc'), A.bpC, A.bpO, Bt.bpC, Bt.bpO) + rowRatio(t('bps'), A.bpS, A.bpF, Bt.bpS, Bt.bpF) + row(t('gp'), A.gp, Bt.gp, A.gp + (c.gpTot ? '/' + c.gpTot : ''), Bt.gp + (c.gpTot ? '/' + c.gpTot : '')) + rowRatio(t('adv'), A.avC, A.avO, Bt.avC, Bt.avO) + row(t('kp'), A.kp, Bt.kp, A.kp + (c.kpTot ? '/' + c.kpTot : ''), Bt.kp + (c.kpTot ? '/' + c.kpTot : '')) + '</div>';
-                if (on('games')) h += '<div class="an-card"><div class="an-ct">' + t('games') + '</div>' + rowRatio(t('hold'), A.holds, A.serv, Bt.holds, Bt.serv) + row(t('brk'), A.breaks, Bt.breaks, A.breaks, Bt.breaks) + row(t('love'), c.love[1], c.love[2], c.love[1], c.love[2]) + (A.tb + Bt.tb ? row(t('tbw'), A.tb, Bt.tb, A.tb, Bt.tb) : '') + '</div>';
-                if (on('streak')) h += '<div class="an-card"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
-                if (on('timing')) { const T2 = c.time; h += '<div class="an-card"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longp') + '</span><b>' + fmt(T2.longP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + '</span><b>' + fmt(T2.avgG) + '</b></div><div class="an-single"><span>' + t('longg') + ' / ' + t('shortg') + '</span><b>' + fmt(T2.longG) + ' / ' + fmt(T2.shortG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
-                if (on('mom')) h += '<div class="an-card"><div class="an-ct">' + t('mom') + '</div><div class="an-chart">' + chart(c) + '</div></div>';
+                if (on('serve')) h += '<div class="an-card" data-k="serve"><div class="an-ct">' + t('serve') + '</div>' + row(t('total'), A.pts, Bt.pts, A.pts, Bt.pts) + ((st.p1Aces || st.p2Aces) ? row(t('aces'), st.p1Aces || 0, st.p2Aces || 0, st.p1Aces || 0, st.p2Aces || 0) : '') + rowRatio(t('srvw'), A.sPts, A.sTot, Bt.sPts, Bt.sTot) + rowRatio(t('retw'), A.rPts, A.rTot, Bt.rPts, Bt.rTot) + '</div>';
+                if (on('key')) h += '<div class="an-card" data-k="key"><div class="an-ct">' + t('key') + '</div>' + rowRatio(t('bpc'), A.bpC, A.bpO, Bt.bpC, Bt.bpO) + rowRatio(t('bps'), A.bpS, A.bpF, Bt.bpS, Bt.bpF) + row(t('gp'), A.gp, Bt.gp, A.gp + (c.gpTot ? '/' + c.gpTot : ''), Bt.gp + (c.gpTot ? '/' + c.gpTot : '')) + rowRatio(t('adv'), A.avC, A.avO, Bt.avC, Bt.avO) + row(t('kp'), A.kp, Bt.kp, A.kp + (c.kpTot ? '/' + c.kpTot : ''), Bt.kp + (c.kpTot ? '/' + c.kpTot : '')) + '</div>';
+                if (on('games')) h += '<div class="an-card" data-k="games"><div class="an-ct">' + t('games') + '</div>' + rowRatio(t('hold'), A.holds, A.serv, Bt.holds, Bt.serv) + row(t('brk'), A.breaks, Bt.breaks, A.breaks, Bt.breaks) + row(t('love'), c.love[1], c.love[2], c.love[1], c.love[2]) + (A.tb + Bt.tb ? row(t('tbw'), A.tb, Bt.tb, A.tb, Bt.tb) : '') + '</div>';
+                if (on('streak')) h += '<div class="an-card" data-k="streak"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
+                if (on('timing')) { const T2 = c.time; h += '<div class="an-card" data-k="timing"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longp') + '</span><b>' + fmt(T2.longP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + '</span><b>' + fmt(T2.avgG) + '</b></div><div class="an-single"><span>' + t('longg') + ' / ' + t('shortg') + '</span><b>' + fmt(T2.longG) + ' / ' + fmt(T2.shortG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
+                if (on('mom')) h += '<div class="an-card" data-k="mom"><div class="an-ct">' + t('mom') + '</div><div class="an-chart">' + chart(c) + '</div><div class="an-legend"><span><i style="background:var(--an-c1)"></i><i style="background:var(--an-c2)"></i>' + t('mkBrk') + '</span><span>+N — ' + t('mkLead') + '</span></div></div>';
+                if (on('shots')) { const sh = (k1, lab) => { const a1 = st['p1' + k1] || 0, a2 = st['p2' + k1] || 0; return (a1 || a2) ? row(t(lab), a1, a2, a1, a2) : ''; }; const body = sh('Aces', 'aces') + sh('DoubleFaults', 'df') + sh('Smashes', 'smash') + sh('NetCords', 'netc') + sh('PorTres', 'ptr') + sh('PorCuatro', 'pcu') + sh('Dormilona', 'dorm') + sh('Killer', 'kill'); if (body) h += '<div class="an-card" data-k="shots"><div class="an-ct">' + t('shots') + '</div>' + body + '</div>'; }
+                if (on('press')) { const P = c.PR, pr = (k, lab) => P[k].n ? rowRatio(t(lab), P[k][1], P[k].n, P[k][2], P[k].n) : '', tot = P.a.n + P.b.n + P.c.n; const body = pr('a', 'pr1') + pr('b', 'pr2') + pr('c', 'pr3') + (tot ? rowRatio(t('prall'), P.a[1] + P.b[1] + P.c[1], tot, P.a[2] + P.b[2] + P.c[2], tot) : ''); h += '<div class="an-card" data-k="press"><div class="an-ct">' + t('press') + '</div>' + (body || '<div class="an-single"><span>' + t('nopress') + '</span></div>') + '</div>'; }
                 panel.innerHTML = h + '</div>';
+                afterBuild(k);
             }
             window.addEventListener('resize', () => { if (window.__lastAnState) { lastSig = ''; render(window.__lastAnState); } });
             setInterval(() => { if (window.__lastAnState && window.__lastAnState.isMatchFinished) render(window.__lastAnState); }, 500);
