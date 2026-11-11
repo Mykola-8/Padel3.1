@@ -4396,9 +4396,13 @@
             });
             cards.forEach((_, i) => apply(i, saved[i] === true));
             const tools = document.createElement('div'); tools.className = 'tcol-tools';
-            tools.innerHTML = '<button type="button" data-a="open">▾ Розгорнути всі</button><button type="button" data-a="close">▴ Згорнути всі</button>';
+            tools.innerHTML = '<select id="tcol-court" style="flex:0 0 auto; width:auto; min-width:96px; font-weight:800; font-size:12px; color:#fff; background:#15803d; border:1px solid #166534; border-radius:6px; padding:6px 4px; text-align:center; text-align-last:center;">' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт №' + n + '</option>').join('') + '</select><button type="button" data-a="open">▾ Розгорнути всі</button><button type="button" data-a="close">▴ Згорнути всі</button>';
             tools.onclick = (e) => { const a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return; cards.forEach((_, i) => apply(i, a === 'open')); persist(); };
-            const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement('div'); sw.className = 'tcol-sticky'; h2.parentNode.insertBefore(sw, h2); sw.appendChild(h2); sw.appendChild(tools); }
+                        { const cs = tools.querySelector('#tcol-court'), main = () => document.getElementById('court-selector');
+              cs.addEventListener('change', () => { if (typeof window.switchCourt === 'function') { const m = main(); if (m) m.value = cs.value; window.switchCourt(cs.value); } });
+              const syn = () => { const m = main(); if (m && document.activeElement !== cs && cs.value !== m.value) cs.value = m.value; };
+              syn(); setInterval(syn, 1000); }
+const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement('div'); sw.className = 'tcol-sticky'; h2.parentNode.insertBefore(sw, h2); sw.appendChild(h2); sw.appendChild(tools); }
         })();
 
         // ===== РЕЙТИНГ КОМАНД =====
