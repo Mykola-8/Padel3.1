@@ -889,6 +889,18 @@
         .po-wrap[data-pt="card"] .po-s .po-t.win, .po-wrap[data-pt="glass"] .po-s .po-t.win { background: var(--po-win, rgba(0,0,0,0.06)); border-radius: 0 10px 10px 0; }
         .po-wrap[data-pt="glass"] .po-m { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .po-wrap[data-pt="card"] .po-n .po-t, .po-wrap[data-pt="glass"] .po-n .po-t { padding-left: 18px; }
+        /* --- тема «Rankedin»: світла, сірі капсули, великі імена й рахунок праворуч --- */
+        .po-wrap[data-pt="pill"] .po-m { border-radius: calc(var(--po-h, 96px) / 2); background: var(--po-frame, #e6e6e8); overflow: hidden; box-shadow: none; }
+        .po-wrap[data-pt="pill"] .po-m::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--po-h, 96px) * 0.62); background: var(--po-line, #313f7a); border-radius: 999px 0 0 999px; }
+        .po-wrap[data-pt="pill"] .po-n { left: calc(var(--po-h, 96px) * 0.62 + 22px); width: calc(100% - var(--po-h, 96px) * 0.62 - 22px - 170px); height: var(--po-h, 96px); background: transparent; }
+        .po-wrap[data-pt="pill"] .po-s { left: auto; right: 26px; width: 150px; height: var(--po-h, 96px); background: transparent; }
+        .po-wrap[data-pt="pill"] .po-t { height: calc(var(--po-h, 96px) / 2); padding: 0; color: var(--po-text, #2b3568); font-weight: 600; }
+        .po-wrap[data-pt="pill"] .po-t + .po-t { border-top: 1px solid rgba(49,63,122,.16); }
+        .po-wrap[data-pt="pill"] .po-n .po-t.two { justify-content: center; }
+        .po-wrap[data-pt="pill"] .po-n .po-t.win { font-weight: 900; }
+        .po-wrap[data-pt="pill"] .po-s .po-t { justify-content: flex-end; font-size: calc(var(--po-h, 96px) * 0.34); font-weight: 900; color: var(--po-sc, #313f7a); opacity: .55; }
+        .po-wrap[data-pt="pill"] .po-s .po-t.win { opacity: 1; }
+        .po-wrap[data-pt="pill"] .po-h { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: var(--po-head, #313f7a); }
         .po-logo { position: absolute; right: 50px; top: 20px; max-width: 520px; object-fit: contain; background: none; border: none; box-shadow: none; }
         .po-title { position: absolute; left: 50px; top: 26px; height: 70px; line-height: 70px; font-size: 54px; font-weight: 900; color: var(--po-title, #fff); text-transform: uppercase; white-space: nowrap; }
 
@@ -2358,14 +2370,17 @@
         const poKeyCache = {};
         function poText(v) { return (v === undefined || v === null) ? '' : String(v); }
         function poBuild(wrap, cfg) {
-            const has16 = poHas16((cfg.m || {})), TWO = !!cfg.twoLines, SZ = poPickSizing(cfg.m || {}, has16, TWO), NW = SZ.NW, PO_L = poLayout(has16, NW + 150, TWO ? 100 : 76);
+            const has16 = poHas16((cfg.m || {})), PILL = cfg.shape === 'pill', TWO = PILL ? true : !!cfg.twoLines;
+            let SZ = poPickSizing(cfg.m || {}, has16, TWO), NW = SZ.NW, PO_L;
+            if (PILL) { const n = has16 ? 4 : 3, gp = 99, Wp = Math.floor((1820 - (n - 1) * gp) / n), Hp = has16 ? 96 : 150; PO_L = poLayout(has16, Wp, Hp); NW = Wp - 170; SZ = { fs: Math.max(16, Math.min(31, Math.round(Hp / 2 / 2.2))), NW }; }
+            else PO_L = poLayout(has16, NW + 150, TWO ? 100 : 76);
             wrap.style.setProperty('--po-h', PO_L.H + 'px');
             wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.dataset.fit = PO_L.fit;
             wrap.innerHTML = '';
             const bg = document.createElement('div'); bg.className = 'po-bg'; wrap.appendChild(bg);
             if (PO_L.fit < 1) { const f = PO_L.fit; bg.style.left = (-(1920 / f - 1920) / 2) + 'px'; bg.style.top = (-(1080 / f - 1080) / 2) + 'px'; bg.style.right = bg.style.bottom = 'auto'; bg.style.width = (1920 / f) + 'px'; bg.style.height = (1080 / f) + 'px'; }
             const svg = document.createElementNS(PO_NS, 'svg'); svg.setAttribute('class', 'po-lines'); svg.setAttribute('width', 1920); svg.setAttribute('height', 1080);
-            const line = (x1, y1, x2, y2) => { const l = document.createElementNS(PO_NS, 'line'); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.style.stroke = 'var(--po-line, #f5c542)'; l.style.strokeWidth = '2'; svg.appendChild(l); };
+            const line = (x1, y1, x2, y2) => { const l = document.createElementNS(PO_NS, 'line'); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.style.stroke = 'var(--po-line, #f5c542)'; l.style.strokeWidth = PILL ? '6' : '2'; if (PILL) l.setAttribute('stroke-linecap', 'round'); svg.appendChild(l); };
             const link = (src, dst, srcX, dstX) => {
                 const right = srcX + PO_L.W, elbow = right + PO_L.gap / 2;
                 dst.forEach((cy, i) => { line(right, src[2 * i], elbow, src[2 * i]); line(right, src[2 * i + 1], elbow, src[2 * i + 1]); line(elbow, src[2 * i], elbow, src[2 * i + 1]); line(elbow, cy, dstX, cy); });
@@ -2377,7 +2392,8 @@
             const lb = Object.assign({ r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, cfg.labels || {});
             const head = (txt, cx, y) => { if (!txt) return; const h = document.createElement('div'); h.className = 'po-h'; h.style.left = cx + 'px'; h.style.top = (y - 16) + 'px'; h.textContent = txt; wrap.appendChild(h); };
             const half = PO_L.W / 2;
-            if (has16) head(lb.r16, PO_L.x.r16 + half, 133); head(lb.qf, PO_L.x.qf + half, 133); head(lb.sf, PO_L.x.sf + half, 133);
+            const hy = PILL ? ((has16 ? PO_L.c16[0] : PO_L.cQF[0]) - PO_L.H / 2 - 24) : 133;
+            if (has16) head(lb.r16, PO_L.x.r16 + half, hy); head(lb.qf, PO_L.x.qf + half, hy); head(lb.sf, PO_L.x.sf + half, hy);
             head(lb.f, PO_L.x.f + half, PO_L.cF - PO_L.H / 2 - 21);
             if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - PO_L.H / 2 - 20);
             const box = (x, cy, m) => {
@@ -2406,6 +2422,7 @@
                 let fs = parseFloat(getComputedStyle(t).fontSize);
                 while (t.scrollWidth > t.clientWidth && fs > 12) { fs -= 1; t.style.fontSize = fs + 'px'; }
             });
+            if (PILL) { const ns = Array.from(wrap.querySelectorAll('.po-n .po-t')); let mn = 99; ns.forEach(t => { mn = Math.min(mn, parseFloat(t.style.fontSize || getComputedStyle(t).fontSize)); }); ns.forEach(t => { t.style.fontSize = mn + 'px'; }); }
         }
         function renderPlayoff(st) {
             const po = st.playoff || {}; let anyVisible = false;
@@ -2419,7 +2436,7 @@
                 wrap.style.setProperty('--po-head', g(cfg.head, '#9fb3dd')); wrap.style.setProperty('--po-title', g(cfg.titleColor, '#ffffff'));
                 wrap.style.setProperty('--po-win', g(cfg.win, 'rgba(0,0,0,0.06)')); wrap.style.setProperty('--po-sc', g(cfg.sc, g(cfg.text, '#10213f'))); wrap.style.setProperty('--po-bd', g(cfg.bd, '#e3e8f5')); wrap.dataset.pt = g(cfg.shape, 'sq');
                 const bgEl = wrap.querySelector('.po-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100;
-                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize, cfg.twoLines]);
+                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize, cfg.twoLines, cfg.shape]);
                 if (poKeyCache[key] !== keyStr || !wrap.firstChild) { poKeyCache[key] = keyStr; poBuild(wrap, cfg); if (bgEl === null) { const nb = wrap.querySelector('.po-bg'); if (nb) nb.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100; } }
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100) * (parseFloat(wrap.dataset.fit) || 1);
                 wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
