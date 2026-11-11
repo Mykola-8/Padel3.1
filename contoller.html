@@ -87,7 +87,11 @@
         .modal-overlay input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), .modal-overlay select, .modal-overlay textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
         .modal-overlay input[type="file"] { max-width: 100%; }
         .modal-overlay .row, .modal-overlay .switch-row { flex-wrap: wrap; min-width: 0; }
-        html, body { overflow-x: hidden; max-width: 100vw; }
+        html, body { max-width: 100vw; }
+        #top-row { position: sticky; top: 0; z-index: 950; background: #1e1e1e; box-shadow: 0 -16px 0 0 #121212, 0 6px 12px rgba(0,0,0,.55); }
+        .nav-tabs { padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateZ(0); -webkit-transform: translateZ(0); }
+        html { overflow-x: hidden; } body { overflow-x: clip; }
+
         #tab-tournament { touch-action: pan-y; min-width: 0; }
         #tab-tournament .card { min-width: 0; max-width: 100%; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid #333; padding: 12px 20px 10px; margin: -20px -20px 15px; position: sticky; top: -20px; z-index: 50; background: #0a0a0a; box-shadow: 0 4px 10px rgba(0,0,0,.6); }
@@ -3588,26 +3592,49 @@
             const sortOn = () => !(state && state.teamRanking && state.teamRanking.sort === false);
             function reconcile() {
                 if (!loaded) return false; const cur = curTeams(); if (!cur.length) return false;
-                let l = arrOf(d.list).filter(x => x && nm(x.n)).map(x => ({ n: String(x.n).trim(), d: Number(x.d) || 0 })); const before = JSON.stringify(l);
+                let l = arrOf(d.list).filter(x => x && nm(x.n)).map(x => ({ n: String(x.n).trim(), d: Number(x.d) || 0, sg: x.sg === -1 ? -1 : undefined })); const before = JSON.stringify(l);
                 l = l.filter(x => cur.some(t => nm(t.n) === nm(x.n)));
                 const seen = {}; l = l.filter(x => { const k = nm(x.n); if (seen[k]) return false; seen[k] = 1; return true; });
                 const so = sortOn(); cur.filter(t => !l.some(x => nm(x.n) === nm(t.n))).sort((a, b) => (so ? b.r - a.r : 0) || a.i - b.i).forEach(t => l.push({ n: t.n, d: 0 }));
                 d.list = l; return JSON.stringify(l) !== before;
             }
             const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const sgOf = t => (t && (t.sg === -1 || Number(t.d) < 0)) ? -1 : 1;
             function preview(force) {
                 const el = card.querySelector('#rkm-list'); if (!el) return;
-                if (!force && el.contains(document.activeElement)) return;
+                if (!force && (el.contains(document.activeElement) || drag)) return;
                 const l = arrOf(d.list), sh = arrOf(d.shown).map(nm);
                 if (!l.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Додайте команди в блоці «Рейтинг команд».</div>'; return; }
-                const bs = 'width:34px; height:30px; padding:0; font-size:15px; font-weight:800;';
-                el.innerHTML = l.map((t, i) => { const was = sh.indexOf(nm(t.n)), dp = was >= 0 ? was - i : 0; const mk = dp > 0 ? '<span style="color:#4ade80">▲' + dp + '</span>' : (dp < 0 ? '<span style="color:#f87171">▼' + (-dp) + '</span>' : ''); return '<div style="display:flex; align-items:center; gap:5px;"><b style="width:22px; text-align:right; font-size:12px;">' + (i + 1) + '</b><span style="flex:1; min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc2(t.n) + '</span><span style="font-size:11px; width:34px;">' + mk + '</span><button class="btn" style="' + bs + '" data-mv="' + i + '" data-dir="-1">▲</button><button class="btn" style="' + bs + '" data-mv="' + i + '" data-dir="1">▼</button><input type="number" step="1" data-dl="' + i + '" value="' + (Number(t.d) || 0) + '" style="width:62px; padding:5px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box;" placeholder="±"></div>'; }).join('');
+                el.innerHTML = '<div style="display:flex; gap:4px; font-size:10px; color:#9bd; padding:0 2px;"><span style="width:30px; text-align:center;">↕</span><span style="width:20px;">#</span><span style="flex:1;">Команда</span><span style="width:36px; text-align:center;">рух</span><span style="width:40px; text-align:center;">+/−</span><span style="width:60px; text-align:center;">рейтинг</span></div>' +
+                    l.map((t, i) => {
+                        const was = sh.indexOf(nm(t.n)), dp = was >= 0 ? was - i : 0, sg = sgOf(t), ab = Math.abs(Number(t.d) || 0), col = sg > 0 ? '#4ade80' : '#f87171';
+                        const mk = dp > 0 ? '<span style="color:#4ade80">▲' + dp + '</span>' : (dp < 0 ? '<span style="color:#f87171">▼' + (-dp) + '</span>' : '');
+                        return '<div data-row="' + i + '" style="display:flex; align-items:center; gap:4px; padding:2px; border-radius:6px; background:' + (drag && drag.i === i ? '#2a3a66' : 'transparent') + ';"><span data-h="' + i + '" title="Тягніть вгору/вниз" style="width:30px; height:34px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#9bd; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; background:#222; border-radius:6px;">☰</span><b style="width:20px; text-align:right; font-size:12px;">' + (i + 1) + '</b><span style="flex:1; min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc2(t.n) + '</span><span style="font-size:11px; width:36px; text-align:center;">' + mk + '</span><button class="btn" data-sg="' + i + '" style="width:40px; height:34px; padding:0; font-size:18px; font-weight:900; color:' + col + ';">' + (sg > 0 ? '+' : '−') + '</button><input type="number" min="0" step="1" inputmode="numeric" data-dl="' + i + '" value="' + ab + '" style="width:60px; padding:6px 2px; border-radius:6px; border:1px solid #444; background:#222; color:' + col + '; font-weight:800; text-align:center; box-sizing:border-box;"></div>';
+                    }).join('');
             }
-            card.querySelector('#rkm-list').addEventListener('click', e => {
-                const b = e.target.closest('[data-mv]'); if (!b) return; const i = parseInt(b.getAttribute('data-mv')), j = i + parseInt(b.getAttribute('data-dir')); const l = arrOf(d.list).slice(); if (j < 0 || j >= l.length) return;
-                const t = l[i]; l[i] = l[j]; l[j] = t; d.list = l; preview(true); save(false);
+            let drag = null;
+            const listEl = card.querySelector('#rkm-list');
+            listEl.addEventListener('pointerdown', e => {
+                const h = e.target.closest('[data-h]'); if (!h) return; e.preventDefault();
+                drag = { i: parseInt(h.getAttribute('data-h')) }; preview(true);
             });
-            card.querySelector('#rkm-list').addEventListener('input', e => { const x = e.target.closest('[data-dl]'); if (!x) return; const i = parseInt(x.getAttribute('data-dl')); const l = arrOf(d.list).slice(); if (!l[i]) return; l[i] = { n: l[i].n, d: parseInt(x.value) || 0 }; d.list = l; save(false); });
+            document.addEventListener('pointermove', e => {
+                if (!drag) return; e.preventDefault();
+                const rows = Array.from(listEl.querySelectorAll('[data-row]')); if (!rows.length) return;
+                let to = rows.length - 1; for (let k = 0; k < rows.length; k++) { const r = rows[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { to = k; break; } }
+                if (to !== drag.i) { const l = arrOf(d.list).slice(), it = l.splice(drag.i, 1)[0]; l.splice(to, 0, it); d.list = l; drag.i = to; preview(true); save(false); }
+            }, { passive: false });
+            const endDrag = () => { if (!drag) return; drag = null; preview(true); save(true); };
+            document.addEventListener('pointerup', endDrag); document.addEventListener('pointercancel', endDrag);
+            listEl.addEventListener('click', e => {
+                const b = e.target.closest('[data-sg]'); if (!b) return; const i = parseInt(b.getAttribute('data-sg')); const l = arrOf(d.list).slice(); if (!l[i]) return;
+                const sg = -sgOf(l[i]), ab = Math.abs(Number(l[i].d) || 0); l[i] = { n: l[i].n, d: sg * ab, sg: sg }; d.list = l; preview(true); save(false);
+            });
+            listEl.addEventListener('input', e => {
+                const x = e.target.closest('[data-dl]'); if (!x) return; const i = parseInt(x.getAttribute('data-dl')); const l = arrOf(d.list).slice(); if (!l[i]) return;
+                const v = parseInt(x.value) || 0; let sg = sgOf(l[i]); if (v < 0) sg = -1; const ab = Math.abs(v); l[i] = { n: l[i].n, d: sg * ab, sg: sg }; d.list = l; save(false);
+                const col = sg > 0 ? '#4ade80' : '#f87171'; x.style.color = col; const sb = listEl.querySelector('[data-sg="' + i + '"]'); if (sb) { sb.style.color = col; sb.textContent = sg > 0 ? '+' : '−'; }
+            });
             function refresh(force) {
                 F.forEach(f => { const el = card.querySelector('#rkm-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
                 card.querySelector('#rkm-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#rkm-off').style.outline = d.show ? 'none' : '3px solid #fff';
