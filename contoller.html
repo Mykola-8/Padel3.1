@@ -3907,7 +3907,7 @@
         // ===== ТАБЛИЦЯ РАХУНКІВ (padel/scoretable) =====
         (function scInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'ТАБЛИЦЯ РАХУНКІВ', anim: 'slide', dur: 1.2, stagger: 0.15, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 90, showElo: true, showWdl: true, showDiff: true, showLegend: true, medals: true, sort: true, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', rows: [] };
+            const DEF = { show: false, court: 'all', title: 'ТАБЛИЦЯ РАХУНКІВ', anim: 'slide', dur: 1.2, stagger: 0.15, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 90, showElo: true, showWdl: true, showDiff: true, showLegend: true, medals: true, sort: true, namesFromRkm: true, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', rows: [] };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
@@ -3938,6 +3938,7 @@
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="scb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="scb-off">■ СХОВАТИ</button></div>' +
                 '<div id="scb-st" style="font-size:11px;"></div>' +
                 '<details open style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">⬇ Імпорт з PADO (фото або текст таблиці)</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО/скріншот таблиці (Ctrl+V у цьому блоці або вибір файлу) — рядки розпізнаються автоматично.</div><label style="font-size:11px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="scb-imp-num" checked> Скріншот ТІЛЬКИ з цифрами (ELO, В-Н-П, ±, О) — імена беру за порядком з блоку «Рух у рейтингу»</label><input type="file" accept="image/*" id="scb-imp-file" style="font-size:11px;"><div id="scb-imp-ocr" style="font-size:11px;"></div><textarea id="scb-imp" rows="6" placeholder="1&#10;Сергій БЕРЕЗЮК&#10;Ярослав ЛІПСЬКИЙ&#10;+84&#10;5 - 0 - 0&#10;+9&#10;10&#10;2&#10;..." style="' + inp + ' font-size:11px;"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="scb-imp-go">⬇ Імпортувати таблицю</button></div></details>' +
+                '<label style="font-size:11px; display:flex; gap:6px; align-items:center; color:#ddd;"><input type="checkbox" id="scb-names-rkm" checked> Імена команд — автоматично з «Рух у рейтингу» (за порядком списку)</label>' +
                 '<div style="font-size:11px; color:#ccc;">Рядки таблиці: <b>Команда · ELO · В · Н · П · ± · Очки</b></div>' +
                 '<div id="scb-rows" style="display:flex; flex-direction:column; gap:4px; background:#1a1a1a; border-radius:6px; padding:6px;"></div>' +
                 '<div style="display:flex; gap:6px;"><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="scb-add">＋ Додати рядок</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="scb-clear">🗑 Очистити таблицю</button></div>' +
@@ -3961,7 +3962,7 @@
                 const r = arrOf(d.rows);
                 if (!r.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Таблиця порожня — вставте текст з PADO або додайте рядок.</div>'; return; }
                 const ni = 'padding:4px 2px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box; font-size:12px;';
-                el.innerHTML = r.map((t, i) => '<div style="display:flex; align-items:center; gap:3px;"><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '" placeholder="Гравець / Гравець" style="flex:1; min-width:0; padding:4px 5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px;">' + COLS.map(c => '<input type="number" data-rc="' + i + ':' + c[0] + '" value="' + (Number(t[c[0]]) || 0) + '" title="' + c[1] + '" style="' + ni + ' width:' + c[2] + 'px;">').join('') + '<button class="btn btn-gray" style="padding:2px 6px; font-size:12px;" data-rd="' + i + '">✕</button></div>').join('');
+                el.innerHTML = r.map((t, i) => '<div style="display:flex; align-items:center; gap:3px;"><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '"' + (d.namesFromRkm !== false ? ' readonly' : '') + ' placeholder="Гравець / Гравець" style="flex:1; min-width:0; padding:4px 5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px;">' + COLS.map(c => '<input type="number" data-rc="' + i + ':' + c[0] + '" value="' + (Number(t[c[0]]) || 0) + '" title="' + c[1] + '" style="' + ni + ' width:' + c[2] + 'px;">').join('') + '<button class="btn btn-gray" style="padding:2px 6px; font-size:12px;" data-rd="' + i + '">✕</button></div>').join('');
             }
             $('scb-rows').addEventListener('input', e => {
                 const t = e.target, r = arrOf(d.rows).slice();
@@ -3997,11 +3998,21 @@
                 }
                 if (!res.length) { alert('Не розпізнано жодного рядка. Для скріншота лише з цифрами має бути видно колонки ELO, В-Н-П, ±, О (наприклад: +124  6 - 0 - 1  +16  12).'); return; }
                 if (!confirm('Розпізнано ' + res.length + ' рядків' + (byOrder ? ' (імена — за порядком із «Рух у рейтингу»)' : '') + ':\n\n' + res.map((t, i) => (i + 1) + '. ' + t.n + ' | ELO ' + t.elo + ' | ' + t.w + '-' + t.d + '-' + t.l + ' | ± ' + t.diff + ' | О ' + t.pts).join('\n') + note + '\n\nЗамінити таблицю? (порядок рядків буде як у PADO)')) return;
-                d.rows = res; d.sort = false; rows(true); refresh(true); save(true);
+                d.rows = res; d.sort = false; if (!byOrder) d.namesFromRkm = false; rows(true); refresh(true); save(true);
             };
+            function syncNames() {
+                if (!loaded || d.namesFromRkm === false || typeof window.__rkmNames !== 'function') return;
+                const names = window.__rkmNames(); if (!names || !names.length) return;
+                const r = arrOf(d.rows).slice(); let ch = false;
+                names.forEach((n, i) => { if (!r[i]) { r[i] = { n: n, elo: 0, w: 0, d: 0, l: 0, diff: 0, pts: 0 }; ch = true; } else if (r[i].n !== n) { r[i] = Object.assign({}, r[i], { n: n }); ch = true; } });
+                if (ch) { d.rows = r; rows(false); save(false); }
+            }
+            $('scb-names-rkm').addEventListener('change', e => { d.namesFromRkm = e.target.checked; if (d.namesFromRkm) syncNames(); rows(true); save(true); });
+            setInterval(() => { try { syncNames(); } catch (e) {} }, 2000);
             ocrBind($('scb-imp-go').parentNode, $('scb-imp'), $('scb-imp-file'), $('scb-imp-ocr'), () => $('scb-imp-go').click(), txt => ($('scb-imp-num').checked ? numNorm(txt) : ocrNorm(txt)), (f, p) => ($('scb-imp-num').checked ? ocrNumeric(f, p) : ocrImage(f, p)));
             function refresh(force) {
                 F.forEach(f => { const el = card.querySelector('#scb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#scb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+                { const nc = $('scb-names-rkm'); if (nc && document.activeElement !== nc) nc.checked = d.namesFromRkm !== false; }
                 $('scb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('scb-off').style.outline = d.show ? 'none' : '3px solid #fff';
                 rows(force);
             }
@@ -4030,7 +4041,8 @@
             const anchor = document.getElementById('rkm-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
             card.innerHTML = '<div style="font-size:11px; font-weight:700;">📥 Імпорт з PADO (фото або текст)</div>' +
                 '<div style="font-size:10px; color:#9bd;">Усі імпорти з PADO в одному місці. Вставте ФОТО/скріншот (Ctrl+V всередині потрібного розділу або кнопка вибору файлу) чи скопійований текст — пульт розпізнає дані й перед записом покаже, що саме знайшов.<br>① «Результати» → «+/−» команд і рух у рейтингу (табло «Стадія турніру»).<br>② «Таблиця» → табло «Таблиця рахунків».</div>' +
-                '<div id="pado-s1"></div><div id="pado-s2"></div>';
+                '<div style="border:2px dashed #4ade80; border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:6px; background:#10241a;"><div style="font-size:13px; font-weight:800; color:#4ade80;">⚡ Швидкий імпорт: просто вставте скріншот PADO</div><div style="font-size:10px; color:#bdb;">Ctrl+V (або кнопка нижче) — пульт сам визначить, що це: «Результати» (рух рейтингу) чи «Таблиця» (з іменами або лише цифри) — і запропонує записати. Для скріна лише з цифрами імена беруться з «Рух у рейтингу».</div><input type="file" accept="image/*" id="pado-auto-file" style="font-size:11px;"><div id="pado-auto-st" style="font-size:11px; white-space:pre-wrap;"></div></div>' +
+                '<div style="font-size:10px; color:#888;">Ручний режим (текст / окремі розділи):</div><div id="pado-s1"></div><div id="pado-s2"></div>';
             const mv = (btnId, slot, title, sub) => {
                 const b = document.getElementById(btnId), det = b && b.closest('details'); if (!det) return;
                 const sm = det.querySelector('summary'); if (sm) sm.textContent = title;
@@ -4040,6 +4052,37 @@
             };
             mv('rkm-imp-go', 'pado-s1', '① Результати → Рух у рейтингу', 'Призначення: табло «Рух у рейтингу» (кнопки показу — в блоці «📊 Рух у рейтингу»).');
             mv('scb-imp-go', 'pado-s2', '② Таблиця → Таблиця рахунків', 'Призначення: табло «Таблиця рахунків» (кнопки показу — в блоці «📋 Таблиця рахунків»).');
+            card.querySelectorAll('details').forEach(x => x.removeAttribute('open'));
+            // ---- автоматичне визначення типу скріна ----
+            const stA = card.querySelector('#pado-auto-st'), fileA = card.querySelector('#pado-auto-file');
+            const hasLetters = t => /[A-Za-zА-Яа-яІіЇїЄєҐґ]{3,}/.test(t);
+            async function autoImport(file) {
+                if (!file) return;
+                const say = (m, c) => { stA.style.color = c || '#9bd'; stA.innerText = m; };
+                const prog = (st, p) => say('⏳ ' + (st === 'recognizing text' ? 'Розпізнаю ' : 'Завантажую модуль ') + Math.round(p * 100) + '%');
+                try {
+                    say('⏳ Читаю скріншот…');
+                    let txt = ocrNorm(await ocrImage(file, prog)), kind = '';
+                    const nrows = numRows(txt).length, deltas = (txt.match(/^[+\-]\d+$/gm) || []).length;
+                    if (nrows >= 2) kind = 'table';
+                    else if (/(^|\n)(court|корт)\s*\d+/i.test(txt) || (deltas >= 2 && hasLetters(txt))) kind = 'results';
+                    if (!kind || (kind === 'table' && !hasLetters(txt))) {
+                        const t2 = await ocrNumeric(file, prog);   // точніше для скріна лише з цифрами
+                        if (numRows(t2).length >= 2) { txt = numNorm(t2); kind = 'table'; }
+                    }
+                    if (kind === 'table') {
+                        const ta = document.getElementById('scb-imp'), nc = document.getElementById('scb-imp-num');
+                        const named = hasLetters(txt) && /[A-Za-zА-Яа-яІіЇїЄєҐґ]{3,}/.test(txt.replace(/[+\-\d\s]/g, ''));
+                        if (nc) nc.checked = !named; ta.value = named ? txt : numNorm(txt);
+                        say('✅ Це «Таблиця» (' + numRows(txt).length + ' рядків) → Таблиця рахунків. Підтвердіть запис.', '#7c7'); document.getElementById('scb-imp-go').click();
+                    } else if (kind === 'results') {
+                        document.getElementById('rkm-imp-txt').value = txt;
+                        say('✅ Це «Результати» → Рух у рейтингу. Підтвердіть запис.', '#7c7'); document.getElementById('rkm-imp-go').click();
+                    } else say('⚠️ Не вдалося визначити тип скріна. Зробіть скрін чіткіше (таблиця «Результати» або «Таблиця» з PADO) або скористайтесь ручним режимом нижче.', '#f66');
+                } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка розпізнавання'), '#f66'); }
+            }
+            fileA.addEventListener('change', () => { const f = fileA.files && fileA.files[0]; fileA.value = ''; autoImport(f); });
+            document.addEventListener('paste', e => { const ae = document.activeElement; if (ae && /^(input|textarea|select)$/i.test(ae.tagName)) return; if (!tab.classList.contains('active') || !stA.offsetParent) return; const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type && x.type.indexOf('image') === 0); if (!it) return; e.preventDefault(); autoImport(it.getAsFile()); });
         })();
 
         // ===== ПОСЛІДОВНИЙ ПОКАЗ ТАБЛО (padel/seq) =====
