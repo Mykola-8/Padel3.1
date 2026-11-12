@@ -3049,6 +3049,7 @@
         window.icToggle = function() { const c = icEnsure(); c.show = !c.show; icRefreshUI(); set(matchRef, state); };
         window.icLogoUrl = function(v, key) { icEnsure()[key || 'logo'] = (v || '').trim(); icRefreshUI(); icSave(true); };
         window.icLogoClear = function(key) { icEnsure()[key || 'logo'] = ''; icRefreshUI(); icSave(true); };
+        { let icPrevLeft = null; setInterval(() => { try { const c0 = icEnsure(); if (c0.cdShow && c0.cdTs && c0.show) { const left = c0.cdTs - Date.now(); if (icPrevLeft !== null && icPrevLeft > 0 && left <= 0) window.showAllCourts('ic', false); icPrevLeft = left; } else icPrevLeft = null; } catch (e) {} }, 1000); }
         window.icCdSet = function(v) { const t = v ? new Date(v).getTime() : 0; icEnsure().cdTs = isFinite(t) ? t : 0; icSave(true); };
         window.icCdToggle = function(v) { icEnsure().cdShow = !!v; icSave(true); };
         window.icLogoUpload = function(input, key) {
@@ -3528,11 +3529,34 @@
             return (r && r.data && r.data.text) || '';
         }
         // підключає вибір файлу / вставку фото (Ctrl+V) до textarea; після розпізнавання викликає done()
-        function ocrBind(box, ta, fileIn, stEl, done, norm) {
+        const NUM_RE = /([+-]?\d+)\s+(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s+([+-]?\d+)\s+(\d+)/g;
+        function numRows(text) {
+            const t = String(text || '').replace(/[−–—]/g, '-').replace(/\s+/g, ' '), out = []; let m; NUM_RE.lastIndex = 0;
+            while ((m = NUM_RE.exec(t))) out.push({ elo: parseInt(m[1]), w: +m[2], d: +m[3], l: +m[4], diff: parseInt(m[5]), pts: +m[6] });
+            return out;
+        }
+        function numNorm(txt) { return numRows(txt).map(r => (r.elo > 0 ? '+' : '') + r.elo + ' ' + r.w + ' - ' + r.d + ' - ' + r.l + ' ' + (r.diff > 0 ? '+' : '') + r.diff + ' ' + r.pts).join('\n'); }
+        async function ocrPrep(file) {
+            const url = URL.createObjectURL(file);
+            const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Не вдалося відкрити зображення')); i.src = url; });
+            const sc = Math.max(1, Math.min(4, 1800 / img.width)), pad = 30, cv = document.createElement('canvas');
+            cv.width = Math.round(img.width * sc) + pad * 2; cv.height = Math.round(img.height * sc) + pad * 2;
+            const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, pad, pad, cv.width - pad * 2, cv.height - pad * 2);
+            const id = cx.getImageData(0, 0, cv.width, cv.height), p = id.data;
+            for (let i = 0; i < p.length; i += 4) { const v = Math.min(p[i], p[i + 1], p[i + 2]) < 175 ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; }
+            cx.putImageData(id, 0, 0); URL.revokeObjectURL(url); return cv;
+        }
+        async function ocrNumeric(file, onProg) {
+            const T = await ocrLoad(), cv = await ocrPrep(file);
+            const w = await T.createWorker('eng', 1, { logger: m => { if (onProg && m && m.progress !== undefined) onProg(m.status, m.progress); } });
+            try { await w.setParameters({ tessedit_char_whitelist: '0123456789+- ', tessedit_pageseg_mode: '6' }); const r = await w.recognize(cv); return (r && r.data && r.data.text) || ''; }
+            finally { try { await w.terminate(); } catch (e) {} }
+        }
+        function ocrBind(box, ta, fileIn, stEl, done, norm, ocrFn) {
             const run = async (file) => {
                 if (!file) return; stEl.style.color = '#9bd'; stEl.innerText = '⏳ Розпізнаю фото…';
                 try {
-                    const txt = await ocrImage(file, (s, p) => { stEl.innerText = '⏳ ' + (s === 'recognizing text' ? 'Розпізнаю текст ' : 'Завантажую модуль ') + Math.round(p * 100) + '%'; });
+                    const txt = await (ocrFn || ocrImage)(file, (s, p) => { stEl.innerText = '⏳ ' + (s === 'recognizing text' ? 'Розпізнаю текст ' : 'Завантажую модуль ') + Math.round(p * 100) + '%'; });
                     ta.value = (norm || ocrNorm)(txt); stEl.style.color = '#7c7'; stEl.innerText = '✅ Фото розпізнано — перевірте нижче'; if (done) done();
                 } catch (e) { stEl.style.color = '#f66'; stEl.innerText = '⚠️ ' + ((e && e.message) || 'помилка розпізнавання'); }
             };
@@ -3602,6 +3626,7 @@
                 d.list = l; return JSON.stringify(l) !== before;
             }
             const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            window.__rkmNames = () => { try { reconcile(); } catch (e) {} return arrOf(d.list).map(x => x.n); };
             const sgOf = t => (t && (t.sg === -1 || Number(t.d) < 0)) ? -1 : 1;
             function preview(force) {
                 const el = card.querySelector('#rkm-list'); if (!el) return;
@@ -3912,7 +3937,7 @@
                 '<div style="font-size:10px; color:#9bd;">Дані беруться зі сторінки «Таблиця» в PADO: виділіть усе, скопіюйте й вставте нижче — або заповніть вручну. Табло одразу з’являється на всіх кортах після «ПОКАЗАТИ».</div>' +
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="scb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="scb-off">■ СХОВАТИ</button></div>' +
                 '<div id="scb-st" style="font-size:11px;"></div>' +
-                '<details open style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">⬇ Імпорт з PADO (фото або текст таблиці)</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО/скріншот таблиці (Ctrl+V у цьому блоці або вибір файлу) — рядки розпізнаються автоматично.</div><input type="file" accept="image/*" id="scb-imp-file" style="font-size:11px;"><div id="scb-imp-ocr" style="font-size:11px;"></div><textarea id="scb-imp" rows="6" placeholder="1&#10;Сергій БЕРЕЗЮК&#10;Ярослав ЛІПСЬКИЙ&#10;+84&#10;5 - 0 - 0&#10;+9&#10;10&#10;2&#10;..." style="' + inp + ' font-size:11px;"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="scb-imp-go">⬇ Імпортувати таблицю</button></div></details>' +
+                '<details open style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">⬇ Імпорт з PADO (фото або текст таблиці)</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте ФОТО/скріншот таблиці (Ctrl+V у цьому блоці або вибір файлу) — рядки розпізнаються автоматично.</div><label style="font-size:11px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="scb-imp-num" checked> Скріншот ТІЛЬКИ з цифрами (ELO, В-Н-П, ±, О) — імена беру за порядком з блоку «Рух у рейтингу»</label><input type="file" accept="image/*" id="scb-imp-file" style="font-size:11px;"><div id="scb-imp-ocr" style="font-size:11px;"></div><textarea id="scb-imp" rows="6" placeholder="1&#10;Сергій БЕРЕЗЮК&#10;Ярослав ЛІПСЬКИЙ&#10;+84&#10;5 - 0 - 0&#10;+9&#10;10&#10;2&#10;..." style="' + inp + ' font-size:11px;"></textarea><button class="btn btn-green" style="padding:10px; font-weight:800;" id="scb-imp-go">⬇ Імпортувати таблицю</button></div></details>' +
                 '<div style="font-size:11px; color:#ccc;">Рядки таблиці: <b>Команда · ELO · В · Н · П · ± · Очки</b></div>' +
                 '<div id="scb-rows" style="display:flex; flex-direction:column; gap:4px; background:#1a1a1a; border-radius:6px; padding:6px;"></div>' +
                 '<div style="display:flex; gap:6px;"><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="scb-add">＋ Додати рядок</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="scb-clear">🗑 Очистити таблицю</button></div>' +
@@ -3961,12 +3986,20 @@
                 return out;
             }
             $('scb-imp-go').onclick = () => {
-                const res = parseTable($('scb-imp').value);
-                if (!res.length) { alert('Не розпізнано жодного рядка. Вставте текст сторінки «Таблиця» з PADO (позиція, імена, ELO, В-Н-П, ±, О).'); return; }
-                if (!confirm('Розпізнано ' + res.length + ' рядків:\n\n' + res.map((t, i) => (i + 1) + '. ' + t.n + ' | ELO ' + t.elo + ' | ' + t.w + '-' + t.d + '-' + t.l + ' | ± ' + t.diff + ' | О ' + t.pts).join('\n') + '\n\nЗамінити таблицю?')) return;
-                d.rows = res; rows(true); save(true);
+                const txt = $('scb-imp').value; let res = parseTable(txt), byOrder = false, note = '';
+                if (!res.length) {
+                    const nums = numRows(txt), names = (typeof window.__rkmNames === 'function') ? window.__rkmNames() : [];
+                    if (nums.length) {
+                        if (!names.length) { alert('Цифри розпізнано (' + nums.length + ' рядків), але в блоці «Рух у рейтингу» немає команд для імен. Спершу додайте команди в «Рейтинг команд».'); return; }
+                        res = nums.map((r, i) => Object.assign({ n: names[i] || ('Команда ' + (i + 1)) }, r)); byOrder = true;
+                        if (names.length !== nums.length) note = '\n\n⚠️ Рядків цифр: ' + nums.length + ', команд у «Рух у рейтингу»: ' + names.length + '. Імена йдуть за порядком списку — перевірте!';
+                    }
+                }
+                if (!res.length) { alert('Не розпізнано жодного рядка. Для скріншота лише з цифрами має бути видно колонки ELO, В-Н-П, ±, О (наприклад: +124  6 - 0 - 1  +16  12).'); return; }
+                if (!confirm('Розпізнано ' + res.length + ' рядків' + (byOrder ? ' (імена — за порядком із «Рух у рейтингу»)' : '') + ':\n\n' + res.map((t, i) => (i + 1) + '. ' + t.n + ' | ELO ' + t.elo + ' | ' + t.w + '-' + t.d + '-' + t.l + ' | ± ' + t.diff + ' | О ' + t.pts).join('\n') + note + '\n\nЗамінити таблицю? (порядок рядків буде як у PADO)')) return;
+                d.rows = res; d.sort = false; rows(true); refresh(true); save(true);
             };
-            ocrBind($('scb-imp-go').parentNode, $('scb-imp'), $('scb-imp-file'), $('scb-imp-ocr'), () => $('scb-imp-go').click());
+            ocrBind($('scb-imp-go').parentNode, $('scb-imp'), $('scb-imp-file'), $('scb-imp-ocr'), () => $('scb-imp-go').click(), txt => ($('scb-imp-num').checked ? numNorm(txt) : ocrNorm(txt)), (f, p) => ($('scb-imp-num').checked ? ocrNumeric(f, p) : ocrImage(f, p)));
             function refresh(force) {
                 F.forEach(f => { const el = card.querySelector('#scb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#scb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
                 $('scb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('scb-off').style.outline = d.show ? 'none' : '3px solid #fff';
