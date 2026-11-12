@@ -2495,9 +2495,12 @@
         })();
 
         // ===== ВСТУПНЕ ТАБЛО =====
-        let icKeyCache = '', icCd = { ts: 0, label: '', end: '', show: false };
+        let icKeyCache = '', icCd = { ts: 0, label: '', end: '', show: false }, icEndedTs = 0, icPrevMs = null;
         function icTick() {
-            const el = document.getElementById('ic-cd-t'); if (!el) return;
+            const el = document.getElementById('ic-cd-t');
+            { const ms0 = icCd.ts - Date.now(), w0 = document.getElementById('ic-wrap');
+              if (icCd.show && icCd.ts) { if (icPrevMs !== null && icPrevMs > 0 && ms0 <= 0 && w0 && w0.classList.contains('visible')) { icEndedTs = icCd.ts; w0.classList.remove('visible'); document.body.classList.remove('ic-active'); } icPrevMs = ms0; } else icPrevMs = null; }
+            if (!el) return;
             let ms = icCd.ts - Date.now();
             if (ms <= 0) { el.textContent = icCd.end || '00:00:00'; const l = document.querySelector('#ic-cd .ic-cd-l'); if (l) l.style.display = 'none'; return; }
             const l = document.querySelector('#ic-cd .ic-cd-l'); if (l) l.style.display = '';
@@ -2541,7 +2544,7 @@
                 const bd = panel.querySelector('.ic-body'); if (bd && icCd.show && icCd.ts) bd.classList.add('has-cd');
             }
             icTick();
-            const vis = !!cfg.show; wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
+            if (!cfg.show) icEndedTs = 0; const vis = !!cfg.show && !(icEndedTs && icEndedTs === icCd.ts); wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
         }
 
         // ===== ГРУПОВИЙ ЕТАП =====
