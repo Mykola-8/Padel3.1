@@ -761,6 +761,16 @@
         .break-overlay.brk-logo #brk-label, .break-overlay.brk-logo #brk-timer { display: none; position: absolute; left: 0; right: 0; text-align: center; z-index: 3; text-shadow: 0 3px 14px rgba(0,0,0,.7); }
         .break-overlay.brk-logo.brk-lbl #brk-label { display: block; bottom: 150px; font-size: 64px; margin: 0; }
         .break-overlay.brk-logo.brk-tm #brk-timer { display: block; bottom: 80px; font-size: 54px; }
+        .brk-cd { display: none; position: absolute; inset: 0; flex-direction: column; align-items: center; justify-content: center; z-index: 3; text-align: center; font-family: 'Montserrat', sans-serif; transform: scale(var(--cd-sc, 1)); transform-origin: center center; }
+        .break-overlay.brk-cd-on { background: rgba(0,0,0,var(--brk-bg, 0)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .break-overlay.brk-cd-on .brk-cd { display: flex; }
+        .break-overlay.brk-cd-on .break-label, .break-overlay.brk-cd-on .break-clock-wrap, .break-overlay.brk-cd-on .break-teams-row, .break-overlay.brk-cd-on .break-timer-digital, .break-overlay.brk-cd-on .break-sets-line, .break-overlay.brk-cd-on .brk-layer { display: none !important; }
+        .brk-cd-logo { display: block; height: var(--cd-lh, 16vh); max-width: 40vw; object-fit: contain; margin-bottom: 3.5vh; filter: drop-shadow(0 6px 18px rgba(0,0,0,.5)); }
+        .brk-cd-title { font-size: 4.2vh; font-weight: 800; letter-spacing: .25em; text-transform: uppercase; color: var(--cd-tc, #fff); text-shadow: 0 3px 14px rgba(0,0,0,.55); margin-bottom: 3vh; }
+        .brk-cd-box { min-width: 52vw; padding: 2.2vh 3vw; background: var(--cd-box, rgba(60,64,110,.35)); box-sizing: border-box; }
+        .brk-cd-time { font-size: 15vh; font-weight: 800; line-height: 1.05; color: var(--cd-tc, #fff); font-variant-numeric: tabular-nums; text-shadow: 0 4px 18px rgba(0,0,0,.4); }
+        .brk-cd-sub { margin-top: 3.2vh; font-size: 2.5vh; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cd-sc2, #ff7a1a); text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+        .brk-cd-title:empty, .brk-cd-sub:empty { display: none; }
         .brk-mover { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
         .brk-mover.dvd { left: 0; top: 0; transform: none; }
         .brk-img { display: block; height: var(--brk-h, 30vh); max-width: 80vw; object-fit: contain; filter: drop-shadow(0 8px 22px rgba(0,0,0,.5)); animation-duration: var(--brk-sp, 6s); animation-iteration-count: infinite; animation-timing-function: ease-in-out; transition: opacity .5s; }
@@ -2223,6 +2233,7 @@
     <!-- ПАНЕЛЬ ПЕРЕРВИ -->
     <div class="break-overlay" id="break-panel">
         <div class="brk-layer" id="brk-layer"><div class="brk-mover" id="brk-mover"><img class="brk-img" id="brk-img" alt=""></div></div>
+        <div class="brk-cd" id="brk-cd"><img class="brk-cd-logo" id="brk-cd-logo" alt="" style="display:none"><div class="brk-cd-title" id="brk-cd-title"></div><div class="brk-cd-box"><div class="brk-cd-time" id="brk-cd-time">0:00:00</div></div><div class="brk-cd-sub" id="brk-cd-sub"></div></div>
         <div class="break-label" id="brk-label">ПЕРЕРВА</div>
         <div class="break-clock-wrap">
             <svg id="brk-clock-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -4227,7 +4238,10 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const panel = document.getElementById('break-panel'), layer = document.getElementById('brk-layer'), mover = document.getElementById('brk-mover'), img = document.getElementById('brk-img');
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-            let gcfg = null, mcfg = null, mj = '', idx = 0, cycT = null, raf = 0, lastSrc = '', active = false, curStyle = '';
+            let gcfg = null, mcfg = null, mj = '', idx = 0, cycT = null, raf = 0, lastSrc = '', active = false, curStyle = '', cdT = null;
+            const cdImg = document.getElementById('brk-cd-logo');
+            const rgbaB = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            function cdTick() { const c = cfg(); let rem = 0; if (c.cdMode === 'target') { const m = String(c.cdTarget || '').match(/^(\d{1,2}):(\d{2})/); if (m) { const t = new Date(); t.setHours(+m[1], +m[2], 0, 0); rem = Math.max(0, Math.round((t - Date.now()) / 1000)); } } else rem = Math.max(0, Math.round((parseFloat(g(c.cdMin, 10)) || 0) * 60) - breakSeconds); const h = Math.floor(rem / 3600), mi = Math.floor(rem % 3600 / 60), se = rem % 60; document.getElementById('brk-cd-time').textContent = h + ':' + String(mi).padStart(2, '0') + ':' + String(se).padStart(2, '0'); }
             const dvd = { x: 80, y: 80, vx: 0, vy: 0, last: 0 };
             const cfg = () => gcfg || mcfg || {};
             function logos(st) {
@@ -4253,9 +4267,21 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 mover.style.transform = 'translate(' + dvd.x + 'px,' + dvd.y + 'px)';
             }
             function stopDvd() { if (raf) cancelAnimationFrame(raf); raf = 0; }
-            function pick(st) { const l = logos(st); if (!l.length) { img.removeAttribute('src'); lastSrc = ''; return; } const s = l[idx % l.length]; if (s !== lastSrc) { lastSrc = s; img.src = s; } }
+            function pick(st) { const l = logos(st); if (!l.length) { img.removeAttribute('src'); lastSrc = ''; cdImg.style.display = 'none'; return; } const s = l[idx % l.length]; if (s !== lastSrc) { lastSrc = s; img.src = s; cdImg.src = s; } cdImg.style.display = ''; }
             function apply(st, breakOn) {
-                const c = cfg(), logoMode = c.style === 'logo' && breakOn;
+                const c = cfg(), logoMode = c.style === 'logo' && breakOn, cdMode = c.style === 'cd' && breakOn;
+                panel.classList.toggle('brk-cd-on', cdMode);
+                if (cdMode) {
+                    stopDvd(); panel.classList.remove('brk-logo', 'brk-lbl', 'brk-tm');
+                    panel.style.setProperty('--brk-bg', Math.max(0, Math.min(100, parseInt(g(c.bgOpacity, 0)))) / 100);
+                    panel.style.setProperty('--cd-lh', Math.max(4, Math.min(60, parseFloat(g(c.cdLogoSize, 16)))) + 'vh'); panel.style.setProperty('--cd-sc', Math.max(30, Math.min(250, parseFloat(g(c.cdScale, 100)))) / 100);
+                    panel.style.setProperty('--cd-box', rgbaB(g(c.cdBoxBg, '#3c406e'), Math.max(0, Math.min(100, parseFloat(g(c.cdBoxOp, 35)))) / 100)); panel.style.setProperty('--cd-tc', g(c.cdTextColor, '#ffffff')); panel.style.setProperty('--cd-sc2', g(c.cdSubColor, '#ff7a1a'));
+                    document.getElementById('brk-cd-title').textContent = g(c.cdTitle, 'NEXT MATCH IN:'); document.getElementById('brk-cd-sub').textContent = g(c.cdSub, '');
+                    pick(st); const cyc2 = Math.max(2, parseInt(g(c.cycleSec, 8)) || 8);
+                    if (!active || cycT === null) { active = true; clearInterval(cycT); cycT = setInterval(() => { idx++; pick(window.__lastBrkState); }, cyc2 * 1000); }
+                    window.__lastBrkState = st; if (!cdT) cdT = setInterval(cdTick, 250); cdTick(); return;
+                }
+                if (cdT) { clearInterval(cdT); cdT = null; }
                 panel.classList.toggle('brk-logo', logoMode); panel.classList.toggle('brk-lbl', logoMode && !!c.showLabel); panel.classList.toggle('brk-tm', logoMode && !!c.showTimer);
                 if (!logoMode) { active = false; clearInterval(cycT); cycT = null; stopDvd(); return; }
                 const bg = Math.max(0, Math.min(100, parseInt(g(c.bgOpacity, 0)))) / 100;
