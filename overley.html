@@ -710,6 +710,30 @@
         .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
         .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
 
+        /* ===== НАСТУПНІ МАТЧІ (padel/nextmatches) ===== */
+        .mt-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--mt-text, #fff); }
+        .mt-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
+        .mt-board { position: absolute; left: calc(var(--mt-x, 50) * 1%); top: calc(var(--mt-y, 50) * 1%); width: var(--mt-w, 1300px); transform: translate(-50%, -50%) scale(calc(var(--mt-sc, 1) * .96)); transition: transform .7s cubic-bezier(.2,.85,.25,1); padding: 30px 40px 34px; border-radius: 22px; background: linear-gradient(180deg, var(--mt-bg1, rgba(11,18,38,0)), var(--mt-bg2, rgba(16,28,61,0))); box-sizing: border-box; }
+        .mt-wrap.on .mt-board { transform: translate(-50%, -50%) scale(var(--mt-sc, 1)); }
+        .mt-logo { display: block; margin: 0 auto 10px; height: calc(var(--mt-lh, 150) * 1px); max-width: 60%; object-fit: contain; }
+        .mt-title { font-size: calc(46px * var(--mt-ts, 1)); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; text-align: center; color: var(--mt-title, #fff); text-shadow: 0 3px 14px rgba(0,0,0,.55); margin: 0 0 22px; }
+        .mt-m { margin-top: 16px; }
+        .mt-cap { text-align: center; font-size: calc(17px * var(--mt-ts, 1)); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--mt-cap, #fff); text-shadow: 0 2px 8px rgba(0,0,0,.6); line-height: 1.5; min-height: 6px; }
+        .mt-cap:empty { display: none; }
+        .mt-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; column-gap: 0; }
+        .mt-p { display: flex; align-items: center; gap: 14px; height: calc(62px * var(--mt-ts, 1)); padding: 0 20px; background: var(--mt-pill, #fff); color: var(--mt-ptext, #1a1a3a); font-size: calc(27px * var(--mt-ts, 1)); font-weight: 800; box-sizing: border-box; min-width: 0; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+        .mt-p.mt-l { justify-content: space-between; border-left: 10px solid var(--mt-acc, #ff7a1a); }
+        .mt-p.mt-r { justify-content: space-between; flex-direction: row-reverse; border-right: 10px solid var(--mt-acc, #ff7a1a); }
+        .mt-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        .mt-p.mt-r .mt-n { text-align: right; }
+        .mt-f { font-style: normal; font-size: 1.1em; line-height: 1; flex: none; }
+        .mt-f:empty { display: none; }
+        .mt-mid { min-width: calc(200px * var(--mt-ts, 1)); padding: 0 18px; text-align: center; font-size: calc(28px * var(--mt-ts, 1)); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--mt-mid, #fff); text-shadow: 0 2px 10px rgba(0,0,0,.6); white-space: nowrap; }
+        .mt-m.pre { opacity: 0; } .mt-m.pre .mt-l { transform: translateX(-120px); } .mt-m.pre .mt-r { transform: translateX(120px); }
+        .mt-m.in { opacity: 1; transition: opacity .6s ease; } .mt-m.in .mt-p { transform: none; transition: transform .75s cubic-bezier(.2,.85,.25,1); }
+        .mt-m.fade.pre .mt-p { transform: none; }
+        .mt-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .8; text-shadow: 0 2px 8px #000; }
+
         /* ===== ТИТРИ ТУРНІРУ (padel/credits) ===== */
         .cr-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10006; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .7s; font-family: var(--cr-font, 'Montserrat'), sans-serif; }
         .cr-wrap.on { opacity: 1; visibility: visible; transition: opacity .7s ease; }
@@ -2066,6 +2090,7 @@
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
     <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
+    <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
@@ -3738,7 +3763,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -3906,6 +3931,59 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             }
             onValue(ref(db, 'padel/rules'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
             window.__rlMirror = (st) => { const v = st && st.rulesCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            return { apply };
+        })();
+
+        // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
+        const MT = (function () {
+            const wrap = document.getElementById('mt-wrap'); if (!wrap) return {};
+            const titleEl = document.getElementById('mt-title'), logoEl = document.getElementById('mt-logo'), list = document.getElementById('mt-list');
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, mcfg = null, mj = '', running = false, lastTs = 0, endT = null, sig = '', timers = [];
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            function look() {
+                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), ts = Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100, op = Math.max(0, Math.min(100, num(cfg.bgOpacity, 0))) / 100, po = Math.max(0, Math.min(100, num(cfg.pillOpacity, 100))) / 100;
+                s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+                s.setProperty('--mt-bg1', rgba(g(cfg.bg1, '#0b1226'), op)); s.setProperty('--mt-bg2', rgba(g(cfg.bg2, '#101c3d'), op));
+                s.setProperty('--mt-pill', rgba(g(cfg.pillBg, '#ffffff'), po)); s.setProperty('--mt-ptext', g(cfg.pillText, '#1a1a3a')); s.setProperty('--mt-acc', g(cfg.accent, '#ff7a1a'));
+                s.setProperty('--mt-text', g(cfg.textColor, '#ffffff')); s.setProperty('--mt-title', g(cfg.titleColor, '#ffffff')); s.setProperty('--mt-mid', g(cfg.midColor, '#ffffff')); s.setProperty('--mt-cap', g(cfg.capColor, '#ffffff'));
+                s.setProperty('--mt-ts', ts); s.setProperty('--mt-w', Math.round(1300 * Math.max(40, Math.min(160, num(cfg.width, 100))) / 100) + 'px'); s.setProperty('--mt-lh', Math.max(30, Math.min(400, num(cfg.logoSize, 150))));
+                s.setProperty('--mt-sc', Math.max(30, Math.min(200, num(cfg.scale, 100))) / 100); s.setProperty('--mt-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--mt-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
+            }
+            function clearT() { timers.forEach(clearTimeout); timers = []; }
+            function model() {
+                return arr(cfg.matches).filter(m => m && (String(m.t1 || '').trim() || String(m.t2 || '').trim())).slice(0, Math.max(1, Math.min(12, Math.round(num(cfg.maxRows, 6)))));
+            }
+            function build() {
+                clearT(); look();
+                titleEl.textContent = g(cfg.title, ''); titleEl.style.display = titleEl.textContent ? '' : 'none';
+                const lg = String(g(cfg.logo, '')).trim(); if (lg) { logoEl.src = lg; logoEl.style.display = ''; } else { logoEl.removeAttribute('src'); logoEl.style.display = 'none'; }
+                const m = model();
+                if (!m.length) { list.innerHTML = '<div class="mt-empty">Додайте матчі на пульті (Наступні матчі)</div>'; return; }
+                const anim = g(cfg.anim, 'slide'), st = Math.max(0, num(cfg.stagger, 0.25)) * 1000, cw = g(cfg.courtWord, 'КОРТ');
+                list.innerHTML = m.map(x => {
+                    const cap = [x.court ? (cw + ' ' + x.court) : '', String(x.time || '').trim(), String(x.cap || '').trim()].filter(Boolean).join(' · ');
+                    return '<div class="mt-m ' + (anim === 'none' ? 'in' : 'pre ' + anim) + '"><div class="mt-cap">' + esc(cap) + '</div><div class="mt-row"><div class="mt-p mt-l"><span class="mt-n">' + esc(x.t1) + '</span><i class="mt-f">' + esc(x.f1) + '</i></div><div class="mt-mid">' + esc(g(x.mid, 'VS')) + '</div><div class="mt-p mt-r"><span class="mt-n">' + esc(x.t2) + '</span><i class="mt-f">' + esc(x.f2) + '</i></div></div></div>';
+                }).join('');
+                if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); }, 250 + j * st)));
+            }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function apply(c) {
+                cfg = c || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v && (!running || ts !== lastTs)) {
+                    lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
+                    const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; clearT(); }, ah * 1000);
+                } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
+                else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); wrap.querySelectorAll('.mt-m').forEach(r => { r.classList.remove('pre'); r.classList.add('in'); }); } }
+            }
+            onValue(ref(db, 'padel/nextmatches'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            window.__mtMirror = (st) => { const v = st && st.mtCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
         })();
