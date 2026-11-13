@@ -2563,7 +2563,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4132,6 +4132,78 @@
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
+        // ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) =====
+        (function mbInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', logo: '', colorA: '#9b1d3a', colorB: '#157a70', cardOpacity: 100, border: '#ffffff', midBg: '#14275c', lgBg: '#0f1f45', textColor: '#ffffff', gamesColor: '#ffffff', abbrLen: 3, scale: 100, x: 15, y: 8, showSets: true, showPlate: true, logos: {} };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS },
+                { k: 'abbrLen', l: 'Скільки літер у скороченні без логотипа (АНД/ОЛК)', t: 'num', step: 1 },
+                { k: 'scale', l: 'Масштаб', t: 'rng', min: 30, max: 250, u: '%' }, { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'cardOpacity', l: 'Непрозорість кольорових плашок', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'showSets', l: 'Рахунок по сетах під центральним логотипом', t: 'chk' }, { k: 'showPlate', l: 'Плашка «SET POINT / Golden…» знизу', t: 'chk' },
+                { k: 'colorA', l: 'Колір плашки команди A', t: 'col' }, { k: 'colorB', l: 'Колір плашки команди B', t: 'col' }, { k: 'border', l: 'Колір рамки', t: 'col' }, { k: 'midBg', l: 'Фон центрального кола (VS)', t: 'col' }, { k: 'lgBg', l: 'Фон бокових кіл (скорочення)', t: 'col' }, { k: 'textColor', l: 'Колір цифр і літер', t: 'col' }, { k: 'gamesColor', l: 'Колір гейм-рахунку', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'mb-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('mt-card') || document.getElementById('sc-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'mbb-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'chk') return '<div class="row">' + lab(f.l + ':') + '<input type="checkbox" data-k="' + f.k + '" id="' + id + '" style="width:20px; height:20px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="1" step="1" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+            }
+            const up = (id, t) => '<label class="btn btn-gray" style="padding:6px 10px; font-size:11px; cursor:pointer;">' + t + '<input type="file" accept="image/*" id="' + id + '" style="display:none;"></label>';
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">🟢 Скорочене табло (логотипи, великий рахунок гейму)</div>' +
+                '<div style="font-size:10px; color:#9bd;">Замінює основне табло на вибраних кортах: великі 15/30/40/AD, геймів під командами, сетів під центральним логотипом. Без логотипа команди — скорочення імен у два рядки, без лого турніру — «VS».</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="mbb-on">▶ УВІМКНУТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="mbb-off">■ ВИМКНУТИ (основне табло)</button></div>' +
+                '<div id="mbb-st" style="font-size:11px;"></div>' +
+                '<div style="background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">Лого турніру (центр)</div><div style="display:flex; gap:6px; align-items:center;">' + up('mbb-flogo', '📁 Завантажити') + '<button type="button" class="btn btn-gray" id="mbb-clogo" style="padding:6px 10px; font-size:11px;">✖ Прибрати (буде VS)</button><span id="mbb-hlogo" style="font-size:11px; color:#8f8;"></span></div></div>' +
+                '<div style="background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">Логотипи команд — <span id="mbb-court">Корт 1</span> (змінюється з вибором корту зверху)</div><div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' + up('mbb-fa', '📁 Команда A (ліво)') + '<button type="button" class="btn btn-gray" id="mbb-ca" style="padding:6px 10px; font-size:11px;">✖</button><span id="mbb-ha" style="font-size:11px; color:#8f8;"></span></div><div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' + up('mbb-fb', '📁 Команда B (право)') + '<button type="button" class="btn btn-gray" id="mbb-cb" style="padding:6px 10px; font-size:11px;">✖</button><span id="mbb-hb" style="font-size:11px; color:#8f8;"></span></div></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('mbb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.mbCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/mbCfg'), data); st(true, 'padel/miniboard відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/miniboard'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const cur = () => { const k = String(typeof courtId !== 'undefined' ? courtId : '1'); if (!d.logos || typeof d.logos !== 'object') d.logos = {}; if (!d.logos[k]) d.logos[k] = { a: '', b: '' }; return d.logos[k]; };
+            function refresh() {
+                F.forEach(f => { const el = card.querySelector('#mbb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#mbb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+                $('mbb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('mbb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                const l = (d.logos && d.logos[String(courtId)]) || {};
+                $('mbb-court').innerText = 'Корт ' + courtId; $('mbb-hlogo').innerText = d.logo ? '✅ є' : ''; $('mbb-ha').innerText = l.a ? '✅ є' : 'немає — скорочення'; $('mbb-hb').innerText = l.b ? '✅ є' : 'немає — скорочення';
+            }
+            $('mbb-on').onclick = () => { d.show = true; save(true); refresh(); };
+            $('mbb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            const pickFile = (id, big, apply) => { $(id).onchange = e => { const f = e.target.files[0]; if (f) tvResize(f, big, big, 'image/png', url => { apply(url); refresh(); save(true); }); e.target.value = ''; }; };
+            pickFile('mbb-flogo', 300, u => { d.logo = u; }); pickFile('mbb-fa', 200, u => { cur().a = u; }); pickFile('mbb-fb', 200, u => { cur().b = u; });
+            $('mbb-clogo').onclick = () => { d.logo = ''; refresh(); save(true); }; $('mbb-ca').onclick = () => { cur().a = ''; refresh(); save(true); }; $('mbb-cb').onclick = () => { cur().b = ''; refresh(); save(true); };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                    const v = f.t === 'chk' ? el.checked : ((f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value); d[f.k] = v;
+                    const lv = card.querySelector('#mbb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh(); let lastC = String(courtId); setInterval(() => { if (String(courtId) !== lastC) { lastC = String(courtId); refresh(); } }, 1000);
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(); };
+            const mirror = () => { const m = state && state.mbCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/miniboard'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== ІМПОРТ З PADO (усе в одному блоці) =====
         (function padoInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -4570,7 +4642,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '🎾 Наступні матчі', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '🎾 Наступні матчі', '🟢 Скорочене табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
             if (!document.getElementById('admin-tournament-panel')) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
