@@ -4432,7 +4432,7 @@
 
         // ===== ПАУЗА / ПЕРЕРВА: оформлення (картка) =====
         (function brkInit() {
-            const DEF = { style: 'clock', anim: 'spin', speed: 6, size: 30, bgOpacity: 0, logoPick: 'all', logoIndex: 1, cycleSec: 8, logoUrl: '', showLabel: false, label: 'ПЕРЕРВА', showTimer: false };
+            const DEF = { style: 'clock', anim: 'spin', speed: 6, size: 30, bgOpacity: 0, logoPick: 'all', logoIndex: 1, cycleSec: 8, logoUrl: '', showLabel: false, label: 'ПЕРЕРВА', showTimer: false, cdTitle: 'NEXT MATCH IN:', cdSub: '', cdMode: 'dur', cdMin: 10, cdTarget: '18:30', cdLogoSize: 16, cdScale: 100, cdBoxOp: 35, cdBoxBg: '#3c406e', cdTextColor: '#ffffff', cdSubColor: '#ff7a1a' };
             let d = Object.assign({}, DEF), timer;
             const t = document.getElementById('ticker-enabled-checkbox'); const anchor = t && t.closest('.card'); if (!anchor) return;
             const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
@@ -4440,7 +4440,20 @@
             const card = document.createElement('div'); card.className = 'card'; card.id = 'brk-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
             const lab = x => '<span style="font-size:11px; color:#ccc;">' + x + '</span>';
             card.innerHTML = '<div style="font-size:10px; color:#9bd;">Кнопка «☕ ПЕРЕРВА» вмикає перерву. Тут обирається, як вона виглядає. Налаштування спільні для всіх кортів.</div><div id="brk-st" style="font-size:11px;"></div>' +
-                '<div class="row">' + lab('Вигляд перерви:') + '<select data-k="style"><option value="clock">⏱ Годинник + рахунок (як було)</option><option value="logo">🖼 Прозорий фон + логотип спонсора</option></select></div>' +
+                '<div class="row">' + lab('Вигляд перерви:') + '<select data-k="style"><option value="clock">⏱ Годинник + рахунок (як було)</option><option value="logo">🖼 Прозорий фон + логотип спонсора</option><option value="cd">⏳ Зворотний відлік «Наступний матч» + логотип</option></select></div>' +
+                '<div data-cd style="display:none; flex-direction:column; gap:8px; background:#1a1a1a; border-radius:6px; padding:6px;">' +
+                '<div style="font-size:10px; color:#9bd;">Логотип — той самий, що нижче (спонсор або власний). Фон: повзунок «Фон» нижче, 0% = чистий.</div>' +
+                '<div class="row">' + lab('Напис над часом:') + '<input type="text" data-k="cdTitle" style="' + inp + '" placeholder="NEXT MATCH IN:"></div>' +
+                '<div class="row">' + lab('Напис під часом (місце, зал…):') + '<input type="text" data-k="cdSub" style="' + inp + '" placeholder="KHALIFA INTERNATIONAL TENNIS AND SQUASH COMPLEX"></div>' +
+                '<div class="row">' + lab('Відлік:') + '<select data-k="cdMode"><option value="dur">Хвилини від початку перерви</option><option value="target">До вказаного часу (годинник)</option></select></div>' +
+                '<div class="row">' + lab('Тривалість (хв):') + '<input type="number" data-k="cdMin" min="0" max="600" style="width:80px; ' + inp + '"></div>' +
+                '<div class="row">' + lab('Час початку матчу:') + '<input type="time" data-k="cdTarget" style="' + inp + '"></div>' +
+                '<div class="row">' + lab('Розмір логотипа (% висоти): <b data-v="cdLogoSize"></b>') + '<input type="range" data-k="cdLogoSize" min="4" max="50"></div>' +
+                '<div class="row">' + lab('Масштаб блоку: <b data-v="cdScale"></b>') + '<input type="range" data-k="cdScale" min="40" max="200"></div>' +
+                '<div class="row">' + lab('Плашка під часом: непрозорість: <b data-v="cdBoxOp"></b>') + '<input type="range" data-k="cdBoxOp" min="0" max="100"></div>' +
+                '<div class="row">' + lab('Колір плашки:') + '<input type="color" data-k="cdBoxBg" style="width:60px; height:30px; padding:0;"></div>' +
+                '<div class="row">' + lab('Колір напису й часу:') + '<input type="color" data-k="cdTextColor" style="width:60px; height:30px; padding:0;"></div>' +
+                '<div class="row">' + lab('Колір нижнього напису:') + '<input type="color" data-k="cdSubColor" style="width:60px; height:30px; padding:0;"></div></div>' +
                 '<div data-logo style="display:flex; flex-direction:column; gap:8px;">' +
                 '<div class="row">' + lab('Анімація логотипа:') + '<select data-k="anim">' + ANIM.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join('') + '</select></div>' +
                 '<div class="row">' + lab('Період анімації / швидкість (с; для «літає» — менше = швидше): <b data-v="speed"></b>') + '<input type="range" data-k="speed" min="1" max="30" step="0.5"></div>' +
@@ -4462,7 +4475,7 @@
             function fill() {
                 card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; });
                 card.querySelectorAll('[data-v]').forEach(b => { const k = b.dataset.v; b.innerText = d[k] + (k === 'speed' ? ' с' : '%'); });
-                card.querySelector('[data-logo]').style.display = d.style === 'logo' ? 'flex' : 'none';
+                card.querySelector('[data-logo]').style.display = (d.style === 'logo' || d.style === 'cd') ? 'flex' : 'none'; card.querySelector('[data-cd]').style.display = d.style === 'cd' ? 'flex' : 'none';
                 card.querySelector('#brk-has').innerText = d.logoUrl ? '✅ власний логотип є' : '';
             }
             card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => { const k = el.dataset.k; d[k] = el.type === 'checkbox' ? el.checked : (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value; fill(); save(); }));
