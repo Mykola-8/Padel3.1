@@ -4006,11 +4006,11 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const hid = document.body.classList.contains('board-hidden');
                 wrap.classList.toggle('on', on && !hid);
                 if (!on) return;
-                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), op = Math.max(0, Math.min(100, num(c.cardOpacity, 100))) / 100;
+                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), op = Math.max(0, Math.min(100, num(c.cardOpacity, 80))) / 100;
                 s.transform = 'translate(-50%, -50%) scale(' + k + ')';
                 s.setProperty('--mb-ca', rgba(g(c.colorA, '#9b1d3a'), op)); s.setProperty('--mb-cb', rgba(g(c.colorB, '#157a70'), op)); s.setProperty('--mb-bd', g(c.border, '#ffffff')); s.setProperty('--mb-midbg', g(c.midBg, '#14275c')); s.setProperty('--mb-lgbg', g(c.lgBg, '#0f1f45'));
                 s.setProperty('--mb-text', g(c.textColor, '#ffffff')); s.setProperty('--mb-gc', g(c.gamesColor, '#ffffff'));
-                s.setProperty('--mb-sc', Math.max(30, Math.min(250, num(c.scale, 100))) / 100); s.setProperty('--mb-x', Math.max(0, Math.min(100, num(c.x, 15)))); s.setProperty('--mb-y', Math.max(0, Math.min(100, num(c.y, 8))));
+                s.setProperty('--mb-sc', Math.max(30, Math.min(250, num(c.scale, 80))) / 100); s.setProperty('--mb-x', Math.max(0, Math.min(100, num(c.x, 10)))); s.setProperty('--mb-y', Math.max(0, Math.min(100, num(c.y, 8))));
                 const lg = (c.logos && (c.logos[courtNum] || c.logos['c' + courtNum])) || {}, n = Math.max(1, Math.min(6, Math.round(num(c.abbrLen, 3))));
                 const nA = nameOf('name-display-t1'), nB = nameOf('name-display-t2');
                 setLogo($('mb-lga'), String(lg.a || '').trim(), nA, n); setLogo($('mb-lgb'), String(lg.b || '').trim(), nB, n);
