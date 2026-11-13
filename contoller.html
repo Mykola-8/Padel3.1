@@ -2563,7 +2563,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4034,6 +4034,104 @@
             window.__scParse = parseTable;
         })();
 
+        // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
+        (function mtInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', title: 'ЧОЛОВІЧИЙ ФІНАЛ', logo: '', logoSize: 150, courtWord: 'КОРТ', anim: 'slide', stagger: 0.25, autoHide: 0, maxRows: 6, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 0, pillOpacity: 100, bg1: '#0b1226', bg2: '#101c3d', pillBg: '#ffffff', pillText: '#1a1a3a', accent: '#ff7a1a', textColor: '#ffffff', titleColor: '#ffffff', midColor: '#ffffff', capColor: '#ffffff', matches: [] };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок (стадія / назва турніру)', t: 'txt' }, { k: 'logo', l: 'Лого над заголовком (URL, необов’язково)', t: 'txt' }, { k: 'logoSize', l: 'Розмір лого', t: 'rng', min: 30, max: 400, u: 'px' },
+                { k: 'courtWord', l: 'Слово перед номером корту (КОРТ / COURT)', t: 'txt' },
+                { k: 'anim', l: 'Анімація', t: 'sel', o: [['slide', 'Команди в’їжджають з боків по черзі'], ['fade', 'Проявляються по черзі'], ['none', 'Без анімації']] },
+                { k: 'stagger', l: 'Затримка між матчами (сек)', t: 'num', step: 0.05 }, { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 }, { k: 'maxRows', l: 'Скільки матчів показувати', t: 'num', step: 1 },
+                { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
+                { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'bgOpacity', l: 'Фон табла: непрозорість (0% = прозорий)', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'pillOpacity', l: 'Плашки з іменами: непрозорість', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'pillBg', l: 'Колір плашок', t: 'col' }, { k: 'pillText', l: 'Колір імен на плашках', t: 'col' }, { k: 'accent', l: 'Колір бокових смужок', t: 'col' },
+                { k: 'titleColor', l: 'Колір заголовка', t: 'col' }, { k: 'midColor', l: 'Колір тексту в центрі (VS)', t: 'col' }, { k: 'capColor', l: 'Колір підпису (корт · час)', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'mt-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('sc-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'mtb-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" step="' + (f.step || 1) + '" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">🎾 Наступні матчі (табло зі списком ігор)</div>' +
+                '<div style="font-size:10px; color:#9bd;">Заголовок, корт і час кожного матчу, імена команд, текст замість «VS» (Півфінал, 1/4 Final, Фінал…) і прозорість фону. Після «ПОКАЗАТИ» табло з’являється на вибраних кортах.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="mtb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="mtb-off">■ СХОВАТИ</button></div>' +
+                '<div id="mtb-st" style="font-size:11px;"></div>' +
+                '<div style="font-size:11px; color:#ccc;">Матчі: <b>Корт · Час · Команда 1 · Текст у центрі · Команда 2</b></div>' +
+                '<div id="mtb-rows" style="display:flex; flex-direction:column; gap:6px; background:#1a1a1a; border-radius:6px; padding:6px;"></div>' +
+                '<div style="display:flex; gap:6px;"><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="mtb-add">＋ Додати матч</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="mtb-clear">🗑 Очистити список</button></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('mtb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.mtCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/mtCfg'), data); st(true, 'padel/nextmatches відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/nextmatches'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const arrOf = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const esc2 = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const ti = 'padding:5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px; min-width:0;';
+            function rows(force) {
+                const el = $('mtb-rows'); if (!el) return; if (!force && el.contains(document.activeElement)) return;
+                const r = arrOf(d.matches);
+                if (!r.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Список порожній — натисніть «Додати матч».</div>'; return; }
+                const co = v => '<option value="">—</option>' + Array.from({ length: 10 }, (_, i) => '<option value="' + (i + 1) + '"' + (String(v) === String(i + 1) ? ' selected' : '') + '>' + (i + 1) + '</option>').join('');
+                el.innerHTML = r.map((m, i) => '<div style="background:#222; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px;">' +
+                    '<div style="display:flex; gap:4px; align-items:center;"><b style="font-size:11px; width:18px;">' + (i + 1) + '</b><span style="font-size:10px; color:#aaa;">Корт</span><select data-mk="' + i + ':court" style="' + ti + ' width:54px;">' + co(m.court) + '</select><input type="text" data-mk="' + i + ':time" value="' + esc2(m.time) + '" placeholder="Час 18:30" style="' + ti + ' width:80px;"><input type="text" data-mk="' + i + ':cap" value="' + esc2(m.cap) + '" placeholder="Підпис (Матч 2…)" style="' + ti + ' flex:1;"><button class="btn btn-gray" style="padding:2px 6px; font-size:11px;" data-mmv="' + i + ':-1">▲</button><button class="btn btn-gray" style="padding:2px 6px; font-size:11px;" data-mmv="' + i + ':1">▼</button><button class="btn btn-gray" style="padding:2px 6px; font-size:12px;" data-md="' + i + '">✕</button></div>' +
+                    '<div style="display:flex; gap:4px;"><input type="text" data-mk="' + i + ':f1" value="' + esc2(m.f1) + '" placeholder="🇦🇷" style="' + ti + ' width:36px; text-align:center;"><input type="text" data-mk="' + i + ':t1" value="' + esc2(m.t1) + '" placeholder="Гравець / Гравець" style="' + ti + ' flex:1;"></div>' +
+                    '<div style="display:flex; gap:4px;"><input type="text" data-mk="' + i + ':mid" value="' + esc2(m.mid) + '" placeholder="VS / Півфінал / 1-2" style="' + ti + ' flex:1; text-align:center; font-weight:700;"></div>' +
+                    '<div style="display:flex; gap:4px;"><input type="text" data-mk="' + i + ':f2" value="' + esc2(m.f2) + '" placeholder="🇪🇸" style="' + ti + ' width:36px; text-align:center;"><input type="text" data-mk="' + i + ':t2" value="' + esc2(m.t2) + '" placeholder="Гравець / Гравець" style="' + ti + ' flex:1;"></div></div>').join('');
+            }
+            const onRow = e => {
+                const t = e.target; if (!t.hasAttribute || !t.hasAttribute('data-mk')) return;
+                const [i, k] = t.getAttribute('data-mk').split(':'), r = arrOf(d.matches).slice(); if (!r[+i]) return;
+                r[+i] = Object.assign({}, r[+i]); r[+i][k] = t.value; d.matches = r; save(false);
+            };
+            $('mtb-rows').addEventListener('input', onRow); $('mtb-rows').addEventListener('change', onRow);
+            $('mtb-rows').addEventListener('click', e => {
+                const b = e.target.closest('[data-md],[data-mmv]'); if (!b) return; const r = arrOf(d.matches).slice();
+                if (b.hasAttribute('data-md')) r.splice(+b.getAttribute('data-md'), 1);
+                else { const [i, dir] = b.getAttribute('data-mmv').split(':').map(Number), j = i + dir; if (j < 0 || j >= r.length) return; const x = r[i]; r[i] = r[j]; r[j] = x; }
+                d.matches = r; rows(true); save(true);
+            });
+            $('mtb-add').onclick = () => { d.matches = arrOf(d.matches).concat([{ court: '', time: '', cap: '', f1: '', t1: '', mid: 'VS', f2: '', t2: '' }]); rows(true); save(false); };
+            $('mtb-clear').onclick = () => { if (confirm('Очистити список матчів?')) { d.matches = []; rows(true); save(true); } };
+            function refresh(force) {
+                F.forEach(f => { const el = card.querySelector('#mtb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#mtb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+                $('mtb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('mtb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                rows(force);
+            }
+            $('mtb-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            $('mtb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = (f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value; d[f.k] = v;
+                    const lv = card.querySelector('#mtb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(true); };
+            const mirror = () => { const m = state && state.mtCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/nextmatches'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== ІМПОРТ З PADO (усе в одному блоці) =====
         (function padoInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -4109,14 +4207,15 @@
                 rules: Object.assign({ name: '📜 Регламент турніру (усі корти)' }, EXP('rl-on', 'rl-off')),
                 rkm: Object.assign({ name: '📊 Рух у рейтингу (усі корти)' }, EXP('rkm-on', 'rkm-off')),
                 sc: Object.assign({ name: '📋 Таблиця рахунків (усі корти)' }, EXP('scb-on', 'scb-off')),
+                mt: Object.assign({ name: '🎾 Наступні матчі (усі корти)' }, EXP('mtb-on', 'mtb-off')),
                 rank: Object.assign({ name: '🏆 Рейтинг команд (усі корти)' }, ALL('rk', s => s.teamRanking && s.teamRanking.show)),
                 groups: Object.assign({ name: '👥 Групи (усі корти)' }, ALL('gr', s => s.groups && s.groups.show)),
                 poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
                 credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
-            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
-            const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm' || id === 'sc') ? 20 : (id === 'credits' ? 60 : 7) })) });
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
+            const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm' || id === 'sc') ? 20 : (id === 'mt' ? 10 : (id === 'credits' ? 60 : 7)) })) });
             const norm = v => {
                 const base = DEFD(); if (!v || typeof v !== 'object') return base;
                 const arr = Array.isArray(v.items) ? v.items : (v.items && typeof v.items === 'object' ? Object.values(v.items) : []);
@@ -4384,7 +4483,7 @@
             const SINGLE = [['btn-mi-toggle', s => s.matchIntro && s.matchIntro.show], ['btn-rk-toggle', s => s.teamRanking && s.teamRanking.show],
                 ['po-btn-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show], ['po-btn-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show],
                 ['gr-btn-show', s => s.groups && s.groups.show], ['ic-btn-show', s => s.introCard && s.introCard.show]];
-            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off'], ['rkm-on', 'rkm-off'], ['scb-on', 'scb-off'], ['cb-on', 'cb-off']];
+            const PAIRS = [['crew-on', 'crew-off'], ['spcard-on', 'spcard-off'], ['cr-on', 'cr-off'], ['rl-on', 'rl-off'], ['rkm-on', 'rkm-off'], ['scb-on', 'scb-off'], ['mtb-on', 'mtb-off'], ['cb-on', 'cb-off']];
             function tick() {
                 try {
                     const s = (typeof state === 'object' && state) || {};
@@ -4458,7 +4557,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '🎾 Наступні матчі', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
             if (!document.getElementById('admin-tournament-panel')) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
@@ -5812,7 +5911,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
             const G = () => { const a = D[0] || {}, b = D[1] || {}; return { items: Object.assign({}, b.items || {}, a.items || {}), def: Object.assign({}, b.def || {}, a.def || {}) }; };
             const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            host.innerHTML = '<div style="font-size:13px; font-weight:800; color:#e0b878;">🐦 Талісмани (анімація на трансляції)</div><div id="ms-st" style="font-size:12px; min-height:16px;"></div><div id="ms-list" style="display:flex; flex-direction:column; gap:6px;"></div>' +
+            host.innerHTML = '<div style="font-size:13px; font-weight:800; color:#e0b878;">🐦 Талісмани (анімація на трансляції)</div><label style="font-size:12px; font-weight:700; color:#fff; display:flex; gap:8px; align-items:center; background:#2a2a2a; border-radius:6px; padding:8px;"><input type="checkbox" id="ms-all" style="width:20px; height:20px;"> Показувати на ВСІХ кортах</label><div id="ms-st" style="font-size:12px; min-height:16px;"></div><div id="ms-list" style="display:flex; flex-direction:column; gap:6px;"></div>' +
                 '<div style="border-top:1px dashed #444; padding-top:8px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">➕ Додати талісман</div>' +
                 '<input id="ms-name" placeholder="Назва" style="' + inp + '"><input id="ms-url" placeholder="Посилання на .webm / .mp4 / .gif / .png (або завантажте файл)" style="' + inp + '">' +
                 '<div style="display:flex; gap:6px;"><button class="btn" id="ms-file-btn" style="flex:1; padding:10px; font-size:12px; background:#444;">📁 Завантажити файл</button><button class="btn btn-green" id="ms-add" style="flex:1; padding:10px; font-size:12px; font-weight:800;">➕ Додати</button></div>' +
@@ -5827,8 +5926,11 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
                 return attempt(base);
             }
             const cur = () => state.mascotId || 'def';
-            function play(id) { state.mascotId = id; state.mascotTs = Date.now(); state.mascotLoop = false; set(matchRef, state); }
-            function loop(id) { if (state.mascotLoop && cur() === id) state.mascotLoop = false; else { state.mascotId = id; state.mascotLoop = true; } set(matchRef, state); }
+            const allOn = () => { const c = host.querySelector('#ms-all'); return !!(c && c.checked); };
+            try { const c = host.querySelector('#ms-all'); c.checked = localStorage.getItem('ms-all') === '1'; c.onchange = () => { try { localStorage.setItem('ms-all', c.checked ? '1' : '0'); } catch (e) {} }; } catch (e) {}
+            function toAll() { if (!allOn()) return; for (let i = 1; i <= 10; i++) { const b = 'padel/courts/court_' + i + '/'; set(ref(db, b + 'mascotId'), state.mascotId || 'def'); set(ref(db, b + 'mascotTs'), state.mascotTs || 0); set(ref(db, b + 'mascotLoop'), !!state.mascotLoop); } }
+            function play(id) { state.mascotId = id; state.mascotTs = Date.now(); state.mascotLoop = false; set(matchRef, state); toAll(); }
+            function loop(id) { if (state.mascotLoop && cur() === id) state.mascotLoop = false; else { state.mascotId = id; state.mascotLoop = true; } set(matchRef, state); toAll(); }
             let lastSig = '', openIds = {};
             function render(force) {
                 const g = G(), sig = JSON.stringify([Object.keys(g.items).map(k => [k, g.items[k].name, g.items[k].size, g.items[k].x, g.items[k].y, g.items[k].dur, g.items[k].key, g.items[k].keyTol, g.items[k].type]), g.def, state.mascotId, !!state.mascotLoop]);
