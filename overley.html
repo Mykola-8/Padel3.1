@@ -710,6 +710,32 @@
         .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
         .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
 
+        /* ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) ===== */
+        .mb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; font-family: 'Montserrat', sans-serif; color: var(--mb-text, #fff); }
+        .mb-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
+        html.mb-on .scoreboard-container { opacity: 0 !important; visibility: hidden !important; }
+        .mb-board { position: absolute; left: calc(var(--mb-x, 15) * 1%); top: calc(var(--mb-y, 12) * 1%); transform: translate(-50%, 0) scale(var(--mb-sc, 1)); transform-origin: top center; display: flex; flex-direction: column; align-items: center; }
+        .mb-top { display: flex; align-items: flex-start; }
+        .mb-side { display: flex; flex-direction: column; align-items: center; width: 220px; }
+        .mb-card { position: relative; width: 220px; height: 132px; border-radius: 22px; border: 3px solid var(--mb-bd, #fff); box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+        .mb-side.a .mb-card { background: var(--mb-ca, rgba(155,29,58,1)); } .mb-side.b .mb-card { background: var(--mb-cb, rgba(21,122,112,1)); }
+        .mb-side.a .mb-card { padding-left: 46px; } .mb-side.b .mb-card { padding-right: 46px; }
+        .mb-pt { font-size: 98px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 3px 10px rgba(0,0,0,.35); }
+        .mb-pt.sm { font-size: 66px; }
+        .mb-lg { position: absolute; top: 50%; width: 92px; height: 92px; margin-top: -46px; border-radius: 50%; border: 3px solid var(--mb-bd, #fff); background: var(--mb-lgbg, #0f1f45); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 900; font-size: 30px; line-height: 1.05; letter-spacing: 1px; box-sizing: border-box; z-index: 3; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+        .mb-lg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mb-side.a .mb-lg { left: -52px; } .mb-side.b .mb-lg { right: -52px; }
+        .mb-srv { position: absolute; top: 8px; font-style: normal; font-size: 22px; opacity: 0; transition: opacity .3s; } .mb-srv.on { opacity: 1; }
+        .mb-side.a .mb-srv { right: 10px; } .mb-side.b .mb-srv { left: 10px; }
+        .mb-g { margin-top: 10px; min-width: 70px; padding: 2px 18px; border-radius: 14px; background: rgba(0,0,0,.5); font-size: 44px; font-weight: 900; text-align: center; font-variant-numeric: tabular-nums; color: var(--mb-gc, #fff); }
+        .mb-gl { margin-top: 10px; }
+        .mb-midcol { width: 110px; margin: 0 -2px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 4; }
+        .mb-mid { position: relative; margin-top: 8px; width: 126px; height: 126px; border-radius: 50%; border: 4px solid var(--mb-bd, #fff); background: var(--mb-midbg, #14275c); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 900; box-sizing: border-box; box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+        .mb-mid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mb-sets { margin-top: 12px; font-size: 34px; font-weight: 900; padding: 2px 16px; border-radius: 14px; background: rgba(0,0,0,.5); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .mb-plate { margin-top: 10px; padding: 5px 22px; border-radius: 10px; background: #f59e0b; color: #111; font-size: 24px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; display: none; white-space: nowrap; }
+        .mb-plate.on { display: block; }
+
         /* ===== НАСТУПНІ МАТЧІ (padel/nextmatches) ===== */
         .mt-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--mt-text, #fff); }
         .mt-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
@@ -2100,6 +2126,11 @@
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
     <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
+    <div class="mb-wrap" id="mb-wrap"><div class="mb-board" id="mb-board"><div class="mb-top">
+        <div class="mb-side a"><div class="mb-card"><div class="mb-lg" id="mb-lga"></div><i class="mb-srv" id="mb-sra">🎾</i><span class="mb-pt" id="mb-pa">0</span></div><div class="mb-g" id="mb-ga">0</div></div>
+        <div class="mb-midcol"><div class="mb-mid" id="mb-mid">VS</div><div class="mb-sets" id="mb-sets">0 - 0</div></div>
+        <div class="mb-side b"><div class="mb-card"><div class="mb-lg" id="mb-lgb"></div><i class="mb-srv" id="mb-srb">🎾</i><span class="mb-pt" id="mb-pb">0</span></div><div class="mb-g" id="mb-gb">0</div></div>
+    </div><div class="mb-plate" id="mb-plate"></div></div></div>
     <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
@@ -3774,7 +3805,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -3944,6 +3975,65 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             window.__rlMirror = (st) => { const v = st && st.rulesCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
+        })();
+
+        // ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) =====
+        const MB = (function () {
+            const wrap = document.getElementById('mb-wrap'); if (!wrap) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let gcfg = null, mcfg = null, mj = '', lastSig = '', lastTxt = {};
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const cfg = () => gcfg || mcfg || {};
+            const $ = id => document.getElementById(id);
+            const txt = id => { const e = $(id); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; };
+            const nameOf = id => { const e = $(id); if (!e) return ''; let t = ''; e.childNodes.forEach(n => { if (n.nodeType === 3) t += n.textContent; }); return (t || e.textContent || '').replace(/\s+/g, ' ').trim(); };
+            function abbr(name, n) {
+                const parts = String(name || '').split(/\s*\/\s*|\s*&\s*|\s+[-–—]\s*|\s*[-–—]\s+/).map(x => x.trim()).filter(Boolean).slice(0, 2);
+                return parts.map(p => esc(Array.from(p).slice(0, n).join('').toUpperCase())).join('<br>');
+            }
+            function setLogo(el, src, name, n) {
+                const key = src + '|' + name + '|' + n; if (el.dataset.k === key) return; el.dataset.k = key;
+                if (src) el.innerHTML = '<img src="' + esc(src) + '" alt="">'; else el.innerHTML = abbr(name, n);
+                el.style.background = src ? 'transparent' : '';
+            }
+            function visibleNow() { const c = cfg(), ct = g(c.court, 'all'); return !!c.show && (ct === 'all' || String(ct) === String(courtNum)); }
+            function tick() {
+                const c = cfg(), on = visibleNow();
+                document.documentElement.classList.toggle('mb-on', on);
+                const hid = document.body.classList.contains('board-hidden');
+                wrap.classList.toggle('on', on && !hid);
+                if (!on) return;
+                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), op = Math.max(0, Math.min(100, num(c.cardOpacity, 100))) / 100;
+                s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+                s.setProperty('--mb-ca', rgba(g(c.colorA, '#9b1d3a'), op)); s.setProperty('--mb-cb', rgba(g(c.colorB, '#157a70'), op)); s.setProperty('--mb-bd', g(c.border, '#ffffff')); s.setProperty('--mb-midbg', g(c.midBg, '#14275c')); s.setProperty('--mb-lgbg', g(c.lgBg, '#0f1f45'));
+                s.setProperty('--mb-text', g(c.textColor, '#ffffff')); s.setProperty('--mb-gc', g(c.gamesColor, '#ffffff'));
+                s.setProperty('--mb-sc', Math.max(30, Math.min(250, num(c.scale, 100))) / 100); s.setProperty('--mb-x', Math.max(0, Math.min(100, num(c.x, 15)))); s.setProperty('--mb-y', Math.max(0, Math.min(100, num(c.y, 8))));
+                const lg = (c.logos && (c.logos[courtNum] || c.logos['c' + courtNum])) || {}, n = Math.max(1, Math.min(6, Math.round(num(c.abbrLen, 3))));
+                const nA = nameOf('name-display-t1'), nB = nameOf('name-display-t2');
+                setLogo($('mb-lga'), String(lg.a || '').trim(), nA, n); setLogo($('mb-lgb'), String(lg.b || '').trim(), nB, n);
+                const mid = $('mb-mid'), tl = String(g(c.logo, '')).trim(), mk = tl + '|';
+                if (mid.dataset.k !== mk) { mid.dataset.k = mk; mid.innerHTML = tl ? '<img src="' + esc(tl) + '" alt="">' : 'VS'; }
+                const pb = $('points-board-outer'), showPts = pb && pb.classList.contains('visible');
+                const pa = showPts ? txt('pb-t1-pts') : '0', pbb = showPts ? txt('pb-t2-pts') : '0';
+                const A = $('mb-pa'), B = $('mb-pb'); A.textContent = pa; B.textContent = pbb; A.classList.toggle('sm', pa.length > 2); B.classList.toggle('sm', pbb.length > 2);
+                const sets = [];
+                for (let i = 1; i <= 9; i++) { const b1 = $('t1-s' + i), b2 = $('t2-s' + i); if (!b1 || !b2) break; if (b1.style.display === 'none') continue; sets.push({ h1: parseInt(b1.textContent) || 0, h2: parseInt(b2.textContent) || 0, cur: b1.classList.contains('set-current') }); }
+                if (!sets.length) sets.push({ h1: 0, h2: 0, cur: true });
+                const cur = sets.filter(x => x.cur).pop() || sets[sets.length - 1];
+                let wa = 0, wb = 0; sets.forEach(x => { if (x !== cur) { if (x.h1 > x.h2) wa++; else if (x.h2 > x.h1) wb++; } });
+                $('mb-ga').textContent = cur.h1; $('mb-gb').textContent = cur.h2; $('mb-sets').textContent = wa + ' - ' + wb; $('mb-sets').style.display = c.showSets === false ? 'none' : '';
+                const sa = $('srv1'), sb = $('srv2'); $('mb-sra').classList.toggle('on', !!(sa && sa.classList.contains('active'))); $('mb-srb').classList.toggle('on', !!(sb && sb.classList.contains('active')));
+                const rb = $('ribbon-match'), co = $('advantage-callout'); let pl = '';
+                if (c.showPlate !== false) { if (rb && rb.classList.contains('visible')) pl = rb.textContent.trim(); if (co && co.classList.contains('visible')) pl = co.textContent.trim(); }
+                const pe = $('mb-plate'); pe.textContent = pl; pe.classList.toggle('on', !!pl);
+            }
+            onValue(ref(db, 'padel/miniboard'), sn => { gcfg = sn.val(); tick(); }, () => { gcfg = null; });
+            window.__mbMirror = (st) => { const v = st && st.mbCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; tick(); };
+            setInterval(tick, 250);
+            return { tick };
         })();
 
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
