@@ -4134,8 +4134,8 @@
 
         // ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) =====
         (function mbInit() {
-            const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', logo: '', colorA: '#9b1d3a', colorB: '#157a70', cardOpacity: 100, border: '#ffffff', midBg: '#14275c', lgBg: '#0f1f45', textColor: '#ffffff', gamesColor: '#ffffff', abbrLen: 3, scale: 100, x: 15, y: 8, showSets: true, showPlate: true, logos: {} };
+            const themeSel = document.getElementById('board-theme-selector'), themeCard = themeSel && themeSel.closest('.card'); if (!themeCard) return;
+            const DEF = { show: false, court: 'all', logo: '', colorA: '#9b1d3a', colorB: '#157a70', cardOpacity: 80, border: '#ffffff', midBg: '#14275c', lgBg: '#0f1f45', textColor: '#ffffff', gamesColor: '#ffffff', abbrLen: 3, scale: 80, x: 10, y: 8, showSets: true, showPlate: true, logos: {} };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS },
@@ -4147,8 +4147,10 @@
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
-            const card = document.createElement('div'); card.id = 'mb-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
-            const anchor = document.getElementById('mt-card') || document.getElementById('sc-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const card = document.createElement('div'); card.id = 'mb-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🟢 Скорочене табло</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            themeCard.after(head); head.after(card);
             const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
             function fld(f) {
                 const id = 'mbb-f-' + f.k;
@@ -4642,7 +4644,7 @@
         (function tcolInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const cards = Array.from(tab.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '🎾 Наступні матчі', '🟢 Скорочене табло', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
+            const titles = ['🎄 Тема турнірних табл (Різдво)', '💾 Збереження турніру (файл)', '🎬 Хто грає', '🏆 Стадія турніру (плашка)', '🏆 Рейтинг команд', '🏆 Play-off: верхня сітка', '🏆 Play-off: нижня сітка', '👥 Групи', '🎬 Вступне табло', '📊 Рух у рейтингу', '📥 Імпорт з PADO', '🌐 Імпорт з Rankedin', '📋 Таблиця рахунків', '🎾 Наступні матчі', '👔 Організатори турніру', '🤝 Спонсори: логотип і опис', '🎞 Титри турніру (прокрутка знизу вгору)', '📜 Регламент турніру', '⏯ Автоматичний показ таблиць', '📐 Банер у куті (перспектива)'];
             if (!document.getElementById('admin-tournament-panel')) { const ix = titles.indexOf('🏆 Стадія турніру (плашка)'); if (ix >= 0) titles.splice(ix, 1); }
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('tcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
