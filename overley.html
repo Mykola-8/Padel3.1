@@ -710,6 +710,25 @@
         .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
         .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
 
+        /* ===== СТІНГЕР / ЗАСТАВКА МІЖ ГЕЙМАМИ (padel/stinger) ===== */
+        .st-wrap { position: fixed; inset: 0; z-index: 10020; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .45s; }
+        .st-wrap.on { opacity: 1; visibility: visible; transition: opacity .25s ease; }
+        .st-wrap.out { opacity: 0; transition: opacity .4s ease, visibility 0s linear .45s; }
+        .st-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 40%, rgba(20,40,110,.9), rgba(3,6,20,1) 70%); opacity: var(--st-bg, .8); }
+        .st-sparks { position: absolute; inset: 0; } .st-sparks i { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #ff9a3c; box-shadow: 0 0 10px 2px rgba(255,150,60,.7); opacity: 0; animation: stSpark 1.6s ease-in-out infinite; }
+        @keyframes stSpark { 0%,100% { opacity: 0; transform: translateY(0); } 40% { opacity: .9; } 70% { opacity: .3; transform: translateY(-40px); } }
+        .st-streak { position: absolute; left: 0; width: 100%; height: 14px; top: 47%; background: linear-gradient(90deg, transparent, var(--st-acc, #fff) 50%, transparent); filter: blur(5px); opacity: 0; }
+        .st-streak.s2 { top: 53%; height: 6px; }
+        .st-wrap.on .st-streak { animation: stSweep .75s cubic-bezier(.5,0,.2,1) forwards; } .st-wrap.on .st-streak.s2 { animation-delay: .08s; }
+        @keyframes stSweep { 0% { transform: translateX(-100%); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+        .st-logo, .st-video { position: absolute; left: 50%; top: 50%; height: calc(var(--st-h, 36) * 1vh); max-width: 80vw; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 0 28px var(--st-acc, #fff)); }
+        .st-video { height: 100vh; width: 100vw; max-width: none; filter: none; object-fit: cover; }
+        .st-wrap.on .st-logo { animation: stLogoIn .7s cubic-bezier(.2,.9,.25,1) .18s both; }
+        .st-wrap.out .st-logo { animation: stLogoOut .4s ease-in forwards; }
+        @keyframes stLogoIn { 0% { opacity: 0; transform: translate(-70%, -50%) scale(.92); filter: blur(14px) drop-shadow(0 0 28px var(--st-acc, #fff)); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0) drop-shadow(0 0 28px var(--st-acc, #fff)); } }
+        @keyframes stLogoOut { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-28%, -50%) scale(1.05); filter: blur(12px) drop-shadow(0 0 28px var(--st-acc, #fff)); } }
+        .st-wrap.vid .st-bg, .st-wrap.vid .st-sparks, .st-wrap.vid .st-streak, .st-wrap.vid .st-logo { display: none; }
+
         /* ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) ===== */
         .mb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; font-family: 'Montserrat', sans-serif; color: var(--mb-text, #fff); }
         .mb-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
@@ -2126,6 +2145,7 @@
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
     <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
+    <div class="st-wrap" id="st-wrap"><div class="st-bg"></div><div class="st-sparks" id="st-sparks"></div><div class="st-streak"></div><div class="st-streak s2"></div><img class="st-logo" id="st-logo" alt=""><video class="st-video" id="st-video" muted playsinline style="display:none"></video></div>
     <div class="mb-wrap" id="mb-wrap"><div class="mb-board" id="mb-board"><div class="mb-top">
         <div class="mb-side a"><div class="mb-card"><div class="mb-lg" id="mb-lga"></div><i class="mb-srv" id="mb-sra">🎾</i><span class="mb-pt" id="mb-pa">0</span></div><div class="mb-g" id="mb-ga">0</div></div>
         <div class="mb-midcol"><div class="mb-mid" id="mb-mid">VS</div><div class="mb-sets" id="mb-sets">0 - 0</div></div>
@@ -3805,7 +3825,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__stgMirror && window.__stgMirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -3977,6 +3997,102 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             return { apply };
         })();
 
+        // ===== СТІНГЕР: заставка після вибраних геймів (padel/stinger) =====
+        const STG = (function () {
+            const wrap = document.getElementById('st-wrap'); if (!wrap) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            const logoEl = document.getElementById('st-logo'), vid = document.getElementById('st-video'), sp = document.getElementById('st-sparks');
+            let gcfg = null, mcfg = null, mj = '', prev = null, lastTest = null, t1 = null, t2 = null, t3 = null;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const cfg = () => gcfg || mcfg || {};
+            const $ = id => document.getElementById(id);
+            for (let i = 0; i < 16; i++) { const d = document.createElement('i'); d.style.left = (Math.random() * 100) + '%'; d.style.top = (20 + Math.random() * 60) + '%'; d.style.animationDelay = (Math.random() * 1.6) + 's'; d.style.width = d.style.height = (3 + Math.random() * 4) + 'px'; sp.appendChild(d); }
+            function logoSrc(c) { const m = (window.__mbCfgNow && window.__mbCfgNow()) || {}; return String(g(c.logo, '') || g(m.logo, '') || '').trim(); }
+            function play() {
+                const c = cfg(); const dur = Math.max(0.8, num(c.dur, 2)) * 1000;
+                clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+                wrap.classList.remove('on', 'out', 'vid'); void wrap.offsetWidth;
+                const s = wrap.style; s.setProperty('--st-bg', Math.max(0, Math.min(100, num(c.bgOpacity, 80))) / 100); s.setProperty('--st-acc', g(c.accent, '#ffffff')); s.setProperty('--st-h', Math.max(8, Math.min(90, num(c.logoSize, 36))));
+                const v = String(g(c.video, '')).trim();
+                if (v) { wrap.classList.add('vid'); vid.style.display = ''; if (vid.getAttribute('src') !== v) vid.src = v; try { vid.currentTime = 0; vid.play().catch(() => {}); } catch (e) {} }
+                else { vid.style.display = 'none'; try { vid.pause(); } catch (e) {} const l = logoSrc(c); if (l) { if (logoEl.getAttribute('src') !== l) logoEl.src = l; logoEl.style.display = ''; } else logoEl.style.display = 'none'; }
+                wrap.classList.add('on');
+                t2 = setTimeout(() => { wrap.classList.add('out'); }, Math.max(300, dur - 400));
+                t3 = setTimeout(() => { wrap.classList.remove('on', 'out', 'vid'); try { vid.pause(); } catch (e) {} }, dur + 100);
+            }
+            function trigger() { const c = cfg(), d = Math.max(0, num(c.delay, 0)) * 1000; clearTimeout(t1); t1 = setTimeout(play, d); }
+            function curSet() {
+                const arr = [];
+                for (let i = 1; i <= 9; i++) { const b1 = $('t1-s' + i), b2 = $('t2-s' + i); if (!b1 || !b2) break; if (b1.style.display === 'none') continue; arr.push({ i: i, g: (parseInt(b1.textContent) || 0) + (parseInt(b2.textContent) || 0), cur: b1.classList.contains('set-current') }); }
+                if (!arr.length) return { i: 1, g: 0 };
+                return arr.filter(x => x.cur).pop() || arr[arr.length - 1];
+            }
+            function listHas(c, n) {
+                const l = String(g(c.games, '')).split(/[,;\s]+/).map(x => parseInt(x)).filter(x => x > 0);
+                if (l.indexOf(n) >= 0) return true;
+                const ev = Math.round(num(c.every, 0)); return ev > 0 && n % ev === 0;
+            }
+            function tick() {
+                const c = cfg(), ct = g(c.court, 'all'), on = !!c.show && (ct === 'all' || String(ct) === String(courtNum));
+                const now = curSet();
+                if (lastTest === null) lastTest = c.testTs || 0;
+                if (c.testTs && c.testTs !== lastTest) { lastTest = c.testTs; if (ct === 'all' || String(ct) === String(courtNum)) trigger(); }
+                if (on && prev && prev.i === now.i && now.g === prev.g + 1 && listHas(c, now.g)) trigger();
+                prev = now;
+            }
+            onValue(ref(db, 'padel/stinger'), sn => { gcfg = sn.val(); }, () => { gcfg = null; });
+            window.__stMirror = (st) => { const v = st && st.stCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
+            setInterval(tick, 300);
+            return { play };
+        })();
+
+        // ===== АВТО-ЗАСТАВКА ПІСЛЯ ГЕЙМУ (padel/stinger) =====
+        const STGAUTO = (function () {
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let gcfg = null, mcfg = null, mj = '', prev = null, lastTs = 0, hideT = null, el = null, media = null, busy = false, firstTs = true;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const cfg = () => gcfg || mcfg || {};
+            function ensure() {
+                if (el) return; el = document.createElement('div'); el.id = 'stg-wrap';
+                el.style.cssText = 'position:fixed; inset:0; z-index:100001; pointer-events:none; opacity:0; visibility:hidden; background:transparent; transition:opacity .15s linear, visibility 0s linear .15s;';
+                document.body.appendChild(el);
+            }
+            function visibleFor(c) { const ct = g(c.court, 'all'); return !!c.enabled && (ct === 'all' || String(ct) === String(courtNum)); }
+            function play(c) {
+                const src = String(g(c.src, '')).trim(); if (!src || busy) return; ensure(); busy = true; clearTimeout(hideT);
+                const isImg = /^data:image\//i.test(src) || /\.(png|jpe?g|gif|webp|svg)(\?|#|$)/i.test(src);
+                el.innerHTML = '';
+                if (isImg) { media = document.createElement('img'); media.src = src; }
+                else { media = document.createElement('video'); media.src = src; media.muted = !c.sound; media.playsInline = true; media.autoplay = true; media.preload = 'auto'; try { media.currentTime = 0; } catch (e) {} }
+                media.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; object-fit:' + g(c.fit, 'cover') + ';';
+                el.appendChild(media);
+                el.style.visibility = 'visible'; el.style.opacity = '1'; el.style.transition = 'opacity .15s linear';
+                if (media.play) { const p = media.play(); if (p && p.catch) p.catch(() => { try { media.muted = true; media.play(); } catch (e) {} }); }
+                const dur = Math.max(0.3, Math.min(30, parseFloat(g(c.duration, 2)) || 2)) * 1000;
+                hideT = setTimeout(() => { el.style.transition = 'opacity .2s linear, visibility 0s linear .2s'; el.style.opacity = '0'; el.style.visibility = 'hidden'; setTimeout(() => { if (el) el.innerHTML = ''; busy = false; }, 260); }, dur);
+            }
+            function parseList(t) { return String(t == null ? '' : t).split(/[^0-9]+/).filter(Boolean).map(x => parseInt(x)); }
+            function sums(st) { const a = []; for (let n = 1; n <= 5; n++) a.push((parseInt(st['t1_s' + n]) || 0) + (parseInt(st['t2_s' + n]) || 0)); return a; }
+            function check() {
+                const c = cfg(); const st = (typeof lastKnownState !== 'undefined') ? lastKnownState : null; if (!st) return;
+                if (c.testTs && c.testTs !== lastTs) { const first = firstTs; lastTs = c.testTs; firstTs = false; if (!first && (Date.now() - c.testTs) < 15000) play(c); }
+                else if (firstTs) { firstTs = false; lastTs = c.testTs || 0; }
+                const cur = sums(st), key = (st.currentSet || 1);
+                if (prev && prev.court === courtNum && visibleFor(c) && !st.isMatchFinished && !st.isAmericano && !st.isMexicano) {
+                    const list = parseList(c.afterGames), odd = !!c.allOdd;
+                    for (let i = 0; i < 5; i++) {
+                        if (cur[i] === prev.s[i] + 1) { const n = cur[i]; if ((odd && n % 2 === 1) || list.indexOf(n) >= 0) { play(c); break; } }
+                    }
+                }
+                prev = { s: cur, set: key, court: courtNum };
+            }
+            onValue(ref(db, 'padel/stinger'), sn => { gcfg = sn.val(); }, () => { gcfg = null; });
+            window.__stgMirror = (st) => { const v = st && st.stgCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
+            setInterval(() => { try { check(); } catch (e) {} }, 250);
+            return { play };
+        })();
+
         // ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) =====
         const MB = (function () {
             const wrap = document.getElementById('mb-wrap'); if (!wrap) return {};
@@ -3987,6 +4103,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const cfg = () => gcfg || mcfg || {};
+            window.__mbCfgNow = cfg;
             const $ = id => document.getElementById(id);
             const txt = id => { const e = $(id); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; };
             const nameOf = id => { const e = $(id); if (!e) return ''; let t = ''; e.childNodes.forEach(n => { if (n.nodeType === 3) t += n.textContent; }); return (t || e.textContent || '').replace(/\s+/g, ' ').trim(); };
