@@ -3265,6 +3265,7 @@
         let setsTimeDurationsHistory = ["00:00", "00:00", "00:00", "00:00", "00:00"], matchTimerStarted = false, breakSeconds = 0, breakInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('pv') === '1') { document.addEventListener('play', e => { try { e.target.muted = true; } catch (_) {} }, true); try { window.speechSynthesis && (window.speechSynthesis.speak = function () {}); } catch (_) {} }
 
         // ===== ШІ-коментатор усередині overlay (?ai=1) — працює з одного пристрою (віджет у Prism/OBS) =====
         const CM = (function () {
