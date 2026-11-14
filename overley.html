@@ -544,6 +544,16 @@
         .ic-wrap[data-anim=slideRight]:not(.visible) .ic-panel { transform: translateX(1100px); }
         .ic-wrap[data-anim=wipe]:not(.visible) .ic-panel { clip-path: inset(0 50% 0 50%); }
         .ic-wrap[data-anim=flip]:not(.visible) .ic-panel { transform: perspective(1400px) rotateX(90deg); }
+        /* ===== Вступне табло: «Логотип → табло» (трансформація) ===== */
+        @keyframes icMorph { 0% { opacity: 0; clip-path: inset(200px 420px 200px 420px); } 8% { opacity: 1; clip-path: inset(200px 420px 200px 420px); } 42% { opacity: 1; clip-path: inset(200px 420px 200px 420px); } 62% { opacity: 1; clip-path: inset(235px 110px 235px 110px); } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }
+        @keyframes icMwOut { 0%, 50% { opacity: 1; } 72%, 100% { opacity: 0; } }
+        @keyframes icMorphIn { 0%, 62% { opacity: 0; } 92%, 100% { opacity: 1; } }
+        .ic-mw { position: absolute; inset: 0; z-index: 5; background: #fff; display: none; align-items: center; justify-content: center; pointer-events: none; color: #10213f; font-size: 54px; font-weight: 800; letter-spacing: 2px; text-align: center; padding: 0 20px; text-transform: uppercase; }
+        .ic-mw img { max-width: 320px; max-height: 300px; object-fit: contain; }
+        .ic-wrap[data-anim=logoMorph] .ic-mw { display: flex; }
+        .ic-wrap[data-anim=logoMorph].visible .ic-panel { animation: icMorph calc(var(--ic-d, .6s) * 4) cubic-bezier(.5, 0, .2, 1) both; transition: none; }
+        .ic-wrap[data-anim=logoMorph].visible .ic-mw { animation: icMwOut calc(var(--ic-d, .6s) * 4) linear both; }
+        .ic-wrap[data-anim=logoMorph].visible .ic-top, .ic-wrap[data-anim=logoMorph].visible .ic-body, .ic-wrap[data-anim=logoMorph].visible .ic-foot, .ic-wrap[data-anim=logoMorph].visible .ic-sl { animation: icMorphIn calc(var(--ic-d, .6s) * 4) linear both; }
         .ic-top { height: 86px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--ic-toptext, #fff); font-size: 42px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; }
         .ic-body { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ic-text, #fff); text-align: center; padding: 20px 60px; gap: 0; }
         .ic-logo { max-width: 1000px; max-height: 330px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
@@ -2627,6 +2637,7 @@
                 h += '</div><div class="ic-foot">' + esc(cfg.footText) + '</div>';
                 if (cfg.logoL) h += '<img class="ic-sl ic-sl-l" src="' + esc(String(cfg.logoL).trim()) + '">';
                 if (cfg.logoR) h += '<img class="ic-sl ic-sl-r" src="' + esc(String(cfg.logoR).trim()) + '">';
+                h += '<div class="ic-mw">' + (logo ? '<img src="' + esc(logo) + '">' : esc(cfg.topText || cfg.line3 || '')) + '</div>';
                 panel.innerHTML = h;
                 const bd = panel.querySelector('.ic-body'); if (bd && icCd.show && icCd.ts) bd.classList.add('has-cd');
             }
