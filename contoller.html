@@ -2563,7 +2563,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stg', 'padel/stinger', 'stgCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4203,6 +4203,128 @@
             const mirror = () => { const m = state && state.mbCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
             onValue(ref(db, 'padel/miniboard'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+        // ===== СТІНГЕР: заставка після вибраних геймів (padel/stinger) =====
+        (function stInit() {
+            const mbc = document.getElementById('mb-card'); if (!mbc) return;
+            const DEF = { show: false, court: 'all', games: '1,3,5', every: 0, dur: 2, delay: 0, bgOpacity: 80, logoSize: 36, accent: '#ffffff', logo: '', video: '' };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS },
+                { k: 'games', l: 'Після гейму № (через кому, у поточному сеті: 1,3,5)', t: 'txt' }, { k: 'every', l: '…або після кожного N-го гейму (0 = вимкнено)', t: 'num', step: 1 },
+                { k: 'dur', l: 'Тривалість показу (сек)', t: 'num', step: 0.5 }, { k: 'delay', l: 'Затримка після гейму (сек)', t: 'num', step: 0.5 },
+                { k: 'bgOpacity', l: 'Непрозорість фону (0% = лише логотип)', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'logoSize', l: 'Розмір логотипа (% висоти екрана)', t: 'rng', min: 8, max: 90, u: '%' },
+                { k: 'accent', l: 'Колір світіння й спалаху', t: 'col' }, { k: 'logo', l: 'Лого (URL; порожньо = лого з «Скорочене табло»)', t: 'txt' },
+                { k: 'video', l: 'Власне відео-заставка (URL .mp4/.webm; замінює анімацію)', t: 'txt' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'st-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>✨ Заставка між геймами (стінгер)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            mbc.after(head); head.after(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'stb-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" step="' + (f.step || 1) + '" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Коротка заставка з логотипом (світловий спалах → лого → зникнення) з’являється автоматично, коли закінчився потрібний гейм. Показується вказаний час і зникає сама.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="stb-on">▶ УВІМКНУТИ АВТО</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="stb-off">■ ВИМКНУТИ</button></div>' +
+                '<button class="btn" style="padding:10px; font-weight:800;" id="stb-test">🎬 Тест: показати зараз</button><div id="stb-st" style="font-size:11px;"></div>' +
+                '<div style="display:flex; gap:6px; align-items:center;"><label class="btn btn-gray" style="padding:6px 10px; font-size:11px; cursor:pointer;">📁 Завантажити лого<input type="file" accept="image/*" id="stb-file" style="display:none;"></label><button type="button" class="btn btn-gray" id="stb-clr" style="padding:6px 10px; font-size:11px;">✖ Прибрати</button><span id="stb-has" style="font-size:11px; color:#8f8;"></span></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = id => document.getElementById(id);
+            function stt(ok, m) { const e = $('stb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.stCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/stCfg'), data); stt(true, 'padel/stinger відхилено — працює через корти'); } catch (e2) { stt(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/stinger'), data).then(() => stt(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function refresh() {
+                F.forEach(f => { const el = card.querySelector('#stb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#stb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
+                $('stb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('stb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                $('stb-has').innerText = d.logo ? (String(d.logo).indexOf('data:') === 0 ? '✅ власне лого завантажено' : '') : '';
+            }
+            $('stb-on').onclick = () => { d.show = true; save(true); refresh(); };
+            $('stb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            $('stb-test').onclick = () => { d.testTs = Date.now(); save(true); };
+            $('stb-file').onchange = e => { const f = e.target.files[0]; if (f) tvResize(f, 700, 700, 'image/png', url => { d.logo = url; refresh(); save(true); }); e.target.value = ''; };
+            $('stb-clr').onclick = () => { d.logo = ''; refresh(); save(true); };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = (f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value; d[f.k] = v;
+                    const lv = card.querySelector('#stb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(); };
+            const mirror = () => { const m = state && state.stCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/stinger'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+        // ===== АВТО-ЗАСТАВКА ПІСЛЯ ГЕЙМУ (padel/stinger) =====
+        (function stgInit() {
+            const mbc = document.getElementById('mb-card'); if (!mbc) return;
+            const DEF = { enabled: false, court: 'all', src: '', afterGames: '1,3,5', allOdd: false, duration: 2, sound: false, fit: 'cover', testTs: 0 };
+            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'stg-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🎬 Авто-заставка після гейму</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            mbc.after(head); head.after(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Коротке відео/картинка на весь екран автоматично після гейму з вказаним номером (наприклад після 1-го, 3-го, 5-го). Показується заданий час і зникає. Працює в оверлеї, пульт відкритим тримати не треба.</div><div id="stgb-st" style="font-size:11px;"></div>' +
+                '<div class="row">' + lab('Увімкнути авто-заставку:') + '<input type="checkbox" data-k="enabled" style="width:20px; height:20px;"></div>' +
+                '<div class="row">' + lab('Показувати на:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
+                '<div class="row">' + lab('Після яких геймів (номер гейму в сеті через кому):') + '<input type="text" data-k="afterGames" style="' + inp + '" placeholder="1,3,5"></div>' +
+                '<div class="row">' + lab('Після кожного непарного гейму (1,3,5,7,9,11…):') + '<input type="checkbox" data-k="allOdd" style="width:20px; height:20px;"></div>' +
+                '<div class="row">' + lab('Скільки секунд показувати:') + '<input type="number" min="0.5" max="30" step="0.5" data-k="duration" style="' + inp + ' max-width:90px;"></div>' +
+                '<div class="row">' + lab('Вмістити в екран:') + '<select data-k="fit"><option value="cover">Заповнити екран (обрізати краї)</option><option value="contain">Вмістити повністю</option></select></div>' +
+                '<div class="row">' + lab('Зі звуком (відео):') + '<input type="checkbox" data-k="sound" style="width:20px; height:20px;"></div>' +
+                '<div style="background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">Файл заставки (mp4 / webm / gif / png)</div>' +
+                '<input type="text" data-k="src" style="' + inp + '" placeholder="https://…/stinger.mp4 (краще посилання, напр. з GitHub)">' +
+                '<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;"><label class="btn btn-gray" style="padding:6px 10px; font-size:11px; cursor:pointer;">📁 Завантажити файл (до 1.5 МБ)<input type="file" accept="video/*,image/*" id="stgb-file" style="display:none;"></label><button type="button" class="btn btn-gray" id="stgb-clr" style="padding:6px 10px; font-size:11px;">✖ Прибрати</button><span id="stgb-has" style="font-size:11px; color:#8f8;"></span></div></div>' +
+                '<button class="btn btn-green" style="padding:12px; font-weight:800;" id="stgb-test">▶ ТЕСТ (показати зараз)</button>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('stgb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = (e) => { try { try { state.stgCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/stgCfg'), data); st(true, 'через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
+                    try { set(ref(db, 'padel/stinger'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = !!v; else el.value = (v === undefined || v === null) ? '' : (el.dataset.k === 'src' && String(v).indexOf('data:') === 0 ? '(завантажений файл)' : v); });
+                $('stgb-has').innerText = d.src ? '✅ файл є' : '';
+            }
+            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                const k = el.dataset.k; if (k === 'src' && el.value === '(завантажений файл)') return;
+                d[k] = el.type === 'checkbox' ? el.checked : (el.type === 'number' ? (parseFloat(el.value) || 0) : el.value); save(false);
+            }));
+            $('stgb-file').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; if (f.size > 1.5 * 1024 * 1024) { alert('Файл завеликий (' + (f.size / 1048576).toFixed(1) + ' МБ). Стисніть його до 1.5 МБ або розмістіть на GitHub і вставте посилання.'); return; } const fr = new FileReader(); fr.onload = () => { d.src = fr.result; fill(); save(true); }; fr.readAsDataURL(f); };
+            $('stgb-clr').onclick = () => { d.src = ''; fill(); save(true); };
+            $('stgb-test').onclick = () => { d.testTs = Date.now(); save(true); };
+            fill();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
+            const mirror = () => { const m = state && state.stgCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/stinger'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
