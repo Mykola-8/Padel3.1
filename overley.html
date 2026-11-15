@@ -4075,7 +4075,11 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const cfg = () => gcfg || ccfg || mcfg || {};
             const QP = new URLSearchParams(location.search), off = QP.get('ann') === '0', dbgOn = QP.get('anndebug') === '1', isObs = typeof window.obsstudio !== 'undefined';
             let unlocked = isObs, lastErr = '', lastSaid = '', badge = null, dbgEl = null;
-            function unlock() { if (unlocked) { return; } unlocked = true; try { if (synth) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } } catch (e) {} if (badge) badge.style.display = 'none'; }
+            function unlock() {
+                if (unlocked) { return; } unlocked = true;
+                try { if (synth) { try { synth.cancel(); } catch (e) {} const c = cfg(), w = lang(c), u = new SpeechSynthesisUtterance(w.lang === 'uk-UA' ? 'Звук увімкнено' : 'Sound on'); const v = pick(c); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = w.lang; u.volume = 1; u.rate = 1; window.__annU = u; synth.speak(u); } } catch (e) {}
+                if (badge) badge.style.display = 'none';
+            }
             ['pointerdown', 'click', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
             function ui(c, on) {
                 if (on && !unlocked) {
@@ -4103,7 +4107,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const done = () => { if (!speaking) return; speaking = false; setTimeout(next, 250); };
                 if (!synth || c.sound === false) { setTimeout(done, 600); return; }
                 try {
-                    const u = new SpeechSynthesisUtterance(t), v = pick(c); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang(c).lang;
+                    try { if (synth.paused) synth.resume(); } catch (e) {} const u = new SpeechSynthesisUtterance(t), v = pick(c); window.__annU = u; if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang(c).lang;
                     u.rate = Math.max(0.5, Math.min(2, parseFloat(g(c.rate, 1)) || 1)); u.volume = Math.max(0, Math.min(1, parseFloat(g(c.vol, 1)))); u.pitch = Math.max(0, Math.min(2, parseFloat(g(c.pitch, 1)) || 1));
                     u.onend = done; u.onerror = e => { lastErr = (e && e.error) || 'error'; if (lastErr === 'not-allowed') unlocked = false; done(); }; lastSaid = t; synth.speak(u); setTimeout(done, Math.max(5000, t.length * 130));
                 } catch (e) { done(); }
