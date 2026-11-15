@@ -4290,6 +4290,36 @@
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
+        // ===== ЖИВИЙ МІНІ-ЕКРАН ТРАНСЛЯЦІЇ =====
+        (function pvInit() {
+            const box = document.createElement('div'); box.id = 'live-pv';
+            box.innerHTML = '<div class="pv-stage"><iframe id="pv-frame" title="Перегляд трансляції" tabindex="-1"></iframe><button type="button" class="pv-btn" id="pv-url" title="Змінити адресу оверлея">⚙ адреса</button></div>';
+            document.body.appendChild(box);
+            const fr = box.querySelector('#pv-frame'), stage = box.querySelector('.pv-stage');
+            const dflt = () => location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, '') + 'overley.html';
+            const base = () => { let u = ''; try { u = localStorage.getItem('pvUrl') || ''; } catch (e) {} return u || dflt(); };
+            let curSrc = '';
+            function load() { const u = base() + (base().indexOf('?') < 0 ? '?' : '&') + 'court=' + encodeURIComponent(String(courtId)) + '&pv=1'; if (u !== curSrc) { curSrc = u; fr.src = u; } }
+            function fit() { const w = stage.clientWidth; if (w) fr.style.transform = 'scale(' + (w / 1920) + ')'; }
+            box.querySelector('#pv-url').onclick = () => { const v = prompt('Адреса оверлея для міні-екрана (порожньо = типова):', base()); if (v === null) return; try { localStorage.setItem('pvUrl', v.trim()); } catch (e) {} curSrc = ''; load(); };
+            window.addEventListener('resize', fit);
+            function want() {
+                const modal = document.getElementById('settings-modal'), tab = document.getElementById('tab-tournament');
+                let ctx = null;
+                if (modal && modal.classList.contains('open')) ctx = modal; else if (tab && tab.classList.contains('active')) ctx = tab;
+                if (!ctx) return false;
+                return ctx.querySelectorAll('.tcol-head.open').length > 0;
+            }
+            let on = false;
+            function tick() {
+                const w = want();
+                if (w !== on) { on = w; document.body.classList.toggle('pv-on', on); if (on) { load(); setTimeout(fit, 30); } else { curSrc = ''; fr.src = 'about:blank'; } }
+                else if (on) load();
+            }
+            setInterval(() => { try { tick(); } catch (e) {} }, 400);
+            fit();
+        })();
+
         // ===== ОЧИЩЕННЯ ВАЖКИХ ДАНИХ З КОРТІВ (щоб годинник не підвисав) =====
         (function heavyCleanup() {
             let done = ''; try { done = localStorage.getItem('heavyClean2') || ''; } catch (e) {}
