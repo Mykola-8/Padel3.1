@@ -4323,7 +4323,7 @@
         // ===== ПРОСТИЙ ДИКТОР (padel/announcer) =====
         (function annInit() {
             const mbc = document.getElementById('mb-card'); if (!mbc) return;
-            const DEF = { enabled: false, court: 'all', lang: 'en', names: true, sound: true, onPoint: false, onGame: true, gameList: '', onSet: true, onBreak: true, onSetPoint: true, onGolden: true, onTiebreak: true, rate: 1, vol: 1, pitch: 1, voiceName: '', testTs: 0 };
+            const DEF = { enabled: false, court: 'all', lang: 'en', engine: 'clips', names: true, sound: true, onPoint: false, onGame: true, gameList: '', onSet: true, onBreak: true, onSetPoint: true, onGolden: true, onTiebreak: true, rate: 1, vol: 1, pitch: 1, voiceName: '', testTs: 0 };
             let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const card = document.createElement('div'); card.id = 'ann-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
@@ -4337,6 +4337,8 @@
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="annb-on">✅ ВКЛ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="annb-off">⏹ ВИКЛ</button></div><div id="annb-st" style="font-size:11px;"></div>' +
                 '<div class="row">' + lab('Озвучувати на:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
                 '<div class="row">' + lab('Мова:') + '<select data-k="lang"><option value="en">English</option><option value="uk">Українська</option></select></div>' +
+                '<div class="row">' + lab('Голос (англ.):') + '<select data-k="engine"><option value="clips">Записані фрази (працює скрізь, Team A/B)</option><option value="device">Голос пристрою (імена команд)</option></select></div>' +
+                '<div style="font-size:10px; color:#fb7;">iPhone: вимкніть беззвучний режим (перемикач збоку) і торкніться екрана оверлея один раз.</div>' +
                 chk('names', 'Називати імена команд (інакше «Team A / Team B»)') +
                 '<div style="font-size:11px; font-weight:700; margin-top:4px;">Що озвучувати</div>' +
                 chk('onPoint', 'Рахунок після кожного очка (fifteen thirty, deuce…)') + chk('onGame', 'Гейм і рахунок по геймах') +
