@@ -3843,7 +3843,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -4063,6 +4063,82 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             window.__stMirror = (st) => { const v = st && st.stCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
             setInterval(tick, 300);
             return { play };
+        })();
+
+        // ===== ПРОСТИЙ ДИКТОР (без ШІ): озвучує рахунок усередині оверлея (padel/announcer) =====
+        const ANN = (function () {
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            const synth = window.speechSynthesis; let voices = [];
+            const loadV = () => { voices = synth ? synth.getVoices().slice() : []; }; if (synth) { loadV(); synth.onvoiceschanged = loadV; }
+            let gcfg = null, ccfg = null, mcfg = null, mj = '', prev = null, lastTest = null, queue = [], speaking = false, ready = false;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const cfg = () => gcfg || ccfg || mcfg || {};
+            const off = new URLSearchParams(location.search).get('ann') === '0';
+            const W = {
+                en: { n: ['love', 'fifteen', 'thirty', 'forty'], all: n => n + ' all', deuce: 'deuce', ad: t => 'advantage ' + t, golden: 'golden point', star: 'star point', game: (t, a, b) => 'game ' + t + '. games ' + a + ', ' + b, set: (t, a, b) => 'set to ' + t + ', ' + a + ' ' + b, match: (t, sets) => 'game, set and match, ' + t + '. ' + sets, bp: 'break point', sp: 'set point', mp: 'match point', tbp: 'tiebreak point', tb: 'tiebreak', test: 'fifteen thirty. break point.', games: (a, b) => 'games ' + a + ', ' + b, team: i => 'team ' + (i === 1 ? 'A' : 'B'), lang: 'en-US' },
+                uk: { n: ['нуль', "п'ятнадцять", 'тридцять', 'сорок'], all: n => n + ' - рівно', deuce: 'рівно', ad: t => 'перевага ' + t, golden: 'золоте очко', star: 'золоте очко', game: (t, a, b) => 'гейм, ' + t + '. гейми ' + a + ', ' + b, set: (t, a, b) => 'сет, ' + t + ', ' + a + ' ' + b, match: (t, sets) => 'гейм, сет і матч, ' + t + '. ' + sets, bp: 'брейк-пойнт', sp: 'сетбол', mp: 'матчбол', tbp: 'очко в тайбрейку', tb: 'тайбрейк', test: "п'ятнадцять тридцять. брейк-пойнт.", games: (a, b) => 'гейми ' + a + ', ' + b, team: i => 'команда ' + (i === 1 ? 'А' : 'Б'), lang: 'uk-UA' }
+            };
+            const lang = c => W[c.lang === 'uk' ? 'uk' : 'en'];
+            function pick(c) {
+                const w = lang(c), pool = voices.filter(v => v.lang && v.lang.toLowerCase().indexOf(w.lang.slice(0, 2).toLowerCase()) === 0);
+                const nm = String(g(c.voiceName, '')).toLowerCase(); let v = null;
+                if (nm) v = voices.find(x => x.name.toLowerCase().indexOf(nm) >= 0);
+                return v || pool.find(x => x.lang === w.lang) || pool[0] || null;
+            }
+            function next() {
+                if (speaking || !queue.length) return; const c = cfg(), t = queue.shift(); speaking = true;
+                const done = () => { if (!speaking) return; speaking = false; setTimeout(next, 250); };
+                if (!synth || c.sound === false) { setTimeout(done, 600); return; }
+                try {
+                    const u = new SpeechSynthesisUtterance(t), v = pick(c); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang(c).lang;
+                    u.rate = Math.max(0.5, Math.min(2, parseFloat(g(c.rate, 1)) || 1)); u.volume = Math.max(0, Math.min(1, parseFloat(g(c.vol, 1)))); u.pitch = Math.max(0, Math.min(2, parseFloat(g(c.pitch, 1)) || 1));
+                    u.onend = u.onerror = done; synth.speak(u); setTimeout(done, Math.max(5000, t.length * 130));
+                } catch (e) { done(); }
+            }
+            function say(t) { if (!t) return; if (queue.length >= 3) queue.shift(); queue.push(t); next(); }
+            const tn = (s, i, c) => { const nm = String(i === 1 ? s.p1name : s.p2name || '').trim(); return (c.names === false || !nm) ? lang(c).team(i) : nm.replace(/[\/&]/g, ' and ').replace(/\s+/g, ' '); };
+            function ptText(s, c) {
+                const w = lang(c), a = s.p1Index || 0, b = s.p2Index || 0, srv = s.currentServer === 2 ? 2 : 1;
+                const reg = !s.isAmericano && !s.isMexicano && !s.isSuperTiebreak && !s.isTiebreak;
+                if (!reg) return a === b ? w.all(String(a)) : (srv === 1 ? a + ' ' + b : b + ' ' + a);
+                if (a >= 3 && b >= 3) { if (a === b) return s.activeMatchRibbon === 'GOLDEN_POINT' ? w.golden : w.deuce; return w.ad(tn(s, a > b ? 1 : 2, c)); }
+                const f = n => w.n[Math.min(3, n)];
+                if (a === b) return w.all(f(a));
+                return srv === 1 ? f(a) + ' ' + f(b) : f(b) + ' ' + f(a);
+            }
+            const sums = s => { const o = []; for (let n = 1; n <= 5; n++) o.push((parseInt(s['t1_s' + n]) || 0) + '-' + (parseInt(s['t2_s' + n]) || 0)); return o; };
+            const setsWon = s => { let a = 0, b = 0; for (let n = 1; n <= 5; n++) { const x = parseInt(s['t1_s' + n]) || 0, y = parseInt(s['t2_s' + n]) || 0; if (x + y === 0) continue; if (n < (s.currentSet || 1) || s.isMatchFinished) { if (x > y) a++; else if (y > x) b++; } } return [a, b]; };
+            function check() {
+                const c = cfg(), s = (typeof lastKnownState !== 'undefined') ? lastKnownState : null; if (!s) return;
+                const ct = g(c.court, 'all'), on = !!c.enabled && !off && (ct === 'all' || String(ct) === String(courtNum));
+                if (c.testTs && c.testTs !== lastTest) { const first = lastTest === null; lastTest = c.testTs; if (!first && Date.now() - c.testTs < 15000 && !off) { queue = [lang(c).test]; speaking = false; try { synth && synth.cancel(); } catch (e) {} next(); } }
+                else if (lastTest === null) lastTest = c.testTs || 0;
+                const w = lang(c), set = s.currentSet || 1, cur = { p1: s.p1Index || 0, p2: s.p2Index || 0, set, g1: parseInt(s['t1_s' + set]) || 0, g2: parseInt(s['t2_s' + set]) || 0, fin: !!s.isMatchFinished, rb: s.activeMatchRibbon || 'NONE', sums: sums(s), tb: !!s.isTiebreak };
+                const p = prev; prev = cur; if (!p || !on) return;
+                const gamesPlayed = cur.sums.reduce((x, y) => x + y.split('-').reduce((m, n) => m + (parseInt(n) || 0), 0), 0), prevPlayed = p.sums.reduce((x, y) => x + y.split('-').reduce((m, n) => m + (parseInt(n) || 0), 0), 0);
+                const list = String(g(c.gameList, '')).split(/[^0-9]+/).filter(Boolean).map(Number);
+                const ev = [];
+                if (cur.fin && !p.fin) { const sw = setsWon(s), win = sw[0] >= sw[1] ? 1 : 2; if (c.onSet !== false) ev.push(w.match(tn(s, win, c), sw[0] + ' ' + sw[1])); }
+                else if (gamesPlayed === prevPlayed + 1) {
+                    const gw = (cur.set !== p.set) ? (parseInt(s['t1_s' + p.set]) > parseInt(s['t2_s' + p.set]) ? 1 : 2) : (cur.g1 > p.g1 ? 1 : 2);
+                    const a = cur.set !== p.set ? (parseInt(s['t1_s' + p.set]) || 0) : cur.g1, b = cur.set !== p.set ? (parseInt(s['t2_s' + p.set]) || 0) : cur.g2;
+                    if (cur.set !== p.set) { if (c.onSet !== false) ev.push(w.set(tn(s, gw, c), a, b)); }
+                    else if (c.onGame !== false && (!list.length || list.indexOf(gamesPlayed) >= 0 || list.indexOf(cur.g1 + cur.g2) >= 0)) ev.push(w.game(tn(s, gw, c), cur.g1, cur.g2));
+                } else if ((cur.p1 !== p.p1 || cur.p2 !== p.p2) && gamesPlayed === prevPlayed && !(cur.p1 < p.p1 || cur.p2 < p.p2) || (cur.p1 === p.p1 && cur.p2 === p.p2 && false)) {
+                    if (c.onPoint === true) ev.push(ptText(s, c));
+                }
+                if (cur.rb !== p.rb && !cur.fin) {
+                    const m = { BREAK_POINT: ['onBreak', w.bp], SET_POINT: ['onSetPoint', w.sp], MATCH_POINT: ['onSetPoint', w.mp], GOLDEN_POINT: ['onGolden', w.golden], TIEBREAK_POINT: ['onSetPoint', w.tbp] }[cur.rb];
+                    if (m && c[m[0]] !== false && ev.indexOf(m[1]) < 0) ev.push(m[1]);
+                }
+                if (cur.tb && !p.tb && c.onTiebreak !== false) ev.push(w.tb);
+                if (ev.length) say(ev.join('. '));
+            }
+            onValue(ref(db, 'padel/announcer'), sn => { gcfg = sn.val(); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_announcer'), sn => { ccfg = sn.val(); }, () => { ccfg = null; });
+            window.__annMirror = (st) => { const v = st && st.annCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
+            setInterval(() => { try { check(); } catch (e) {} }, 250);
+            return { say, check };
         })();
 
         // ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) =====
