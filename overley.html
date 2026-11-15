@@ -528,6 +528,18 @@
         /* ===== ВСТУПНЕ ТАБЛО ===== */
         .ic-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10004; pointer-events: none; visibility: hidden; transition: visibility 0s linear var(--ic-d, 0.6s); font-family: var(--ic-font, 'Montserrat'), sans-serif; }
         .ic-wrap.visible { visibility: visible; transition-delay: 0s; }
+        .ic-wrap[data-f3d='1'], .ic-wrap[data-f3d='2'], .ic-wrap[data-f3d='3'] { perspective: 1700px; perspective-origin: 50% 45%; }
+        .ic-wrap[data-f3d='1'] { --f3-y: 3deg; --f3-x: 1.6deg; --f3-t: 7px; } .ic-wrap[data-f3d='2'] { --f3-y: 6deg; --f3-x: 3deg; --f3-t: 12px; } .ic-wrap[data-f3d='3'] { --f3-y: 10deg; --f3-x: 5deg; --f3-t: 18px; }
+        .ic-wrap[data-f3d='1'].visible .ic-panel, .ic-wrap[data-f3d='2'].visible .ic-panel, .ic-wrap[data-f3d='3'].visible .ic-panel { animation: icFloat3d 7s ease-in-out .6s infinite; will-change: transform, rotate, translate; }
+        .ic-wrap[data-f3d='1'].visible .ic-panel, .ic-wrap[data-f3d='2'].visible .ic-panel, .ic-wrap[data-f3d='3'].visible .ic-panel { filter: drop-shadow(0 30px 40px rgba(0,0,0,.35)); }
+        @keyframes icFloat3d {
+            0%   { rotate: 0.35 1 0 calc(var(--f3-y) * -1);  translate: 0 0; }
+            25%  { rotate: 1 0.4 0 calc(var(--f3-x));         translate: 0 calc(var(--f3-t) * -1); }
+            50%  { rotate: 0.35 1 0 var(--f3-y);              translate: 0 0; }
+            75%  { rotate: 1 -0.4 0 calc(var(--f3-x) * -1);  translate: 0 calc(var(--f3-t) * -1); }
+            100% { rotate: 0.35 1 0 calc(var(--f3-y) * -1);  translate: 0 0; }
+        }
+
         body.ic-active #statistics-panel { display: none !important; }
         .ic-panel { position: absolute; left: 370px; top: 170px; width: 1180px; height: 740px; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,calc(.55 * var(--ic-op, 1))); clip-path: inset(0 0 0 0); transform: none; opacity: 1; transition: opacity var(--ic-d, 0.6s) ease, transform var(--ic-d, 0.6s) cubic-bezier(.2,.8,.2,1), clip-path var(--ic-d, 0.6s) ease; }
         .ic-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); opacity: var(--ic-op, 1); z-index: 0; }
@@ -749,6 +761,18 @@
         .gt-plate.sh-pill { border-radius: 999px; } .gt-plate.sh-round { border-radius: 22px; } .gt-plate.sh-square { border-radius: 0; }
         .gt-plate.sh-skew { border-radius: 6px; transform: skewX(-12deg); } .gt-plate.sh-skew > * { display: inline-block; transform: skewX(12deg); }
         .gt-plate.sh-hex { clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 22px 100%, 0 50%); padding: 12px 46px; border: 0; }
+
+        /* 3D-ефект «у повітрі» для табло (data-f3 = 1..3) */
+        [data-f3="1"] { --f3-y: 3deg; --f3-x: 1.6deg; --f3-t: 7px; } [data-f3="2"] { --f3-y: 6deg; --f3-x: 3deg; --f3-t: 12px; } [data-f3="3"] { --f3-y: 10deg; --f3-x: 5deg; --f3-t: 18px; }
+        #match-intro-wrap[data-f3], #team-ranking-wrap[data-f3], #statistics-panel[data-f3], #statistics-panel-manual[data-f3], .gr-wrap[data-f3], .po-wrap[data-f3] { perspective: 1700px; perspective-origin: 50% 45%; }
+        #match-intro-wrap[data-f3].visible #match-intro-board, #team-ranking-wrap[data-f3].visible #rk-boards, #statistics-panel[data-f3].visible .stats-broadcast-card, #statistics-panel-manual[data-f3].visible > *, .gr-wrap[data-f3].visible > *, .po-wrap[data-f3].visible > * { animation: f3Float var(--f3-d, 7s) ease-in-out .6s infinite; will-change: rotate, translate; }
+        @keyframes f3Float {
+            0%   { rotate: 0.35 1 0 calc(var(--f3-y) * -1);  translate: 0 0; }
+            25%  { rotate: 1 0.4 0 var(--f3-x);               translate: 0 calc(var(--f3-t) * -1); }
+            50%  { rotate: 0.35 1 0 var(--f3-y);              translate: 0 0; }
+            75%  { rotate: 1 -0.4 0 calc(var(--f3-x) * -1);  translate: 0 calc(var(--f3-t) * -1); }
+            100% { rotate: 0.35 1 0 calc(var(--f3-y) * -1);  translate: 0 0; }
+        }
         .mb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; font-family: 'Montserrat', sans-serif; color: var(--mb-text, #fff); }
         .mb-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
         html.mb-on .scoreboard-container { opacity: 0 !important; visibility: hidden !important; }
@@ -2630,7 +2654,7 @@
             s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
             s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
             s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100); s.setProperty('--ic-d', dur + 's');
-            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom'));
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0')));
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
@@ -3853,7 +3877,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -4310,6 +4334,21 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             window.__gtMirror = (st) => { const v = st && st.gtCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
             setInterval(() => { try { track(); render(); } catch (e) {} }, 250);
             return {};
+        })();
+
+
+        // ===== 3D-ЕФЕКТ «У ПОВІТРІ» ДЛЯ ТАБЛО (padel/float3d) =====
+        (function () {
+            let gcfg = null, ccfg = null, mcfg = null, mj = '', last = '';
+            const T = { mi: ['match-intro-wrap'], st: ['statistics-panel', 'statistics-panel-manual'], rk: ['team-ranking-wrap'], gr: ['gr-wrap'], po: ['po-wrap-upper', 'po-wrap-lower'] };
+            function apply() {
+                const c = gcfg || ccfg || mcfg || {}, j = JSON.stringify(c); if (j === last) return; last = j;
+                Object.keys(T).forEach(k => { const lv = String(c[k] || '0'); T[k].forEach(id => { const e = document.getElementById(id); if (!e) return; if (lv === '0') e.removeAttribute('data-f3'); else e.setAttribute('data-f3', lv); }); });
+                const sp = Math.max(3, Math.min(14, parseFloat(c.speed) || 7)); document.documentElement.style.setProperty('--f3-d', sp + 's');
+            }
+            onValue(ref(db, 'padel/float3d'), sn => { gcfg = sn.val(); apply(); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_float3d'), sn => { ccfg = sn.val(); apply(); }, () => { ccfg = null; });
+            window.__f3Mirror = (st) => { const v = st && st.f3Cfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; apply(); };
         })();
 
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
