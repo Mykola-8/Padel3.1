@@ -865,6 +865,12 @@
         .an-row .lb { text-align: center; font-size: 17px; font-weight: 600; opacity: .85; line-height: 1.15; }
         .an-bar { height: 7px; border-radius: 4px; display: flex; justify-content: center; overflow: hidden; background: rgba(255,255,255,.1); margin-top: 3px; }
         .an-bar i { display: block; height: 100%; transition: width 1.4s cubic-bezier(.2,.8,.2,1); }
+        .an-bar.ctr { display: grid; grid-template-columns: 1fr 1fr; column-gap: 4px; height: 9px; overflow: visible; background: transparent; position: relative; }
+        .an-bar.ctr .h { display: flex; height: 100%; background: rgba(255,255,255,.1); overflow: hidden; }
+        .an-bar.ctr .h.l { justify-content: flex-end; border-radius: 5px 0 0 5px; } .an-bar.ctr .h.r { justify-content: flex-start; border-radius: 0 5px 5px 0; }
+        .an-bar.ctr .h.l i { background: var(--an-c1, #38bdf8); border-radius: 5px 0 0 5px; box-shadow: 0 0 10px var(--an-c1, #38bdf8); }
+        .an-bar.ctr .h.r i { background: var(--an-c2, #fb923c); border-radius: 0 5px 5px 0; box-shadow: 0 0 10px var(--an-c2, #fb923c); }
+        .an-bar.ctr::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: rgba(255,255,255,.55); border-radius: 1px; }
         .an-panel .an-grid > .an-card { opacity: 0; transform: translateY(18px) scale(.97); }
         .an-panel .an-grid > .an-card.in { opacity: 1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
         .an-panel .an-grid > .an-card .an-chart { clip-path: inset(0 100% 0 0); }
@@ -4545,7 +4551,13 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 let love1 = 0, love2 = 0; for (let k = 1; k <= 9; k++) { love1 += st['t1_lg_s' + k] || 0; love2 += st['t2_lg_s' + k] || 0; }
                 return { n: log.length, T, PR, BRK, gpTot, kpTot, mom, marks, love: [0, love1, love2], longGP, time: { avgP: avg(ptsGaps), longP: ptsGaps.length ? Math.max.apply(null, ptsGaps) : 0, longPause: allGaps.length ? Math.max.apply(null, allGaps) : 0, avgG: avg(gDur), longG: gDur.length ? Math.max.apply(null, gDur) : 0, shortG: gDur.length ? Math.min.apply(null, gDur) : 0, sets: sDur, match: log.length > 1 ? (log[log.length - 1][2] - log[0][2]) / 1000 : 0 } };
             }
-            function row(lab, a, b, ta, tb) { const sum = (a + b) || 1; return '<div><div class="an-row"><div class="v v1">' + esc(ta) + '</div><div class="lb">' + esc(lab) + '</div><div class="v v2">' + esc(tb) + '</div></div><div class="an-bar"><i data-w="' + (a / sum * 100) + '"></i><i data-w="' + (b / sum * 100) + '"></i></div></div>'; }
+            function bar(a, b, sum) {
+                const cf = (window.__lastAnState && window.__lastAnState.anCfg) || {};
+                if (cf.barCenter === false) return '<div class="an-bar"><i data-w="' + (a / sum * 100) + '"></i><i data-w="' + (b / sum * 100) + '"></i></div>';
+                const mx = Math.max(a, b) || 1;
+                return '<div class="an-bar ctr"><span class="h l"><i data-w="' + (a / mx * 100) + '"></i></span><span class="h r"><i data-w="' + (b / mx * 100) + '"></i></span></div>';
+            }
+            function row(lab, a, b, ta, tb) { const sum = (a + b) || 1; return '<div><div class="an-row"><div class="v v1">' + esc(ta) + '</div><div class="lb">' + esc(lab) + '</div><div class="v v2">' + esc(tb) + '</div></div>' + bar(a, b, sum) + '</div>'; }
             const pct = (n, d) => d ? Math.round(n / d * 100) + '%' : '–';
             const ratio = (n, d) => (d ? n + '/' + d : '–');
             function rowRatio(lab, n1, d1, n2, d2) { return row(lab, d1 ? n1 / d1 : 0, d2 ? n2 / d2 : 0, d1 ? pct(n1, d1) + ' (' + n1 + '/' + d1 + ')' : '–', d2 ? pct(n2, d2) + ' (' + n2 + '/' + d2 + ')' : '–'); }
@@ -4604,7 +4616,17 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 } catch (e) {}
             }
             // ===== Живе табло: блоки відкриваються по черзі, повзунки «виростають», цифри рахуються =====
-            let revShown = false, revSince = 0, revLastW = {}, revCounted = {};
+            let revShown = false, revSince = 0, revLastW = {}, revCounted = {}, numPrev = {};
+            function tweenNums(card) {
+                const key = card.getAttribute('data-k');
+                card.querySelectorAll('.an-row .v').forEach((el, j) => {
+                    const tx = el.textContent, mt = /^(\d+)(.*)$/.exec(tx); if (!mt || tx.indexOf(':') >= 0) return;
+                    const N = parseInt(mt[1]), rest = mt[2], id = key + ':' + j, P = numPrev[id]; numPrev[id] = N;
+                    if (P === undefined || P === N || N > 9999) return;
+                    const t0 = performance.now(), D = 900; el.textContent = P + rest;
+                    (function step(now) { const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(P + (N - P) * e) + rest; if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = tx; })(t0);
+                });
+            }
             const revSec = () => { const cf = (window.__lastAnState && window.__lastAnState.anCfg) || {}; const v = parseFloat(g(cf.revealSec, 2)); return isFinite(v) ? Math.max(0, v) : 2; };
             const revN = () => { const sec = revSec(); return sec <= 0 ? 999 : Math.floor((Date.now() - revSince) / (sec * 1000)) + 1; };
             function setBars(card, animate) {
@@ -4619,6 +4641,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 card.querySelectorAll('.an-row .v').forEach(el => {
                     const tx = el.textContent, mt = /^(\d+)(.*)$/.exec(tx); if (!mt || tx.indexOf(':') >= 0) return;
                     const N = parseInt(mt[1]), rest = mt[2]; if (!(N > 0) || N > 9999) return;
+                    numPrev[card.getAttribute('data-k') + ':' + Array.prototype.indexOf.call(card.querySelectorAll('.an-row .v'), el)] = N;
                     const t0 = performance.now(), D = 1300; el.textContent = '0' + rest;
                     (function step(now) { const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(N * e) + rest; if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = tx; })(t0);
                 });
@@ -4628,7 +4651,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 const n = revN(), cards = panel.querySelectorAll('.an-grid > .an-card');
                 cards.forEach((card, i) => {
                     const key = card.getAttribute('data-k');
-                    if (i < n && revCounted[key]) { card.classList.add('in'); setBars(card, false); }
+                    if (i < n && revCounted[key]) { card.classList.add('in'); setBars(card, false); tweenNums(card); }
                 });
                 panel.style.transform = 'none';
                 const z = parseFloat(getComputedStyle(panel).zoom) || 1, avail = (z > 1 ? 1056 : 960);
@@ -4656,7 +4679,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 wrap.classList.toggle('on', show);
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
                 wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
-                if (!show) { revShown = false; revLastW = {}; revCounted = {}; lastSig = ''; return; }
+                if (!show) { revShown = false; revLastW = {}; revCounted = {}; numPrev = {}; lastSig = ''; return; }
                 if (!revShown) { revShown = true; revSince = Date.now(); lastSig = ''; }
                 const s = wrap.style, lang = ph === 'an' ? endLang : (st.cornerSlideLang === 'ua' ? 1 : 0), t = key => L[key][lang];
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
