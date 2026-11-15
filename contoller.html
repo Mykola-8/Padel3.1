@@ -4377,6 +4377,60 @@
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
+
+        (function gtInit() {
+            const mbc = document.getElementById('ann-card'); if (!mbc) return;
+            const DEF = { enabled: false, court: 'all', mode: 'game', shape: 'pill', bg: '#000000', bgOpacity: 70, color: '#ffffff', border: '#ffffff', x: 60, y: 60, scale: 1, showLabel: true, lGame: 'ГЕЙМ', lSet: 'СЕТ', lMatch: 'МАТЧ', sec: 8, showTs: 0 };
+            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'gt-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>⏱ Тривалість гейму / сету (плашка)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            mbc.after(head); head.after(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const chk = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="checkbox" data-k="' + k + '" style="width:20px; height:20px;"></div>';
+            const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Окрема плашка на оверлеї: скільки триває гейм / сет / матч. Таймер рахується в оверлеї (скидається при новому геймі, сеті). Показ — коли ви натиснете кнопку.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="gtb-on">✅ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="gtb-off">⏹ СХОВАТИ</button></div><div id="gtb-st" style="font-size:11px;"></div>' +
+                '<div style="display:flex; gap:8px; align-items:center;"><button class="btn" style="flex:1; padding:10px;" id="gtb-test">▶ Показати на N сек</button><input type="number" data-k="sec" min="2" max="60" style="width:70px; ' + inp + '"></div>' +
+                '<div class="row">' + lab('Що показувати:') + '<select data-k="mode"><option value="game">Гейм</option><option value="set">Сет</option><option value="match">Матч</option><option value="gs">Гейм + Сет</option><option value="all">Гейм + Сет + Матч</option></select></div>' +
+                '<div class="row">' + lab('Корт:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
+                '<div class="row">' + lab('Форма:') + '<select data-k="shape"><option value="pill">Капсула</option><option value="round">Скруглений прямокутник</option><option value="square">Прямокутник</option><option value="skew">Нахилена</option><option value="hex">Шестикутна</option></select></div>' +
+                '<div class="row">' + lab('Колір фону:') + '<input type="color" data-k="bg"></div>' + rng('bgOpacity', 'Прозорість фону, % (0 = прозорий)', 0, 100, 1) +
+                '<div class="row">' + lab('Колір тексту:') + '<input type="color" data-k="color"></div><div class="row">' + lab('Колір рамки:') + '<input type="color" data-k="border"></div>' +
+                rng('x', 'Позиція по горизонталі (X)', 0, 1920, 5) + rng('y', 'Позиція по вертикалі (Y)', 0, 1080, 5) + rng('scale', 'Розмір', 0.4, 3, 0.05) +
+                chk('showLabel', 'Показувати підписи') +
+                '<div class="row">' + lab('Підпис «гейм»:') + '<input type="text" data-k="lGame" style="' + inp + '"></div><div class="row">' + lab('Підпис «сет»:') + '<input type="text" data-k="lSet" style="' + inp + '"></div><div class="row">' + lab('Підпис «матч»:') + '<input type="text" data-k="lMatch" style="' + inp + '"></div>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('gtb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = () => set(ref(db, 'padel/courts/_gametimer'), data).then(() => st(true, 'окремо від кортів'), e2 => { try { try { state.gtCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/gtCfg'), data); st(true, 'через корти'); } catch (e4) { st(false, (e2 && e2.message) || 'помилка'); } });
+                    try { set(ref(db, 'padel/gametimer'), data).then(() => st(true), fail); } catch (e) { fail(); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = v !== false && !!v; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + el.dataset.k + '"]'); if (lv) lv.innerText = v; });
+                $('gtb-on').style.outline = d.enabled ? '3px solid #fff' : 'none'; $('gtb-off').style.outline = d.enabled ? 'none' : '3px solid #fff';
+            }
+            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                const k = el.dataset.k; d[k] = el.type === 'checkbox' ? el.checked : ((el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value); const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.innerText = d[k]; save(false);
+            }));
+            $('gtb-on').onclick = () => { d.enabled = true; save(true); fill(); }; $('gtb-off').onclick = () => { d.enabled = false; save(true); fill(); };
+            $('gtb-test').onclick = () => { d.showTs = Date.now(); save(true); };
+            fill();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
+            const mirror = () => { const m = state && state.gtCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/gametimer'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            onValue(ref(db, 'padel/courts/_gametimer'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; prim = true; apply(v); } });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+
         // ===== ОЧИЩЕННЯ ВАЖКИХ ДАНИХ З КОРТІВ (щоб годинник не підвисав) =====
         (function heavyCleanup() {
             let done = ''; try { done = localStorage.getItem('heavyClean2') || ''; } catch (e) {}
