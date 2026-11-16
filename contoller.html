@@ -4567,6 +4567,12 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
 
             const pickFile = (id, key) => { $(id).onchange = e => { const f = e.target.files[0]; if (f) tvResize(f, 360, 360, 'image/png', url => { d[key] = url; fill(); save(true); }); e.target.value = ''; }; };
             pickFile('wxb-f1', 'logo1'); pickFile('wxb-f2', 'logo2');
+            const stOn = () => { try { $('wxb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('wxb-off').style.outline = d.show ? 'none' : '3px solid #fff'; } catch (e) {} };
+            $('wxb-on').onclick = () => { d.show = true; save(true); stOn(); };
+            $('wxb-off').onclick = () => { d.show = false; d.showTs = 0; save(true); stOn(); };
+            $('wxb-test').onclick = () => { d.showTs = Date.now(); save(true); };
+            stOn(); setInterval(stOn, 1500);
+
             $('wxb-c1').onclick = () => { d.logo1 = ''; fill(); save(true); }; $('wxb-c2').onclick = () => { d.logo2 = ''; fill(); save(true); };
             $('wxb-find').onclick = async () => {
                 const e = $('wxb-st'); const city = String(d.city || '').trim(); if (!city) { e.innerText = '⚠️ Введіть місто'; e.style.color = '#f66'; return; }
