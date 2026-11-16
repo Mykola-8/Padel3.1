@@ -4481,6 +4481,104 @@
 
 
 
+
+        (function wxInit() {
+            const mbc = document.getElementById('f3-card'); if (!mbc) return;
+            const DEF = { show: false, court: 'all', mode: 'auto', city: '', lat: '', lon: '', lang: 'en', units: 'both', logo1: '', logo2: '', iTemp: true, iFc: true, iWind: true, iHum: true, showLabels: true, showCity: true, mT: 20, mCond: 'clear', mCondText: '', mWs: 10, mWd: 'E', mH: 40, bgL: '#0f1932', opL: 80, bgR: '#14146e', opR: 85, textColor: '#ffffff', border: '#ffffff', borderOp: 35, radius: 18, x: 90, y: 880, scale: 100, sec: 10, showTs: 0 };
+            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'wx-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🌤 Погода (метео міста)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            mbc.after(head); head.after(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const chk = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="checkbox" data-k="' + k + '" style="width:20px; height:20px;"></div>';
+            const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
+            const up = (id, t) => '<label class="btn btn-gray" style="padding:6px 10px; font-size:11px; cursor:pointer;">' + t + '<input type="file" accept="image/*" id="' + id + '" style="display:none;"></label>';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Табло-плашка з погодою міста: логотипи, температура, прогноз, вітер, вологість. Автоматично бере поточну погоду за назвою міста (Open-Meteo, безкоштовно, оновлення кожні 10 хв) або вводьте вручну.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="wxb-on">✅ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="wxb-off">⏹ СХОВАТИ</button></div><div id="wxb-st" style="font-size:11px;"></div>' +
+                '<div style="display:flex; gap:8px; align-items:center;"><button class="btn" style="flex:1; padding:10px;" id="wxb-test">▶ Показати на N сек</button><input type="number" data-k="sec" min="2" max="120" style="width:70px; ' + inp + '"></div>' +
+'<div class="row">' + lab('Джерело даних:') + '<select data-k="mode"><option value="auto">Автоматично (за містом)</option><option value="manual">Вручну</option></select></div>' +
+'<div class="row">' + lab('Корт:') + '<select data-k="court"><option value="all">Усі корти</option><option value="1">Корт 1</option><option value="2">Корт 2</option><option value="3">Корт 3</option><option value="4">Корт 4</option><option value="5">Корт 5</option><option value="6">Корт 6</option><option value="7">Корт 7</option><option value="8">Корт 8</option><option value="9">Корт 9</option><option value="10">Корт 10</option></select></div>' +
+'<div class="row">' + lab('Місто (англійською краще):') + '<input type="text" data-k="city" placeholder="Indian Wells" style="' + inp + '">' + '</div>' +
+'<button class="btn" style="padding:8px;" id="wxb-find">🔍 Знайти місто і перевірити погоду</button>' +
+'<div class="row">' + lab('Широта (необов’язково):') + '<input type="number" step="any" data-k="lat" style="' + inp + ' max-width:110px;">' + '</div>' +
+'<div class="row">' + lab('Довгота (необов’язково):') + '<input type="number" step="any" data-k="lon" style="' + inp + ' max-width:110px;">' + '</div>' +
+'<div class="row">' + lab('Мова підписів:') + '<select data-k="lang"><option value="en">English</option><option value="uk">Українська</option></select></div>' +
+'<div class="row">' + lab('Одиниці:') + '<select data-k="units"><option value="both">°C | °F</option><option value="c">тільки °C</option><option value="f">тільки °F / mph</option></select></div>' +
+'<div style="font-size:11px; font-weight:700; margin-top:4px;">Ручні дані (режим «Вручну»)</div>' +
+'<div class="row">' + lab('Температура, °C:') + '<input type="number" step="any" data-k="mT" style="' + inp + ' max-width:110px;">' + '</div>' +
+'<div class="row">' + lab('Погода:') + '<select data-k="mCond"><option value="clear">Сонячно</option><option value="night">Ясно (ніч)</option><option value="partly">Мінлива хмарність</option><option value="cloud">Хмарно</option><option value="fog">Туман</option><option value="rain">Дощ</option><option value="snow">Сніг</option><option value="storm">Гроза</option></select></div>' +
+'<div class="row">' + lab('Свій текст прогнозу (необов’язково):') + '<input type="text" data-k="mCondText" placeholder="" style="' + inp + '">' + '</div>' +
+'<div class="row">' + lab('Вітер, км/год:') + '<input type="number" step="any" data-k="mWs" style="' + inp + ' max-width:110px;">' + '</div>' +
+'<div class="row">' + lab('Напрям вітру:') + '<input type="text" data-k="mWd" placeholder="E" style="' + inp + '">' + '</div>' +
+'<div class="row">' + lab('Вологість, %:') + '<input type="number" step="any" data-k="mH" style="' + inp + ' max-width:110px;">' + '</div>' +
+'<div style="font-size:11px; font-weight:700; margin-top:4px;">Що показувати</div>' +
+chk('iTemp','Температура') +
+chk('iFc','Прогноз (іконка)') +
+chk('iWind','Вітер') +
+chk('iHum','Вологість') +
+chk('showLabels','Малі підписи над значеннями') +
+chk('showCity','Назва міста, якщо немає логотипів') +
+'<div class="row">' + lab('Підпис «температура»:') + '<input type="text" data-k="lTemp" placeholder="" style="' + inp + '">' + '</div>' +
+'<div class="row">' + lab('Підпис «прогноз»:') + '<input type="text" data-k="lFc" placeholder="" style="' + inp + '">' + '</div>' +
+'<div class="row">' + lab('Підпис «вітер»:') + '<input type="text" data-k="lWind" placeholder="" style="' + inp + '">' + '</div>' +
+'<div class="row">' + lab('Підпис «вологість»:') + '<input type="text" data-k="lHum" placeholder="" style="' + inp + '">' + '</div>' +
+'<div style="background:#1a1a1a; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">Логотипи зліва (турнір / місто)</div><div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' + up('wxb-f1', '📁 Лого 1') + '<button type="button" class="btn btn-gray" id="wxb-c1" style="padding:6px 10px; font-size:11px;">✖</button><span id="wxb-h1" style="font-size:11px;"></span>' + up('wxb-f2', '📁 Лого 2') + '<button type="button" class="btn btn-gray" id="wxb-c2" style="padding:6px 10px; font-size:11px;">✖</button><span id="wxb-h2" style="font-size:11px;"></span></div></div>' +
+'<div class="row">' + lab('Колір лівого блоку (лого):') + '<input type="color" data-k="bgL" style="width:60px; height:30px; padding:0;"></div>' +
+rng('opL', 'Непрозорість лівого блоку, %', 0, 100, 1) +
+'<div class="row">' + lab('Колір правого блоку:') + '<input type="color" data-k="bgR" style="width:60px; height:30px; padding:0;"></div>' +
+rng('opR', 'Непрозорість правого блоку, %', 0, 100, 1) +
+'<div class="row">' + lab('Колір тексту:') + '<input type="color" data-k="textColor" style="width:60px; height:30px; padding:0;"></div>' +
+'<div class="row">' + lab('Колір рамки:') + '<input type="color" data-k="border" style="width:60px; height:30px; padding:0;"></div>' +
+rng('borderOp', 'Непрозорість рамки, %', 0, 100, 1) +
+rng('radius', 'Скруглення кутів', 0, 60, 1) +
+rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y', 'Позиція Y (по вертикалі)', 0, 1080, 5) + rng('scale', 'Розмір, %', 30, 200, 1);
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('wxb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = () => set(ref(db, 'padel/courts/_weather'), data).then(() => st(true, 'окремо від кортів'), e2 => { try { try { state.wxCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/wxCfg'), data); st(true, 'через корти'); } catch (e4) { st(false, (e2 && e2.message) || 'помилка'); } });
+                    try { set(ref(db, 'padel/weather'), data).then(() => st(true), fail); } catch (e) { fail(); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function fill() {
+                try { $('wxb-h1').innerText = d.logo1 ? '✅' : ''; $('wxb-h2').innerText = d.logo2 ? '✅' : ''; } catch (e) {}
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = v !== false && !!v; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + el.dataset.k + '"]'); if (lv) lv.innerText = v; });
+            }
+            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                const k = el.dataset.k; d[k] = el.type === 'checkbox' ? el.checked : ((el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value); const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.innerText = d[k]; save(false);
+            }));
+
+            const pickFile = (id, key) => { $(id).onchange = e => { const f = e.target.files[0]; if (f) tvResize(f, 360, 360, 'image/png', url => { d[key] = url; fill(); save(true); }); e.target.value = ''; }; };
+            pickFile('wxb-f1', 'logo1'); pickFile('wxb-f2', 'logo2');
+            $('wxb-c1').onclick = () => { d.logo1 = ''; fill(); save(true); }; $('wxb-c2').onclick = () => { d.logo2 = ''; fill(); save(true); };
+            $('wxb-find').onclick = async () => {
+                const e = $('wxb-st'); const city = String(d.city || '').trim(); if (!city) { e.innerText = '⚠️ Введіть місто'; e.style.color = '#f66'; return; }
+                e.innerText = '⏳ Шукаю…'; e.style.color = '#ccc';
+                try {
+                    const r = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=' + encodeURIComponent(city))).json(); const x = r && r.results && r.results[0]; if (!x) throw new Error('місто не знайдено');
+                    d.lat = x.latitude; d.lon = x.longitude;
+                    const w = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + x.latitude + '&longitude=' + x.longitude + '&current=temperature_2m,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&timezone=auto')).json(); const k = w.current || {};
+                    e.innerText = '✅ ' + x.name + (x.country ? ', ' + x.country : '') + ': ' + Math.round(k.temperature_2m) + '°C, вітер ' + Math.round(k.wind_speed_10m) + ' км/г, вологість ' + k.relative_humidity_2m + '%'; e.style.color = '#7c7';
+                    fill(); save(true);
+                } catch (err) { e.innerText = '⚠️ ' + (err.message || 'помилка мережі'); e.style.color = '#f66'; }
+            };
+            fill();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
+            const mirror = () => { const m = state && state.wxCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/weather'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            onValue(ref(db, 'padel/courts/_weather'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; prim = true; apply(v); } });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+
+
+
         // ===== ОЧИЩЕННЯ ВАЖКИХ ДАНИХ З КОРТІВ (щоб годинник не підвисав) =====
         (function heavyCleanup() {
             let done = ''; try { done = localStorage.getItem('heavyClean2') || ''; } catch (e) {}
