@@ -4482,6 +4482,18 @@
 
 
 
+        const UA = { 'київ': [50.4501, 30.5234], 'kyiv': [50.4501, 30.5234], 'львів': [49.8397, 24.0297], 'харків': [49.9935, 36.2304], 'одеса': [46.4825, 30.7233], 'дніпро': [48.4647, 35.0462], 'хмельницький': [49.4230, 26.9871], 'khmelnytskyi': [49.4230, 26.9871], 'вінниця': [49.2328, 28.4810], 'житомир': [50.2547, 28.6587], 'рівне': [50.6199, 26.2516], 'луцьк': [50.7472, 25.3254], 'тернопіль': [49.5535, 25.5948], 'івано-франківськ': [48.9226, 24.7111], 'ужгород': [48.6208, 22.2879], 'чернівці': [48.2915, 25.9403], 'черкаси': [49.4444, 32.0598], 'полтава': [49.5883, 34.5514], 'суми': [50.9077, 34.7981], 'чернігів': [51.4982, 31.2893], 'кропивницький': [48.5079, 32.2623], 'запоріжжя': [47.8388, 35.1396], 'миколаїв': [46.9750, 31.9946], 'херсон': [46.6354, 32.6169], 'буковель': [48.3590, 24.4020] };
+        async function geocode(city) {
+            const key = String(city || '').trim().toLowerCase(); if (!key) throw new Error('введіть місто');
+            if (UA[key]) return { la: UA[key][0], lo: UA[key][1], name: city };
+            const tries = [
+                async () => { for (const lg of ['uk', 'en']) { const r = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + lg + '&name=' + encodeURIComponent(city))).json(); const x = r && r.results && r.results[0]; if (x) return { la: x.latitude, lo: x.longitude, name: x.name + (x.country ? ', ' + x.country : '') }; } return null; },
+                async () => { const r = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=uk&q=' + encodeURIComponent(city))).json(); const x = r && r[0]; return x ? { la: parseFloat(x.lat), lo: parseFloat(x.lon), name: String(x.display_name || city).split(',').slice(0, 2).join(',') } : null; }
+            ];
+            for (const t of tries) { try { const v = await t(); if (v && isFinite(v.la) && isFinite(v.lo)) return v; } catch (e) {} }
+            throw new Error('місто не знайдено — введіть широту й довготу вручну');
+        }
+        
         (function wxInit() {
             const mbc = document.getElementById('f3-card'); if (!mbc) return;
             const DEF = { show: false, court: 'all', mode: 'auto', city: '', lat: '', lon: '', lang: 'en', units: 'both', logo1: '', logo2: '', iTemp: true, iFc: true, iWind: true, iHum: true, showLabels: true, showCity: true, mT: 20, mCond: 'clear', mCondText: '', mWs: 10, mWd: 'E', mH: 40, bgL: '#0f1932', opL: 80, bgR: '#14146e', opR: 85, textColor: '#ffffff', border: '#ffffff', borderOp: 35, radius: 18, x: 90, y: 880, scale: 100, sec: 10, showTs: 0 };
@@ -4560,10 +4572,9 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                 const e = $('wxb-st'); const city = String(d.city || '').trim(); if (!city) { e.innerText = '⚠️ Введіть місто'; e.style.color = '#f66'; return; }
                 e.innerText = '⏳ Шукаю…'; e.style.color = '#ccc';
                 try {
-                    const r = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=' + encodeURIComponent(city))).json(); const x = r && r.results && r.results[0]; if (!x) throw new Error('місто не знайдено');
-                    d.lat = x.latitude; d.lon = x.longitude;
-                    const w = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + x.latitude + '&longitude=' + x.longitude + '&current=temperature_2m,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&timezone=auto')).json(); const k = w.current || {};
-                    e.innerText = '✅ ' + x.name + (x.country ? ', ' + x.country : '') + ': ' + Math.round(k.temperature_2m) + '°C, вітер ' + Math.round(k.wind_speed_10m) + ' км/г, вологість ' + k.relative_humidity_2m + '%'; e.style.color = '#7c7';
+                    const x = await geocode(city); d.lat = x.la; d.lon = x.lo;
+                    const w = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + x.la + '&longitude=' + x.lo + '&current=temperature_2m,relative_humidity_2m,wind_speed_10m&wind_speed_unit=kmh&timezone=auto')).json(); const k = w.current || {};
+                    e.innerText = '✅ ' + x.name + ': ' + Math.round(k.temperature_2m) + '°C, вітер ' + Math.round(k.wind_speed_10m) + ' км/г, вологість ' + k.relative_humidity_2m + '%'; e.style.color = '#7c7';
                     fill(); save(true);
                 } catch (err) { e.innerText = '⚠️ ' + (err.message || 'помилка мережі'); e.style.color = '#f66'; }
             };
