@@ -979,6 +979,29 @@
         .gr-ch { display: flex; align-items: center; background: var(--gr-head, #1b2644); gap: 14px; padding: 0 18px; box-sizing: border-box; font-family: var(--gr-fonth, 'Montserrat'), sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--gr-title, #fff); }
 
         /* ===== ТЕМИ ГРУП: візерунок фону / вставка шапки / стиль карток ===== */
+
+        /* ===== АНІМАЦІЯ ТАБЛИЦЬ: ГРУПИ ===== */
+        .gr-row { transition: transform 1s cubic-bezier(.3,.7,.2,1), opacity .45s ease, background .6s ease, box-shadow .6s ease; }
+        .gr-row.lead { background: color-mix(in srgb, var(--gr-accent, #d4f542) 16%, transparent); box-shadow: inset 6px 0 0 var(--gr-accent, #d4f542); }
+        .gr-card.pre .gr-cell[data-m]:not(.shown), .gr-card.pre .gr-cell.tot:not(.shown) { opacity: 0; }
+        .gr-card.pre .gr-cell.win:not(.shown) { background: transparent; }
+        .gr-cell.shown { animation: grPop .55s cubic-bezier(.2,.9,.3,1.3) both; }
+        .gr-cell.win.shown { animation: grPop .55s cubic-bezier(.2,.9,.3,1.3) both, grFlash 1.2s ease .15s; }
+        @keyframes grPop { 0% { opacity: 0; transform: scale(.4); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes grFlash { 0%, 100% { filter: none; } 35% { filter: brightness(2) saturate(1.4); } }
+        /* ===== АНІМАЦІЯ ТАБЛИЦЬ: ПЛЕЙ-ОФФ ===== */
+        .po-t { transition: color .4s ease, background .5s ease; }
+        .po-n .po-t.win, .po-s .po-t.win { background: var(--po-win, rgba(255,255,255,0.28)); }
+        .po-wrap.po-pre .po-m { opacity: 0; transform: translateY(18px) scale(.96); transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+        .po-wrap.po-pre .po-m.fr { opacity: 1; transform: none; }
+        .po-wrap.po-pre .po-h { opacity: 0; transition: opacity .5s ease; } .po-wrap.po-pre .po-h.fr { opacity: 1; }
+        .po-wrap.po-pre .po-m:not(.nm) .po-n .po-t { color: transparent !important; }
+        .po-wrap.po-pre .po-m:not(.sc) .po-s .po-t { color: transparent !important; }
+        .po-wrap.po-pre .po-m:not(.wn) .po-t.win { background: transparent !important; }
+        .po-wrap.po-pre .po-m.nm .po-n .po-t { animation: poIn .5s ease both; }
+        .po-wrap.po-pre .po-m.sc .po-s .po-t { animation: poPop .5s cubic-bezier(.2,.9,.3,1.3) both; }
+        @keyframes poIn { 0% { opacity: 0; transform: translateX(-12px); } 100% { opacity: 1; transform: none; } }
+        @keyframes poPop { 0% { opacity: 0; transform: scale(.4); } 100% { opacity: 1; transform: scale(1); } }
         .gr-bgimg, .gr-bgdim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-repeat: no-repeat; background-position: center; }
         .gr-bglogo { position: absolute; object-fit: contain; pointer-events: none; }
         .gr-bg::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
@@ -2531,29 +2554,29 @@
             else PO_L = poLayout(has16, NW + 150, TWO ? 100 : 76);
             wrap.style.setProperty('--po-h', PO_L.H + 'px');
             wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.style.setProperty('--po-ts', TS); wrap.style.setProperty('--po-sf', Math.min(38, Math.round(26 * TS)) + 'px'); wrap.dataset.fit = PO_L.fit;
-            wrap.innerHTML = '';
+            wrap.innerHTML = ''; wrap.classList.remove('po-pre');
             const bg = document.createElement('div'); bg.className = 'po-bg'; wrap.appendChild(bg);
             if (PO_L.fit < 1) { const f = PO_L.fit; bg.style.left = (-(1920 / f - 1920) / 2) + 'px'; bg.style.top = (-(1080 / f - 1080) / 2) + 'px'; bg.style.right = bg.style.bottom = 'auto'; bg.style.width = (1920 / f) + 'px'; bg.style.height = (1080 / f) + 'px'; }
             const svg = document.createElementNS(PO_NS, 'svg'); svg.setAttribute('class', 'po-lines'); svg.setAttribute('width', 1920); svg.setAttribute('height', 1080);
-            const line = (x1, y1, x2, y2) => { const l = document.createElementNS(PO_NS, 'line'); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.style.stroke = 'var(--po-line, #f5c542)'; l.style.strokeWidth = PILL ? '6' : '2'; if (PILL) l.setAttribute('stroke-linecap', 'round'); svg.appendChild(l); };
-            const link = (src, dst, srcX, dstX) => {
-                const right = srcX + PO_L.W, elbow = right + PO_L.gap / 2;
+            let curR = ''; const line = (x1, y1, x2, y2) => { const l = document.createElementNS(PO_NS, 'line'); l.setAttribute('data-r', curR); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.style.stroke = 'var(--po-line, #f5c542)'; l.style.strokeWidth = PILL ? '6' : '2'; if (PILL) l.setAttribute('stroke-linecap', 'round'); svg.appendChild(l); };
+            const link = (src, dst, srcX, dstX, rk) => {
+                curR = rk; const right = srcX + PO_L.W, elbow = right + PO_L.gap / 2;
                 dst.forEach((cy, i) => { line(right, src[2 * i], elbow, src[2 * i]); line(right, src[2 * i + 1], elbow, src[2 * i + 1]); line(elbow, src[2 * i], elbow, src[2 * i + 1]); line(elbow, cy, dstX, cy); });
             };
-            if (has16) link(PO_L.c16, PO_L.cQF, PO_L.x.r16, PO_L.x.qf);
-            link(PO_L.cQF, PO_L.cSF, PO_L.x.qf, PO_L.x.sf);
-            link(PO_L.cSF, [PO_L.cF], PO_L.x.sf, PO_L.x.f);
+            if (has16) link(PO_L.c16, PO_L.cQF, PO_L.x.r16, PO_L.x.qf, 'r16');
+            link(PO_L.cQF, PO_L.cSF, PO_L.x.qf, PO_L.x.sf, 'qf');
+            link(PO_L.cSF, [PO_L.cF], PO_L.x.sf, PO_L.x.f, 'sf');
             wrap.appendChild(svg);
             const lb = Object.assign({ r16: '1/8', qf: '1/4', sf: '1/2', f: 'FINAL', third: '3RD PLACE' }, cfg.labels || {});
-            const head = (txt, cx, y) => { if (!txt) return; const h = document.createElement('div'); h.className = 'po-h'; h.style.left = cx + 'px'; h.style.top = (y - 16) + 'px'; h.textContent = txt; wrap.appendChild(h); };
+            const head = (txt, cx, y, rk) => { if (!txt) return; const h = document.createElement('div'); h.className = 'po-h'; h.setAttribute('data-r', rk); h.style.left = cx + 'px'; h.style.top = (y - 16) + 'px'; h.textContent = txt; wrap.appendChild(h); };
             const half = PO_L.W / 2;
             const hy = PILL ? ((has16 ? PO_L.c16[0] : PO_L.cQF[0]) - PO_L.H / 2 - 24) : 133;
-            if (has16) head(lb.r16, PO_L.x.r16 + half, hy); head(lb.qf, PO_L.x.qf + half, hy); head(lb.sf, PO_L.x.sf + half, hy);
-            head(lb.f, PO_L.x.f + half, PO_L.cF - PO_L.H / 2 - 21);
-            if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - PO_L.H / 2 - 20);
-            const box = (x, cy, m) => {
+            if (has16) head(lb.r16, PO_L.x.r16 + half, hy, 'r16'); head(lb.qf, PO_L.x.qf + half, hy, 'qf'); head(lb.sf, PO_L.x.sf + half, hy, 'sf');
+            head(lb.f, PO_L.x.f + half, PO_L.cF - PO_L.H / 2 - 21, 'f');
+            if (cfg.third) head(lb.third, PO_L.x.f + half, PO_L.cThird - PO_L.H / 2 - 20, 'third');
+            const box = (x, cy, m, rk, bi) => {
                 m = m || {};
-                const d = document.createElement('div'); d.className = 'po-m'; d.style.width = PO_L.W + 'px'; d.style.left = x + 'px'; d.style.top = (cy - PO_L.H / 2) + 'px';
+                const d = document.createElement('div'); d.className = 'po-m'; d.setAttribute('data-r', rk); d.setAttribute('data-i', bi); d.style.width = PO_L.W + 'px'; d.style.left = x + 'px'; d.style.top = (cy - PO_L.H / 2) + 'px';
                 const n = document.createElement('div'); n.className = 'po-n'; const s = document.createElement('div'); s.className = 'po-s';
                 const wn = poWinner(m);
                 [[m.a, m.sa], [m.b, m.sb]].forEach((p, pi) => {
@@ -2565,11 +2588,11 @@
                 d.appendChild(n); d.appendChild(s); wrap.appendChild(d);
             };
             const M = cfg.m || {};
-            PO_L.c16.forEach((cy, i) => box(PO_L.x.r16, cy, (M.r16 || [])[i]));
-            PO_L.cQF.forEach((cy, i) => box(PO_L.x.qf, cy, (M.qf || [])[i]));
-            PO_L.cSF.forEach((cy, i) => box(PO_L.x.sf, cy, (M.sf || [])[i]));
-            box(PO_L.x.f, PO_L.cF, (M.f || [])[0]);
-            if (cfg.third) box(PO_L.x.f, PO_L.cThird, (M.third || [])[0]);
+            PO_L.c16.forEach((cy, i) => box(PO_L.x.r16, cy, (M.r16 || [])[i], 'r16', i));
+            PO_L.cQF.forEach((cy, i) => box(PO_L.x.qf, cy, (M.qf || [])[i], 'qf', i));
+            PO_L.cSF.forEach((cy, i) => box(PO_L.x.sf, cy, (M.sf || [])[i], 'sf', i));
+            box(PO_L.x.f, PO_L.cF, (M.f || [])[0], 'f', 0);
+            if (cfg.third) box(PO_L.x.f, PO_L.cThird, (M.third || [])[0], 'third', 0);
             if (cfg.logo) { const li = document.createElement('img'); li.className = 'po-logo'; li.src = cfg.logo; li.style.height = Math.round(120 * Math.max(30, Math.min(250, parseInt(cfg.logoSize) || 100)) / 100) + 'px'; wrap.appendChild(li); }
             if (cfg.title) { const t = document.createElement('div'); t.className = 'po-title'; t.textContent = cfg.title; wrap.appendChild(t); }
             // довгі назви — зменшуємо шрифт, щоб вміщались у клітинку
@@ -2578,6 +2601,40 @@
                 while (t.scrollWidth > t.clientWidth && fs > 12) { fs -= 1; t.style.fontSize = fs + 'px'; }
             });
             if (PILL) { const ns = Array.from(wrap.querySelectorAll('.po-n .po-t')); let mn = 99; ns.forEach(t => { mn = Math.min(mn, parseFloat(t.style.fontSize || getComputedStyle(t).fontSize)); }); ns.forEach(t => { t.style.fontSize = mn + 'px'; }); }
+        }
+
+        // ===== АНІМАЦІЯ ПЛЕЙ-ОФФ: команди → рахунок → переможці → лінії → наступний раунд =====
+        const poTimers = {}, poLastTs = {};
+        function poCancel(key, wrap) {
+            (poTimers[key] || []).forEach(clearTimeout); poTimers[key] = [];
+            if (!wrap) return; wrap.classList.remove('po-pre');
+            wrap.querySelectorAll('.po-m').forEach(m => m.classList.remove('fr', 'nm', 'sc', 'wn')); wrap.querySelectorAll('.po-h').forEach(h => h.classList.remove('fr'));
+            wrap.querySelectorAll('.po-lines line').forEach(l => { l.style.strokeDasharray = ''; l.style.strokeDashoffset = ''; l.style.transition = ''; });
+        }
+        function poPlay(key, wrap, cfg) {
+            poCancel(key, wrap);
+            const sp = Math.max(0.4, Math.min(2.5, (parseInt(cfg.animSpeed) || 100) / 100)), T = ms => ms / sp, at = (ms, fn) => poTimers[key].push(setTimeout(fn, ms));
+            wrap.classList.add('po-pre');
+            wrap.querySelectorAll('.po-lines line').forEach(l => { const len = Math.hypot(l.getAttribute('x2') - l.getAttribute('x1'), l.getAttribute('y2') - l.getAttribute('y1')) + 2; l.style.transition = 'none'; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; });
+            void wrap.offsetWidth;
+            let t = T(300);
+            [['r16'], ['qf'], ['sf'], ['f', 'third']].forEach(rs => {
+                const ms = []; rs.forEach(r => wrap.querySelectorAll('.po-m[data-r="' + r + '"]').forEach(m => ms.push(m)));
+                if (!ms.length) return;
+                wrap.querySelectorAll(rs.map(r => '.po-h[data-r="' + r + '"]').join(',')).forEach(h => at(t, () => h.classList.add('fr')));
+                ms.forEach((m, k) => at(t + T(k * 90), () => m.classList.add('fr')));
+                t += T(ms.length * 90 + 500);
+                ms.forEach(m => {
+                    const hasN = Array.from(m.querySelectorAll('.po-n .po-t')).some(x => x.textContent.trim()), hasS = Array.from(m.querySelectorAll('.po-s .po-t')).some(x => x.textContent.trim()), hasW = !!m.querySelector('.po-t.win');
+                    if (hasN) { at(t, () => m.classList.add('nm')); t += T(280); } else at(t, () => m.classList.add('nm'));
+                    if (hasS) { at(t, () => m.classList.add('sc')); t += T(hasW ? 450 : 250); if (hasW) { at(t - T(150), () => m.classList.add('wn')); t += T(250); } } else at(t, () => m.classList.add('sc'));
+                    at(t, () => m.classList.add('wn'));
+                });
+                const ls = Array.from(wrap.querySelectorAll('.po-lines line[data-r="' + rs[0] + '"]'));
+                ls.forEach((l, k) => at(t + T(k * 25), () => { l.style.transition = 'stroke-dashoffset .6s ease'; l.style.strokeDashoffset = '0'; }));
+                if (ls.length) t += T(ls.length * 25 + 750);
+            });
+            at(t + T(500), () => poCancel(key, wrap));
         }
         function renderPlayoff(st) {
             const po = st.playoff || {}; let anyVisible = false;
@@ -2595,7 +2652,10 @@
                 if (poKeyCache[key] !== keyStr || !wrap.firstChild) { poKeyCache[key] = keyStr; poBuild(wrap, cfg); { const nb = wrap.querySelector('.po-bg'); if (nb) nb.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 0)))) / 100; } }
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100) * (parseFloat(wrap.dataset.fit) || 1);
                 wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
-                const vis = !!cfg.show; wrap.classList.toggle('visible', vis); if (vis) anyVisible = true;
+                const vis = !!cfg.show, wasVis = wrap.classList.contains('visible'), ats = cfg.animTs || 0;
+                let rep = false; if (poLastTs[key] === undefined) poLastTs[key] = ats; else if (ats !== poLastTs[key]) { poLastTs[key] = ats; rep = ats > 0 && Date.now() - ats < 20000; }
+                if (vis && cfg.anim !== false && (!wasVis || rep)) { try { poPlay(key, wrap, cfg); } catch (e) {} } else if (!vis && wasVis) poCancel(key, wrap);
+                wrap.classList.toggle('visible', vis); if (vis) anyVisible = true;
             });
             document.body.classList.toggle('po-active', anyVisible);
         }
@@ -2703,6 +2763,44 @@
             if (!cfg.show) icEndedTs = 0; const vis = !!cfg.show && !(icEndedTs && icEndedTs === icCd.ts); wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
         }
 
+
+        // ===== АНІМАЦІЯ ГРУП: спочатку команди, потім результати по черзі, потім перестановка за місцями =====
+        let grTimers = [], grLastTs = null;
+        function grCancel() {
+            grTimers.forEach(clearTimeout); grTimers = [];
+            const w = document.getElementById('gr-wrap'); if (!w) return;
+            w.querySelectorAll('.gr-card').forEach(c => c.classList.remove('pre'));
+            w.querySelectorAll('.gr-cell.shown').forEach(c => c.classList.remove('shown'));
+            w.querySelectorAll('.gr-row').forEach(r => { r.style.transition = ''; r.style.opacity = ''; r.style.transform = ''; if (r.hasAttribute('data-lead')) r.classList.add('lead'); });
+        }
+        function grPlay(wrap, cfg) {
+            grCancel();
+            const sp = Math.max(0.4, Math.min(2.5, (parseInt(cfg.animSpeed) || 100) / 100)), T = ms => ms / sp, at = (ms, fn) => grTimers.push(setTimeout(fn, ms));
+            wrap.querySelectorAll('.gr-card').forEach((card, ci) => {
+                const rows = Array.from(card.querySelectorAll('.gr-row')); if (!rows.length) return;
+                const rh = rows[0].offsetHeight || 60, off = r => (parseInt(r.dataset.i) - parseInt(r.dataset.f)) * rh;
+                card.classList.add('pre');
+                rows.forEach(r => { r.style.transition = 'none'; r.style.opacity = '0'; r.style.transform = 'translateY(' + (off(r) + 16) + 'px)'; r.classList.remove('lead'); });
+                void card.offsetWidth;
+                const byI = rows.slice().sort((a, b) => parseInt(a.dataset.i) - parseInt(b.dataset.i));
+                let t = T(ci * 300);
+                byI.forEach((r, k) => at(t + T(k * 110), () => { r.style.transition = 'opacity .45s ease, transform .6s cubic-bezier(.2,.8,.2,1)'; r.style.opacity = '1'; r.style.transform = 'translateY(' + off(r) + 'px)'; }));
+                t += T(byI.length * 110 + 800);
+                const keys = []; card.querySelectorAll('.gr-cell[data-m]').forEach(c => { if (keys.indexOf(c.dataset.m) < 0) keys.push(c.dataset.m); });
+                keys.sort((a, b) => { const x = a.split('_').map(Number), y = b.split('_').map(Number); return (x[0] - y[0]) || (x[1] - y[1]); });
+                const step = T(Math.max(150, Math.min(700, 5000 / Math.max(1, keys.length))));
+                keys.forEach((k, n) => at(t + n * step, () => card.querySelectorAll('.gr-cell[data-m="' + k + '"]').forEach(c => c.classList.add('shown'))));
+                t += keys.length * step + T(350);
+                at(t, () => card.querySelectorAll('.gr-cell.tot').forEach(c => c.classList.add('shown')));
+                t += T(1000);
+                const moves = rows.some(r => r.dataset.i !== r.dataset.f);
+                at(t, () => rows.forEach(r => { r.style.transition = 'transform 1s cubic-bezier(.3,.7,.2,1), background .6s ease, box-shadow .6s ease, opacity .4s ease'; r.style.transform = 'translateY(0px)'; }));
+                t += T(moves ? 1100 : 200);
+                at(t, () => rows.forEach(r => { if (r.hasAttribute('data-lead')) r.classList.add('lead'); }));
+                at(t + T(1300), () => { card.classList.remove('pre'); card.querySelectorAll('.gr-cell.shown').forEach(c => c.classList.remove('shown')); rows.forEach(r => { r.style.transition = ''; r.style.opacity = ''; r.style.transform = ''; }); });
+            });
+        }
+
         // ===== ГРУПОВИЙ ЕТАП =====
         let grKeyCache = '';
         function renderGroups(st) {
@@ -2738,7 +2836,7 @@
             st2.transform = 'translate(-50%, -50%) scale(' + k + ')';
             const keyStr = JSON.stringify([cfg.count, cfg.mode, cfg.single, cfg.teamsPer, cfg.textSize, cfg.tournament, cfg.title, cfg.subtitle, cfg.prefix, cfg.g, cfg.font, cfg.fontHead, cfg.cross, cfg.winPts, cfg.lossPts, cfg.drawPts, cfg.sortRows, cfg.lblDiff, cfg.lblPts]);
             if (keyStr !== grKeyCache || !wrap.querySelector('.gr-inner').firstChild) {
-                grKeyCache = keyStr;
+                grKeyCache = keyStr; grCancel();
                 const count = Math.max(1, Math.min(10, parseInt(g(cfg.count, 6)) || 6)), tp = Math.max(2, Math.min(8, parseInt(g(cfg.teamsPer, 5)) || 5));
                 const ts = Math.max(40, Math.min(160, parseInt(g(cfg.textSize, 100)))) / 100;
                 const arr = a => Array.isArray(a) ? a : (a && typeof a === 'object' ? Object.values(a) : []);
@@ -2774,7 +2872,7 @@
                     const c = p % cols, r = Math.floor(p / cols), x = left0 + c * (cardW + gap), y = top0 + r * (realH + gap), G = grp(gi);
                     let rowsHtml = '';
                     if (!cross) {
-                        for (let j = 0; j < tp; j++) rowsHtml += '<div class="gr-row" style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (j + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px;">' + esc(G.t[j]) + '</span></div>';
+                        for (let j = 0; j < tp; j++) rowsHtml += '<div class="gr-row" data-i="' + j + '" data-f="' + j + '" style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (j + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px;">' + esc(G.t[j]) + '</span></div>';
                     } else {
                         const wP = Math.max(0, parseInt(g(cfg.winPts, 2)) || 0), lP = parseInt(g(cfg.lossPts, 0)) || 0, dP = parseInt(g(cfg.drawPts, 1)) || 0;
                         const parse = s => { const out = []; String(s == null ? '' : s).replace(/(\d+)\s*[:\-–—]\s*(\d+)/g, (m, a, b) => { out.push([parseInt(a), parseInt(b)]); return m; }); return out; };
@@ -2799,13 +2897,14 @@
                         for (let j = 0; j < tp; j++) hh += '<span style="width:' + cw + 'px; text-align:center;">' + (j + 1) + '</span>';
                         hh += '<span style="width:' + wD + 'px; text-align:center;">' + esc(g(cfg.lblDiff, 'РІЗН')) + '</span><span style="width:' + wP2 + 'px; text-align:center;">' + esc(g(cfg.lblPts, 'ОЧК')) + '</span></div>';
                         rowsHtml = hh;
-                        order.forEach(S => {
-                            const i = S.i; let r = '<div class="gr-row" style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (i + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px; min-width:' + nameMin * 0.6 + 'px;">' + esc(G.t[i]) + '</span>';
+                        const ranked = stats.slice().sort((x, y) => (y.pts - x.pts) || (y.diff - x.diff) || (y.gf - x.gf) || (x.i - y.i)); const leaderI = (ranked.length && ranked[0].pl > 0) ? ranked[0].i : -1;
+                        order.forEach((S, fi) => {
+                            const i = S.i; let r = '<div class="gr-row' + (i === leaderI ? ' lead' : '') + '" data-i="' + i + '" data-f="' + fi + '"' + (i === leaderI ? ' data-lead="1"' : '') + ' style="height:' + rh + 'px;"><span class="gr-num" style="font-size:' + fsNum + 'px; width:' + (fsNum * 2.6) + 'px;">' + (i + 1) + '</span><span class="gr-name" style="font-size:' + fsN + 'px; min-width:' + nameMin * 0.6 + 'px;">' + esc(G.t[i]) + '</span>';
                             for (let j = 0; j < tp; j++) {
                                 if (i === j) { r += '<span class="gr-cell diag" style="width:' + cw + 'px;"></span>'; continue; }
                                 const p = pair(i, j); let txt = '', cls = '';
                                 if (p) { txt = p.map(x => x[0] + ':' + x[1]).join(' '); let a = 0, b = 0; p.forEach(x => { a += x[0]; b += x[1]; if (p.length > 1) { if (x[0] > x[1]) a += 0; } }); if (p.length > 1) { a = p.filter(x => x[0] > x[1]).length; b = p.filter(x => x[1] > x[0]).length; } if (a > b) cls = ' win'; }
-                                r += '<span class="gr-cell' + cls + '" style="width:' + cw + 'px; font-size:' + fsC + 'px;">' + esc(txt) + '</span>';
+                                r += '<span class="gr-cell' + cls + '"' + (p ? ' data-m="' + Math.min(i, j) + '_' + Math.max(i, j) + '"' : '') + ' style="width:' + cw + 'px; font-size:' + fsC + 'px;">' + esc(txt) + '</span>';
                             }
                             const anyRes = S.pl > 0;
                             r += '<span class="gr-cell tot" style="width:' + wD + 'px; font-size:' + fsN * 0.9 + 'px;">' + (anyRes ? (S.diff > 0 ? '+' + S.diff : S.diff) : '') + '</span><span class="gr-cell tot" style="width:' + wP2 + 'px; font-size:' + fsN + 'px; color:var(--gr-text);">' + (anyRes ? S.pts : '') + '</span></div>';
@@ -2818,7 +2917,10 @@
                 inner.querySelectorAll('.gr-cell').forEach(t => { let fs = parseFloat(t.style.fontSize); if (!fs) return; while (t.scrollWidth > t.clientWidth && fs > 7) { fs -= 1; t.style.fontSize = fs + 'px'; } });
                 inner.querySelectorAll('.gr-name').forEach(t => { let fs = parseFloat(t.style.fontSize); while (t.scrollWidth > t.clientWidth && fs > 9) { fs -= 1; t.style.fontSize = fs + 'px'; } });
             }
-            const vis = !!cfg.show; wrap.classList.toggle('visible', vis); document.body.classList.toggle('gr-active', vis);
+            const vis = !!cfg.show, wasVis = wrap.classList.contains('visible'), ats = cfg.animTs || 0;
+            let rep = false; if (grLastTs === null) grLastTs = ats; else if (ats !== grLastTs) { grLastTs = ats; rep = ats > 0 && Date.now() - ats < 20000; }
+            if (vis && cfg.anim !== false && (!wasVis || rep)) { try { grPlay(wrap, cfg); } catch (e) {} } else if (!vis && wasVis) grCancel();
+            wrap.classList.toggle('visible', vis); document.body.classList.toggle('gr-active', vis);
         }
 
         // ===== ТАБЛО «РЕЙТИНГ КОМАНД» =====
