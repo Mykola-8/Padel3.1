@@ -3186,11 +3186,13 @@
                 inner.insertBefore(h, card); heads.push(h);
                 h.onclick = () => { apply(i, card.style.display === 'none'); persist(); };
             });
-            cards.forEach((_, i) => apply(i, saved[i] === true));
+            cards.forEach((_, i) => apply(i, i === 1 ? saved[i] !== false : saved[i] === true));   // «Назви команд» за замовчуванням розгорнуті
             const tools = document.createElement('div'); tools.className = 'tcol-tools';
             tools.innerHTML = '<button type="button" data-a="open">▾ Розгорнути всі</button><button type="button" data-a="close">▴ Згорнути всі</button>';
             tools.onclick = (e) => { const a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return; cards.forEach((_, i) => apply(i, a === 'open')); persist(); };
             inner.insertBefore(tools, inner.firstChild);
+            // «Назви команд», «Режими гри», «Розіграш при 40:40» — нагору списку
+            { let anchor = tools; [1, 2, 3].forEach(k => { if (!heads[k] || !cards[k]) return; anchor.after(heads[k]); heads[k].after(cards[k]); anchor = cards[k]; }); }
         })();
 
 
