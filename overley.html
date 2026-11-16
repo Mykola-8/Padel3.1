@@ -4072,7 +4072,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const wrap = document.getElementById('st-wrap'); if (!wrap) return {};
             const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
             const logoEl = document.getElementById('st-logo'), vid = document.getElementById('st-video'), sp = document.getElementById('st-sparks');
-            let gcfg = null, mcfg = null, mj = '', prev = null, lastTest = null, t1 = null, t2 = null, t3 = null;
+            let gcfg = null, ccfg = null, mcfg = null, mj = '', prev = null, lastTest = null, t1 = null, t2 = null, t3 = null;
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
             const cfg = () => gcfg || ccfg || mcfg || {};
@@ -4253,7 +4253,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
             const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const cfg = () => gcfg || mcfg || {};
+            const cfg = () => gcfg || ccfg || mcfg || {};
             window.__mbCfgNow = cfg;
             const $ = id => document.getElementById(id);
             const txt = id => { const e = $(id); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; };
