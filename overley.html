@@ -773,6 +773,20 @@
             75%  { rotate: 1 -0.4 0 calc(var(--f3-x) * -1);  translate: 0 calc(var(--f3-t) * -1); }
             100% { rotate: 0.35 1 0 calc(var(--f3-y) * -1);  translate: 0 0; }
         }
+
+        .wx-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9050; pointer-events: none; font-family: 'Montserrat', sans-serif; }
+        .wx-bar { position: absolute; left: 0; top: 0; display: flex; align-items: stretch; transform-origin: 0 0; color: var(--wx-tx, #fff); opacity: 0; visibility: hidden; transform: translateY(40px); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1), visibility 0s linear .6s; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+        .wx-bar.on { opacity: 1; visibility: visible; transform: none; transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+        .wx-l, .wx-r { display: flex; align-items: center; box-sizing: border-box; }
+        .wx-l { background: var(--wx-bgl, rgba(15,25,50,.8)); border-radius: var(--wx-rad, 18px) 0 0 var(--wx-rad, 18px); padding: 0 34px; gap: 24px; min-width: 180px; justify-content: center; border: 2px solid var(--wx-bd, rgba(255,255,255,.35)); border-right: 0; }
+        .wx-l img { max-height: 92px; max-width: 280px; object-fit: contain; }
+        .wx-l .wx-div { width: 3px; align-self: stretch; margin: 22px 0; background: var(--wx-tx, #fff); opacity: .45; }
+        .wx-l .wx-city { font-size: 38px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .wx-r { background: var(--wx-bgr, rgba(20,20,110,.85)); border-radius: 0 var(--wx-rad, 18px) var(--wx-rad, 18px) 0; padding: 0 46px; gap: 58px; border: 2px solid var(--wx-bd, rgba(255,255,255,.35)); border-left: 0; }
+        .wx-l:only-child { border-radius: var(--wx-rad, 18px); border-right: 2px solid var(--wx-bd, rgba(255,255,255,.35)); }
+        .wx-i { display: flex; align-items: center; gap: 18px; padding: 22px 0; }
+        .wx-ic svg { width: 62px; height: 62px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; display: block; }
+        .wx-tx { display: flex; flex-direction: column; gap: 2px; } .wx-lb { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: .9; } .wx-v { font-size: 44px; font-weight: 800; text-transform: uppercase; line-height: 1.05; white-space: nowrap; }
         .mb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9000; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; font-family: 'Montserrat', sans-serif; color: var(--mb-text, #fff); }
         .mb-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
         html.mb-on .scoreboard-container { opacity: 0 !important; visibility: hidden !important; }
@@ -2195,6 +2209,7 @@
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
     <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
     <div class="st-wrap" id="st-wrap"><div class="st-bg"></div><div class="st-sparks" id="st-sparks"></div><div class="st-streak"></div><div class="st-streak s2"></div><img class="st-logo" id="st-logo" alt=""><video class="st-video" id="st-video" muted playsinline style="display:none"></video></div>
+    <div class="wx-wrap" id="wx-wrap"><div class="wx-bar" id="wx-bar"></div></div>
     <div class="gt-wrap" id="gt-wrap"><div class="gt-plate sh-pill" id="gt-plate"></div></div>
     <div class="mb-wrap" id="mb-wrap"><div class="mb-board" id="mb-board"><div class="mb-top">
         <div class="mb-side a"><div class="mb-card"><div class="mb-lg" id="mb-lga"></div><i class="mb-srv" id="mb-sra">🎾</i><span class="mb-pt" id="mb-pa">0</span></div><div class="mb-g" id="mb-ga">0</div></div>
@@ -3877,7 +3892,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -4349,6 +4364,85 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             onValue(ref(db, 'padel/float3d'), sn => { gcfg = sn.val(); apply(); }, () => { gcfg = null; });
             onValue(ref(db, 'padel/courts/_float3d'), sn => { ccfg = sn.val(); apply(); }, () => { ccfg = null; });
             window.__f3Mirror = (st) => { const v = st && st.f3Cfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; apply(); };
+        })();
+
+
+        // ===== ПОГОДА / МЕТЕО МІСТА (padel/weather) =====
+        const WX = (function () {
+            const wrap = document.getElementById('wx-wrap'), bar = document.getElementById('wx-bar'); if (!wrap || !bar) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let gcfg = null, ccfg = null, mcfg = null, mj = '', lastTs = null, showUntil = 0, data = null, lastFetch = 0, fetching = false, geo = null, lastHtml = '', lastOn = false;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const cfg = () => gcfg || ccfg || mcfg || {};
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            function fit() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')'; }
+            window.addEventListener('resize', fit); fit();
+            const S = { therm: '<svg viewBox="0 0 64 64"><path d="M26 38V14a6 6 0 0 1 12 0v24a11 11 0 1 1-12 0z"/><path d="M32 22v22"/><circle cx="32" cy="46" r="3.5"/><path d="M46 18h8M46 26h6M46 34h4"/></svg>',
+                wind: '<svg viewBox="0 0 64 64"><path d="M6 22c8-7 14 7 22 0s14 7 22 0 8 2 8 2"/><path d="M6 34c8-7 14 7 22 0s14 7 22 0 8 2 8 2"/><path d="M6 46c8-7 14 7 22 0s14 7 22 0 8 2 8 2"/></svg>',
+                hum: '<svg viewBox="0 0 64 64"><path d="M32 8C22 22 16 30 16 40a16 16 0 0 0 32 0c0-10-6-18-16-32z"/></svg>',
+                clear: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10"/><path d="M32 6v8M32 50v8M6 32h8M50 32h8M13.6 13.6l5.7 5.7M44.7 44.7l5.7 5.7M13.6 50.4l5.7-5.7M44.7 19.3l5.7-5.7"/></svg>',
+                night: '<svg viewBox="0 0 64 64"><path d="M44 40A18 18 0 0 1 24 12a20 20 0 1 0 26 28 18 18 0 0 1-6 0z"/></svg>',
+                partly: '<svg viewBox="0 0 64 64"><circle cx="24" cy="22" r="8"/><path d="M24 6v4M8 22h4M12.7 10.7l2.8 2.8M35.3 10.7l-2.8 2.8"/><path d="M22 52h26a9 9 0 0 0 0-18 12 12 0 0 0-23-2A10 10 0 0 0 22 52z"/></svg>',
+                cloud: '<svg viewBox="0 0 64 64"><path d="M18 50h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A12 12 0 0 0 18 50z"/></svg>',
+                fog: '<svg viewBox="0 0 64 64"><path d="M18 36h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A12 12 0 0 0 18 36z"/><path d="M12 44h40M20 52h30"/></svg>',
+                rain: '<svg viewBox="0 0 64 64"><path d="M18 38h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A12 12 0 0 0 18 38z"/><path d="M22 46l-3 8M33 46l-3 8M44 46l-3 8"/></svg>',
+                snow: '<svg viewBox="0 0 64 64"><path d="M18 38h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A12 12 0 0 0 18 38z"/><path d="M22 46v6M19 49h6M33 46v6M30 49h6M44 46v6M41 49h6"/></svg>',
+                storm: '<svg viewBox="0 0 64 64"><path d="M18 36h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A12 12 0 0 0 18 36z"/><path d="M34 38l-7 10h8l-5 10"/></svg>' };
+            const COND = { clear: ['SUNNY', 'СОНЯЧНО'], night: ['CLEAR', 'ЯСНО'], partly: ['PARTLY CLOUDY', 'МІНЛИВА ХМАРНІСТЬ'], cloud: ['CLOUDY', 'ХМАРНО'], fog: ['FOG', 'ТУМАН'], rain: ['RAIN', 'ДОЩ'], snow: ['SNOW', 'СНІГ'], storm: ['THUNDERSTORM', 'ГРОЗА'] };
+            const DIR = { en: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'], uk: ['Пн', 'ПнС', 'С', 'ПдС', 'Пд', 'ПдЗ', 'З', 'ПнЗ'] };
+            const kind = (code, day) => { code = parseInt(code); if (code === 0 || code === 1) return day === 0 ? 'night' : 'clear'; if (code === 2) return 'partly'; if (code === 3) return 'cloud'; if (code === 45 || code === 48) return 'fog'; if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'rain'; if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow'; if (code >= 95) return 'storm'; return 'cloud'; };
+            async function load(c) {
+                if (fetching) return; fetching = true; lastFetch = Date.now();
+                try {
+                    let la = num(c.lat, NaN), lo = num(c.lon, NaN);
+                    if (!isFinite(la) || !isFinite(lo)) {
+                        const city = String(g(c.city, '')).trim(); if (!city) { fetching = false; return; }
+                        if (!geo || geo.city !== city) { const r = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=' + encodeURIComponent(city))).json(); const x = r && r.results && r.results[0]; if (!x) { fetching = false; return; } geo = { city: city, la: x.latitude, lo: x.longitude }; }
+                        la = geo.la; lo = geo.lo;
+                    }
+                    const r = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + la + '&longitude=' + lo + '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,is_day&wind_speed_unit=kmh&timezone=auto')).json();
+                    const k = r && r.current; if (k) data = { t: k.temperature_2m, h: k.relative_humidity_2m, code: k.weather_code, ws: k.wind_speed_10m, wd: k.wind_direction_10m, day: k.is_day };
+                } catch (e) {}
+                fetching = false;
+            }
+            function values(c) {
+                const L = c.lang === 'uk' ? 1 : 0;
+                if (g(c.mode, 'auto') === 'manual') {
+                    const T = num(c.mT, 0), wd = String(g(c.mWd, 'E')), kd = g(c.mCond, 'clear');
+                    return { t: T, h: num(c.mH, 0), kind: kd, ws: num(c.mWs, 0), dir: wd };
+                }
+                if (!data) return null;
+                const dirs = DIR[L ? 'uk' : 'en'];
+                return { t: data.t, h: data.h, kind: kind(data.code, data.day), ws: data.ws, dir: dirs[Math.round((num(data.wd, 0) % 360) / 45) % 8] };
+            }
+            function render() {
+                const c = cfg(), ct = g(c.court, 'all'), forCourt = (ct === 'all' || String(ct) === String(courtNum));
+                if (c.showTs && c.showTs !== lastTs) { const first = lastTs === null; lastTs = c.showTs; if (!first && Date.now() - c.showTs < 15000) showUntil = Date.now() + Math.max(2, num(c.sec, 10)) * 1000; } else if (lastTs === null) lastTs = c.showTs || 0;
+                const vis = forCourt && (c.show === true || Date.now() < showUntil);
+                if (vis && g(c.mode, 'auto') !== 'manual' && Date.now() - lastFetch > 600000) load(c);
+                const s = bar.style; s.left = num(c.x, 90) + 'px'; s.top = num(c.y, 880) + 'px'; s.scale = String(num(c.scale, 100) / 100);
+                s.setProperty('--wx-tx', g(c.textColor, '#ffffff')); s.setProperty('--wx-bgl', rgba(g(c.bgL, '#0f1932'), num(c.opL, 80) / 100)); s.setProperty('--wx-bgr', rgba(g(c.bgR, '#14146e'), num(c.opR, 85) / 100));
+                s.setProperty('--wx-bd', g(c.border, '#ffffff') === 'none' ? 'transparent' : rgba(g(c.border, '#ffffff'), num(c.borderOp, 35) / 100)); s.setProperty('--wx-rad', num(c.radius, 18) + 'px');
+                const on = vis && (g(c.mode, 'auto') === 'manual' || !!data); if (on !== lastOn) { bar.classList.toggle('on', on); lastOn = on; }
+                const v = values(c); if (!v) return;
+                const L = c.lang === 'uk' ? 1 : 0, lb = { t: g(c.lTemp, L ? 'ТЕМПЕРАТУРА' : 'TEMPERATURE'), f: g(c.lFc, L ? 'ПРОГНОЗ' : 'FORECAST'), w: g(c.lWind, L ? 'ВІТЕР' : 'WIND'), h: g(c.lHum, L ? 'ВОЛОГІСТЬ' : 'HUMIDITY') };
+                const C = Math.round(v.t), F = Math.round(v.t * 9 / 5 + 32), tu = g(c.units, 'both'), tt = tu === 'c' ? C + '°C' : tu === 'f' ? F + '°F' : C + '°C | ' + F + '°F';
+                const ws = tu === 'f' ? Math.round(v.ws * 0.621) + ' mph' : Math.round(v.ws) + (L ? ' км/г' : ' km/h');
+                const item = (ic, l, val) => '<div class="wx-i"><span class="wx-ic">' + ic + '</span><span class="wx-tx">' + (c.showLabels === false ? '' : '<b class="wx-lb">' + esc(l) + '</b>') + '<b class="wx-v">' + esc(val) + '</b></span></div>';
+                let r = ''; if (c.iTemp !== false) r += item(S.therm, lb.t, tt); if (c.iFc !== false) r += item(S[v.kind] || S.clear, lb.f, g(c.mCondText, '') && g(c.mode, 'auto') === 'manual' ? c.mCondText : COND[v.kind][L]); if (c.iWind !== false) r += item(S.wind, lb.w, v.dir + ' ' + ws); if (c.iHum !== false) r += item(S.hum, lb.h, Math.round(v.h) + '%');
+                let l = ''; const a = String(g(c.logo1, '')), b = String(g(c.logo2, ''));
+                if (a) l += '<img src="' + esc(a) + '" alt="">'; if (a && b) l += '<i class="wx-div"></i>'; if (b) l += '<img src="' + esc(b) + '" alt="">'; if (!a && !b && g(c.city, '') && c.showCity !== false) l = '<span class="wx-city">' + esc(c.city) + '</span>';
+                const html = (l ? '<div class="wx-l">' + l + '</div>' : '') + (r ? '<div class="wx-r">' + r + '</div>' : ''); if (html !== lastHtml) { bar.innerHTML = html; lastHtml = html; }
+            }
+            let lk = '';
+            function chg() { const c = cfg(), k = [c.city, c.lat, c.lon, c.mode].join('|'); if (k !== lk) { lk = k; lastFetch = 0; geo = null; data = null; } }
+            onValue(ref(db, 'padel/weather'), sn => { gcfg = sn.val(); chg(); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_weather'), sn => { ccfg = sn.val(); chg(); }, () => { ccfg = null; });
+            window.__wxMirror = (st) => { const v = st && st.wxCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; chg(); };
+            setInterval(() => { try { render(); } catch (e) {} }, 500);
+            return {};
         })();
 
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
