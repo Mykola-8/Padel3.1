@@ -4434,9 +4434,9 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 if (c.showTs && c.showTs !== lastTs) { const first = lastTs === null; lastTs = c.showTs; if (!first && Date.now() - c.showTs < 15000) showUntil = Date.now() + Math.max(2, num(c.sec, 10)) * 1000; } else if (lastTs === null) lastTs = c.showTs || 0;
                 const vis = forCourt && (c.show === true || Date.now() < showUntil);
                 if (vis && g(c.mode, 'auto') !== 'manual' && Date.now() - lastFetch > 600000) load(c);
-                const s = bar.style; s.left = num(c.x, 90) + 'px'; s.top = num(c.y, 880) + 'px'; s.scale = String(num(c.scale, 100) / 100);
-                s.setProperty('--wx-tx', g(c.textColor, '#ffffff')); s.setProperty('--wx-bgl', rgba(g(c.bgL, '#0f1932'), num(c.opL, 80) / 100)); s.setProperty('--wx-bgr', rgba(g(c.bgR, '#14146e'), num(c.opR, 85) / 100));
-                s.setProperty('--wx-bd', g(c.border, '#ffffff') === 'none' ? 'transparent' : rgba(g(c.border, '#ffffff'), num(c.borderOp, 35) / 100)); s.setProperty('--wx-rad', num(c.radius, 18) + 'px');
+                const s = bar.style; s.left = num(c.x, 695) + 'px'; s.top = num(c.y, 30) + 'px'; s.scale = String(num(c.scale, 49) / 100);
+                s.setProperty('--wx-tx', g(c.textColor, '#ffffff')); s.setProperty('--wx-bgl', rgba(g(c.bgL, '#0f1932'), num(c.opL, 50) / 100)); s.setProperty('--wx-bgr', rgba(g(c.bgR, '#14146e'), num(c.opR, 50) / 100));
+                s.setProperty('--wx-bd', g(c.border, '#ffffff') === 'none' ? 'transparent' : rgba(g(c.border, '#ffffff'), num(c.borderOp, 16) / 100)); s.setProperty('--wx-rad', num(c.radius, 23) + 'px');
                 const on = vis && (g(c.mode, 'auto') === 'manual' || !!data); if (on !== lastOn) { bar.classList.toggle('on', on); lastOn = on; }
                 const v = values(c); if (!v) return;
                 const L = c.lang === 'uk' ? 1 : 0, lb = { t: g(c.lTemp, L ? 'ТЕМПЕРАТУРА' : 'TEMPERATURE'), f: g(c.lFc, L ? 'ПРОГНОЗ' : 'FORECAST'), w: g(c.lWind, L ? 'ВІТЕР' : 'WIND'), h: g(c.lHum, L ? 'ВОЛОГІСТЬ' : 'HUMIDITY') };
