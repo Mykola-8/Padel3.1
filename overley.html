@@ -800,6 +800,9 @@
         .mb-pt.sm { font-size: 66px; }
         .mb-lg { position: absolute; top: 50%; width: 92px; height: 92px; margin-top: -46px; border-radius: 50%; border: 3px solid var(--mb-bd, #fff); background: var(--mb-lgbg, #0f1f45); overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 900; font-size: 30px; line-height: 1.05; letter-spacing: 1px; box-sizing: border-box; z-index: 3; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
         .mb-lg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mb-lg.wide { width: auto; min-width: 92px; padding: 0 26px; border-radius: 46px; white-space: nowrap; }
+        .mb-side.a .mb-lg.wide { left: auto; right: calc(100% - 40px); } .mb-side.b .mb-lg.wide { right: auto; left: calc(100% - 40px); }
+        .mb-side.a .mb-lg.wide { padding-right: 46px; } .mb-side.b .mb-lg.wide { padding-left: 46px; }
         .mb-side.a .mb-lg { left: -52px; } .mb-side.b .mb-lg { right: -52px; }
         .mb-srv { position: absolute; top: 8px; font-style: normal; font-size: 22px; opacity: 0; transition: opacity .3s; } .mb-srv.on { opacity: 1; }
         .mb-side.a .mb-srv { right: 10px; } .mb-side.b .mb-srv { left: 10px; }
@@ -4262,7 +4265,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
             function setLogo(el, src, name, n) {
                 const key = src + '|' + name + '|' + n; if (el.dataset.k === key) return; el.dataset.k = key;
                 if (src) el.innerHTML = '<img src="' + esc(src) + '" alt="">'; else el.innerHTML = abbr(name, n);
-                el.style.background = src ? 'transparent' : '';
+                el.style.background = src ? 'transparent' : ''; el.classList.toggle('wide', !src);
             }
             function visibleNow() { const c = cfg(), ct = g(c.court, 'all'); return !!c.show && (ct === 'all' || String(ct) === String(courtNum)); }
             function tick() {
@@ -4276,7 +4279,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 s.setProperty('--mb-ca', rgba(g(c.colorA, '#9b1d3a'), op)); s.setProperty('--mb-cb', rgba(g(c.colorB, '#157a70'), op)); s.setProperty('--mb-bd', g(c.border, '#ffffff')); s.setProperty('--mb-midbg', g(c.midBg, '#14275c')); s.setProperty('--mb-lgbg', g(c.lgBg, '#0f1f45'));
                 s.setProperty('--mb-text', g(c.textColor, '#ffffff')); s.setProperty('--mb-gc', g(c.gamesColor, '#ffffff'));
                 s.setProperty('--mb-sc', Math.max(30, Math.min(250, num(c.scale, 80))) / 100); s.setProperty('--mb-x', Math.max(0, Math.min(100, num(c.x, 10)))); s.setProperty('--mb-y', Math.max(0, Math.min(100, num(c.y, 8))));
-                const lg = (c.logos && (c.logos[courtNum] || c.logos['c' + courtNum])) || {}, n = Math.max(1, Math.min(6, Math.round(num(c.abbrLen, 3))));
+                const lg = (c.logos && (c.logos[courtNum] || c.logos['c' + courtNum])) || {}, n = Math.max(1, Math.min(24, Math.round(num(c.abbrLen, 3))));
                 const nA = nameOf('name-display-t1'), nB = nameOf('name-display-t2');
                 setLogo($('mb-lga'), String(lg.a || '').trim(), nA, n); setLogo($('mb-lgb'), String(lg.b || '').trim(), nB, n);
                 const mid = $('mb-mid'), tl = String(g(c.logo, '')).trim(), mk = tl + '|';
