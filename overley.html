@@ -1037,7 +1037,7 @@
         .po-n { position: absolute; left: 0; top: 0; width: var(--po-nw, 231px); height: var(--po-h, 76px); background: var(--po-frame, #f5c542); }
         .po-s { position: absolute; left: calc(var(--po-nw, 231px) + 5px); top: 0; width: 145px; height: var(--po-h, 76px); background: var(--po-score, #e8b52c); }
         .po-t { height: calc(var(--po-h, 76px) / 2); box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; font-size: 22px; font-weight: 700; color: var(--po-text, #10213f); white-space: nowrap; overflow: hidden; }
-        .po-n .po-t { font-size: var(--po-nf, 22px); }
+        .po-n .po-t { font-size: var(--po-nf, 22px); text-transform: uppercase; font-weight: 800; letter-spacing: .4px; }
         .po-n .po-t.two { flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.14; }
         .po-n .po-t.two > div { white-space: nowrap; }
         .po-t + .po-t { border-top: 1px solid rgba(0,0,0,0.28); }
@@ -2529,13 +2529,13 @@
         // ширина колонки назв = найдовша назва в усій сітці (для симетрії всіх рамок)
         function poNameWidth(M, fs, two) {
             let w = 0; const cv = poNameWidth._cv || (poNameWidth._cv = document.createElement('canvas')), cx = cv.getContext('2d');
-            cx.font = '800 ' + (fs || 22) + 'px Montserrat, Arial, sans-serif';
-            Object.keys(M || {}).forEach(r => (M[r] || []).forEach(m => { if (!m) return; [m.a, m.b].forEach(t => { if (!t) return; (two ? String(t).split('/') : [String(t)]).forEach(x => { w = Math.max(w, cx.measureText(x.trim()).width); }); }); }));
+            cx.font = '800 ' + (fs || 22) + 'px Montserrat, Arial, sans-serif'; cx.letterSpacing = '0.4px';
+            Object.keys(M || {}).forEach(r => (M[r] || []).forEach(m => { if (!m) return; [m.a, m.b].forEach(t => { if (!t) return; (two ? String(t).split('/') : [String(t)]).forEach(x => { w = Math.max(w, cx.measureText(x.trim().toUpperCase()).width); }); }); }));
             return Math.max(231, Math.ceil(w * 1.04 + 36));
         }
         // спершу зменшуємо шрифт назв (22→16 px), щоб усе вмістилось без стиснення сітки; потім — стискаємо сітку
         function poPickSizing(M, has16, two, ts) {
-            ts = ts || 1; const n = has16 ? 4 : 3, cap = 30; let fs = Math.min(cap, Math.round((two ? 20 : 22) * ts)), NW = poNameWidth(M, fs, two); const fmin = Math.max(12, Math.round(16 * Math.min(ts, 1)));
+            ts = ts || 1; const n = has16 ? 4 : 3, cap = 48; let fs = Math.min(cap, Math.round((two ? 24 : 28) * ts)), NW = poNameWidth(M, fs, two); const fmin = Math.max(13, Math.round(17 * Math.min(ts, 1)));
             while (fs > fmin && n * (NW + 150) + (n - 1) * 40 > 1860) { fs--; NW = poNameWidth(M, fs, two); }
             return { fs, NW };
         }
@@ -2549,11 +2549,11 @@
         function poText(v) { return (v === undefined || v === null) ? '' : String(v); }
         function poBuild(wrap, cfg) {
             const has16 = poHas16((cfg.m || {})), PILL = cfg.shape === 'pill', TWO = PILL ? true : !!cfg.twoLines;
-            const TS = Math.max(0.5, Math.min(2, (parseInt(cfg.textSize) || 100) / 100)); let SZ = poPickSizing(cfg.m || {}, has16, TWO, TS), NW = SZ.NW, PO_L;
-            if (PILL) { const n = has16 ? 4 : 3, gp = 99, Wp = Math.floor((1820 - (n - 1) * gp) / n), Hp = has16 ? 96 : 150; PO_L = poLayout(has16, Wp, Hp); NW = Wp - 170; SZ = { fs: Math.max(14, Math.min(40, Math.round(Math.max(16, Math.min(31, Math.round(Hp / 2 / 2.2))) * TS))), NW }; }
-            else PO_L = poLayout(has16, NW + 150, TWO ? 100 : 76);
+            const TS = Math.max(0.5, Math.min(2, (parseInt(cfg.textSize) || 100) / 100)), NS = Math.max(0.5, Math.min(2.5, (parseInt(cfg.nameSize) || 100) / 100)); let SZ = poPickSizing(cfg.m || {}, has16, TWO, NS), NW = SZ.NW, PO_L;
+            if (PILL) { const n = has16 ? 4 : 3, gp = 99, Wp = Math.floor((1820 - (n - 1) * gp) / n), Hp = has16 ? 96 : 150; PO_L = poLayout(has16, Wp, Hp); NW = Wp - 170; SZ = { fs: Math.max(14, Math.min(48, Math.round(Hp / 2 / 1.9 * NS))), NW }; }
+            else PO_L = poLayout(has16, NW + 150, TWO ? Math.max(100, Math.ceil(SZ.fs * 2 * 1.22) + 18) : Math.max(76, Math.ceil(SZ.fs * 1.5) * 2));
             wrap.style.setProperty('--po-h', PO_L.H + 'px');
-            wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.style.setProperty('--po-ts', TS); wrap.style.setProperty('--po-sf', Math.min(38, Math.round(26 * TS)) + 'px'); wrap.dataset.fit = PO_L.fit;
+            wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.style.setProperty('--po-ts', TS); wrap.style.setProperty('--po-sf', Math.min(60, Math.round(Math.max(26, PO_L.H * 0.34) * TS)) + 'px'); wrap.dataset.fit = PO_L.fit;
             wrap.innerHTML = ''; wrap.classList.remove('po-pre');
             const bg = document.createElement('div'); bg.className = 'po-bg'; wrap.appendChild(bg);
             if (PO_L.fit < 1) { const f = PO_L.fit; bg.style.left = (-(1920 / f - 1920) / 2) + 'px'; bg.style.top = (-(1080 / f - 1080) / 2) + 'px'; bg.style.right = bg.style.bottom = 'auto'; bg.style.width = (1920 / f) + 'px'; bg.style.height = (1080 / f) + 'px'; }
@@ -2648,7 +2648,7 @@
                 wrap.style.setProperty('--po-head', g(cfg.head, '#9fb3dd')); wrap.style.setProperty('--po-title', g(cfg.titleColor, '#ffffff'));
                 wrap.style.setProperty('--po-win', g(cfg.win, 'rgba(0,0,0,0.06)')); wrap.style.setProperty('--po-sc', g(cfg.sc, g(cfg.text, '#10213f'))); wrap.style.setProperty('--po-bd', g(cfg.bd, '#e3e8f5')); wrap.dataset.pt = g(cfg.shape, 'sq');
                 const bgEl = wrap.querySelector('.po-bg'); if (bgEl) bgEl.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 0)))) / 100; wrap.dataset.na = g(cfg.nameAlign, 'left');
-                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize, cfg.twoLines, cfg.shape, cfg.textSize]);
+                const keyStr = JSON.stringify([cfg.title, cfg.third, cfg.labels, cfg.m, cfg.logo, cfg.logoSize, cfg.twoLines, cfg.shape, cfg.textSize, cfg.nameSize]);
                 if (poKeyCache[key] !== keyStr || !wrap.firstChild) { poKeyCache[key] = keyStr; poBuild(wrap, cfg); { const nb = wrap.querySelector('.po-bg'); if (nb) nb.style.opacity = Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 0)))) / 100; } }
                 const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100) * (parseFloat(wrap.dataset.fit) || 1);
                 wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; wrap.dataset.scale = g(cfg.scale, 100);
@@ -3885,7 +3885,7 @@ function enqueue(ev, s) { const e = ev.filter(allowed); if (!e.length) return; i
                 ['upper', 'lower'].forEach(key => {
                     const gp = __globalPo[key]; if (!gp || typeof gp !== 'object') return;
                     const c = Object.assign({}, p[key] || {});
-                    ['title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines', 'textSize', 'nameAlign'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
+                    ['title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines', 'textSize', 'nameSize', 'nameAlign'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
                     if (gp.labels) c.labels = Object.assign({}, c.labels || {}, gp.labels);
                     if (gp.m) { const m = {}; Object.keys(gp.m).forEach(r => { m[r] = __arr(gp.m[r]); }); c.m = m; }
                     p[key] = c;
