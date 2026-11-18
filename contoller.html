@@ -3559,7 +3559,7 @@
         // ===== РУХ У РЕЙТИНГУ (padel/rkmove) =====
         (function rmInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'СТАДІЯ ТУРНІРУ', anim: 'move', x: 50, y: 50, scale: 100, width: 100, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', list: [], items: [], from: [], shown: [], logo: '', logoSize: 100 };
+            const DEF = { show: false, court: 'all', title: 'СТАДІЯ ТУРНІРУ', anim: 'move', x: 50, y: 50, scale: 90, width: 139, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', list: [], items: [], from: [], shown: [], logo: '', logoSize: 100 };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
