@@ -730,6 +730,25 @@
         .sc-pts em { font-style: normal; display: inline-block; min-width: calc(64px * var(--sc-ts, 1)); padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,.12); font-weight: 900; }
         .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
         .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
+        /* ===== STANDINGS у стилі Rankedin (padel/rdstand) ===== */
+        .rs-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--rs-text, #2a2f6b); }
+        .rs-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
+        .rs-board { position: absolute; left: calc(var(--rs-x, 50) * 1%); top: calc(var(--rs-y, 50) * 1%); width: var(--rs-w, 1400px); transform: translate(-50%, -50%) scale(calc(var(--rs-sc, 1) * .97)); transition: transform .7s cubic-bezier(.2,.85,.25,1); padding: 30px 36px 26px; border-radius: 30px; background: var(--rs-bg, #fff); box-sizing: border-box; box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+        .rs-wrap.on .rs-board { transform: translate(-50%, -50%) scale(var(--rs-sc, 1)); }
+        .rs-top { display: flex; align-items: center; gap: 16px; margin: 0 0 12px 12px; }
+        .rs-title { font-size: calc(38px * var(--rs-ts, 1)); font-weight: 800; letter-spacing: .2px; }
+        .rs-info { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: 999px; background: var(--rs-pill, #2a2f6b); color: #fff; font-size: calc(17px * var(--rs-ts, 1)); font-weight: 800; }
+        .rs-info i { display: inline-flex; width: 1.15em; height: 1.15em; border-radius: 50%; background: #fff; color: var(--rs-pill, #2a2f6b); align-items: center; justify-content: center; font-style: normal; font-size: .82em; font-weight: 900; }
+        .rs-head, .rs-row { display: grid; align-items: center; column-gap: 6px; box-sizing: border-box; }
+        .rs-head { padding: 6px 28px; font-size: calc(19px * var(--rs-ts, 1)); font-weight: 800; margin-bottom: 4px; }
+        .rs-head span, .rs-row > span { text-align: center; white-space: nowrap; } .rs-head .rs-hn, .rs-row .rs-name { text-align: left; }
+        .rs-row { height: calc(92px * var(--rs-ts, 1)); padding: 0 28px; margin-top: 8px; border-radius: 28px; background: var(--rs-row, #ececf0); font-size: calc(24px * var(--rs-ts, 1)); font-weight: 500; }
+        .rs-row.lead { background: var(--rs-lead, #e0e0ea); font-weight: 800; }
+        .rs-row.pre { opacity: 0; transform: translateY(18px); }
+        .rs-row.in { opacity: 1; transform: none; transition: opacity .55s ease, transform .6s cubic-bezier(.2,.85,.25,1); }
+        .rs-name { display: flex; flex-direction: column; justify-content: center; line-height: 1.22; min-width: 0; }
+        .rs-name b { font-weight: inherit; font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rs-empty { text-align: center; padding: 30px; font-size: 28px; opacity: .6; }
 
         /* ===== СТІНГЕР / ЗАСТАВКА МІЖ ГЕЙМАМИ (padel/stinger) ===== */
         .st-wrap { position: fixed; inset: 0; z-index: 10020; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .45s; }
@@ -2244,6 +2263,7 @@
     </div><div class="mb-plate" id="mb-plate"></div></div></div>
     <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
+    <div class="rs-wrap" id="rs-wrap"><div class="rs-board" id="rs-board"><div class="rs-top"><div class="rs-title" id="rs-title"></div><div class="rs-info" id="rs-info"></div></div><div class="rs-head" id="rs-head"></div><div class="rs-list" id="rs-list"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
     <div class="tc-wrap" id="crew-wrap"><div class="tc-pos"><div class="tc-panel"></div></div></div>
@@ -3810,7 +3830,7 @@
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); window.__rsMirror && window.__rsMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -4358,6 +4378,63 @@
             }
             onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
             window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            return { apply };
+        })();
+
+        // ===== STANDINGS у стилі Rankedin (padel/rdstand) =====
+        const RS = (function () {
+            const wrap = document.getElementById('rs-wrap'); if (!wrap) return {};
+            const titleEl = document.getElementById('rs-title'), infoEl = document.getElementById('rs-info'), headEl = document.getElementById('rs-head'), list = document.getElementById('rs-list');
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, ccfg = null, mcfg = null, mj = '', running = false, lastTs = 0, endT = null, sig = '', timers = [];
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#ffffff').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            const HD = { en: ['M.P', 'P', 'M (W - L - D)', 'Sets', 'Games'], ua: ['О', 'І', 'М (В - П - Н)', 'Сети', 'Гейми'] };
+            function look() {
+                const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), ts = Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100, op = Math.max(0, Math.min(100, num(cfg.bgOpacity, 100))) / 100;
+                s.transform = 'translate(-50%, -50%) scale(' + k + ')';
+                s.setProperty('--rs-bg', rgba(g(cfg.bg, '#ffffff'), op)); s.setProperty('--rs-row', g(cfg.rowBg, '#ececf0')); s.setProperty('--rs-lead', g(cfg.leadBg, '#dedee8'));
+                s.setProperty('--rs-text', g(cfg.textColor, '#2a2f6b')); s.setProperty('--rs-pill', g(cfg.pill, '#2a2f6b'));
+                s.setProperty('--rs-ts', ts); s.setProperty('--rs-w', Math.round(1400 * Math.max(40, Math.min(160, num(cfg.width, 100))) / 100) + 'px');
+                s.setProperty('--rs-sc', Math.max(30, Math.min(200, num(cfg.scale, 100))) / 100); s.setProperty('--rs-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--rs-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
+            }
+            function clearT() { timers.forEach(clearTimeout); timers = []; }
+            function model() {
+                let r = arr(cfg.rows).filter(t => t && String(t.n || '').trim()).map((t, i) => { const o = { n: String(t.n).trim(), mp: num(t.mp, 0), p: num(t.p, 0), w: num(t.w, 0), l: num(t.l, 0), d: num(t.d, 0), sw: num(t.sw, 0), sl: num(t.sl, 0), gw: num(t.gw, 0), gl: num(t.gl, 0), i }; o.sd = o.sw - o.sl; o.gd = o.gw - o.gl; return o; });
+                if (cfg.sort === true) r.sort((a, b) => (b.mp - a.mp) || (b.sd - a.sd) || (b.gd - a.gd) || (a.i - b.i));
+                return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
+            }
+            function build() {
+                clearT(); look(); titleEl.textContent = g(cfg.title, 'Standings'); titleEl.style.display = titleEl.textContent ? '' : 'none';
+                const showInfo = cfg.showInfo !== false; infoEl.style.display = showInfo ? '' : 'none'; infoEl.innerHTML = esc(g(cfg.infoText, 'Info')) + ' <i>i</i>';
+                const m = model(), H = HD[cfg.hdr === 'ua' ? 'ua' : 'en'], cols = 'minmax(0,1fr) 76px 76px 160px 170px 200px';
+                if (!m.length) { headEl.style.display = 'none'; list.innerHTML = '<div class="rs-empty">Додайте рядки на пульті (Standings Rankedin)</div>'; return; }
+                headEl.style.display = ''; headEl.style.gridTemplateColumns = cols;
+                headEl.innerHTML = '<span class="rs-hn"></span>' + H.map(x => '<span>' + esc(x) + '</span>').join('');
+                const anim = g(cfg.anim, 'fade'), st = Math.max(0, num(cfg.stagger, 0.12)) * 1000;
+                list.innerHTML = m.map((t, p) => {
+                    const nn = t.n.split(/\s+\/\s+/).slice(0, 2).map(x => '<b>' + esc(x) + '</b>').join('');
+                    return '<div class="rs-row' + (p === 0 && cfg.hiFirst !== false ? ' lead' : '') + ' ' + (anim === 'none' ? 'in' : 'pre') + '" style="grid-template-columns:' + cols + '"><span class="rs-name">' + nn + '</span><span>' + t.mp + '</span><span>' + t.p + '</span><span>' + t.w + ' - ' + t.l + ' - ' + t.d + '</span><span>' + t.sw + ' - ' + t.sl + ' (' + t.sd + ')</span><span>' + t.gw + ' - ' + t.gl + ' (' + t.gd + ')</span></div>';
+                }).join('');
+                if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); }, 200 + j * st)));
+            }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function apply(c) {
+                cfg = c || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v && (!running || ts !== lastTs)) {
+                    lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
+                    const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; clearT(); }, ah * 1000);
+                } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
+                else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; const keep = list.children.length; build(); Array.from(list.children).forEach(r => { r.classList.remove('pre'); r.classList.add('in'); }); } }
+            }
+            onValue(ref(db, 'padel/rdstand'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_rdstand'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
+            window.__rsMirror = (st) => { const v = st && st.rsCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
         })();
