@@ -4393,7 +4393,7 @@
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
             const rgba = (hex, a) => { let h = String(hex || '#ffffff').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
-            const HD = { en: ['M.P', 'P', 'M (W - L - D)', 'Sets', 'Games'], ua: ['О', 'І', 'М (В - П - Н)', 'Сети', 'Гейми'] };
+            const HD = { en: ['M.P', 'P', 'M (W - L - D)', 'Sets', 'Games'], ua: ['Очки', 'Ігри', 'Матчі (В - П - Н)', 'Сети', 'Гейми'] };
             function look() {
                 const s = wrap.style, k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), ts = Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100, op = Math.max(0, Math.min(100, num(cfg.bgOpacity, 100))) / 100;
                 s.transform = 'translate(-50%, -50%) scale(' + k + ')';
@@ -4409,9 +4409,9 @@
                 return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
             }
             function build() {
-                clearT(); look(); titleEl.textContent = g(cfg.title, 'Standings'); titleEl.style.display = titleEl.textContent ? '' : 'none';
-                const showInfo = cfg.showInfo !== false; infoEl.style.display = showInfo ? '' : 'none'; infoEl.innerHTML = esc(g(cfg.infoText, 'Info')) + ' <i>i</i>';
-                const m = model(), H = HD[cfg.hdr === 'ua' ? 'ua' : 'en'], cols = 'minmax(0,1fr) 76px 76px 160px 170px 200px';
+                clearT(); look(); titleEl.textContent = (cfg.hdrLang !== 'en' && (!cfg.title || cfg.title === 'Standings')) ? 'Таблиця рахунків' : g(cfg.title, 'Таблиця рахунків'); titleEl.style.display = titleEl.textContent ? '' : 'none';
+                const showInfo = cfg.showInfo === true; infoEl.style.display = showInfo ? '' : 'none'; infoEl.innerHTML = esc(g(cfg.infoText, 'Info')) + ' <i>i</i>';
+                const m = model(), H = HD[cfg.hdrLang === 'en' ? 'en' : 'ua'], cols = 'minmax(0,1fr) 84px 84px 220px 170px 200px';
                 if (!m.length) { headEl.style.display = 'none'; list.innerHTML = '<div class="rs-empty">Додайте рядки на пульті (Standings Rankedin)</div>'; return; }
                 headEl.style.display = ''; headEl.style.gridTemplateColumns = cols;
                 headEl.innerHTML = '<span class="rs-hn"></span>' + H.map(x => '<span>' + esc(x) + '</span>').join('');
