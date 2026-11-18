@@ -1107,34 +1107,6 @@
                 </div>
             </div>
 
-            <div class="card" id="ai-card">
-                <div style="font-size:11px; font-weight:700; margin-bottom:2px;">🎙 ШІ-коментатор <span style="font-weight:400; color:#9bd;">(у посиланні overlay: <b>&amp;ai=1&amp;gkey=…</b> — ключ лише там, у базу він не йде)</span></div>
-                <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn btn-green" id="ai-on" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', true)">✅ ВКЛ</button>
-                        <button class="btn btn-red" id="ai-off" style="flex:1; padding:12px; font-weight:800;" onclick="aiSet('enabled', false)">⏹ ВИКЛ</button>
-                    </div>
-                    <div class="row"><span>Мозок ШІ:</span><select id="ai-engine" onchange="aiSet('engine', this.value)"><option value="">Авто (за наявним ключем)</option><option value="gemini">Gemini (Google)</option><option value="groq">Groq — безкоштовно, швидко</option><option value="openrouter">OpenRouter — безкоштовні моделі</option><option value="mistral">Mistral — безкоштовний рівень</option><option value="cerebras">Cerebras — безкоштовно</option><option value="claude">Claude (Anthropic)</option><option value="local">Без ШІ — готові фрази</option></select></div>
-                    <div class="row"><span>Режим:</span><select id="ai-mode" onchange="aiSet('mode', this.value)">
-                        <option value="emo">🔥 Емоційний (1 голос)</option><option value="calm">🎓 Спокійний аналітик</option>
-                        <option value="m_pro">👔 Він — професійний</option><option value="f_pro">👩‍💼 Вона — професійна</option>
-                        <option value="m_fun">🤡 Він — смішний</option><option value="f_fun">😜 Вона — смішна</option>
-                        <option value="foot_emo">⚽ Футбольний темперамент</option><option value="foot_exp">⚽ Футбольний експерт</option><option value="duo">🎙️ Дует: він і вона</option><option value="fun">😄 Жартівливий (жін.)</option><option value="score">📟 Тільки рахунок</option></select></div>
-                    <div class="row"><span>Реагувати на:</span><select id="ai-react" onchange="aiSet('react', this.value)"><option value="all">Кожне очко</option><option value="key">Гейми, брейки, яскраві моменти</option><option value="big">Тільки гейми, сети, кінець</option></select></div>
-                    <div class="row"><span>Голос (для 1-голосих режимів):</span><select id="ai-voice" onchange="aiSet('voice', this.value)"><option value="">Як у режимі</option><option value="m">Чоловічий</option><option value="f">Жіночий</option></select></div>
-                    <div class="row"><span>Чоловічий голос Gemini:</span><select id="ai-gvm" onchange="aiSet('gvm', this.value)"><option value="">Авто</option><option>Charon</option><option>Puck</option><option>Orus</option><option>Fenrir</option><option>Algenib</option><option>Iapetus</option></select></div>
-                    <div class="row"><span>Жіночий голос Gemini:</span><select id="ai-gvf" onchange="aiSet('gvf', this.value)"><option value="">Авто</option><option>Kore</option><option>Leda</option><option>Zephyr</option><option>Aoede</option><option>Callirrhoe</option><option>Autonoe</option></select></div>
-                    <div class="row"><span>Озвучення:</span><select id="ai-gtts" onchange="aiSet('gtts', this.value === '1')"><option value="1">Голоси Gemini</option><option value="0">Голос браузера/телефона</option></select></div>
-                    <div class="row"><span>Субтитри в ефірі:</span><input type="checkbox" id="ai-sub" onchange="aiSet('sub', this.checked)"></div>
-                    <div class="row"><span>Звук (голос):</span><input type="checkbox" id="ai-speak" onchange="aiSet('speak', this.checked)"></div>
-                    <div class="row"><span>Швидкість: <b id="ai-rate-v">1.05</b></span><input type="range" id="ai-rate" min="0.7" max="1.6" step="0.05" oninput="aiSet('rate', parseFloat(this.value))"></div>
-                    <div class="row"><span>Гучність: <b id="ai-vol-v">100%</b></span><input type="range" id="ai-vol" min="0" max="1" step="0.05" oninput="aiSet('vol', parseFloat(this.value))"></div>
-                    <div class="row"><span>Пауза між репліками: <b id="ai-gap-v">4 с</b></span><input type="range" id="ai-gap" min="0" max="20" step="1" oninput="aiSet('gap', parseInt(this.value))"></div>
-                    <textarea id="ai-prompt" rows="4" placeholder="Своя інструкція для ШІ (порожньо = стандартна для режиму)" style="width:100%; box-sizing:border-box; font-size:12px; padding:6px;" onchange="aiSet('prompt', this.value)"></textarea>
-                    <button class="btn" style="padding:9px;" onclick="aiTest()">🔊 Тест звуку в ефірі</button>
-                    <div id="ai-st" style="font-size:11px;"></div>
-                </div>
-            </div>
 
 
             <div id="match-actions" style="display:flex; flex-direction:column; gap:8px; border:2px solid #b91c1c; border-radius:8px; padding:10px; background:#1a0f0f;">
@@ -1151,6 +1123,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKOG6SqtMdktckIlXHKWoPZKOwME0yr1M",
@@ -1394,24 +1367,6 @@
         });
         setTimeout(tvUiRefresh, 0);
 
-        // ===== ШІ-коментатор: керування з пульта (padel/commentator) =====
-        const AI_DEF = { enabled: false, engine: '', mode: 'emo', react: 'key', voice: '', gvm: '', gvf: '', gtts: true, sub: true, speak: true, rate: 1.05, vol: 1, gap: 4, prompt: '' };
-        let aiCfg = Object.assign({}, AI_DEF);
-        function aiSave() { const st = document.getElementById('ai-st'); try { set(ref(db, 'padel/commentator'), Object.assign({}, aiCfg, { t: Date.now() })).then(() => { if (st) { st.innerText = '☁️ Надіслано в ефір ✅'; st.style.color = '#7c7'; } }, e => { if (st) { st.innerText = '⚠️ ' + e.message; st.style.color = '#f66'; } }); } catch (e) { if (st) st.innerText = '⚠️ ' + e.message; } }
-        window.aiSet = function(k, v) { aiCfg[k] = v; aiSave(); aiUi(); };
-        window.aiTest = function() { aiCfg.test = Date.now(); aiSave(); };
-        function aiUi() {
-            const g = id => document.getElementById(id); if (!g('ai-card')) return;
-            ['engine', 'mode', 'react', 'voice', 'gvm', 'gvf'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k] || ''; });
-            if (g('ai-gtts')) g('ai-gtts').value = aiCfg.gtts === false ? '0' : '1';
-            if (g('ai-sub')) g('ai-sub').checked = aiCfg.sub !== false; if (g('ai-speak')) g('ai-speak').checked = aiCfg.speak !== false;
-            ['rate', 'vol', 'gap'].forEach(k => { const e = g('ai-' + k); if (e && document.activeElement !== e) e.value = aiCfg[k]; });
-            g('ai-rate-v').innerText = aiCfg.rate; g('ai-vol-v').innerText = Math.round((aiCfg.vol === undefined ? 1 : aiCfg.vol) * 100) + '%'; g('ai-gap-v').innerText = aiCfg.gap + ' с';
-            if (g('ai-prompt') && document.activeElement !== g('ai-prompt')) g('ai-prompt').value = aiCfg.prompt || '';
-            g('ai-on').style.outline = aiCfg.enabled ? '3px solid #fff' : 'none'; g('ai-off').style.outline = aiCfg.enabled ? 'none' : '3px solid #fff';
-        }
-        onValue(ref(db, 'padel/commentator'), (snap) => { const v = snap.val(); if (v) aiCfg = Object.assign({}, AI_DEF, v); aiUi(); });
-        setTimeout(aiUi, 0);
 
         // ===== СПІЛЬНИЙ QR-КОД для всіх кортів: padel/qr (розмір і позиції — окремо для корту) =====
         let globalQr = null;
@@ -1516,7 +1471,7 @@
             matchRef = ref(db, databasePath); stateHistory = [];
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; try { window.__wlPub && window.__wlPub(); } catch (e) {} mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -2576,7 +2531,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['ann', 'padel/announcer', 'annCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4344,62 +4299,8 @@
             fit();
         })();
 
-        // ===== ПРОСТИЙ ДИКТОР (padel/announcer) =====
-        (function annInit() {
-            const mbc = document.getElementById('mb-card'); if (!mbc) return;
-            const DEF = { enabled: false, court: 'all', lang: 'en', engine: 'clips', names: true, sound: true, onPoint: false, onGame: true, gameList: '', onSet: true, onBreak: true, onSetPoint: true, onGolden: true, onTiebreak: true, rate: 1, vol: 1, pitch: 1, voiceName: '', testTs: 0 };
-            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
-            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
-            const card = document.createElement('div'); card.id = 'ann-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
-            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🔊 Простий диктор (рахунок голосом, без ШІ)</span><span class="tcol-arrow">▸</span>';
-            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
-            mbc.after(head); head.after(card);
-            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
-            const chk = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="checkbox" data-k="' + k + '" style="width:20px; height:20px;"></div>';
-            const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
-            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Працює всередині оверлея (окремий браузер і ШІ не потрібні): голос бере вбудовані голоси пристрою, де відкритий оверлей (OBS, телефон тощо). Озвучує очки, гейми, брейк-пойнти, сети й кінець матчу.</div>' +
-                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="annb-on">✅ ВКЛ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="annb-off">⏹ ВИКЛ</button></div><div id="annb-st" style="font-size:11px;"></div>' +
-                '<div class="row">' + lab('Озвучувати на:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
-                '<div class="row">' + lab('Мова:') + '<select data-k="lang"><option value="en">English</option><option value="uk">Українська</option></select></div>' +
-                '<div class="row">' + lab('Голос (англ.):') + '<select data-k="engine"><option value="clips">Записані фрази (працює скрізь, Team A/B)</option><option value="device">Голос пристрою (імена команд)</option></select></div>' +
-                '<div style="font-size:10px; color:#fb7;">iPhone: вимкніть беззвучний режим (перемикач збоку) і торкніться екрана оверлея один раз.</div>' +
-                chk('names', 'Називати імена команд (інакше «Team A / Team B»)') +
-                '<div style="font-size:11px; font-weight:700; margin-top:4px;">Що озвучувати</div>' +
-                chk('onPoint', 'Рахунок після кожного очка (fifteen thirty, deuce…)') + chk('onGame', 'Гейм і рахунок по геймах') +
-                '<div class="row">' + lab('Лише після геймів №(через кому, порожньо = кожен):') + '<input type="text" data-k="gameList" style="' + inp + '" placeholder="1,3,5"></div>' +
-                chk('onSet', 'Виграний сет і кінець матчу') + chk('onBreak', 'Break point') + chk('onSetPoint', 'Set point / match point / tiebreak point') + chk('onGolden', 'Golden point (40:40)') + chk('onTiebreak', 'Початок тайбрейку') +
-                chk('sound', 'Звук (вимкніть, якщо потрібен лише тест без голосу)') +
-                rng('rate', 'Швидкість мови', 0.6, 1.6, 0.05) + rng('vol', 'Гучність', 0, 1, 0.05) + rng('pitch', 'Висота голосу', 0.5, 1.6, 0.05) +
-                '<div class="row">' + lab('Назва голосу містить (необов’язково, напр. David, Zira, Google US):') + '<input type="text" data-k="voiceName" style="' + inp + '"></div>' +
-                '<button class="btn" style="padding:10px;" id="annb-test">🔊 Тест (озвучити зараз)</button>';
-            const $ = id => document.getElementById(id);
-            function st(ok, m) { const e = $('annb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
-            function save(now) {
-                const run = () => {
-                    if (!loaded) { setTimeout(run, 500); return; }
-                    const data = JSON.parse(JSON.stringify(d));
-                    const fail = () => set(ref(db, 'padel/courts/_announcer'), data).then(() => st(true, 'окремо від кортів'), e2 => { try { try { state.annCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/annCfg'), data); st(true, 'через корти'); } catch (e4) { st(false, (e2 && e2.message) || 'помилка'); } });
-                    try { set(ref(db, 'padel/announcer'), data).then(() => st(true), fail); } catch (e) { fail(); }
-                };
-                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
-            }
-            function fill() {
-                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; if (el.type === 'checkbox') el.checked = v !== false && !!v; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + el.dataset.k + '"]'); if (lv) lv.innerText = v; });
-                $('annb-on').style.outline = d.enabled ? '3px solid #fff' : 'none'; $('annb-off').style.outline = d.enabled ? 'none' : '3px solid #fff';
-            }
-            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => {
-                const k = el.dataset.k; d[k] = el.type === 'checkbox' ? el.checked : (el.type === 'range' ? parseFloat(el.value) : el.value); const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.innerText = d[k]; save(false);
-            }));
-            $('annb-on').onclick = () => { d.enabled = true; save(true); fill(); }; $('annb-off').onclick = () => { d.enabled = false; save(true); fill(); };
-            $('annb-test').onclick = () => { d.testTs = Date.now(); save(true); };
-            fill();
-            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
-            const mirror = () => { const m = state && state.annCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
-            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
-            onValue(ref(db, 'padel/announcer'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
-            onValue(ref(db, 'padel/courts/_announcer'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; prim = true; apply(v); } });
-            setTimeout(() => { loaded = true; }, 3000);
-        })();
+        // ===== (диктор видалено; прихований якір для наступних карток) =====
+        (function annAnchor() { const mbc = document.getElementById('mb-card'); if (!mbc) return; const a = document.createElement('div'); a.id = 'ann-card'; a.style.display = 'none'; mbc.after(a); })();
 
 
         (function gtInit() {
@@ -4621,6 +4522,105 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
 
 
 
+
+        // ===== ЛЕГКИЙ ВУЗОЛ ДЛЯ ГОДИННИКА (padel/watch/court_N) — менше трафіку Firebase =====
+        (function wlInit() {
+            let last = '', tm = null, idx = 0, lastCourt = '';
+            const small = o => (o && typeof o === 'object') ? { show: !!o.show } : null;
+            function lite(st) {
+                const l = {};
+                Object.keys(st || {}).forEach(k => {
+                    const v = st[k]; if (k === 'lastSnapshot' || v === null || v === undefined) return;
+                    if (typeof v === 'number' || typeof v === 'boolean' || (typeof v === 'string' && v.length <= 300)) { l[k] = v; return; }
+                    if (['matchIntro', 'teamRanking', 'groups', 'introCard', 'anCfg'].indexOf(k) >= 0) { l[k] = small(v); return; }
+                    if (k === 'playoff') { l[k] = { upper: small(v.upper) || {}, lower: small(v.lower) || {} }; return; }
+                    if (['crewCfg', 'creditsCfg', 'spcardCfg'].indexOf(k) >= 0) { l[k] = { show: !!v.show, court: v.court === undefined ? null : v.court, ts: v.ts || 0 }; }
+                });
+                return l;
+            }
+            const paths = c => ['padel/watch/court_' + c, 'padel/courts/_watch_' + c];
+            function write(force) {
+                try {
+                    if (!state || typeof state !== 'object') return;
+                    const l = lite(state), sig = JSON.stringify(l) + '|' + courtId;
+                    if (!force && sig === last) return; last = sig; l._t = Date.now();
+                    const p = paths(courtId);
+                    set(ref(db, p[idx]), l).catch(() => { if (idx === 0) { idx = 1; set(ref(db, p[1]), l).catch(() => {}); } });
+                } catch (e) {}
+            }
+            window.__wlPub = function () { clearTimeout(tm); tm = setTimeout(() => write(false), 500); };
+            setInterval(() => write(true), 15000);   // «серцебиття»: годинник бачить, що вузол свіжий
+        })();
+
+        // ===== ОПТИМІЗАЦІЯ FIREBASE: картинки з бази → Firebase Storage (у базі лишається лише посилання) =====
+        (function stoInit() {
+            const mbc = document.getElementById('wx-card'); if (!mbc) return;
+            let stor = null; try { stor = getStorage(app); } catch (e) {}
+            const MIN = 20000;   // менші за ~20 КБ рядки data: лишаємо в базі
+            const card = document.createElement('div'); card.id = 'sto-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>☁️ Оптимізація Firebase (картинки → Storage)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            mbc.after(head); head.after(card);
+            card.innerHTML = '<div style="font-size:11px; color:#9ca3af; line-height:1.4;">Картинки й відео, збережені в базі як data:, роздувають кожен корт і вантажаться на кожен оверлей, пульт і годинник. Тут вони переносяться у Firebase Storage, а в базі лишаються короткі посилання.</div>' +
+                '<div class="row"><span style="font-size:11px; color:#ccc;">Переносити автоматично (раз на 20 хв):</span><input type="checkbox" id="sto-auto" style="width:20px; height:20px;"></div>' +
+                '<div style="display:flex; gap:6px;"><button class="btn btn-gray" id="sto-size" style="flex:1; padding:9px; font-size:12px;">📊 Розмір даних</button><button class="btn btn-green" id="sto-run" style="flex:1; padding:9px; font-size:12px; font-weight:800;">☁️ Перенести зараз</button></div>' +
+                '<div id="sto-st" style="font-size:11px; white-space:pre-wrap; color:#cbd5e1;"></div>';
+            const $ = id => card.querySelector('#' + id), st = t => { $('sto-st').textContent = t; };
+            const auto = $('sto-auto'); try { auto.checked = localStorage.getItem('stoAuto') !== '0'; } catch (e) { auto.checked = true; }
+            auto.onchange = () => { try { localStorage.setItem('stoAuto', auto.checked ? '1' : '0'); } catch (e) {} };
+            const cache = {};
+            const hash = str => { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return str.length + '_' + (h >>> 0).toString(36); };
+            async function upload(du) {
+                if (!stor) throw new Error('Storage недоступний');
+                const k = hash(du); if (cache[k]) return cache[k];
+                const blob = await (await fetch(du)).blob();
+                const ext = ((blob.type || 'image/png').split('/')[1] || 'bin').replace('jpeg', 'jpg').replace('+xml', '');
+                const r = await uploadBytes(sRef(stor, 'media/' + k + '.' + ext), blob, { contentType: blob.type, cacheControl: 'public,max-age=31536000' });
+                return (cache[k] = await getDownloadURL(r.ref));
+            }
+            function walk(o, p, out) {
+                if (typeof o === 'string') { if (o.length > MIN && o.startsWith('data:')) out.push({ p: p, v: o }); return; }
+                if (o && typeof o === 'object') Object.keys(o).forEach(k => walk(o[k], p ? p + '/' + k : k, out));
+            }
+            async function nodes() {
+                const dbu = firebaseConfig.databaseURL, list = [];
+                const top = await (await fetch(dbu + '/padel.json?shallow=true')).json() || {};
+                for (const k of Object.keys(top)) {
+                    if (k === 'courts') { const c = await (await fetch(dbu + '/padel/courts.json?shallow=true')).json() || {}; Object.keys(c).forEach(x => list.push('padel/courts/' + x)); }
+                    else list.push('padel/' + k);
+                }
+                return list;
+            }
+            async function size() {
+                st('⏳ Рахую…'); try {
+                    const rows = []; let tot = 0;
+                    for (const p of await nodes()) { const v = (await get(ref(db, p))).val(); const n = JSON.stringify(v === undefined ? null : v).length; tot += n; rows.push([n, p]); }
+                    rows.sort((a, b) => b[0] - a[0]);
+                    st('Усього: ' + Math.round(tot / 1024) + ' КБ\n' + rows.slice(0, 14).map(r => Math.round(r[0] / 1024) + ' КБ — ' + r[1]).join('\n'));
+                } catch (e) { st('❌ ' + (e && e.message || e)); }
+            }
+            let busy = false;
+            async function run(silent) {
+                if (busy) return; busy = true; if (!silent) st('⏳ Шукаю картинки в базі…');
+                let cnt = 0, bytes = 0, fail = 0, lastErr = '';
+                try {
+                    for (const p of await nodes()) {
+                        const v = (await get(ref(db, p))).val(), items = []; walk(v, '', items);
+                        for (const it of items) {
+                            try { const url = await upload(it.v); await set(ref(db, p + '/' + it.p), url); cnt++; bytes += it.v.length; if (!silent) st('⏳ Перенесено: ' + cnt + ' (' + Math.round(bytes / 1024) + ' КБ)…'); }
+                            catch (e) { fail++; lastErr = (e && (e.code || e.message)) || String(e); }
+                        }
+                    }
+                    let msg = cnt ? '✅ Перенесено у Storage: ' + cnt + ' шт., звільнено ≈ ' + Math.round(bytes / 1024) + ' КБ у базі.' : '✅ Нових картинок у базі немає.';
+                    if (fail) msg += '\n⚠️ Не вдалося: ' + fail + ' (' + lastErr + '). Перевір у Firebase → Storage → Rules: для шляху media/** має бути дозволений запис (allow read, write: if true).';
+                    if (!silent || cnt || fail) st(msg);
+                } catch (e) { st('❌ ' + (e && e.message || e)); }
+                busy = false;
+            }
+            $('sto-size').onclick = size; $('sto-run').onclick = () => run(false);
+            setTimeout(() => { if (auto.checked) run(true); }, 30000);
+            setInterval(() => { if (auto.checked) run(true); }, 20 * 60 * 1000);
+        })();
 
         // ===== ОЧИЩЕННЯ ВАЖКИХ ДАНИХ З КОРТІВ (щоб годинник не підвисав) =====
         (function heavyCleanup() {
@@ -6442,10 +6442,10 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
                 const attempt = i => set(ref(db, PATHS[i] + '/' + sub), val).then(() => { base = i; st(true, '☁️ Збережено ✅'); }, e => { if (i + 1 < PATHS.length) return attempt(i + 1); st(false, '⚠️ Не збережено: правила Firebase не дозволяють запис (' + ((e && e.message) || e) + '). Додайте у Rules дозвіл на padel/mascots.'); });
                 return attempt(base);
             }
-            const cur = () => state.mascotId || 'def';
+            const cur = () => state.mascotId || '';
             const allOn = () => { const c = host.querySelector('#ms-all'); return !!(c && c.checked); };
             try { const c = host.querySelector('#ms-all'); c.checked = localStorage.getItem('ms-all') === '1'; c.onchange = () => { try { localStorage.setItem('ms-all', c.checked ? '1' : '0'); } catch (e) {} }; } catch (e) {}
-            function toAll() { if (!allOn()) return; for (let i = 1; i <= 10; i++) { const b = 'padel/courts/court_' + i + '/'; set(ref(db, b + 'mascotId'), state.mascotId || 'def'); set(ref(db, b + 'mascotTs'), state.mascotTs || 0); set(ref(db, b + 'mascotLoop'), !!state.mascotLoop); } }
+            function toAll() { if (!allOn()) return; for (let i = 1; i <= 10; i++) { const b = 'padel/courts/court_' + i + '/'; set(ref(db, b + 'mascotId'), state.mascotId || null); set(ref(db, b + 'mascotTs'), state.mascotTs || 0); set(ref(db, b + 'mascotLoop'), !!state.mascotLoop); } }
             function play(id) { state.mascotId = id; state.mascotTs = Date.now(); state.mascotLoop = false; set(matchRef, state); toAll(); }
             function loop(id) { if (state.mascotLoop && cur() === id) state.mascotLoop = false; else { state.mascotId = id; state.mascotLoop = true; } set(matchRef, state); toAll(); }
             let lastSig = '', openIds = {};
@@ -6453,7 +6453,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
                 const g = G(), sig = JSON.stringify([Object.keys(g.items).map(k => [k, g.items[k].name, g.items[k].size, g.items[k].x, g.items[k].y, g.items[k].dur, g.items[k].key, g.items[k].keyTol, g.items[k].type]), g.def, state.mascotId, !!state.mascotLoop]);
                 if (!force && sig === lastSig) return; 
                 const list = host.querySelector('#ms-list'); if (!force && list.contains(document.activeElement)) return; lastSig = sig;
-                const rows = [{ id: 'def', name: 'Ворон (стандартний)', size: g.def.size === undefined ? 420 : g.def.size, x: g.def.x || 0, y: g.def.y || 0, type: 'video' }].concat(items());
+                const rows = items(); if (!rows.length) { list.innerHTML = '<div style="font-size:12px; color:#9ca3af; padding:6px;">Талісманів немає — завантаж свій файл нижче.</div>'; return; }
                 list.innerHTML = '';
                 rows.forEach(r => {
                     const on = !!state.mascotLoop && cur() === r.id, w = document.createElement('div'); w.style.cssText = 'background:#222; border-radius:6px; padding:8px; display:flex; flex-direction:column; gap:6px;';
@@ -6465,7 +6465,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
                     w.querySelector('details').addEventListener('toggle', e => { openIds[r.id] = e.target.open; });
                     const bx = w.firstChild, mk = (t, bg, fn) => { const b = document.createElement('button'); b.className = 'btn' + (on && t.startsWith('🔁') ? ' tb-live' : ''); b.style.cssText = 'padding:8px 12px; font-size:12px; font-weight:800; background:' + bg + ';'; b.innerText = t; b.onclick = fn; bx.appendChild(b); };
                     mk('▶', '#0f766e', () => play(r.id)); mk(on ? '🔁 ВКЛ' : '🔁', '#374151', () => loop(r.id));
-                    if (r.id !== 'def') mk('✕', '#b91c1c', () => { if (!confirm('Видалити «' + (r.name || '') + '»?')) return; if (state.mascotId === r.id) { state.mascotId = 'def'; state.mascotLoop = false; set(matchRef, state); } PATHS.forEach(pp => { set(ref(db, pp + '/items/' + r.id), null).catch(() => {}); set(ref(db, pp + '/index/' + r.id), null).catch(() => {}); }); });
+                    if (r.id !== 'def') mk('✕', '#b91c1c', () => { if (!confirm('Видалити «' + (r.name || '') + '»?')) return; if (state.mascotId === r.id) { state.mascotId = ''; state.mascotLoop = false; set(matchRef, state); } PATHS.forEach(pp => { set(ref(db, pp + '/items/' + r.id), null).catch(() => {}); set(ref(db, pp + '/index/' + r.id), null).catch(() => {}); }); });
                     const kc = w.querySelector('[data-kc]'); if (kc) kc.onchange = () => write('items/' + r.id + '/key', kc.checked);
                     w.querySelectorAll('input[type=range]').forEach(el => { el.oninput = () => { el.previousElementSibling.querySelector('b').innerText = el.value; clearTimeout(el._t); el._t = setTimeout(() => { const v = parseInt(el.value); write((r.id === 'def' ? 'def/' : 'items/' + r.id + '/') + el.dataset.f, v); }, 200); }; });
                     list.appendChild(w);
