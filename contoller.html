@@ -4131,8 +4131,9 @@
             const fin = Number.isFinite;
             function rsBuild(stats, names) {
                 const n = stats.length; if (!n) return [];
+                stats.forEach(r => { ['w', 'l', 'd'].forEach(k => { if (!fin(r[k])) { r[k] = 0; r._miss = 1; } }); });
                 const pairs = names.length >= 2 * n || names.length > n;
-                const rowsOut = stats.map((s, i) => Object.assign({}, s, { n: pairs ? [names[2 * i], names[2 * i + 1]].filter(Boolean).join(' / ') : (names[i] || '') }));
+                const rowsOut = stats.map((s, i) => Object.assign({}, s, { n: s.n !== undefined ? s.n : (pairs ? [names[2 * i], names[2 * i + 1]].filter(Boolean).join(' / ') : (names[i] || '')) }));
                 // відновлення пропущених цифр: сума виграних = сумі програних (сети й гейми), P = W+L+D
                 const zs = (a, b) => { const A = rowsOut.filter(r => !fin(r[a])), B = rowsOut.filter(r => !fin(r[b]));
                     if (A.length === 1 && !B.length) { const v = rowsOut.reduce((s, r) => s + (fin(r[b]) ? r[b] : 0), 0) - rowsOut.reduce((s, r) => s + (fin(r[a]) ? r[a] : 0), 0); if (v >= 0) A[0][a] = v; }
@@ -4158,7 +4159,7 @@
                 rowsOut.forEach(r => {
                     r.p = r.w + r.l + r.d;
                     r.mp = K * r.w + K * 0.5 * r.d;
-                    let q = false; ['sw', 'sl', 'gw', 'gl'].forEach(k => { if (!fin(r[k])) { r[k] = 0; q = true; } });
+                    let q = !!r._miss; delete r._miss; ['sw', 'sl', 'gw', 'gl'].forEach(k => { if (!fin(r[k])) { r[k] = 0; q = true; } });
                     if (!r.n) q = true; if (q) { r.q = 1; bad++; }
                 });
                 const sum = k => rowsOut.reduce((s, r) => s + r[k], 0);
@@ -4172,29 +4173,82 @@
                 const e = $('rsb-ocr'); if (e) { e.style.color = warn ? '#f59e0b' : '#7c7'; e.innerText = '✅ ' + via + ': ' + res.length + ' рядків записано' + (warn ? '. ⚠️ Позначено ' + warn + ' рядків — перевірте цифри й імена нижче.' : '.'); }
                 return true;
             }
+            // ---- розпізнавання з позиціями слів (TSV): рядки збираються за координатою Y, імена прив’язуються до рядків цифр ----
+            function tsvWords(tsv, dy) {
+                return String(tsv || '').split('\n').slice(1).map(l => l.split('\t')).filter(a => a.length >= 12 && a[0] === '5' && String(a[11]).trim())
+                    .map(a => ({ x: +a[6], y: +a[7] + (+a[9]) / 2 + (dy || 0), h: +a[9], t: String(a[11]).trim() }));
+            }
+            function linesFromWords(ws) {
+                const lines = []; ws.slice().sort((a, b) => a.y - b.y).forEach(w => {
+                    let L = lines.find(l => Math.abs(l.y - w.y) < Math.max(14, w.h * 0.6));
+                    if (!L) { L = { y: w.y, ws: [] }; lines.push(L); } L.ws.push(w); L.y = L.ws.reduce((s, x) => s + x.y, 0) / L.ws.length;
+                });
+                lines.forEach(l => { l.ws.sort((a, b) => a.x - b.x); l.text = l.ws.map(w => w.t).join(' '); l.x0 = l.ws[0].x; });
+                return lines.sort((a, b) => a.y - b.y);
+            }
+            const cleanName = l0 => { let l = String(l0 || '').replace(/[*?|@©®_=~]/g, ' ').replace(/\s+/g, ' ').trim(); l = l.replace(/(\s+[\d.,()+\-]+)+$/, '').trim(); if (!l || JUNK.test(l)) return ''; return ((l.match(/[A-Za-zА-Яа-яІіЇїЄєҐґ]/g) || []).length < 3) ? '' : l; };
+            const consistent = rs => rs.length >= 3 && rs.reduce((s, r) => s + r.w, 0) === rs.reduce((s, r) => s + r.l, 0) && rs.every(r => fin(r.sw) && fin(r.sl) && fin(r.gw) && fin(r.gl));
+            async function loadImg(file) { const url = URL.createObjectURL(file); try { return await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Не вдалося відкрити зображення')); i.src = url; }); } finally { setTimeout(() => URL.revokeObjectURL(url), 5000); } }
+            function prepImg(img, thr) {
+                const sc = Math.max(1, Math.min(4, 1800 / img.width)), pad = 30, cv = document.createElement('canvas');
+                cv.width = Math.round(img.width * sc) + pad * 2; cv.height = Math.round(img.height * sc) + pad * 2;
+                const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, pad, pad, cv.width - pad * 2, cv.height - pad * 2);
+                const id = cx.getImageData(0, 0, cv.width, cv.height), p = id.data;
+                for (let i = 0; i < p.length; i += 4) { const v = Math.min(p[i], p[i + 1], p[i + 2]) < thr ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; }
+                cx.putImageData(id, 0, 0); return cv;
+            }
             async function fromImage(file, say) {
                 say = say || (m => { const e = $('rsb-ocr'); if (e) { e.style.color = '#9bd'; e.innerText = m; } });
                 const prog = (s, p) => say('⏳ ' + (s === 'recognizing text' ? 'Розпізнаю ' : 'Завантажую модуль ') + Math.round(p * 100) + '%');
                 try {
                     say('⏳ Готую скріншот…');
-                    const T = await ocrLoad(), cv = await ocrPrep(file);
+                    const T = await ocrLoad(), img = await loadImg(file), base = prepImg(img, 175);
+                    // 1) цифри: кілька спроб (різні режими/пороги), беремо найкращу
                     const wN = await T.createWorker('eng', 1, { logger: m => { if (m && m.progress !== undefined) prog(m.status, m.progress); } });
-                    let numText = '', minX = Infinity;
-                    try { await wN.setParameters({ tessedit_char_whitelist: '0123456789+-() ', tessedit_pageseg_mode: '6' }); const r = await wN.recognize(cv); numText = (r && r.data && r.data.text) || ''; ((r && r.data && r.data.words) || []).forEach(w => { if (/\d/.test(w.text) && w.bbox && w.bbox.y0 > cv.height * 0.17) minX = Math.min(minX, w.bbox.x0); }); }
-                    finally { try { await wN.terminate(); } catch (e) {} }
-                    const stats = rsStats(numText);
-                    if (!stats.length) { say('⚠️ Не знайдено рядків з цифрами (W-L-D). Зробіть чіткіший скрін таблиці Standings.'); const e = $('rsb-ocr'); if (e) e.style.color = '#f66'; return false; }
-                    const x1 = (minX > cv.width * 0.25 && minX < cv.width * 0.75) ? Math.max(60, Math.round(minX - 14)) : Math.round(cv.width * 0.405), y0 = Math.round(cv.height * 0.17);
-                    const nc = document.createElement('canvas'); nc.width = x1; nc.height = cv.height - y0; nc.getContext('2d').drawImage(cv, 0, y0, x1, nc.height, 0, 0, x1, nc.height);
+                    let best = null;
+                    try {
+                        const TRY = [[175, '6'], [175, '11'], [150, '6'], [200, '6'], [175, '4']];
+                        for (let k = 0; k < TRY.length; k++) {
+                            say('⏳ Цифри: спроба ' + (k + 1) + ' з ' + TRY.length + '…');
+                            await wN.setParameters({ tessedit_char_whitelist: '0123456789+-() ', tessedit_pageseg_mode: TRY[k][1], tsv: '1' });
+                            const cv = TRY[k][0] === 175 ? base : prepImg(img, TRY[k][0]);
+                            const r = await wN.recognize(cv, {}, { tsv: true, text: true });
+                            const ws = tsvWords(r && r.data && r.data.tsv, 0), lines = ws.length ? linesFromWords(ws) : String((r && r.data && r.data.text) || '').split(/\r?\n/).map((t, i) => ({ y: i, text: t, x0: 0, ws: [] }));
+                            const stats = []; lines.forEach(l => { const s0 = rsStats(l.text)[0]; if (s0) { s0.y = l.y; stats.push(s0); } });
+                            const cand = { stats: stats, ws: ws, ok: consistent(stats.map(s => Object.assign({}, s))) };
+                            if (!best || cand.stats.length > best.stats.length || (cand.stats.length === best.stats.length && cand.ok && !best.ok)) best = cand;
+                            if (cand.ok) break;
+                        }
+                    } finally { try { await wN.terminate(); } catch (e) {} }
+                    if (!best || !best.stats.length) { say('⚠️ Не знайдено рядків з цифрами (W-L-D). Зробіть чіткіший скрін таблиці Standings.'); const e = $('rsb-ocr'); if (e) e.style.color = '#f66'; return false; }
+                    // 2) імена: окрема колонка зліва від цифр
+                    let minX = Infinity; best.ws.forEach(w => { if (/\d/.test(w.t) && w.y > base.height * 0.17) minX = Math.min(minX, w.x); });
+                    const x1 = (minX > base.width * 0.25 && minX < base.width * 0.75) ? Math.max(60, Math.round(minX - 14)) : Math.round(base.width * 0.405), y0 = Math.round(base.height * 0.17);
+                    const nc = document.createElement('canvas'); nc.width = x1; nc.height = base.height - y0; nc.getContext('2d').drawImage(base, 0, y0, x1, nc.height, 0, 0, x1, nc.height);
                     say('⏳ Розпізнаю імена…');
                     const wT = await T.createWorker('ukr+eng', 1, { logger: m => { if (m && m.progress !== undefined) prog(m.status, m.progress); } });
-                    let nameText = '';
-                    try { await wT.setParameters({ tessedit_pageseg_mode: '4' }); const r2 = await wT.recognize(nc); nameText = (r2 && r2.data && r2.data.text) || ''; }
-                    finally { try { await wT.terminate(); } catch (e) {} }
-                    const ok = applyRows(rsBuild(stats, rsNames(nameText)), 'Скріншот');
-                    return ok;
+                    let nameLines = [], nameText = '';
+                    try {
+                        await wT.setParameters({ tessedit_pageseg_mode: '4', tsv: '1' });
+                        const r2 = await wT.recognize(nc, {}, { tsv: true, text: true });
+                        nameText = (r2 && r2.data && r2.data.text) || '';
+                        const w2 = tsvWords(r2 && r2.data && r2.data.tsv, y0); if (w2.length) nameLines = linesFromWords(w2).map(l => ({ y: l.y, n: cleanName(l.text) })).filter(l => l.n);
+                    } finally { try { await wT.terminate(); } catch (e) {} }
+                    // 3) зіставлення імен із рядками цифр за координатою Y
+                    const st = best.stats.slice().sort((a, b) => a.y - b.y); let rowsOut;
+                    if (st.length >= 2 && nameLines.length) {
+                        const pitch = Math.max(20, st.slice(1).map((s, i) => s.y - st[i].y).sort((a, b) => a - b)[Math.floor((st.length - 1) / 2)] || 60);
+                        const grp = st.map(s => ({ s: s, names: [] })), orphan = [];
+                        nameLines.forEach(nl => { let bi = 0, bd = 1e9; grp.forEach((g, i) => { const dd = Math.abs(g.s.y - nl.y); if (dd < bd) { bd = dd; bi = i; } }); if (bd <= pitch * 0.75) grp[bi].names.push(nl.n); else orphan.push(nl); });
+                        const extra = []; orphan.forEach(o => { const last = extra[extra.length - 1]; if (last && Math.abs(last.y - o.y) <= pitch * 0.6 && last.names.length < 2) { last.names.push(o.n); last.y = (last.y + o.y) / 2; } else extra.push({ y: o.y, names: [o.n] }); });
+                        const all = grp.map(g => ({ y: g.s.y, s: g.s, names: g.names })).concat(extra.map(e => ({ y: e.y, s: { mp: NaN, p: NaN, w: NaN, l: NaN, d: NaN, sw: NaN, sl: NaN, gw: NaN, gl: NaN }, names: e.names, miss: true }))).sort((a, b) => a.y - b.y);
+                        rowsOut = rsBuild(all.map(a => { const o = Object.assign({}, a.s); delete o.y; o.n = a.names.slice(0, 2).join(' / '); if (a.miss) { o.w = 0; o.l = 0; o.d = 0; o._miss = 1; } return o; }), []);
+                    } else rowsOut = rsBuild(best.stats.map(s => { const o = Object.assign({}, s); delete o.y; return o; }), rsNames(nameText));
+                    const missing = rowsOut.filter(r => r.q).length;
+                    const ok = applyRows(rowsOut, 'Скріншот'); return ok;
                 } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка розпізнавання')); const el = $('rsb-ocr'); if (el) el.style.color = '#f66'; return false; }
             }
+
             $('rsb-file').addEventListener('change', () => { const f = $('rsb-file').files && $('rsb-file').files[0]; $('rsb-file').value = ''; if (f) fromImage(f); });
             $('rsb-go').onclick = () => {
                 const t = $('rsb-txt').value, res = rsBuild(rsStats(t), rsNames(t));
