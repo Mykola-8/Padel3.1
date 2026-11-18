@@ -4422,9 +4422,11 @@
                 }).join('');
                 if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); }, 200 + j * st)));
             }
+            let pvCfg = null; const isPv = /[?&]pv=1/.test(location.search);
+            const eff = c => pvCfg ? Object.assign({}, pvCfg, { show: true, court: 'all', autoHide: 0, ts: 1 }) : c;
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = eff(c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) {
                     lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
@@ -4434,6 +4436,7 @@
             }
             onValue(ref(db, 'padel/rdstand'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; });
             onValue(ref(db, 'padel/courts/_rdstand'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
+            if (isPv) window.addEventListener('message', e => { const m = e.data; if (!m || m.type !== 'rsPreview') return; const nv = m.off ? null : (m.cfg || null); if (JSON.stringify(nv) === JSON.stringify(pvCfg)) return; pvCfg = nv; apply(gcfg || ccfg || mcfg); });
             window.__rsMirror = (st) => { const v = st && st.rsCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
