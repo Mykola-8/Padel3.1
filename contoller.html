@@ -4029,11 +4029,11 @@
         // ===== STANDINGS у стилі Rankedin (padel/rdstand): скрін → таблиця =====
         (function rsInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'Standings', showInfo: true, infoText: 'Info', hdr: 'en', hiFirst: true, sort: false, anim: 'fade', stagger: 0.12, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg: '#ffffff', rowBg: '#ececf0', leadBg: '#dedee8', textColor: '#2a2f6b', pill: '#2a2f6b', rows: [] };
+            const DEF = { show: false, court: 'all', title: 'Таблиця рахунків', showInfo: false, infoText: 'Info', hdrLang: 'ua', hiFirst: true, sort: false, anim: 'fade', stagger: 0.12, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg: '#ffffff', rowBg: '#ececf0', leadBg: '#dedee8', textColor: '#2a2f6b', pill: '#2a2f6b', rows: [] };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' }, { k: 'showInfo', l: 'Кнопка «Info»', t: 'chk' }, { k: 'infoText', l: 'Текст кнопки', t: 'txt' },
-                { k: 'hdr', l: 'Мова заголовків колонок', t: 'sel', o: [['en', 'English (M.P, P, M (W-L-D), Sets, Games)'], ['ua', 'Українська (О, І, М (В-П-Н), Сети, Гейми)']] },
+                { k: 'hdrLang', l: 'Мова таблиці', t: 'sel', o: [['ua', 'Українська (Очки, Ігри, Матчі (В-П-Н), Сети, Гейми)'], ['en', 'English (M.P, P, M (W-L-D), Sets, Games)']] },
                 { k: 'hiFirst', l: 'Виділяти перший рядок (лідер)', t: 'chk' }, { k: 'sort', l: 'Сортувати автоматично (M.P → різниця сетів → геймів)', t: 'chk' },
                 { k: 'anim', l: 'Анімація', t: 'sel', o: [['fade', 'Рядки проявляються по черзі'], ['none', 'Без анімації']] }, { k: 'stagger', l: 'Затримка між рядками (сек)', t: 'num', step: 0.05 },
                 { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 }, { k: 'maxRows', l: 'Скільки рядків показувати', t: 'num', step: 1 },
@@ -4043,8 +4043,13 @@
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
-            const card = document.createElement('div'); card.id = 'rs-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
-            const anchor = document.getElementById('sc-card') || document.getElementById('rdn-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const card = document.createElement('div'); card.id = 'rs-card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px; margin-top:8px;';
+            const rdnHost = document.getElementById('rdn-card');
+            if (rdnHost) {   // блок живе всередині «Імпорт з Rankedin»
+                const det = document.createElement('details'); det.id = 'rs-det'; det.style.cssText = 'background:#1a1a1a; border-radius:6px; padding:6px;';
+                det.innerHTML = '<summary style="font-size:12px; font-weight:700; cursor:pointer;">📋 Standings → таблиця рахунків Rankedin (скрін / текст)</summary>';
+                det.appendChild(card); rdnHost.appendChild(det);
+            } else { card.className = 'card'; tab.appendChild(card); }
             const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
             function fld(f) {
                 const id = 'rsb-f-' + f.k;
@@ -4200,7 +4205,7 @@
             window.__rsLooksLike = t => /standings|sets\s*games|\bw\s*-\s*l\s*-\s*d/i.test(String(t || ''));
 
             function refresh(force) {
-                F.forEach(f => { const el = card.querySelector('#rsb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rsb-f-' + f.k + '-v'); if (lv) lv.innerText = (v === undefined ? '' : v) + (f.u || ''); });
+                F.forEach(f => { const el = card.querySelector('#rsb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = f.k === 'showInfo' ? v === true : v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rsb-f-' + f.k + '-v'); if (lv) lv.innerText = (v === undefined ? '' : v) + (f.u || ''); });
                 $('rsb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('rsb-off').style.outline = d.show ? 'none' : '3px solid #fff';
                 rows(force);
             }
