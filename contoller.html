@@ -4026,6 +4026,202 @@
             window.__scParse = parseTable;
         })();
 
+        // ===== STANDINGS у стилі Rankedin (padel/rdstand): скрін → таблиця =====
+        (function rsInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', title: 'Standings', showInfo: true, infoText: 'Info', hdr: 'en', hiFirst: true, sort: false, anim: 'fade', stagger: 0.12, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg: '#ffffff', rowBg: '#ececf0', leadBg: '#dedee8', textColor: '#2a2f6b', pill: '#2a2f6b', rows: [] };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' }, { k: 'showInfo', l: 'Кнопка «Info»', t: 'chk' }, { k: 'infoText', l: 'Текст кнопки', t: 'txt' },
+                { k: 'hdr', l: 'Мова заголовків колонок', t: 'sel', o: [['en', 'English (M.P, P, M (W-L-D), Sets, Games)'], ['ua', 'Українська (О, І, М (В-П-Н), Сети, Гейми)']] },
+                { k: 'hiFirst', l: 'Виділяти перший рядок (лідер)', t: 'chk' }, { k: 'sort', l: 'Сортувати автоматично (M.P → різниця сетів → геймів)', t: 'chk' },
+                { k: 'anim', l: 'Анімація', t: 'sel', o: [['fade', 'Рядки проявляються по черзі'], ['none', 'Без анімації']] }, { k: 'stagger', l: 'Затримка між рядками (сек)', t: 'num', step: 0.05 },
+                { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 }, { k: 'maxRows', l: 'Скільки рядків показувати', t: 'num', step: 1 },
+                { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
+                { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'bgOpacity', l: 'Непрозорість фону', t: 'rng', min: 0, max: 100, u: '%' },
+                { k: 'bg', l: 'Колір картки', t: 'col' }, { k: 'rowBg', l: 'Колір рядків', t: 'col' }, { k: 'leadBg', l: 'Колір рядка лідера', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }, { k: 'pill', l: 'Колір кнопки «Info»', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'rs-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('sc-card') || document.getElementById('rdn-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'rsb-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                if (f.t === 'chk') return '<div class="row">' + lab(f.l + ':') + '<input type="checkbox" data-k="' + f.k + '" id="' + id + '" style="width:20px; height:20px;"></div>';
+                if (f.t === 'num') return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" step="' + (f.step || 1) + '" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="text" data-k="' + f.k + '" id="' + id + '" style="' + inp + '"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">📋 Standings (Rankedin) — M.P · P · W-L-D · Sets · Games</div>' +
+                '<div style="font-size:10px; color:#9bd;">Завантажте скріншот таблиці «Standings» з Rankedin — рядки розпізнаються й одразу зберігаються, табло на оверлеї оновлюється саме. Різниці в дужках (сети, гейми) рахуються автоматично.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rsb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rsb-off">■ СХОВАТИ</button></div>' +
+                '<div id="rsb-st" style="font-size:11px;"></div>' +
+                '<div style="border:2px dashed #4ade80; border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:6px; background:#10241a;"><div style="font-size:12px; font-weight:800;">📷 Скріншот Standings → таблиця</div><input type="file" accept="image/*" id="rsb-file" style="font-size:11px;"><div id="rsb-ocr" style="font-size:11px; color:#9bd;"></div></div>' +
+                '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">📋 Або вставити текст таблиці</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">Скопіюйте таблицю зі сторінки Rankedin і вставте: імена команд + рядок «4 4 4-0-0 4-0 (4) 24-1 (23)».</div><textarea id="rsb-txt" rows="5" style="' + inp + '"></textarea><button class="btn btn-green" style="padding:8px;" id="rsb-go">✔ Розпізнати текст</button></div></details>' +
+                '<div id="rsb-rows" style="display:flex; flex-direction:column; gap:4px; background:#1a1a1a; border-radius:6px; padding:6px;"></div>' +
+                '<div style="display:flex; gap:6px;"><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="rsb-add">＋ Додати рядок</button><button class="btn" style="flex:1; padding:8px; font-size:11px;" id="rsb-clear">🗑 Очистити</button></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('rsb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const mirrorAll = () => { try { try { state.rsCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/rsCfg'), data); st(true, 'працює через корти'); } catch (e2) { st(false, (e2 && e2.message) || 'помилка'); } };
+                    const fail2 = () => { try { set(ref(db, 'padel/courts/_rdstand'), data).then(() => st(true, 'запасний шлях'), mirrorAll); } catch (e) { mirrorAll(); } };
+                    try { set(ref(db, 'padel/rdstand'), data).then(() => st(true), fail2); } catch (e) { fail2(); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const arrOf = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const esc2 = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const COLS = [['mp', 'M.P'], ['p', 'P'], ['w', 'В'], ['l', 'П'], ['d', 'Н'], ['sw', 'Сет+'], ['sl', 'Сет−'], ['gw', 'Гем+'], ['gl', 'Гем−']];
+            function rows(force) {
+                const el = $('rsb-rows'); if (!el) return; if (!force && el.contains(document.activeElement)) return;
+                const r = arrOf(d.rows);
+                if (!r.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Таблиця порожня — завантажте скріншот або додайте рядок.</div>'; return; }
+                const ni = 'padding:4px 2px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box; font-size:12px; width:46px;';
+                el.innerHTML = r.map((t, i) => '<div style="background:#202020; border-radius:6px; padding:5px; ' + (t.q ? 'border:1px solid #f59e0b;' : '') + '"><div style="display:flex; align-items:center; gap:3px;"><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '" placeholder="Гравець 1 / Гравець 2" style="' + inp + ' flex:1; font-size:12px; padding:4px;"><button class="btn" data-rd="' + i + '" style="padding:2px 8px; font-size:11px;">✕</button></div><div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; padding-left:21px;">' +
+                    COLS.map(cc => '<label style="font-size:9px; color:#9ca3af; display:flex; flex-direction:column; align-items:center;">' + cc[1] + '<input type="text" inputmode="decimal" data-rc="' + i + ':' + cc[0] + '" value="' + esc2(t[cc[0]] === undefined ? 0 : t[cc[0]]) + '" style="' + ni + '"></label>').join('') + '</div>' + (t.q ? '<div style="font-size:10px; color:#f59e0b; padding-left:21px;">⚠️ перевірте цифри цього рядка</div>' : '') + '</div>').join('');
+            }
+            $('rsb-rows').addEventListener('input', e => {
+                const t = e.target, r = arrOf(d.rows).slice();
+                if (t.hasAttribute('data-rn')) { const i = +t.getAttribute('data-rn'); if (r[i]) { r[i] = Object.assign({}, r[i], { n: t.value }); d.rows = r; save(false); } }
+                else if (t.hasAttribute('data-rc')) { const [i, k] = t.getAttribute('data-rc').split(':'); if (r[+i]) { r[+i] = Object.assign({}, r[+i]); const v = parseFloat(String(t.value).replace(',', '.')); r[+i][k] = isFinite(v) ? v : 0; delete r[+i].q; d.rows = r; save(false); } }
+            });
+            $('rsb-rows').addEventListener('click', e => { const b = e.target.closest('[data-rd]'); if (!b) return; const r = arrOf(d.rows).slice(); r.splice(+b.getAttribute('data-rd'), 1); d.rows = r; rows(true); save(true); });
+            $('rsb-add').onclick = () => { d.rows = arrOf(d.rows).concat([{ n: '', mp: 0, p: 0, w: 0, l: 0, d: 0, sw: 0, sl: 0, gw: 0, gl: 0 }]); rows(true); save(false); };
+            $('rsb-clear').onclick = () => { if (confirm('Очистити всю таблицю Standings?')) { d.rows = []; rows(true); save(true); } };
+
+            // ---------- розбір тексту / OCR ----------
+            const NaNs = () => NaN;
+            function rsStats(text) {
+                const out = [];
+                String(text || '').replace(/[−–—]/g, '-').replace(/[|]/g, ' ').split(/\r?\n/).forEach(line => {
+                    const m = /(\d+)\s*-\s*(\d+)\s*-\s*(\d+)/.exec(line); if (!m) return;
+                    const nums = (line.slice(0, m.index).match(/\d+(?:[.,]5)?/g) || []).map(x => parseFloat(x.replace(',', '.')));
+                    const rest = line.slice(m.index + m[0].length).replace(/\([^)]*\)?/g, ' ');
+                    const pr = []; rest.replace(/(\d*)\s*-\s*(\d+)/g, (_, a, b) => { pr.push([a === '' ? NaN : parseInt(a), parseInt(b)]); return ''; });
+                    out.push({ mp: nums.length >= 2 ? nums[nums.length - 2] : NaN, p: nums.length >= 2 ? nums[nums.length - 1] : NaN, w: +m[1], l: +m[2], d: +m[3],
+                        sw: pr[0] ? pr[0][0] : NaN, sl: pr[0] ? pr[0][1] : NaN, gw: pr[1] ? pr[1][0] : NaN, gl: pr[1] ? pr[1][1] : NaN });
+                });
+                return out;
+            }
+            const JUNK = /^(standings|info|m\.?\s?p|games|sets|m\s*\(|w\s*-\s*l)/i;
+            function rsNames(text) {
+                const out = [];
+                String(text || '').split(/\r?\n/).forEach(l0 => {
+                    let l = l0.replace(/[*?|@©®_=~]/g, ' ').replace(/\s+/g, ' ').trim();
+                    if (/\d+\s*-\s*\d+\s*-\s*\d+/.test(l)) l = (l.match(/^[^\d]*/) || [''])[0].trim();
+                    l = l.replace(/(\s+[\d.,()+\-]+)+$/, '').trim();
+                    if (!l || JUNK.test(l)) return;
+                    if ((l.match(/[A-Za-zА-Яа-яІіЇїЄєҐґ]/g) || []).length < 3) return;
+                    out.push(l);
+                });
+                return out;
+            }
+            const fin = Number.isFinite;
+            function rsBuild(stats, names) {
+                const n = stats.length; if (!n) return [];
+                const pairs = names.length >= 2 * n || names.length > n;
+                const rowsOut = stats.map((s, i) => Object.assign({}, s, { n: pairs ? [names[2 * i], names[2 * i + 1]].filter(Boolean).join(' / ') : (names[i] || '') }));
+                // відновлення пропущених цифр: сума виграних = сумі програних (сети й гейми), P = W+L+D
+                const zs = (a, b) => { const A = rowsOut.filter(r => !fin(r[a])), B = rowsOut.filter(r => !fin(r[b]));
+                    if (A.length === 1 && !B.length) { const v = rowsOut.reduce((s, r) => s + (fin(r[b]) ? r[b] : 0), 0) - rowsOut.reduce((s, r) => s + (fin(r[a]) ? r[a] : 0), 0); if (v >= 0) A[0][a] = v; }
+                    if (B.length === 1 && !A.length) { const v = rowsOut.reduce((s, r) => s + (fin(r[a]) ? r[a] : 0), 0) - rowsOut.reduce((s, r) => s + (fin(r[b]) ? r[b] : 0), 0); if (v >= 0) B[0][b] = v; } };
+                zs('sw', 'sl'); zs('gw', 'gl');
+                let bad = 0;
+                const sm = k => rowsOut.reduce((s, r) => s + (fin(r[k]) ? r[k] : 0), 0);
+                // Контроль W-L-D: у повній таблиці сума перемог = сумі поразок; якщо ні — виправляємо цифру, що ламає кількість матчів (P)
+                if (n >= 3 && sm('w') !== sm('l')) {
+                    const cnt = {}; rowsOut.forEach(r => { const k = r.w + r.l + r.d; cnt[k] = (cnt[k] || 0) + 1; });
+                    const mode = +Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x])[0];
+                    if (cnt[mode] >= Math.max(2, n / 2)) rowsOut.forEach(r => {
+                        if (r.w + r.l + r.d === mode) return;
+                        let best = null;
+                        ['w', 'l', 'd'].forEach(f => { const o = ['w', 'l', 'd'].filter(x => x !== f), v = mode - r[o[0]] - r[o[1]]; if (v < 0) return;
+                            const sw2 = sm('w') - (f === 'w' ? r.w : 0) + (f === 'w' ? v : 0), sl2 = sm('l') - (f === 'l' ? r.l : 0) + (f === 'l' ? v : 0), sc = Math.abs(sw2 - sl2); if (!best || sc < best.sc) best = { f: f, v: v, sc: sc }; });
+                        if (best) { r[best.f] = best.v; r.q = 1; bad++; }
+                    });
+                }
+                // M.P (очки за матчі): беремо коефіцієнт зі скріна (1, 2 чи 3 за перемогу), якщо він збігається в більшості рядків
+                const kf = [1, 2, 3].map(k => ({ k: k, n: rowsOut.filter(r => fin(r.mp) && r.mp === k * r.w + k * 0.5 * r.d).length })).sort((x, y) => y.n - x.n)[0];
+                const K = kf && kf.n >= 2 ? kf.k : 1;
+                rowsOut.forEach(r => {
+                    r.p = r.w + r.l + r.d;
+                    r.mp = K * r.w + K * 0.5 * r.d;
+                    let q = false; ['sw', 'sl', 'gw', 'gl'].forEach(k => { if (!fin(r[k])) { r[k] = 0; q = true; } });
+                    if (!r.n) q = true; if (q) { r.q = 1; bad++; }
+                });
+                const sum = k => rowsOut.reduce((s, r) => s + r[k], 0);
+                if (sum('sw') !== sum('sl') || sum('gw') !== sum('gl')) rowsOut.forEach(r => { if (!r.q) { r.q = 1; } });
+                rowsOut._bad = bad; return rowsOut;
+            }
+            function applyRows(res, via) {
+                if (!res.length) return false;
+                d.rows = res; d.sort = false; d.ts = d.ts || 0; rows(true); refresh(true); save(true);
+                const warn = res.filter(r => r.q).length;
+                const e = $('rsb-ocr'); if (e) { e.style.color = warn ? '#f59e0b' : '#7c7'; e.innerText = '✅ ' + via + ': ' + res.length + ' рядків записано' + (warn ? '. ⚠️ Позначено ' + warn + ' рядків — перевірте цифри й імена нижче.' : '.'); }
+                return true;
+            }
+            async function fromImage(file, say) {
+                say = say || (m => { const e = $('rsb-ocr'); if (e) { e.style.color = '#9bd'; e.innerText = m; } });
+                const prog = (s, p) => say('⏳ ' + (s === 'recognizing text' ? 'Розпізнаю ' : 'Завантажую модуль ') + Math.round(p * 100) + '%');
+                try {
+                    say('⏳ Готую скріншот…');
+                    const T = await ocrLoad(), cv = await ocrPrep(file);
+                    const wN = await T.createWorker('eng', 1, { logger: m => { if (m && m.progress !== undefined) prog(m.status, m.progress); } });
+                    let numText = '', minX = Infinity;
+                    try { await wN.setParameters({ tessedit_char_whitelist: '0123456789+-() ', tessedit_pageseg_mode: '6' }); const r = await wN.recognize(cv); numText = (r && r.data && r.data.text) || ''; ((r && r.data && r.data.words) || []).forEach(w => { if (/\d/.test(w.text) && w.bbox && w.bbox.y0 > cv.height * 0.17) minX = Math.min(minX, w.bbox.x0); }); }
+                    finally { try { await wN.terminate(); } catch (e) {} }
+                    const stats = rsStats(numText);
+                    if (!stats.length) { say('⚠️ Не знайдено рядків з цифрами (W-L-D). Зробіть чіткіший скрін таблиці Standings.'); const e = $('rsb-ocr'); if (e) e.style.color = '#f66'; return false; }
+                    const x1 = (minX > cv.width * 0.25 && minX < cv.width * 0.75) ? Math.max(60, Math.round(minX - 14)) : Math.round(cv.width * 0.405), y0 = Math.round(cv.height * 0.17);
+                    const nc = document.createElement('canvas'); nc.width = x1; nc.height = cv.height - y0; nc.getContext('2d').drawImage(cv, 0, y0, x1, nc.height, 0, 0, x1, nc.height);
+                    say('⏳ Розпізнаю імена…');
+                    const wT = await T.createWorker('ukr+eng', 1, { logger: m => { if (m && m.progress !== undefined) prog(m.status, m.progress); } });
+                    let nameText = '';
+                    try { await wT.setParameters({ tessedit_pageseg_mode: '4' }); const r2 = await wT.recognize(nc); nameText = (r2 && r2.data && r2.data.text) || ''; }
+                    finally { try { await wT.terminate(); } catch (e) {} }
+                    const ok = applyRows(rsBuild(stats, rsNames(nameText)), 'Скріншот');
+                    return ok;
+                } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка розпізнавання')); const el = $('rsb-ocr'); if (el) el.style.color = '#f66'; return false; }
+            }
+            $('rsb-file').addEventListener('change', () => { const f = $('rsb-file').files && $('rsb-file').files[0]; $('rsb-file').value = ''; if (f) fromImage(f); });
+            $('rsb-go').onclick = () => {
+                const t = $('rsb-txt').value, res = rsBuild(rsStats(t), rsNames(t));
+                if (!res.length) { alert('Не розпізнано жодного рядка. Потрібні рядки виду: 4 4 4-0-0 4-0 (4) 24-1 (23).'); return; }
+                applyRows(res, 'Текст');
+            };
+            window.__rsFromImage = fromImage;
+            window.__rsLooksLike = t => /standings|sets\s*games|\bw\s*-\s*l\s*-\s*d/i.test(String(t || ''));
+
+            function refresh(force) {
+                F.forEach(f => { const el = card.querySelector('#rsb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rsb-f-' + f.k + '-v'); if (lv) lv.innerText = (v === undefined ? '' : v) + (f.u || ''); });
+                $('rsb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('rsb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                rows(force);
+            }
+            $('rsb-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            $('rsb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', () => {
+                    const v = f.t === 'chk' ? el.checked : ((f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value); d[f.k] = v;
+                    const lv = card.querySelector('#rsb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh();
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(true); };
+            const mirror = () => { const m = state && state.rsCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/rdstand'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+            window.__rsParse = t => rsBuild(rsStats(t), rsNames(t));
+        })();
+
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
         (function mtInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -4664,6 +4860,10 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                 try {
                     say('⏳ Читаю скріншот…');
                     let txt = ocrNorm(await ocrImage(file, prog)), kind = '';
+                    if (window.__rsLooksLike && window.__rsLooksLike(txt) && window.__rsFromImage) {
+                        say('✅ Це «Standings» (Rankedin) → розпізнаю таблицю…', '#7c7');
+                        const okRs = await window.__rsFromImage(file, m => say(m)); say(okRs ? '✅ Standings записано в таблицю Rankedin (блок нижче). Перевірте рядки.' : '⚠️ Standings не розпізнано', okRs ? '#7c7' : '#f66'); return;
+                    }
                     const nrows = numRows(txt).length, deltas = (txt.match(/^[+\-]\d+$/gm) || []).length;
                     if (nrows >= 2) kind = 'table';
                     else if (/(^|\n)(court|корт)\s*\d+/i.test(txt) || (deltas >= 2 && hasLetters(txt))) kind = 'results';
