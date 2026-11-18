@@ -4062,7 +4062,7 @@
             }
             card.innerHTML = '<div style="font-size:11px; font-weight:700;">📋 Standings (Rankedin) — M.P · P · W-L-D · Sets · Games</div>' +
                 '<div style="font-size:10px; color:#9bd;">Завантажте скріншот таблиці «Standings» з Rankedin — рядки розпізнаються й одразу зберігаються, табло на оверлеї оновлюється саме. Різниці в дужках (сети, гейми) рахуються автоматично.</div>' +
-                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rsb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rsb-off">■ СХОВАТИ</button></div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="rsb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="rsb-off">■ СХОВАТИ</button><button class="btn" style="flex:1; padding:12px; font-weight:800; background:#7c3aed; color:#fff;" id="rsb-pv" title="Показати табло лише на міні-екрані пульта (на трансляцію не йде)">👁 ПЕРЕГЛЯД</button></div>' +
                 '<div id="rsb-st" style="font-size:11px;"></div>' +
                 '<div style="border:2px dashed #4ade80; border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:6px; background:#10241a;"><div style="font-size:12px; font-weight:800;">📷 Скріншот Standings → таблиця</div><input type="file" accept="image/*" id="rsb-file" style="font-size:11px;"><div id="rsb-ocr" style="font-size:11px; color:#9bd;"></div></div>' +
                 '<details style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">📋 Або вставити текст таблиці</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">Скопіюйте таблицю зі сторінки Rankedin і вставте: імена команд + рядок «4 4 4-0-0 4-0 (4) 24-1 (23)».</div><textarea id="rsb-txt" rows="5" style="' + inp + '"></textarea><button class="btn btn-green" style="padding:8px;" id="rsb-go">✔ Розпізнати текст</button></div></details>' +
@@ -4108,8 +4108,12 @@
                 String(text || '').replace(/[−–—]/g, '-').replace(/[|]/g, ' ').split(/\r?\n/).forEach(line => {
                     const m = /(\d+)\s*-\s*(\d+)\s*-\s*(\d+)/.exec(line); if (!m) return;
                     const nums = (line.slice(0, m.index).match(/\d+(?:[.,]5)?/g) || []).map(x => parseFloat(x.replace(',', '.')));
-                    const rest = line.slice(m.index + m[0].length).replace(/\([^)]*\)?/g, ' ');
-                    const pr = []; rest.replace(/(\d*)\s*-\s*(\d+)/g, (_, a, b) => { pr.push([a === '' ? NaN : parseInt(a), parseInt(b)]); return ''; });
+                    const rest = line.slice(m.index + m[0].length), pr = []; let mm; const re2 = /(\d*)\s*-\s*(\d+)\s*(\(\s*[+-]?\d+\s*\)|[+-]?\d*\s*\))?/g;
+                    while ((mm = re2.exec(rest))) {
+                        const a = mm[1] === '' ? NaN : parseInt(mm[1]), bS = mm[2], tail = mm[3] || ''; let b = parseInt(bS);
+                        if (tail && tail.indexOf('(') < 0 && isFinite(a)) { for (let k = 1; k < bS.length; k++) { const gl = parseInt(bS.slice(0, k)), dd = parseInt(bS.slice(k)); if (a - gl === dd) { b = gl; break; } } }   // «(» не розпізнано: останні цифри — різниця
+                        pr.push([a, b]);
+                    }
                     out.push({ mp: nums.length >= 2 ? nums[nums.length - 2] : NaN, p: nums.length >= 2 ? nums[nums.length - 1] : NaN, w: +m[1], l: +m[2], d: +m[3],
                         sw: pr[0] ? pr[0][0] : NaN, sl: pr[0] ? pr[0][1] : NaN, gw: pr[1] ? pr[1][0] : NaN, gl: pr[1] ? pr[1][1] : NaN });
                 });
@@ -4263,6 +4267,12 @@
                 $('rsb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('rsb-off').style.outline = d.show ? 'none' : '3px solid #fff';
                 rows(force);
             }
+            // Перегляд: табло показується лише на міні-екрані пульта (iframe), на трансляцію нічого не йде
+            let pvOn = false;
+            function postPv() { try { const fr = document.getElementById('pv-frame'); if (fr && fr.contentWindow) fr.contentWindow.postMessage({ type: 'rsPreview', off: !pvOn, cfg: pvOn ? JSON.parse(JSON.stringify(d)) : null }, '*'); } catch (e) {} }
+            function pvUi() { const b = $('rsb-pv'); if (b) { b.style.outline = pvOn ? '3px solid #fff' : 'none'; b.innerText = pvOn ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; } }
+            $('rsb-pv').onclick = () => { pvOn = !pvOn; pvUi(); postPv(); if (pvOn && !document.body.classList.contains('pv-on')) st(true, 'міні-екран з’явиться, коли відкрито будь-який розділ Tournament'); };
+            setInterval(() => { if (pvOn) postPv(); }, 1200);
             $('rsb-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
             $('rsb-off').onclick = () => { d.show = false; save(true); refresh(); };
             card.querySelectorAll('[data-k]').forEach(el => {
