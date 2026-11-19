@@ -705,6 +705,32 @@
         .rm-logo.off { display: none; }
         .rm-row.up .rm-arrow, .rm-row.down .rm-arrow { animation: rmPop .6s ease-out; }
         @keyframes rmPop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.25); } 100% { transform: scale(1); opacity: 1; } }
+        /* ===== РЕЗУЛЬТАТИ РАУНДУ (режим results у «Рух у рейтингу») ===== */
+        .rm-board.res { background: var(--rr-bg, rgba(255,255,255,.92)); color: var(--rr-tx, #111827); border: 0; padding: calc(30px * var(--rm-ts, 1)) calc(34px * var(--rm-ts, 1)) calc(34px * var(--rm-ts, 1)); border-radius: 28px; font-family: 'Montserrat', 'Inter', sans-serif; }
+        .rm-board.res > .rm-logo, .rm-board.res > .rm-title, .rm-board.res > .rm-colhead, .rm-board.res > .rm-list { display: none; }
+        .rm-board:not(.res) > .rr-box { display: none; }
+        .rr-m { font-size: calc(38px * var(--rm-ts, 1)); font-weight: 800; margin-bottom: calc(14px * var(--rm-ts, 1)); }
+        .rr-dots { display: flex; gap: calc(12px * var(--rm-ts, 1)); flex-wrap: wrap; margin-bottom: calc(28px * var(--rm-ts, 1)); }
+        .rr-dots i { font-style: normal; width: calc(60px * var(--rm-ts, 1)); height: calc(60px * var(--rm-ts, 1)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: calc(30px * var(--rm-ts, 1)); font-weight: 600; color: #fff; background: #9ca3af; box-sizing: border-box; }
+        .rr-dots i.g { background: #52b469; } .rr-dots i.r { background: #ef5350; }
+        .rr-dots i.sel { box-shadow: 0 0 0 3px var(--rr-bg, #fff), 0 0 0 6px var(--rr-tx, #111827); }
+        .rr-grid { display: grid; gap: calc(6px * var(--rm-ts, 1)) calc(34px * var(--rm-ts, 1)); align-items: start; }
+        .rr-court { opacity: 1; transform: none; transition: opacity .5s ease, transform .5s ease; }
+        .rr-court.pre { opacity: 0; transform: translateY(24px); }
+        .rr-cn { font-size: calc(34px * var(--rm-ts, 1)); font-weight: 800; margin: calc(14px * var(--rm-ts, 1)) 0 calc(14px * var(--rm-ts, 1)); }
+        .rr-card { background: var(--rr-card, #f3f5f8); border-radius: calc(36px * var(--rm-ts, 1)); padding: calc(14px * var(--rm-ts, 1)) calc(18px * var(--rm-ts, 1)); display: flex; flex-direction: column; gap: calc(12px * var(--rm-ts, 1)); }
+        .rr-t { display: flex; align-items: center; gap: calc(18px * var(--rm-ts, 1)); }
+        .rr-av { display: flex; flex: none; }
+        .rr-av b, .rr-av img { width: calc(92px * var(--rm-ts, 1)); height: calc(92px * var(--rm-ts, 1)); border-radius: calc(26px * var(--rm-ts, 1)); border: 3px solid var(--rr-card, #f3f5f8); box-sizing: border-box; background: #dbe3f0; color: #6b7a99; font-size: calc(42px * var(--rm-ts, 1)); font-weight: 800; display: flex; align-items: center; justify-content: center; object-fit: cover; }
+        .rr-av > :nth-child(2) { margin-left: calc(-22px * var(--rm-ts, 1)); }
+        .rr-n { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: calc(36px * var(--rm-ts, 1)); font-weight: 500; line-height: 1.25; }
+        .rr-n span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rr-n span.hl { color: #6d3df0; }
+        .rr-d { font-size: calc(36px * var(--rm-ts, 1)); font-weight: 600; min-width: calc(84px * var(--rm-ts, 1)); text-align: right; color: #6b7280; }
+        .rr-d.pos { color: #43a047; } .rr-d.neg { color: #e5524e; }
+        .rr-s { width: calc(120px * var(--rm-ts, 1)); height: calc(86px * var(--rm-ts, 1)); flex: none; border-radius: calc(22px * var(--rm-ts, 1)); background: var(--rr-score, #e6eaf2); display: flex; align-items: center; justify-content: center; font-size: calc(40px * var(--rm-ts, 1)); font-weight: 600; }
+        .rm-board.res.dark { --rr-bg: rgba(15,23,42,.92); --rr-tx: #f8fafc; --rr-card: #1e293b; --rr-score: #334155; }
+        .rm-board.res.dark .rr-av b { background: #334155; color: #cbd5e1; }
         .rm-colhead { display: flex; justify-content: flex-end; padding: 10px 22px 0; font-size: calc(20px * var(--rm-ts, 1)); font-weight: 800; letter-spacing: 3px; color: var(--rm-acc, #f5c542); opacity: .85; }
         .rm-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
 
@@ -2260,7 +2286,7 @@
     <div class="anb-wrap" id="anb-wrap"><div class="anb-plate" id="anb-plate"></div></div>
     <div class="an-wrap" id="an-wrap"><div class="an-panel" id="an-panel"></div></div>
     <div class="cb-wrap" id="cb-wrap"><div class="cb-plane" id="cb-plane"><div class="cb-bg" id="cb-bg"></div><div class="cb-box" id="cb-box"></div></div></div>
-    <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div></div></div>
+    <div class="rm-wrap" id="rm-wrap"><div class="rm-board" id="rm-board"><img class="rm-logo off" id="rm-logo" alt=""><div class="rm-title" id="rm-title"></div><div class="rm-colhead" id="rm-colhead">РЕЙТИНГ</div><div class="rm-list" id="rm-list"></div><div class="rr-box" id="rr-box"></div></div></div>
     <div class="st-wrap" id="st-wrap"><div class="st-bg"></div><div class="st-sparks" id="st-sparks"></div><div class="st-streak"></div><div class="st-streak s2"></div><img class="st-logo" id="st-logo" alt=""><video class="st-video" id="st-video" muted playsinline style="display:none"></video></div>
     <div class="wx-wrap" id="wx-wrap"><div class="wx-bar" id="wx-bar"></div></div>
     <div class="gt-wrap" id="gt-wrap"><div class="gt-plate sh-pill" id="gt-plate"></div></div>
@@ -4521,6 +4547,25 @@
                 s.setProperty('--rm-ts', ts); s.setProperty('--rm-rh', Math.round(74 * ts) + 'px'); s.setProperty('--rm-w', Math.round(1100 * Math.max(40, Math.min(160, num(cfg.width, 100))) / 100) + 'px');
                 s.setProperty('--rm-sc', Math.max(30, Math.min(200, num(cfg.scale, 100))) / 100); s.setProperty('--rm-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--rm-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
                 s.setProperty('--rm-dur', Math.max(0.2, num(cfg.dur, 1.6)) + 's');
+                const rsm = cfg.mode === 'results'; board.classList.toggle('res', rsm); board.classList.toggle('dark', rsm && cfg.resTheme === 'dark');
+                if (rsm) { s.setProperty('--rm-w', Math.round(700 * resCols() * Math.max(40, Math.min(200, num(cfg.width, 100))) / 100) + 'px'); s.setProperty('--rr-bg', g(cfg.resTheme, 'light') === 'dark' ? rgba('#0f172a', op) : rgba('#ffffff', op)); }
+            }
+            const resCols = () => { const n = arr((cfg.res || {}).courts).filter(x => x && arr(x.teams).length).length, c = parseInt(cfg.cols); return (c >= 1 && c <= 3) ? c : (n > 3 ? 2 : 1); };
+            const initial = s => { const w = String(s || '').trim(); return w ? w.charAt(0).toUpperCase() : '·'; };
+            function buildRes() {
+                const box = document.getElementById('rr-box'); if (!box) return; const r = cfg.res || {};
+                const nr = Math.max(1, Math.min(14, parseInt(r.rounds) || 5)), rc = arr(r.rc), sel = parseInt(r.round) || 1, lbl = g(r.label, 'Матч');
+                const courts = arr(r.courts).filter(c => c && arr(c.teams).some(t => t && (String(t.n1 || '').trim() || String(t.n2 || '').trim())));
+                const sg = d => (d > 0 ? '+' + d : (d < 0 ? '−' + Math.abs(d) : '0'));
+                let h = '<div class="rr-m">' + esc(lbl) + ': ' + esc(sel) + '</div>';
+                if (r.dots !== false) h += '<div class="rr-dots">' + Array.from({ length: nr }, (_, i) => '<i class="' + (rc[i] === 'g' ? 'g' : (rc[i] === 'r' ? 'r' : '')) + (i + 1 === sel ? ' sel' : '') + '">' + (i + 1) + '</i>').join('') + '</div>';
+                h += '<div class="rr-grid" style="grid-template-columns:repeat(' + resCols() + ', minmax(0, 1fr));">' + courts.map(c => '<div class="rr-court pre"><div class="rr-cn">' + esc(c.name || '') + '</div><div class="rr-card">' + arr(c.teams).filter(t => t).map(t => {
+                    const dv = (t.d === '' || t.d === null || t.d === undefined) ? null : (parseInt(t.d) || 0), av = (u, n) => u ? '<img src="' + esc(u) + '" alt="">' : '<b>' + esc(initial(n)) + '</b>';
+                    return '<div class="rr-t"><div class="rr-av">' + av(t.p1, t.n1) + av(t.p2, t.n2) + '</div><div class="rr-n"><span' + (t.hl ? ' class="hl"' : '') + '>' + esc(t.n1 || '') + '</span><span>' + esc(t.n2 || '') + '</span></div>' +
+                        (dv === null ? '' : '<div class="rr-d ' + (dv > 0 ? 'pos' : (dv < 0 ? 'neg' : '')) + '">' + sg(dv) + '</div>') + '<div class="rr-s">' + esc(t.s === undefined || t.s === null ? '' : t.s) + '</div></div>';
+                }).join('') + '</div></div>').join('') + '</div>';
+                box.innerHTML = h;
+                Array.from(box.querySelectorAll('.rr-court')).forEach((el, j) => timers.push(setTimeout(() => el.classList.remove('pre'), 150 + j * 220)));
             }
             const rh = () => Math.round(74 * Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100);
             function order(a, sort) { const r = a.slice(); if (sort) r.sort((x, y) => (y.r - x.r) || (x.i - y.i)); return r; }
@@ -4546,7 +4591,7 @@
                 if (rtEl) rtEl.textContent = it.r;
             }
             function build() {
-                clearT(); look(); { const lg = document.getElementById('rm-logo'), rk0 = ((lastKnownState || {}).teamRanking) || {}, src = String(g(cfg.logo, '') || rk0.logoL || '').trim(); if (lg) { if (src) { if (lg.getAttribute('src') !== src) lg.src = src; lg.classList.remove('off'); } else { lg.classList.add('off'); } wrap.style.setProperty('--rm-ls', Math.max(30, Math.min(250, num(cfg.logoSize, 100))) / 100); } } titleEl.textContent = mTitle(); titleEl.style.display = titleEl.textContent ? '' : 'none';
+                clearT(); look(); if (cfg.mode === 'results') { buildRes(); return; } { const lg = document.getElementById('rm-logo'), rk0 = ((lastKnownState || {}).teamRanking) || {}, src = String(g(cfg.logo, '') || rk0.logoL || '').trim(); if (lg) { if (src) { if (lg.getAttribute('src') !== src) lg.src = src; lg.classList.remove('off'); } else { lg.classList.add('off'); } wrap.style.setProperty('--rm-ls', Math.max(30, Math.min(250, num(cfg.logoSize, 100))) / 100); } } titleEl.textContent = mTitle(); titleEl.style.display = titleEl.textContent ? '' : 'none';
                 const m = model(), maxR = Math.max(1, Math.min(60, Math.round(num(cfg.maxRows, 12)))), rows = Math.max(1, Math.min(maxR, m.length));
                 list.style.height = (rows * rh()) + 'px'; { const ch = document.getElementById('rm-colhead'); if (ch) ch.style.display = m.some(it => it.delta) ? '' : 'none'; }
                 if (!m.length) { list.style.height = 'auto'; list.innerHTML = '<div class="rm-empty">Додайте команди на пульті (Рух у рейтингу)</div>'; tsig = ''; return; }
@@ -4568,7 +4613,7 @@
                     lastTs = ts; running = true; sig = ''; build(); wrap.classList.add('on'); clearTimeout(endT);
                     const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; clearT(); }, ah * 1000);
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
-                else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.textSize, cfg.maxRows, cfg.showArrow, cfg.upper, cfg.anim, cfg.logo, cfg.logoSize]); if (s2 !== sig) { sig = s2; build(); } }
+                else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.textSize, cfg.maxRows, cfg.showArrow, cfg.upper, cfg.anim, cfg.logo, cfg.logoSize, cfg.mode, cfg.res, cfg.cols, cfg.resTheme, cfg.width]); if (s2 !== sig) { sig = s2; build(); } }
             }
             onValue(ref(db, 'padel/rkmove'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('rm', () => apply(gcfg || mcfg));
             window.__rmMirror = (st) => { const v = st && st.rkmCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
