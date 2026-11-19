@@ -3560,10 +3560,11 @@
         // ===== РУХ У РЕЙТИНГУ (padel/rkmove) =====
         (function rmInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'СТАДІЯ ТУРНІРУ', anim: 'move', x: 50, y: 50, scale: 90, width: 139, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', list: [], items: [], from: [], shown: [], logo: '', logoSize: 100 };
+            const DEF = { mode: 'results', resTheme: 'light', cols: 'auto', res: { label: 'Матч', round: 1, rounds: 5, rc: [], dots: true, courts: [] }, show: false, court: 'all', title: 'СТАДІЯ ТУРНІРУ', anim: 'move', x: 50, y: 50, scale: 90, width: 139, textSize: 100, maxRows: 12, dur: 1.6, delay: 1.2, stagger: 0.12, replay: 0, showArrow: true, upper: true, autoHide: 0, bgOpacity: 88, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', list: [], items: [], from: [], shown: [], logo: '', logoSize: 100 };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
-                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
+                { k: 'mode', l: 'Режим табла', t: 'sel', o: [['results', 'Результати матчів раунду (як на фото)'], ['rank', 'Рух у рейтингу (старий режим)']] },
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'resTheme', l: 'Тема табла результатів', t: 'sel', o: [['light', 'Світла (як на фото)'], ['dark', 'Темна']] }, { k: 'cols', l: 'Колонок кортів (результати)', t: 'sel', o: [['auto', 'Авто (до 3 кортів — 1, більше — 2)'], ['1', '1'], ['2', '2'], ['3', '3']] }, { k: 'title', l: 'Заголовок', t: 'txt' },
                 { k: 'anim', l: 'Анімація', t: 'sel', o: [['move', 'Рядки переїжджають на нові місця'], ['cascade', 'Спершу рядки з’являються по черзі, потім переїжджають']] },
                 { k: 'dur', l: 'Тривалість руху (сек)', t: 'num', step: 0.1 }, { k: 'delay', l: 'Пауза перед рухом (сек)', t: 'num', step: 0.1 }, { k: 'stagger', l: 'Затримка між рядками (сек)', t: 'num', step: 0.05 },
                 { k: 'replay', l: 'Повторювати анімацію через (сек, 0 = без повтору)', t: 'num', step: 1 }, { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 },
@@ -3660,9 +3661,10 @@
                 F.forEach(f => { const el = card.querySelector('#rkm-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
                 card.querySelector('#rkm-on').style.outline = d.show ? '3px solid #fff' : 'none'; card.querySelector('#rkm-off').style.outline = d.show ? 'none' : '3px solid #fff';
                 { const u = card.querySelector('#rkm-logo-url'); if (u && document.activeElement !== u) u.value = String(d.logo || '').indexOf('data:') === 0 ? '(завантажено файл)' : (d.logo || ''); }
-                preview(force);
+                preview(force); try { modeUi(); resUi(force); } catch (e) { console.error(e); }
             }
             card.querySelector('#rkm-on').onclick = () => {
+                if (d.mode === 'results') { d.show = true; d.ts = Date.now(); save(true); refresh(); return; }
                 reconcile(); const l = arrOf(d.list).map(x => ({ n: x.n, d: Number(x.d) || 0 }));
                 if (!l.length) { alert('Спершу додайте команди в блоці «Рейтинг команд».'); return; }
                 const names = l.map(x => x.n);
@@ -3736,7 +3738,129 @@
                     const lv = card.querySelector('#rkm-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
                 });
             });
-            refresh(); setInterval(() => { try { if (!card.contains(document.activeElement)) { if (reconcile()) save(false); preview(); } } catch (e) {} }, 2000);
+            // ===== РЕЖИМ «РЕЗУЛЬТАТИ РАУНДУ» (табло як на фото: Матч N, раунди, корти, команди, різниця, рахунок) =====
+            const resBox = document.createElement('div'); resBox.id = 'rkm-res'; resBox.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            card.querySelector('#rkm-list').before(resBox);
+            const RANKF = ['anim', 'dur', 'delay', 'stagger', 'replay', 'maxRows', 'showArrow', 'logoSize', 'upper', 'up', 'dn', 'title'], RESF = ['resTheme', 'cols'];
+            function modeUi() {
+                const rs = d.mode === 'results', fr = (k, on) => { const e = card.querySelector('#rkm-f-' + k); const r = e && e.closest('.row'); if (r) r.style.display = on ? '' : 'none'; };
+                RANKF.forEach(k => fr(k, !rs)); RESF.forEach(k => fr(k, rs));
+                resBox.style.display = rs ? 'flex' : 'none';
+                const hide = el => { if (el) el.style.display = rs ? 'none' : ''; };
+                hide(card.querySelector('#rkm-list')); hide(card.querySelector('#rkm-sort') && card.querySelector('#rkm-sort').parentElement); card.querySelectorAll('details').forEach(hide); hide(card.querySelector('#rkm-logo-url') && card.querySelector('#rkm-logo-url').closest('.row'));
+            }
+            const R = () => { if (!d.res || typeof d.res !== 'object') d.res = { label: 'Матч', round: 1, rounds: 5, rc: [], dots: true, courts: [] }; d.res.courts = arrOf(d.res.courts).map(c => Object.assign({}, c, { teams: arrOf(c && c.teams) })); d.res.rc = arrOf(d.res.rc); return d.res; };
+            const ri = 'padding:5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px;';
+            function resUi(force) {
+                if (!force && resBox.contains(document.activeElement)) return;
+                const r = R(), nr = Math.max(1, Math.min(14, parseInt(r.rounds) || 5));
+                resBox.innerHTML =
+                    '<div style="font-size:11px; font-weight:700;">🏁 Результати матчів у раунді</div>' +
+                    '<div style="display:flex; gap:6px; align-items:flex-end;"><label style="flex:2; font-size:10px; color:#9ca3af;">Напис<input data-rf="label" value="' + esc2(r.label || 'Матч') + '" style="' + ri + ' width:100%;"></label><label style="flex:1; font-size:10px; color:#9ca3af;">Раунд №<input type="number" data-rf="round" value="' + (parseInt(r.round) || 1) + '" style="' + ri + ' width:100%;"></label><label style="flex:1; font-size:10px; color:#9ca3af;">Усього раундів<input type="number" data-rf="rounds" value="' + nr + '" style="' + ri + ' width:100%;"></label></div>' +
+                    '<div style="font-size:10px; color:#9ca3af;">Кружечки раундів (торкніться, щоб змінити колір: сірий → зелений → червоний):</div>' +
+                    '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + Array.from({ length: nr }, (_, i) => { const s = r.rc[i], bg = s === 'g' ? '#52b469' : (s === 'r' ? '#ef5350' : '#6b7280'); return '<button type="button" data-dot="' + i + '" style="width:38px; height:38px; border-radius:50%; border:' + ((parseInt(r.round) || 1) === i + 1 ? '3px solid #fff' : '0') + '; background:' + bg + '; color:#fff; font-weight:700;">' + (i + 1) + '</button>'; }).join('') + '</div>' +
+                    '<div style="display:flex; flex-direction:column; gap:8px;">' + r.courts.map((c, ci) =>
+                        '<div style="background:#1a1a1a; border-radius:8px; padding:6px; display:flex; flex-direction:column; gap:5px;"><div style="display:flex; gap:6px; align-items:center;"><input data-cn="' + ci + '" value="' + esc2(c.name || '') + '" placeholder="Court N" style="' + ri + ' flex:1; font-weight:700;"><button type="button" class="btn btn-gray" data-dc="' + ci + '" style="padding:3px 8px; font-size:12px;">✕ корт</button></div>' +
+                        c.teams.map((t, ti) =>
+                            '<div style="background:#222; border-radius:6px; padding:5px; display:flex; flex-direction:column; gap:4px;"><div style="display:flex; gap:4px;"><input data-t="' + ci + ':' + ti + ':n1" value="' + esc2(t.n1 || '') + '" placeholder="Гравець 1" style="' + ri + ' flex:1; min-width:0;"><input data-t="' + ci + ':' + ti + ':n2" value="' + esc2(t.n2 || '') + '" placeholder="Гравець 2" style="' + ri + ' flex:1; min-width:0;"></div>' +
+                            '<div style="display:flex; gap:6px; align-items:center;"><label style="font-size:10px; color:#9ca3af;">±<input type="number" data-t="' + ci + ':' + ti + ':d" value="' + (t.d === undefined || t.d === null ? '' : t.d) + '" style="' + ri + ' width:64px;"></label><label style="font-size:10px; color:#9ca3af;">Рахунок<input type="number" data-t="' + ci + ':' + ti + ':s" value="' + (t.s === undefined || t.s === null ? '' : t.s) + '" style="' + ri + ' width:64px;"></label><label style="font-size:10px; color:#c4b5fd; display:flex; align-items:center; gap:3px;"><input type="checkbox" data-t="' + ci + ':' + ti + ':hl"' + (t.hl ? ' checked' : '') + '> фіолетовий</label><span style="flex:1"></span><button type="button" class="btn btn-gray" data-dt="' + ci + ':' + ti + '" style="padding:2px 8px; font-size:12px;">✕</button></div></div>').join('') +
+                        '<button type="button" class="btn btn-gray" data-at="' + ci + '" style="padding:5px; font-size:11px;">➕ команда</button></div>').join('') + '</div>' +
+                    '<div style="display:flex; gap:6px;"><button type="button" class="btn btn-gray" id="rr-addc" style="flex:1; padding:8px; font-size:12px;">➕ Додати корт</button><button type="button" class="btn btn-gray" id="rr-clr" style="padding:8px; font-size:12px;">🗑 Очистити</button></div>' +
+                    '<div style="background:#1a1a1a; border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; font-weight:700;">📷 Скрін / фото результатів раунду</div><div style="font-size:10px; color:#9bd;">Завантажте скрін із PADO (екран «Матч: N → Court → команди») — імена, різниця й рахунок розпізнаються. Або вставте скрін Ctrl+V / текст нижче. Обов’язково перевірте цифри.</div>' +
+                    '<div style="display:flex; gap:6px;"><label class="btn btn-gray" style="flex:1; text-align:center; padding:8px; font-size:12px; cursor:pointer;">📷 Вибрати скрін<input type="file" accept="image/*" id="rr-file" style="display:none;"></label></div>' +
+                    '<textarea id="rr-txt" rows="3" placeholder="…або вставте текст (Court 2 / імена / +26 / 7 …) чи Ctrl+V зі скріном" style="' + ri + ' width:100%; resize:vertical;"></textarea><button type="button" class="btn btn-gray" id="rr-parse" style="padding:6px; font-size:12px;">⬇ Розібрати текст</button><div id="rr-st" style="font-size:11px;"></div></div>';
+                const w = resBox.querySelector('#rr-file'), ta = resBox.querySelector('#rr-txt');
+                w.addEventListener('change', () => { const f = w.files && w.files[0]; w.value = ''; rrImage(f); });
+                resBox.addEventListener('paste', pasteH); 
+            }
+            const rrSt = (m, col) => { const e = resBox.querySelector('#rr-st'); if (e) { e.style.color = col || '#9bd'; e.innerText = m; } };
+            function pasteH(e) { const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type && x.type.indexOf('image') === 0); if (!it) return; e.preventDefault(); rrImage(it.getAsFile()); }
+            resBox.addEventListener('input', e => {
+                const t = e.target, r = R(); let a;
+                if ((a = t.getAttribute('data-rf'))) { r[a] = a === 'label' ? t.value : (parseInt(t.value) || 1); save(false); if (a === 'rounds') { r.rc = arrOf(r.rc).slice(0, Math.max(1, Math.min(14, parseInt(t.value) || 5))); } }
+                else if ((a = t.getAttribute('data-cn'))) { r.courts[+a].name = t.value; save(false); }
+                else if ((a = t.getAttribute('data-t'))) {
+                    const [ci, ti, k] = a.split(':'), tm = r.courts[+ci] && r.courts[+ci].teams[+ti]; if (!tm) return;
+                    if (k === 'hl') tm.hl = t.checked; else if (k === 'd' || k === 's') tm[k] = t.value === '' ? '' : (parseInt(t.value) || 0); else tm[k] = t.value;
+                    if (k === 'd' && t.value !== '' && r.courts[+ci].teams.length === 2) {   // різниця протилежна у суперника
+                        const oi = 1 - (+ti), ot = r.courts[+ci].teams[oi], nv = -(parseInt(t.value) || 0); ot.d = nv; const oe = resBox.querySelector('[data-t="' + ci + ':' + oi + ':d"]'); if (oe && document.activeElement !== oe) oe.value = nv;
+                    }
+                    save(false);
+                }
+            });
+            resBox.addEventListener('change', e => { const t = e.target; if (t.getAttribute && t.getAttribute('data-t') && /:hl$/.test(t.getAttribute('data-t'))) { const [ci, ti] = t.getAttribute('data-t').split(':'); R().courts[+ci].teams[+ti].hl = t.checked; save(false); } if (t.getAttribute && (t.getAttribute('data-rf') === 'rounds')) resUi(true); });
+            resBox.addEventListener('click', e => {
+                const b = e.target.closest('button'); if (!b) return; const r = R(); let a;
+                if ((a = b.getAttribute('data-dot')) !== null) { const i = +a, cyc = { undefined: 'g', '': 'g', g: 'r', r: '' }; r.rc[i] = cyc[r.rc[i] === undefined ? 'undefined' : r.rc[i]]; save(true); resUi(true); }
+                else if ((a = b.getAttribute('data-dc')) !== null) { r.courts.splice(+a, 1); save(true); resUi(true); }
+                else if ((a = b.getAttribute('data-dt')) !== null) { const [ci, ti] = a.split(':'); r.courts[+ci].teams.splice(+ti, 1); save(true); resUi(true); }
+                else if ((a = b.getAttribute('data-at')) !== null) { r.courts[+a].teams.push({ n1: '', n2: '', d: '', s: '' }); save(true); resUi(true); }
+                else if (b.id === 'rr-addc') { r.courts.push({ name: 'Court ' + (r.courts.length + 1), teams: [{ n1: '', n2: '', d: '', s: '' }, { n1: '', n2: '', d: '', s: '' }] }); save(true); resUi(true); }
+                else if (b.id === 'rr-clr') { if (confirm('Очистити всі корти й результати?')) { r.courts = []; r.rc = []; save(true); resUi(true); } }
+                else if (b.id === 'rr-parse') { rrText(resBox.querySelector('#rr-txt').value); }
+            });
+            function applyParsed(p, msg) {
+                const r = R(); if (p.round) r.round = p.round; if (p.rounds && p.rounds > 1) { r.rounds = Math.max(parseInt(r.rounds) || 5, p.rounds); }
+                r.courts = p.courts.map(c => ({ name: c.name, teams: c.teams })); save(true); resUi(true);
+                rrSt('✅ ' + msg + ' Кортів: ' + p.courts.length + ', команд: ' + p.courts.reduce((s, c) => s + c.teams.length, 0) + '. Перевірте імена й цифри та натисніть «ПОКАЗАТИ».', '#7c7');
+            }
+            // текст (PADO) → корти/команди
+            function rrText(text) {
+                const flat = padoParse(text), mm = String(text).match(/(?:матч|match)\s*[:.]?\s*(\d+)/i);
+                if (!flat.length) { rrSt('⚠️ Не знайшов команд із «+/−». Вставте текст зі сторінки результатів раунду.', '#f66'); return; }
+                const cs = []; flat.forEach(t => { let c = cs.find(x => x.k === t.court); if (!c) { c = { k: t.court, name: t.court ? 'Court ' + t.court : '', teams: [] }; cs.push(c); } c.teams.push({ n1: t.players[0] || '', n2: t.players[1] || '', d: t.d, s: t.sc === null ? '' : t.sc }); });
+                applyParsed({ round: mm ? +mm[1] : 0, courts: cs }, 'Текст розібрано.');
+            }
+            // скрін → імена (ukr+eng) + цифри (окремий прохід по правому краю)
+            function cleanName(l) {
+                let t = String(l).replace(/[^A-Za-zА-Яа-яІіЇїЄєҐґ'’\-\s]/g, ' ').replace(/\s+/g, ' ').trim(); if (!t) return '';
+                let w = t.split(' ');
+                while (w.length > 2 && (w[0].length <= 2 || w[0] === w[0].toLowerCase())) w.shift();
+                while (w.length > 1 && w[w.length - 1].length <= 1) w.pop();
+                t = w.join(' '); return (t.replace(/[^A-Za-zА-Яа-яІіЇїЄєҐґ]/g, '').length >= 4) ? t : '';
+            }
+            function parseNames(text) {
+                const out = { round: 0, rounds: 0, courts: [] }; let cur = null;
+                String(text || '').split(/\r?\n/).forEach(raw => {
+                    const l = raw.replace(/[−–—]/g, '-').trim(); if (!l) return; let m;
+                    if ((m = l.match(/^(?:матч|match|matu|mat\w{1,3})\s*[:.;]?\s*(\d+)/i))) { out.round = +m[1]; return; }
+                    if ((m = l.match(/^(?:court|корт)\s*(\d+)/i))) { cur = { name: 'Court ' + m[1], names: [] }; out.courts.push(cur); return; }
+                    if (!cur) { const nums = l.match(/\d+/g); if (nums && /^[\d\s]+$/.test(l) && nums.length >= 2) out.rounds = Math.max(out.rounds, Math.max.apply(null, nums.map(Number))); return; }
+                    const n = cleanName(l); if (n) cur.names.push(n);
+                });
+                out.courts.forEach(c => { c.teams = []; for (let i = 0; i < c.names.length; i += 2) c.teams.push({ n1: c.names[i] || '', n2: c.names[i + 1] || '', d: '', s: '' }); });
+                return out;
+            }
+            async function cropRight(file) {
+                const url = URL.createObjectURL(file); const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Не вдалося відкрити зображення')); i.src = url; });
+                const x0 = Math.round(img.width * 0.68), top = Math.round(img.height * 0.12), cv = document.createElement('canvas'); cv.width = img.width - x0; cv.height = img.height - top;
+                cv.getContext('2d').drawImage(img, x0, top, cv.width, cv.height, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
+                return await new Promise(res => cv.toBlob(res, 'image/png'));
+            }
+            function parseNums(text) {
+                const rows = []; String(text || '').replace(/[−–—]/g, '-').split(/\r?\n/).forEach(l => {
+                    const tk = l.match(/[+\-]?\d+/g); if (!tk) return; const sg = tk.filter(x => /^[+\-]/.test(x)), un = tk.filter(x => !/^[+\-]/.test(x));
+                    rows.push({ d: sg.length ? parseInt(sg[0]) : '', s: un.length ? parseInt(un[un.length - 1]) : '' });
+                });
+                return rows;
+            }
+            async function rrImage(file) {
+                if (!file) return;
+                try {
+                    rrSt('⏳ Читаю імена…'); const prog = (s, p) => rrSt('⏳ ' + (s === 'recognizing text' ? 'Розпізнаю ' : 'Завантажую модуль ') + Math.round(p * 100) + '%');
+                    const txt = await ocrImage(file, prog), p = parseNames(txt);
+                    if (!p.courts.length) { rrSt('⚠️ Не знайшов «Court N». Зробіть скрін чіткіше (екран результатів раунду) або впишіть вручну.', '#f66'); return; }
+                    rrSt('⏳ Читаю цифри (різниця й рахунок)…'); let nums = [];
+                    try { nums = parseNums(await ocrNumeric(await cropRight(file), prog)); } catch (e) { console.warn(e); }
+                    const all = []; p.courts.forEach(c => c.teams.forEach(t => all.push(t)));
+                    all.forEach((t, i) => { if (nums[i]) { t.d = nums[i].d; t.s = nums[i].s; } });
+                    p.courts.forEach(c => { if (c.teams.length === 2) { const [a, b] = c.teams; if (a.d !== '' && b.d === '') b.d = -a.d; else if (b.d !== '' && a.d === '') a.d = -b.d; } });
+                    applyParsed(p, 'Скрін розпізнано' + (nums.length === all.length ? '.' : ' (цифри: ' + nums.length + ' з ' + all.length + ' — допишіть пропущені).'));
+                } catch (e) { rrSt('⚠️ ' + ((e && e.message) || 'помилка розпізнавання'), '#f66'); }
+            }
+            window.__rmResFromImage = async (file, say) => { await rrImage(file); const e = resBox.querySelector('#rr-st'); if (say && e) say(e.innerText, /✅/.test(e.innerText) ? '#7c7' : '#f66'); d.mode = 'results'; save(true); refresh(true); return !!(e && /✅/.test(e.innerText)); };
+            window.__rmResFromText = (t) => { d.mode = 'results'; rrText(t); };
+            refresh(true); setInterval(() => { try { if (!card.contains(document.activeElement)) { if (reconcile()) save(false); preview(); } } catch (e) {} }, 2000);
             const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(); };
             const mirror = () => { const m = state && state.rkmCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
@@ -5074,8 +5198,9 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                         if (nc) nc.checked = !named; ta.value = named ? txt : numNorm(txt);
                         say('✅ Це «Таблиця» (' + numRows(txt).length + ' рядків) → Таблиця рахунків. Підтвердіть запис.', '#7c7'); document.getElementById('scb-imp-go').click();
                     } else if (kind === 'results') {
-                        document.getElementById('rkm-imp-txt').value = txt;
-                        say('✅ Це «Результати» → Рух у рейтингу. Підтвердіть запис.', '#7c7'); document.getElementById('rkm-imp-go').click();
+                        say('✅ Це «Результати раунду» → табло «Рух у рейтингу»… розпізнаю цифри.', '#7c7');
+                        if (window.__rmResFromImage) { const okR = await window.__rmResFromImage(file, (m, c) => say(m, c)); if (!okR) say('⚠️ Результати розпізнано частково — перевірте в блоці «Рух у рейтингу».', '#fa0'); }
+                        else { document.getElementById('rkm-imp-txt').value = txt; document.getElementById('rkm-imp-go').click(); }
                     } else say('⚠️ Не вдалося визначити тип скріна. Зробіть скрін чіткіше (таблиця «Результати» або «Таблиця» з PADO) або скористайтесь ручним режимом нижче.', '#f66');
                 } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка розпізнавання'), '#f66'); }
             }
