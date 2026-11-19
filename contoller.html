@@ -3954,13 +3954,24 @@
                 const r = arrOf(d.rows);
                 if (!r.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Таблиця порожня — вставте текст з PADO або додайте рядок.</div>'; return; }
                 const ni = 'padding:4px 2px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box; font-size:12px;';
-                el.innerHTML = r.map((t, i) => '<div style="display:flex; align-items:center; gap:3px;"><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '"' + (d.namesFromRkm !== false ? ' readonly' : '') + ' placeholder="Гравець / Гравець" style="flex:1; min-width:0; padding:4px 5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px;">' + COLS.map(c => '<input type="number" data-rc="' + i + ':' + c[0] + '" value="' + (Number(t[c[0]]) || 0) + '" title="' + c[1] + '" style="' + ni + ' width:' + c[2] + 'px;">').join('') + '<button class="btn btn-gray" style="padding:2px 6px; font-size:12px;" data-rd="' + i + '">✕</button></div>').join('');
+                el.innerHTML = r.map((t, i) => '<div style="display:flex; align-items:center; gap:3px;"><span data-rh="' + i + '" title="Перетягніть, щоб змінити порядок" style="width:30px; text-align:center; cursor:grab; font-size:18px; color:#9bd; touch-action:none; user-select:none;">↕</span><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '"' + (d.namesFromRkm !== false ? ' readonly' : '') + ' placeholder="Гравець / Гравець" style="flex:1; min-width:0; padding:4px 5px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:12px;">' + COLS.map(c => '<input type="number" data-rc="' + i + ':' + c[0] + '" value="' + (Number(t[c[0]]) || 0) + '" title="' + c[1] + '" style="' + ni + ' width:' + c[2] + 'px;">').join('') + '<button class="btn btn-gray" style="padding:2px 6px; font-size:12px;" data-rd="' + i + '">✕</button></div>').join('');
             }
             $('scb-rows').addEventListener('input', e => {
                 const t = e.target, r = arrOf(d.rows).slice();
                 if (t.hasAttribute('data-rn')) { const i = +t.getAttribute('data-rn'); if (r[i]) { r[i] = Object.assign({}, r[i], { n: t.value }); d.rows = r; save(false); } }
                 else if (t.hasAttribute('data-rc')) { const [i, k] = t.getAttribute('data-rc').split(':'); if (r[+i]) { r[+i] = Object.assign({}, r[+i]); r[+i][k] = parseInt(t.value) || 0; d.rows = r; save(false); } }
             });
+            // перетягування рядків (як у «Рейтингу команд»); порядок зберігається в Firebase і синхронізується
+            { let dg = null; const host = $('scb-rows'), box = h => h.parentElement, mark = i => { const nh = host.querySelector('[data-rh="' + i + '"]'); if (nh) box(nh).style.background = '#2a3a66'; };
+              host.addEventListener('pointerdown', e => { const h = e.target.closest('[data-rh]'); if (!h) return; e.preventDefault(); dg = { i: parseInt(h.getAttribute('data-rh')) }; rows(true); mark(dg.i); });
+              document.addEventListener('pointermove', e => {
+                if (!dg) return; e.preventDefault();
+                const hs = Array.from(host.querySelectorAll('[data-rh]')).map(box); if (!hs.length) return;
+                let to = hs.length - 1; for (let k = 0; k < hs.length; k++) { const r = hs[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { to = k; break; } }
+                if (to !== dg.i) { const r = arrOf(d.rows).slice(), it = r.splice(dg.i, 1)[0]; r.splice(to, 0, it); d.rows = r; d.sort = false; const cb = document.getElementById('scb-f-sort'); if (cb) cb.checked = false; dg.i = to; rows(true); mark(to); save(false); }
+              }, { passive: false });
+              const end = () => { if (!dg) return; dg = null; rows(true); save(true); };
+              document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end); }
             $('scb-rows').addEventListener('click', e => { const b = e.target.closest('[data-rd]'); if (!b) return; const r = arrOf(d.rows).slice(); r.splice(+b.getAttribute('data-rd'), 1); d.rows = r; rows(true); save(true); });
             $('scb-add').onclick = () => { d.rows = arrOf(d.rows).concat([{ n: '', elo: 0, w: 0, d: 0, l: 0, diff: 0, pts: 0 }]); rows(true); save(false); };
             $('scb-clear').onclick = () => { if (confirm('Очистити всю таблицю рахунків?')) { d.rows = []; rows(true); save(true); } };
@@ -4089,7 +4100,7 @@
                 const r = arrOf(d.rows);
                 if (!r.length) { el.innerHTML = '<div style="font-size:11px; color:#ddd;">Таблиця порожня — завантажте скріншот або додайте рядок.</div>'; return; }
                 const ni = 'padding:4px 2px; border-radius:5px; border:1px solid #444; background:#222; color:#fff; text-align:center; box-sizing:border-box; font-size:12px; width:46px;';
-                el.innerHTML = r.map((t, i) => '<div style="background:#202020; border-radius:6px; padding:5px; ' + (t.q ? 'border:1px solid #f59e0b;' : '') + '"><div style="display:flex; align-items:center; gap:3px;"><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '" placeholder="Гравець 1 / Гравець 2" style="' + inp + ' flex:1; font-size:12px; padding:4px;"><button class="btn" data-rd="' + i + '" style="padding:2px 8px; font-size:11px;">✕</button></div><div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; padding-left:21px;">' +
+                el.innerHTML = r.map((t, i) => '<div style="background:#202020; border-radius:6px; padding:5px; ' + (t.q ? 'border:1px solid #f59e0b;' : '') + '"><div style="display:flex; align-items:center; gap:3px;"><span data-rh="' + i + '" title="Перетягніть, щоб змінити порядок" style="width:30px; text-align:center; cursor:grab; font-size:18px; color:#9bd; touch-action:none; user-select:none;">↕</span><b style="width:18px; font-size:11px; text-align:right;">' + (i + 1) + '</b><input type="text" data-rn="' + i + '" value="' + esc2(t.n) + '" placeholder="Гравець 1 / Гравець 2" style="' + inp + ' flex:1; font-size:12px; padding:4px;"><button class="btn" data-rd="' + i + '" style="padding:2px 8px; font-size:11px;">✕</button></div><div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; padding-left:21px;">' +
                     COLS.map(cc => '<label style="font-size:9px; color:#9ca3af; display:flex; flex-direction:column; align-items:center;">' + cc[1] + '<input type="text" inputmode="decimal" data-rc="' + i + ':' + cc[0] + '" value="' + esc2(t[cc[0]] === undefined ? 0 : t[cc[0]]) + '" style="' + ni + '"></label>').join('') + '</div>' + (t.q ? '<div style="font-size:10px; color:#f59e0b; padding-left:21px;">⚠️ перевірте цифри цього рядка</div>' : '') + '</div>').join('');
             }
             $('rsb-rows').addEventListener('input', e => {
@@ -4097,6 +4108,17 @@
                 if (t.hasAttribute('data-rn')) { const i = +t.getAttribute('data-rn'); if (r[i]) { r[i] = Object.assign({}, r[i], { n: t.value }); d.rows = r; save(false); } }
                 else if (t.hasAttribute('data-rc')) { const [i, k] = t.getAttribute('data-rc').split(':'); if (r[+i]) { r[+i] = Object.assign({}, r[+i]); const v = parseFloat(String(t.value).replace(',', '.')); r[+i][k] = isFinite(v) ? v : 0; delete r[+i].q; d.rows = r; save(false); } }
             });
+            // перетягування рядків (як у «Рейтингу команд»); порядок зберігається в Firebase і синхронізується
+            { let dg = null; const host = $('rsb-rows'), box = h => h.parentElement.parentElement, mark = i => { const nh = host.querySelector('[data-rh="' + i + '"]'); if (nh) box(nh).style.background = '#2a3a66'; };
+              host.addEventListener('pointerdown', e => { const h = e.target.closest('[data-rh]'); if (!h) return; e.preventDefault(); dg = { i: parseInt(h.getAttribute('data-rh')) }; rows(true); mark(dg.i); });
+              document.addEventListener('pointermove', e => {
+                if (!dg) return; e.preventDefault();
+                const hs = Array.from(host.querySelectorAll('[data-rh]')).map(box); if (!hs.length) return;
+                let to = hs.length - 1; for (let k = 0; k < hs.length; k++) { const r = hs[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { to = k; break; } }
+                if (to !== dg.i) { const r = arrOf(d.rows).slice(), it = r.splice(dg.i, 1)[0]; r.splice(to, 0, it); d.rows = r; d.sort = false; const cb = document.getElementById('rsb-f-sort'); if (cb) cb.checked = false; dg.i = to; rows(true); mark(to); save(false); }
+              }, { passive: false });
+              const end = () => { if (!dg) return; dg = null; rows(true); save(true); };
+              document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end); }
             $('rsb-rows').addEventListener('click', e => { const b = e.target.closest('[data-rd]'); if (!b) return; const r = arrOf(d.rows).slice(); r.splice(+b.getAttribute('data-rd'), 1); d.rows = r; rows(true); save(true); });
             $('rsb-add').onclick = () => { d.rows = arrOf(d.rows).concat([{ n: '', mp: 0, p: 0, w: 0, l: 0, d: 0, sw: 0, sl: 0, gw: 0, gl: 0 }]); rows(true); save(false); };
             $('rsb-clear').onclick = () => { if (confirm('Очистити всю таблицю Standings?')) { d.rows = []; rows(true); save(true); } };
