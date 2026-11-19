@@ -734,7 +734,7 @@
         .ci-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; }
         .ci-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
         .ci-board { position: absolute; left: 98.5%; top: 2.5%; transform-origin: 100% 0; transform: translate(-100%, 0); display: flex; flex-direction: column; gap: 10px; align-items: stretch; width: max-content; max-width: 1500px; font-family: 'Montserrat', 'Arial Black', sans-serif; }
-        .ci-c { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.45); }
+        .ci-c { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; }
         .ci-t, .ci-d { white-space: pre-wrap; padding: .28em .8em; line-height: 1.15; }
         .ci-t { font-weight: 800; text-align: center; }
         .ci-d { font-weight: 600; text-align: center; }
@@ -4473,13 +4473,15 @@
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
             function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
             function build() {
+                const op = Math.max(0, Math.min(100, num(cfg.bgOp, 85))) / 100;
                 const sc = Math.max(30, Math.min(300, num(cfg.scale, 100))) / 100;
                 board.style.left = Math.max(0, Math.min(100, num(cfg.x, 98.5))) + '%'; board.style.top = Math.max(0, Math.min(100, num(cfg.y, 2.5))) + '%';
                 board.style.transform = 'translate(-100%, 0) scale(' + sc + ')'; board.style.minWidth = Math.max(0, num(cfg.minW, 0)) + 'px';
                 const ts = num(cfg.tSize, 30), ds = num(cfg.dSize, 24);
                 board.innerHTML = arr(cfg.courts).filter(x => x && x.on !== false && String(x.d || '').trim()).map(x => {
-                    const tb = g(x.tBg, g(cfg.tBg, '#7ac143')), db = g(x.dBg, g(cfg.dBg, '#0d4a26'));
+                    const tb = rgba(g(x.tBg, g(cfg.tBg, '#2a2a2a')), op), db = rgba(g(x.dBg, g(cfg.dBg, '#1a1a1a')), op);
                     return '<div class="ci-c">' + (String(x.t || '').trim() ? '<div class="ci-t" style="background:' + esc(tb) + ';color:' + esc(g(cfg.tColor, '#ffffff')) + ';font-size:' + ts + 'px">' + esc(x.t) + '</div>' : '') +
                         (String(x.d || '').trim() ? '<div class="ci-d" style="background:' + esc(db) + ';color:' + esc(g(cfg.dColor, '#ffffff')) + ';font-size:' + ds + 'px">' + esc(x.d) + '</div>' : '') + '</div>';
                 }).join('');
