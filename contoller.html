@@ -4305,8 +4305,10 @@
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
-            const card = document.createElement('div'); card.id = 'ci-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
-            const anchor = document.getElementById('mt-card') || document.getElementById('sc-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const card = document.createElement('div'); card.id = 'ci-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📋 Інфо по кортах (табло зверху справа)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);   // без класу card до tcolInit, щоб не збивати нумерацію заголовків
             const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
             function fld(f) {
                 const id = 'cib-f-' + f.k;
