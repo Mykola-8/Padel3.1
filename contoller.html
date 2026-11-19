@@ -4291,6 +4291,84 @@
             window.__rsParse = t => rsBuild(rsStats(t), rsNames(t));
         })();
 
+        // ===== ІНФО ПО КОРТАХ (padel/courtinfo) =====
+        (function ciInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const NAMES = ['Перший корт', 'Другий корт', 'Третій корт', 'Четвертий корт', 'П’ятий корт', 'Шостий корт'];
+            const DEF = { show: false, court: 'all', x: 98.5, y: 2.5, scale: 100, minW: 0, tSize: 30, dSize: 24, autoHide: 0, tBg: '#7ac143', tColor: '#ffffff', dBg: '#0d4a26', dColor: '#ffffff', courts: NAMES.map(n => ({ on: true, t: n, d: '' })) };
+            const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
+            const F = [
+                { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'x', l: 'Позиція по горизонталі (правий край табла)', t: 'rng', min: 0, max: 100, step: 0.5, u: '%' }, { k: 'y', l: 'Позиція по вертикалі (верх табла)', t: 'rng', min: 0, max: 100, step: 0.5, u: '%' },
+                { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 250, u: '%' }, { k: 'tSize', l: 'Розмір тексту назви корту', t: 'rng', min: 12, max: 90, u: 'px' }, { k: 'dSize', l: 'Розмір тексту команд', t: 'rng', min: 10, max: 80, u: 'px' },
+                { k: 'minW', l: 'Мінімальна ширина (табло саме розтягується під довгі імена)', t: 'rng', min: 0, max: 1200, step: 10, u: 'px' }, { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num' },
+                { k: 'tBg', l: 'Колір фону назви корту', t: 'col' }, { k: 'tColor', l: 'Колір тексту назви', t: 'col' }, { k: 'dBg', l: 'Колір фону команд', t: 'col' }, { k: 'dColor', l: 'Колір тексту команд', t: 'col' }
+            ];
+            let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'ci-card'; card.className = 'card'; card.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+            const anchor = document.getElementById('mt-card') || document.getElementById('sc-card'); if (anchor && anchor.parentNode === tab) anchor.after(card); else tab.appendChild(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            function fld(f) {
+                const id = 'cib-f-' + f.k;
+                if (f.t === 'sel') return '<div class="row">' + lab(f.l + ':') + '<select data-k="' + f.k + '" id="' + id + '">' + f.o.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('') + '</select></div>';
+                if (f.t === 'rng') return '<div class="row">' + lab(f.l + ': <b id="' + id + '-v"></b>') + '<input type="range" data-k="' + f.k + '" id="' + id + '" min="' + f.min + '" max="' + f.max + '" step="' + (f.step || 1) + '"></div>';
+                if (f.t === 'col') return '<div class="row">' + lab(f.l + ':') + '<input type="color" data-k="' + f.k + '" id="' + id + '" style="width:60px; height:30px; padding:0;"></div>';
+                return '<div class="row">' + lab(f.l + ':') + '<input type="number" min="0" step="1" data-k="' + f.k + '" id="' + id + '" style="' + inp + ' max-width:90px;"></div>';
+            }
+            card.innerHTML = '<div style="font-size:11px; font-weight:700;">📋 Інфо по кортах (табло: назва корту + команди)</div>' +
+                '<div style="font-size:10px; color:#9bd;">Окреме табло зверху справа: світлий рядок — назва корту, темний під ним — опис / імена команд. Enter у полі = новий рядок. Табло саме розтягується під довгі імена. Положення, розмір і кольори — повзунками нижче.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="cib-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="cib-off">■ СХОВАТИ</button></div>' +
+                '<div id="cib-st" style="font-size:11px;"></div><div id="cib-rows" style="display:flex; flex-direction:column; gap:8px;"></div>' +
+                '<div style="display:flex; flex-direction:column; gap:6px;">' + F.map(fld).join('') + '</div>';
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('cib-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const mirrorAll = () => { try { try { state.ciCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/ciCfg'), data); st(true, 'працює через корти'); } catch (e2) { st(false, (e2 && e2.message) || 'помилка'); } };
+                    const fail2 = () => { try { set(ref(db, 'padel/courts/_courtinfo'), data).then(() => st(true, 'запасний шлях'), mirrorAll); } catch (e) { mirrorAll(); } };
+                    try { set(ref(db, 'padel/courtinfo'), data).then(() => st(true), fail2); } catch (e) { fail2(); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            const arrOf = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const esc2 = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            function rows(force) {
+                const el = $('cib-rows'); if (!el) return; if (!force && el.contains(document.activeElement)) return;
+                const cs = arrOf(d.courts);
+                el.innerHTML = cs.map((x, i) => '<div style="background:#1a1a1a; border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:5px;">' +
+                    '<div style="display:flex; align-items:center; gap:8px;"><b style="font-size:12px;">Корт ' + (i + 1) + '</b><label style="font-size:11px; color:#ccc; display:flex; align-items:center; gap:4px;"><input type="checkbox" data-ci="' + i + ':on"' + (x.on !== false ? ' checked' : '') + '> показувати</label>' +
+                    '<span style="flex:1"></span><span style="font-size:10px; color:#9ca3af;">фон назви</span><input type="color" data-ci="' + i + ':tBg" value="' + esc2(x.tBg || d.tBg) + '" style="width:34px; height:26px; padding:0;"><span style="font-size:10px; color:#9ca3af;">фон команд</span><input type="color" data-ci="' + i + ':dBg" value="' + esc2(x.dBg || d.dBg) + '" style="width:34px; height:26px; padding:0;"></div>' +
+                    '<input type="text" data-ci="' + i + ':t" value="' + esc2(x.t) + '" placeholder="Назва корту" style="' + inp + ' font-weight:700;">' +
+                    '<textarea data-ci="' + i + ':d" rows="2" placeholder="Команди / опис (Enter = новий рядок)" style="' + inp + ' resize:vertical; font-family:inherit;">' + esc2(x.d) + '</textarea></div>').join('');
+            }
+            $('cib-rows').addEventListener('input', e => {
+                const t = e.target, a = t.getAttribute && t.getAttribute('data-ci'); if (!a) return; const [i, k] = a.split(':'), cs = arrOf(d.courts).slice(); if (!cs[+i]) return;
+                cs[+i] = Object.assign({}, cs[+i], { [k]: k === 'on' ? t.checked : t.value }); d.courts = cs; save(false);
+            });
+            function refresh(force) {
+                F.forEach(f => { const el = $('cib-f-' + f.k); if (!el) return; if (document.activeElement !== el) el.value = d[f.k] === undefined ? DEF[f.k] : d[f.k]; const lv = $('cib-f-' + f.k + '-v'); if (lv) lv.innerText = (d[f.k] === undefined ? DEF[f.k] : d[f.k]) + (f.u || ''); });
+                $('cib-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('cib-off').style.outline = d.show ? 'none' : '3px solid #fff';
+                rows(force);
+            }
+            $('cib-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
+            $('cib-off').onclick = () => { d.show = false; save(true); refresh(); };
+            card.querySelectorAll('[data-k]').forEach(el => {
+                const f = F.find(x => x.k === el.getAttribute('data-k'));
+                el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' ? 'change' : 'input', () => {
+                    const v = (f.t === 'rng' || f.t === 'num') ? (parseFloat(el.value) || 0) : el.value; d[f.k] = v;
+                    const lv = card.querySelector('#cib-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); save(false);
+                });
+            });
+            refresh(true);
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); refresh(true); };
+            const mirror = () => { const m = state && state.ciCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
+            { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
+            onValue(ref(db, 'padel/courtinfo'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
         (function mtInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -4537,7 +4615,7 @@
         // ===== ЖИВИЙ МІНІ-ЕКРАН ТРАНСЛЯЦІЇ =====
         (function pvInit() {
             const box = document.createElement('div'); box.id = 'live-pv';
-            box.innerHTML = '<div class="pv-stage"><iframe id="pv-frame" title="Перегляд трансляції" tabindex="-1"></iframe><button type="button" class="pv-btn" id="pv-url" title="Змінити адресу оверлея">⚙ адреса</button></div>';
+            box.innerHTML = '<div class="pv-stage"><iframe id="pv-frame" title="Перегляд трансляції" tabindex="-1"></iframe><button type="button" class="pv-btn" id="pv-url" title="Змінити адресу оверлея">⚙ адреса</button><button type="button" class="pv-btn" id="pv-pin" style="right:70px;" title="Закріпити міні-екран на всіх вкладках">📌 закріпити</button></div>';
             document.body.appendChild(box);
             const fr = box.querySelector('#pv-frame'), stage = box.querySelector('.pv-stage');
             const dflt = () => location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, '') + 'overley.html';
@@ -4547,7 +4625,13 @@
             function fit() { const w = stage.clientWidth; if (w) fr.style.transform = 'scale(' + (w / 1920) + ')'; }
             box.querySelector('#pv-url').onclick = () => { const v = prompt('Адреса оверлея для міні-екрана (порожньо = типова):', base()); if (v === null) return; try { localStorage.setItem('pvUrl', v.trim()); } catch (e) {} curSrc = ''; load(); };
             window.addEventListener('resize', fit);
+            let pinned = false; try { pinned = localStorage.getItem('pvPin') === '1'; } catch (e) {}
+            const pinB = box.querySelector('#pv-pin');
+            function pinUi() { pinB.innerText = pinned ? '📌 закріплено ✓' : '📌 закріпити'; pinB.style.background = pinned ? '#7c3aed' : 'rgba(0,0,0,.6)'; }
+            pinB.onclick = () => { pinned = !pinned; try { localStorage.setItem('pvPin', pinned ? '1' : '0'); } catch (e) {} pinUi(); };
+            pinUi();
             function want() {
+                if (pinned) return true;
                 const modal = document.getElementById('settings-modal'), tab = document.getElementById('tab-tournament');
                 let ctx = null;
                 if (modal && modal.classList.contains('open')) ctx = modal; else if (tab && tab.classList.contains('active')) ctx = tab;
@@ -4562,6 +4646,25 @@
             }
             setInterval(() => { try { tick(); } catch (e) {} }, 400);
             fit();
+            // --- універсальна фіолетова кнопка ПЕРЕГЛЯД для всіх таблиць ---
+            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
+            const pvOn = {};
+            function send(k) { try { if (fr.contentWindow) fr.contentWindow.postMessage({ type: 'pvAny', key: k, on: !!pvOn[k] }, '*'); } catch (e) {} }
+            function ui(k, b) { b.style.outline = pvOn[k] ? '3px solid #fff' : 'none'; b.innerText = pvOn[k] ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; }
+            function inject() {
+                Object.keys(PV).forEach(k => {
+                    const ref0 = document.getElementById(PV[k]); if (!ref0 || document.getElementById('pvb-' + k)) return;
+                    const b = document.createElement('button'); b.type = 'button'; b.id = 'pvb-' + k; b.className = 'btn';
+                    b.style.cssText = 'background:#7c3aed; color:#fff; font-weight:800; padding:12px; ' + (ref0.parentElement && ref0.parentElement.style.display === 'flex' ? 'flex:1;' : 'width:100%; margin-top:6px;');
+                    b.title = 'Показати таблицю лише на міні-екрані пульта (на трансляцію не йде). Береться збережене налаштування.';
+                    ui(k, b);
+                    b.onclick = () => { pvOn[k] = !pvOn[k]; ui(k, b); if (pvOn[k] && !document.body.classList.contains('pv-on')) { pinned = true; try { localStorage.setItem('pvPin', '1'); } catch (e) {} pinUi(); } send(k); };
+                    ref0.parentElement.insertBefore(b, ref0.nextSibling);
+                    if (ref0.parentElement.style.display !== 'flex') ref0.after(b);
+                });
+            }
+            setInterval(() => { try { inject(); } catch (e) {} }, 1500);
+            setInterval(() => { Object.keys(pvOn).forEach(k => { if (pvOn[k]) send(k); }); }, 1500);
         })();
 
         // ===== (диктор видалено; прихований якір для наступних карток) =====
