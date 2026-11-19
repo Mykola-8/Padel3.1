@@ -4295,13 +4295,13 @@
         (function ciInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const NAMES = ['Перший корт', 'Другий корт', 'Третій корт', 'Четвертий корт', 'П’ятий корт', 'Шостий корт'];
-            const DEF = { show: false, court: 'all', x: 98.5, y: 2.5, scale: 100, minW: 0, tSize: 30, dSize: 24, autoHide: 0, tBg: '#7ac143', tColor: '#ffffff', dBg: '#0d4a26', dColor: '#ffffff', courts: NAMES.map(n => ({ on: true, t: n, d: '' })) };
+            const DEF = { show: false, court: 'all', x: 98.5, y: 2.5, scale: 100, minW: 0, tSize: 30, dSize: 24, autoHide: 0, bgOp: 85, tBg: '#2a2a2a', tColor: '#ffffff', dBg: '#1a1a1a', dColor: '#ffffff', courts: NAMES.map(n => ({ on: true, t: n, d: '' })) };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'x', l: 'Позиція по горизонталі (правий край табла)', t: 'rng', min: 0, max: 100, step: 0.5, u: '%' }, { k: 'y', l: 'Позиція по вертикалі (верх табла)', t: 'rng', min: 0, max: 100, step: 0.5, u: '%' },
                 { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 250, u: '%' }, { k: 'tSize', l: 'Розмір тексту назви корту', t: 'rng', min: 12, max: 90, u: 'px' }, { k: 'dSize', l: 'Розмір тексту команд', t: 'rng', min: 10, max: 80, u: 'px' },
                 { k: 'minW', l: 'Мінімальна ширина (табло саме розтягується під довгі імена)', t: 'rng', min: 0, max: 1200, step: 10, u: 'px' }, { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num' },
-                { k: 'tBg', l: 'Колір фону назви корту', t: 'col' }, { k: 'tColor', l: 'Колір тексту назви', t: 'col' }, { k: 'dBg', l: 'Колір фону команд', t: 'col' }, { k: 'dColor', l: 'Колір тексту команд', t: 'col' }
+                { k: 'bgOp', l: 'Прозорість фону (0 = прозорий, 100 = суцільний)', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'tBg', l: 'Колір фону назви корту', t: 'col' }, { k: 'tColor', l: 'Колір тексту назви', t: 'col' }, { k: 'dBg', l: 'Колір фону команд', t: 'col' }, { k: 'dColor', l: 'Колір тексту команд', t: 'col' }
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
@@ -4364,7 +4364,7 @@
                 });
             });
             refresh(true);
-            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); refresh(true); };
+            const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); if (v && v.bgOp === undefined) { if (d.tBg === '#7ac143') d.tBg = DEF.tBg; if (d.dBg === '#0d4a26') d.dBg = DEF.dBg; arrOf(d.courts).forEach(x => { if (x && x.tBg === '#7ac143') delete x.tBg; if (x && x.dBg === '#0d4a26') delete x.dBg; }); } refresh(true); };
             const mirror = () => { const m = state && state.ciCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
             onValue(ref(db, 'padel/courtinfo'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
