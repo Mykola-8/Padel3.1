@@ -4478,7 +4478,7 @@
                 board.style.left = Math.max(0, Math.min(100, num(cfg.x, 98.5))) + '%'; board.style.top = Math.max(0, Math.min(100, num(cfg.y, 2.5))) + '%';
                 board.style.transform = 'translate(-100%, 0) scale(' + sc + ')'; board.style.minWidth = Math.max(0, num(cfg.minW, 0)) + 'px';
                 const ts = num(cfg.tSize, 30), ds = num(cfg.dSize, 24);
-                board.innerHTML = arr(cfg.courts).filter(x => x && x.on !== false && (String(x.t || '').trim() || String(x.d || '').trim())).map(x => {
+                board.innerHTML = arr(cfg.courts).filter(x => x && x.on !== false && String(x.d || '').trim()).map(x => {
                     const tb = g(x.tBg, g(cfg.tBg, '#7ac143')), db = g(x.dBg, g(cfg.dBg, '#0d4a26'));
                     return '<div class="ci-c">' + (String(x.t || '').trim() ? '<div class="ci-t" style="background:' + esc(tb) + ';color:' + esc(g(cfg.tColor, '#ffffff')) + ';font-size:' + ts + 'px">' + esc(x.t) + '</div>' : '') +
                         (String(x.d || '').trim() ? '<div class="ci-d" style="background:' + esc(db) + ';color:' + esc(g(cfg.dColor, '#ffffff')) + ';font-size:' + ds + 'px">' + esc(x.d) + '</div>' : '') + '</div>';
