@@ -4429,6 +4429,7 @@
                 if (cfg.sort === true) r.sort((a, b) => (b.mp - a.mp) || (b.sd - a.sd) || (b.gd - a.gd) || (a.i - b.i));
                 return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
             }
+            window.__rsTop = (n) => { try { const m = model(); return m.slice(0, n || 3).map(t => t.n); } catch (e) { return []; } };
             function build() {
                 clearT(); look(); titleEl.textContent = (cfg.hdrLang !== 'en' && (!cfg.title || cfg.title === 'Standings')) ? 'Таблиця рахунків' : g(cfg.title, 'Таблиця рахунків'); titleEl.style.display = titleEl.textContent ? '' : 'none';
                 const showInfo = cfg.showInfo === true; infoEl.style.display = showInfo ? '' : 'none'; infoEl.innerHTML = esc(g(cfg.infoText, 'Info')) + ' <i>i</i>';
@@ -4595,6 +4596,9 @@
                     } else if (kind === 'groups') {
                         const gr = st.groups || {}, pre = g(gr.prefix, 'ГРУПА');
                         arr(gr.g).forEach((grp, i) => { const ts = arr(grp && grp.t).map(x => String(x || '').trim()).filter(Boolean); if (ts.length) out.push({ title: (title ? title + ' · ' : '') + pre + ' ' + String.fromCharCode(65 + i), html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') }); });
+                    } else if (kind === 'winners') {
+                        const top = (window.__rsTop ? window.__rsTop(3) : []).filter(Boolean), medals = ['🥇 1 МІСЦЕ', '🥈 2 МІСЦЕ', '🥉 3 МІСЦЕ'];
+                        if (top.length) out.push({ title: title || 'ПЕРЕМОЖЦІ ТУРНІРУ', html: top.map((n, i) => '<div class="cr-line"><span class="cr-role">' + medals[i] + '</span>' + esc(n) + '</div>').join('') });
                     } else if (kind === 'teams') {
                         const ts = arr((st.teamRanking || {}).teams).filter(t => t && String(t.n || '').trim()).map(t => String(t.n));
                         if (ts.length) out.push({ title: title || 'УЧАСНИКИ ТУРНІРУ', html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') });
