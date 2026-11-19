@@ -4369,6 +4369,7 @@
                 if (cfg.sort !== false) r.sort((a, b) => (b.pts - a.pts) || (b.diff - a.diff) || (b.elo - a.elo) || (a.i - b.i));
                 return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
             }
+            window.__scAll = () => { try { const mr = cfg.maxRows; cfg.maxRows = 40; const m = rowsModel(); cfg.maxRows = mr; return m; } catch (e) { return []; } };
             function countTo(el, to, dur) { const t0 = performance.now(); (function step(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = String(Math.round(to * e)); if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = String(to); })(t0); }
             function build() {
                 clearT(); look(); titleEl.textContent = g(cfg.title, 'ТАБЛИЦЯ РАХУНКІВ'); titleEl.style.display = titleEl.textContent ? '' : 'none';
@@ -4429,7 +4430,7 @@
                 if (cfg.sort === true) r.sort((a, b) => (b.mp - a.mp) || (b.sd - a.sd) || (b.gd - a.gd) || (a.i - b.i));
                 return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
             }
-            window.__rsTop = (n) => { try { const m = model(); return m.slice(0, n || 3).map(t => t.n); } catch (e) { return []; } };
+            window.__rsAll = () => { try { const mr = cfg.maxRows; cfg.maxRows = 40; const m = model(); cfg.maxRows = mr; return m; } catch (e) { return []; } };
             function build() {
                 clearT(); look(); titleEl.textContent = (cfg.hdrLang !== 'en' && (!cfg.title || cfg.title === 'Standings')) ? 'Таблиця рахунків' : g(cfg.title, 'Таблиця рахунків'); titleEl.style.display = titleEl.textContent ? '' : 'none';
                 const showInfo = cfg.showInfo === true; infoEl.style.display = showInfo ? '' : 'none'; infoEl.innerHTML = esc(g(cfg.infoText, 'Info')) + ' <i>i</i>';
@@ -4596,9 +4597,13 @@
                     } else if (kind === 'groups') {
                         const gr = st.groups || {}, pre = g(gr.prefix, 'ГРУПА');
                         arr(gr.g).forEach((grp, i) => { const ts = arr(grp && grp.t).map(x => String(x || '').trim()).filter(Boolean); if (ts.length) out.push({ title: (title ? title + ' · ' : '') + pre + ' ' + String.fromCharCode(65 + i), html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') }); });
-                    } else if (kind === 'winners') {
-                        const top = (window.__rsTop ? window.__rsTop(3) : []).filter(Boolean), medals = ['🥇 1 МІСЦЕ', '🥈 2 МІСЦЕ', '🥉 3 МІСЦЕ'];
-                        if (top.length) out.push({ title: title || 'ПЕРЕМОЖЦІ ТУРНІРУ', html: top.map((n, i) => '<div class="cr-line"><span class="cr-role">' + medals[i] + '</span>' + esc(n) + '</div>').join('') });
+                    } else if (kind === 'winners' || kind === 'table') {
+                        // джерело: «Таблиця рахунків PADO» (якщо заповнена), інакше Standings (Rankedin)
+                        const sc = (window.__scAll ? window.__scAll() : []).map(t => ({ n: t.n, v: t.pts + ' очк' + (t.diff ? ' · ' + (t.diff > 0 ? '+' : '') + t.diff : '') }));
+                        const rs = (window.__rsAll ? window.__rsAll() : []).map(t => ({ n: t.n, v: t.mp + ' очк' }));
+                        const src = (sc.length ? sc : rs), nn = kind === 'table' ? src.length : Math.max(1, Math.min(40, parseInt(sec.n) || 3));
+                        const top = src.slice(0, nn), medals = ['🥇 1 МІСЦЕ', '🥈 2 МІСЦЕ', '🥉 3 МІСЦЕ'];
+                        if (top.length) out.push({ title: title || (kind === 'table' ? 'ТАБЛИЦЯ РАХУНКІВ' : 'ПЕРЕМОЖЦІ ТУРНІРУ'), html: top.map((t, i) => '<div class="cr-line"><span class="cr-role">' + (kind === 'winners' ? (medals[i] || ((i + 1) + ' МІСЦЕ')) : (i + 1) + ' МІСЦЕ' + (i < 3 ? ' ' + ['🥇', '🥈', '🥉'][i] : '')) + '</span>' + esc(t.n) + (kind === 'table' ? ' <span style="opacity:.7; font-size:.7em;">' + esc(t.v) + '</span>' : '') + '</div>').join('') });
                     } else if (kind === 'teams') {
                         const ts = arr((st.teamRanking || {}).teams).filter(t => t && String(t.n || '').trim()).map(t => String(t.n));
                         if (ts.length) out.push({ title: title || 'УЧАСНИКИ ТУРНІРУ', html: ts.map(t => '<div class="cr-line">' + esc(t) + '</div>').join('') });
