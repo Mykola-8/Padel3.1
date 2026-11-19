@@ -730,6 +730,14 @@
         .sc-pts em { font-style: normal; display: inline-block; min-width: calc(64px * var(--sc-ts, 1)); padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,.12); font-weight: 900; }
         .sc-foot { margin-top: 12px; text-align: center; font-size: calc(19px * var(--sc-ts, 1)); font-weight: 700; opacity: .75; letter-spacing: 1px; }
         .sc-empty { text-align: center; padding: 30px; font-size: 30px; opacity: .7; }
+        /* ===== ІНФО ПО КОРТАХ (padel/courtinfo) ===== */
+        .ci-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; }
+        .ci-wrap.on { opacity: 1; visibility: visible; transition: opacity .5s ease; }
+        .ci-board { position: absolute; left: 98.5%; top: 2.5%; transform-origin: 100% 0; transform: translate(-100%, 0); display: flex; flex-direction: column; gap: 10px; align-items: stretch; width: max-content; max-width: 1500px; font-family: 'Montserrat', 'Arial Black', sans-serif; }
+        .ci-c { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.45); }
+        .ci-t, .ci-d { white-space: pre-wrap; padding: .28em .8em; line-height: 1.15; }
+        .ci-t { font-weight: 800; text-align: center; }
+        .ci-d { font-weight: 600; text-align: center; }
         /* ===== STANDINGS у стилі Rankedin (padel/rdstand) ===== */
         .rs-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--rs-text, #2a2f6b); }
         .rs-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
@@ -2263,6 +2271,7 @@
     </div><div class="mb-plate" id="mb-plate"></div></div></div>
     <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
+    <div class="ci-wrap" id="ci-wrap"><div class="ci-board" id="ci-board"></div></div>
     <div class="rs-wrap" id="rs-wrap"><div class="rs-board" id="rs-board"><div class="rs-top"><div class="rs-title" id="rs-title"></div><div class="rs-info" id="rs-info"></div></div><div class="rs-head" id="rs-head"></div><div class="rs-list" id="rs-list"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
@@ -3830,7 +3839,7 @@
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); window.__rsMirror && window.__rsMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); window.__rsMirror && window.__rsMirror(st); } catch (e) {} try { window.__ciMirror && window.__ciMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -3949,6 +3958,18 @@
         })();
 
         /* ===== РЕГЛАМЕНТ ТУРНІРУ (padel/rules) ===== */
+        window.__pvOn = {}; window.__pvFn = {};
+        window.__pvE = (k, c) => window.__pvOn[k] ? Object.assign({}, c || {}, { show: true, court: 'all', autoHide: 0, ts: 1 }) : c;
+        window.__pvReg = (k, fn) => { window.__pvFn[k] = fn; };
+        window.__pvApply = m => {
+            const o = window.__pvOn; if (!m || !Object.keys(o).some(k => o[k])) return m;
+            m = Object.assign({}, m);
+            ['groups', 'teamRanking', 'matchIntro', 'introCard'].forEach(k => { if (o[k]) m[k] = Object.assign({}, m[k] || {}, { show: true }); });
+            if (o.poU || o.poL) { const p = Object.assign({}, m.playoff || {}); if (o.poU) p.upper = Object.assign({}, p.upper || {}, { show: true }); if (o.poL) p.lower = Object.assign({}, p.lower || {}, { show: true }); m.playoff = p; }
+            return m;
+        };
+        if (/[?&]pv=1/.test(location.search)) window.addEventListener('message', e => { const m = e.data; if (!m || m.type !== 'pvAny') return; window.__pvOn[m.key] = !!m.on; try { if (window.__pvFn[m.key]) window.__pvFn[m.key](); else if (window.__rerender) window.__rerender(); } catch (_) {} });
+
         const RL = (function () {
             const wrap = document.getElementById('rl-wrap'); if (!wrap) return {};
             const body = document.getElementById('rl-body'), view = document.getElementById('rl-view'), titleEl = document.getElementById('rl-title');
@@ -3988,7 +4009,7 @@
             }
             function visibleNow() { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); }
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = window.__pvE('rl', c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) {
                     lastTs = ts; running = true; build(); wrap.classList.add('on'); clearTimeout(endT);
@@ -3996,7 +4017,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); }
                 else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.text, cfg.textSize, cfg.width, cfg.speed, cfg.scale]); if (s2 !== sig) build(); sig = s2; }
             }
-            onValue(ref(db, 'padel/rules'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/rules'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('rl', () => apply(gcfg || mcfg));
             window.__rlMirror = (st) => { const v = st && st.rulesCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
@@ -4307,7 +4328,7 @@
             }
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = window.__pvE('mt', c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) {
                     lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
@@ -4315,7 +4336,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
                 else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); wrap.querySelectorAll('.mt-m').forEach(r => { r.classList.remove('pre'); r.classList.add('in'); }); } }
             }
-            onValue(ref(db, 'padel/nextmatches'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/nextmatches'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('mt', () => apply(gcfg || mcfg));
             onValue(ref(db, 'padel/courts/_nextmatches'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
             window.__mtMirror = (st) => { const v = st && st.mtCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
             window.addEventListener('resize', look);
@@ -4368,7 +4389,7 @@
             }
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = window.__pvE('sc', c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) {
                     lastTs = ts; running = true; sig = JSON.stringify(cfg); build(); wrap.classList.add('on'); clearTimeout(endT);
@@ -4376,7 +4397,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
                 else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); } }
             }
-            onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('sc', () => apply(gcfg || mcfg));
             window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
@@ -4442,6 +4463,41 @@
             return { apply };
         })();
 
+        // ===== ІНФО ПО КОРТАХ (padel/courtinfo) =====
+        const CI = (function () {
+            const wrap = document.getElementById('ci-wrap'), board = document.getElementById('ci-board'); if (!wrap || !board) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, ccfg = null, mcfg = null, mj = '', sig = '', endT = null, lastTs = 0, running = false;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
+            function build() {
+                const sc = Math.max(30, Math.min(300, num(cfg.scale, 100))) / 100;
+                board.style.left = Math.max(0, Math.min(100, num(cfg.x, 98.5))) + '%'; board.style.top = Math.max(0, Math.min(100, num(cfg.y, 2.5))) + '%';
+                board.style.transform = 'translate(-100%, 0) scale(' + sc + ')'; board.style.minWidth = Math.max(0, num(cfg.minW, 0)) + 'px';
+                const ts = num(cfg.tSize, 30), ds = num(cfg.dSize, 24);
+                board.innerHTML = arr(cfg.courts).filter(x => x && x.on !== false && (String(x.t || '').trim() || String(x.d || '').trim())).map(x => {
+                    const tb = g(x.tBg, g(cfg.tBg, '#7ac143')), db = g(x.dBg, g(cfg.dBg, '#0d4a26'));
+                    return '<div class="ci-c">' + (String(x.t || '').trim() ? '<div class="ci-t" style="background:' + esc(tb) + ';color:' + esc(g(cfg.tColor, '#ffffff')) + ';font-size:' + ts + 'px">' + esc(x.t) + '</div>' : '') +
+                        (String(x.d || '').trim() ? '<div class="ci-d" style="background:' + esc(db) + ';color:' + esc(g(cfg.dColor, '#ffffff')) + ';font-size:' + ds + 'px">' + esc(x.d) + '</div>' : '') + '</div>';
+                }).join('');
+            }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function apply(c) {
+                cfg = window.__pvE('ci', c) || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); } wrap.classList.add('on'); running = true; lastTs = ts; const ah = num(cfg.autoHide, 0); clearTimeout(endT); if (ah > 0 && ts !== lastTs) endT = setTimeout(() => { wrap.classList.remove('on'); running = false; }, ah * 1000); }
+                else { wrap.classList.remove('on'); running = false; clearTimeout(endT); }
+            }
+            onValue(ref(db, 'padel/courtinfo'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('ci', () => apply(gcfg || ccfg || mcfg));
+            onValue(ref(db, 'padel/courts/_courtinfo'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
+            window.__ciMirror = (st) => { const v = st && st.ciCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            return { apply };
+        })();
+
         const RM = (function () {
             const wrap = document.getElementById('rm-wrap'); if (!wrap) return {};
             const board = document.getElementById('rm-board'), titleEl = document.getElementById('rm-title'), list = document.getElementById('rm-list');
@@ -4502,7 +4558,7 @@
             }
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = window.__pvE('rm', c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) {
                     lastTs = ts; running = true; sig = ''; build(); wrap.classList.add('on'); clearTimeout(endT);
@@ -4510,7 +4566,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
                 else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.textSize, cfg.maxRows, cfg.showArrow, cfg.upper, cfg.anim, cfg.logo, cfg.logoSize]); if (s2 !== sig) { sig = s2; build(); } }
             }
-            onValue(ref(db, 'padel/rkmove'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/rkmove'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('rm', () => apply(gcfg || mcfg));
             window.__rmMirror = (st) => { const v = st && st.rkmCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
@@ -4574,14 +4630,14 @@
             }
             function visibleNow() { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); }
             function apply(c) {
-                cfg = c || {}; look();
+                cfg = window.__pvE('cr', c) || {}; look();
                 const v = visibleNow(), ts = cfg.ts || 0;
                 if (v && (!running || ts !== lastTs)) { lastTs = ts; running = true; wrap.classList.add('on'); startRoll(); }
                 else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); }
                 else if (v && running) { const s2 = JSON.stringify([cfg.title, cfg.sections, cfg.endText]); if (s2 !== sig) { /* зміна вмісту — оновлюємо без перезапуску */ build(); } sig = s2; }
             }
             sig = '';
-            onValue(ref(db, 'padel/credits'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/credits'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('cr', () => apply(gcfg || mcfg));
             window.__crMirror = (st) => { const v = st && st.creditsCfg; const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
             window.__crRelook = look;
@@ -5047,7 +5103,7 @@
         })();
 
         function __courtOnValue(cb) {
-            const wrap = snap => ({ val: () => { const m = __mergeSp(snap.val()); window.__schState = m; return SCH.gate(m); } });
+            const wrap = snap => ({ val: () => { const m = __mergeSp(snap.val()); window.__schState = m; return window.__pvApply(SCH.gate(m)); } });
             window.__rerender = () => { if (__lastSnap) cb(wrap(__lastSnap)); };
             onValue(ref(db, databasePath), (snap) => { __lastSnap = snap; cb(wrap(snap)); });
             onValue(ref(db, 'padel/sponsors'), (snap) => { __globalSp = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
