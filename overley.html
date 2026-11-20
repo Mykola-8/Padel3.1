@@ -782,6 +782,79 @@
         .ci-t, .ci-d { white-space: pre-wrap; padding: .28em .8em; line-height: 1.15; }
         .ci-t { font-weight: 800; text-align: center; }
         .ci-d { font-weight: 600; text-align: center; }
+
+        /* ===== ТАБЛО «НАЗВА ТУРНІРУ» (padel/tname) ===== */
+        .tn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
+        .tn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
+        .tn-board { position: absolute; left: calc(var(--tn-x, 50) * 1%); top: calc(var(--tn-y, 50) * 1%); transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); box-sizing: border-box; width: var(--tn-w, max-content); max-width: 1860px; display: flex; align-items: center; gap: 34px; padding: var(--tn-pad, 36px); border-radius: var(--tn-rad, 28px); background: var(--tn-bg, rgba(11,18,38,.85)); border: var(--tn-bw, 0px) solid var(--tn-bc, #f5c542); box-shadow: var(--tn-sh, none); text-align: var(--tn-al, center); }
+        .tn-board.noanim .tn-ch, .tn-board.noanim .tn-line, .tn-board.noanim .tn-logo.a-pop, .tn-board.noanim .tn-logo.a-spin, .tn-board.noanim .tn-logo.a-fade { animation: none !important; }
+        .tn-board.noanim .tn-ch { opacity: 1 !important; }
+        .tn-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 14px; align-items: var(--tn-ai, center); }
+        .tn-k { font-size: var(--tn-ks, 26px); color: var(--tn-kc, #f5c542); font-weight: 800; letter-spacing: .28em; text-transform: uppercase; line-height: 1.15; }
+        .tn-t { font-size: var(--tn-ts, 84px); color: var(--tn-tc, #fff); font-weight: 900; line-height: 1.05; white-space: pre-wrap; }
+        .tn-s { font-size: var(--tn-ss, 38px); color: var(--tn-sc2, #dbe4ff); font-weight: 600; line-height: 1.25; white-space: pre-wrap; }
+        .tn-line { height: 5px; width: 44%; border-radius: 3px; background: var(--tn-lc, #f5c542); transform-origin: var(--tn-lo, 50%) 50%; }
+        .tn-logo { flex: 0 0 auto; width: var(--tn-ls, 160px); height: var(--tn-ls, 160px); display: flex; align-items: center; justify-content: center; }
+        .tn-logo img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+        .tn-logo.round { border-radius: 50%; overflow: hidden; } .tn-logo.round img { width: 100%; height: 100%; object-fit: cover; }
+        .tn-w { display: inline-block; white-space: nowrap; }
+        .tn-ch { display: inline-block; white-space: pre; opacity: 0; animation-duration: var(--tn-td, .5s); animation-fill-mode: both; animation-delay: calc(var(--tn-d0, .3s) + var(--i, 0) * var(--tn-st, .04s)); }
+        .tn-ta-type .tn-ch { animation-name: tnChType; animation-duration: .01s; }
+        .tn-ta-rise .tn-ch { animation-name: tnChRise; animation-timing-function: cubic-bezier(.2,.85,.25,1); }
+        .tn-ta-blur .tn-ch { animation-name: tnChBlur; }
+        .tn-ta-pop .tn-ch { animation-name: tnChPop; }
+        .tn-ta-flip .tn-ch { animation-name: tnChFlip; }
+        .tn-ta-fade .tn-ch { animation-name: tnChFade; }
+        .tn-ta-words .tn-ch { animation-name: tnChRise; }
+        @keyframes tnChType { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tnChFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tnChRise { from { opacity: 0; transform: translateY(.7em); } to { opacity: 1; transform: none; } }
+        @keyframes tnChBlur { from { opacity: 0; filter: blur(.35em); transform: scale(1.4); } to { opacity: 1; filter: none; transform: none; } }
+        @keyframes tnChPop { 0% { opacity: 0; transform: scale(0); } 70% { opacity: 1; transform: scale(1.35); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes tnChFlip { from { opacity: 0; transform: perspective(500px) rotateX(-90deg); } to { opacity: 1; transform: none; } }
+        .tn-fx-glow .tn-t { animation: tnGlow 1.8s ease-in-out infinite alternate; }
+        @keyframes tnGlow { from { text-shadow: 0 0 6px rgba(255,255,255,.15); } to { text-shadow: 0 0 26px var(--tn-kc, #f5c542), 0 0 54px var(--tn-kc, #f5c542); } }
+        .tn-fx-pulse .tn-t { animation: tnPulse 1.6s ease-in-out infinite; }
+        @keyframes tnPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+        .tn-fx-shimmer .tn-t, .tn-fx-shimmer .tn-t .tn-ch { background-image: linear-gradient(100deg, var(--tn-tc, #fff) 30%, var(--tn-kc, #f5c542) 50%, var(--tn-tc, #fff) 70%); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: tnShim 3s linear infinite; }
+        @keyframes tnShim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+        .tn-line.a { animation: tnLine .8s cubic-bezier(.2,.85,.25,1) both; animation-delay: var(--tn-d0, .3s); }
+        @keyframes tnLine { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        .tn-logo.a-pop { animation: tnLPop .8s cubic-bezier(.2,.85,.25,1) both; animation-delay: .15s; }
+        .tn-logo.a-spin { animation: tnLSpin 1s cubic-bezier(.2,.85,.25,1) both; animation-delay: .15s; }
+        .tn-logo.a-fade { animation: tnChFade 1s ease both; animation-delay: .15s; }
+        .tn-logo.a-pulse { animation: tnLPulse 1.6s ease-in-out infinite; }
+        .tn-logo.a-float { animation: tnLFloat 2.4s ease-in-out infinite; }
+        @keyframes tnLPop { 0% { transform: scale(0); } 70% { transform: scale(1.18); } 100% { transform: scale(1); } }
+        @keyframes tnLSpin { from { transform: rotate(-360deg) scale(0); opacity: 0; } to { transform: none; opacity: 1; } }
+        @keyframes tnLPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes tnLFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .tn-board.in-fade { animation: tnInFade var(--tn-dur, .9s) ease both; }
+        .tn-board.in-slideUp { animation: tnInUp var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-slideDown { animation: tnInDown var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-slideLeft { animation: tnInLeft var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-slideRight { animation: tnInRight var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-zoom { animation: tnInZoom var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-zoomOut { animation: tnInZoomOut var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-flipX { animation: tnInFlipX var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-flipY { animation: tnInFlipY var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        .tn-board.in-bounce { animation: tnInBounce var(--tn-dur, 1.1s) ease-out both; }
+        .tn-board.in-blur { animation: tnInBlur var(--tn-dur, .9s) ease both; }
+        .tn-board.in-wipe { animation: tnInWipe var(--tn-dur, .9s) cubic-bezier(.65,0,.25,1) both; }
+        .tn-board.in-rotate { animation: tnInRot var(--tn-dur, .9s) cubic-bezier(.2,.85,.25,1) both; }
+        @keyframes tnInFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tnInUp { from { opacity: 0; transform: translate(-50%, calc(-50% + 160px)) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInDown { from { opacity: 0; transform: translate(-50%, calc(-50% - 160px)) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInLeft { from { opacity: 0; transform: translate(calc(-50% - 900px), -50%) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInRight { from { opacity: 0; transform: translate(calc(-50% + 900px), -50%) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInZoom { from { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--tn-sc, 1) * .3)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInZoomOut { from { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--tn-sc, 1) * 2.2)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInFlipX { from { opacity: 0; transform: perspective(1400px) translate(-50%, -50%) rotateX(90deg) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: perspective(1400px) translate(-50%, -50%) rotateX(0) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInFlipY { from { opacity: 0; transform: perspective(1400px) translate(-50%, -50%) rotateY(90deg) scale(var(--tn-sc, 1)); } to { opacity: 1; transform: perspective(1400px) translate(-50%, -50%) rotateY(0) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInBounce { 0% { opacity: 0; transform: translate(-50%, calc(-50% - 700px)) scale(var(--tn-sc, 1)); } 55% { opacity: 1; transform: translate(-50%, calc(-50% + 34px)) scale(var(--tn-sc, 1)); } 75% { transform: translate(-50%, calc(-50% - 16px)) scale(var(--tn-sc, 1)); } 90% { transform: translate(-50%, calc(-50% + 6px)) scale(var(--tn-sc, 1)); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); } }
+        @keyframes tnInBlur { from { opacity: 0; filter: blur(34px); } to { opacity: 1; filter: blur(0); } }
+        @keyframes tnInWipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        @keyframes tnInRot { from { opacity: 0; transform: translate(-50%, -50%) rotate(-90deg) scale(calc(var(--tn-sc, 1) * .2)); } to { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(var(--tn-sc, 1)); } }
         /* ===== STANDINGS у стилі Rankedin (padel/rdstand) ===== */
         .rs-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10003; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', sans-serif; color: var(--rs-text, #2a2f6b); }
         .rs-wrap.on { opacity: 1; visibility: visible; transition: opacity .6s ease; }
@@ -2316,6 +2389,7 @@
     <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="ci-wrap" id="ci-wrap"><div class="ci-board" id="ci-board"></div></div>
+    <div class="tn-wrap" id="tn-wrap"><div class="tn-board" id="tn-board"></div></div>
     <div class="rs-wrap" id="rs-wrap"><div class="rs-board" id="rs-board"><div class="rs-top"><div class="rs-title" id="rs-title"></div><div class="rs-info" id="rs-info"></div></div><div class="rs-head" id="rs-head"></div><div class="rs-list" id="rs-list"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
     <div class="cr-wrap" id="cr-wrap"><div class="cr-bg"></div><div class="cr-fade"><div class="cr-scroll"></div></div></div>
@@ -3895,7 +3969,7 @@
             onValue(ref(db, 'padel/spcard'), s => { spc.gcfg = s.val(); apply(spc, src(spc)); }, () => { spc.gcfg = null; });
             // резерв: якщо база не дозволяє padel/crew чи padel/spcard, налаштування лежать у стані корту
             const mirror = (o, v) => { const j = v ? JSON.stringify(v.ts || 0) + JSON.stringify(v.show) + JSON.stringify(v.rows || v.items || '') : ''; if (o.mj === j) return; o.mj = j; o.mcfg = v || null; apply(o, src(o)); };
-            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); window.__rsMirror && window.__rsMirror(st); } catch (e) {} try { window.__ciMirror && window.__ciMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
+            window.__tcMirror = (st) => { if (!st) return; mirror(crew, st.crewCfg); mirror(spc, st.spcardCfg); try { TT.setMirror(st); } catch (e) {} try { window.__crMirror && window.__crMirror(st); } catch (e) {} try { window.__rlMirror && window.__rlMirror(st); } catch (e) {} try { window.__rmMirror && window.__rmMirror(st); } catch (e) {} try { window.__scMirror && window.__scMirror(st); window.__rsMirror && window.__rsMirror(st); } catch (e) {} try { window.__ciMirror && window.__ciMirror(st); } catch (e) {} try { window.__tnMirror && window.__tnMirror(st); } catch (e) {} try { window.__mtMirror && window.__mtMirror(st); } catch (e) {} try { window.__mbMirror && window.__mbMirror(st); } catch (e) {} try { window.__annMirror && window.__annMirror(st); } catch (e) {} try { window.__gtMirror && window.__gtMirror(st); } catch (e) {} try { window.__wxMirror && window.__wxMirror(st); } catch (e) {} try { window.__f3Mirror && window.__f3Mirror(st); } catch (e) {} try { window.__stMirror && window.__stMirror(st); } catch (e) {} try { window.__cbMirror && window.__cbMirror(st); } catch (e) {} };
             onValue(ref(db, 'padel/tournTheme'), s => { try { TT.setGlobal(s.val()); } catch (e) {} }, () => {});
             setInterval(() => { [crew, spc].forEach(o => { const v = visible(o); if (v !== o.shown) setVis(o, v); }); }, 500);
             window.addEventListener('resize', () => { look(crew); look(spc); });
@@ -4554,6 +4628,76 @@
             onValue(ref(db, 'padel/courtinfo'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('ci', () => apply(gcfg || ccfg || mcfg));
             onValue(ref(db, 'padel/courts/_courtinfo'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
             window.__ciMirror = (st) => { const v = st && st.ciCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
+            window.addEventListener('resize', look);
+            return { apply };
+        })();
+
+
+        // ===== ТАБЛО «НАЗВА ТУРНІРУ» (padel/tname): назва + мета/деталі, логотип, анімації =====
+        const TN = (function () {
+            const wrap = document.getElementById('tn-wrap'), board = document.getElementById('tn-board'); if (!wrap || !board) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, ccfg = null, mcfg = null, mj = '', csig = '', endT = null, lastTs = 0, isOn = false, hidden = false;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
+            function vars() {
+                const s = board.style, op = Math.max(0, Math.min(100, num(cfg.bgOp, 85))) / 100, w = num(cfg.width, 1100);
+                const c1 = rgba(g(cfg.bgColor, '#0b1226'), op), c2 = rgba(g(cfg.bg2Color, '#1b2a5a'), op);
+                s.setProperty('--tn-bg', cfg.bgGrad === false ? c1 : 'linear-gradient(135deg, ' + c1 + ', ' + c2 + ')');
+                s.setProperty('--tn-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--tn-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
+                s.setProperty('--tn-sc', Math.max(20, Math.min(300, num(cfg.scale, 100))) / 100); s.setProperty('--tn-w', w > 0 ? w + 'px' : 'max-content');
+                s.setProperty('--tn-pad', num(cfg.pad, 36) + 'px'); s.setProperty('--tn-rad', num(cfg.radius, 28) + 'px');
+                s.setProperty('--tn-bw', num(cfg.bW, 0) + 'px'); s.setProperty('--tn-bc', g(cfg.bColor, '#f5c542'));
+                s.setProperty('--tn-sh', cfg.shadow === false ? 'none' : '0 18px 60px rgba(0,0,0,.45)');
+                const al = g(cfg.align, 'center'); s.setProperty('--tn-al', al); s.setProperty('--tn-ai', al === 'left' ? 'flex-start' : (al === 'right' ? 'flex-end' : 'center')); s.setProperty('--tn-lo', al === 'left' ? '0%' : (al === 'right' ? '100%' : '50%'));
+                s.setProperty('--tn-ks', num(cfg.kSize, 26) + 'px'); s.setProperty('--tn-ts', num(cfg.tSize, 84) + 'px'); s.setProperty('--tn-ss', num(cfg.sSize, 38) + 'px');
+                s.setProperty('--tn-kc', g(cfg.kColor, '#f5c542')); s.setProperty('--tn-tc', g(cfg.tColor, '#ffffff')); s.setProperty('--tn-sc2', g(cfg.sColor, '#dbe4ff')); s.setProperty('--tn-lc', g(cfg.lineColor, '#f5c542'));
+                s.setProperty('--tn-ls', num(cfg.logoSize, 160) + 'px'); s.setProperty('--tn-dur', Math.max(0.1, num(cfg.dur, 0.9)) + 's'); s.setProperty('--tn-st', Math.max(0.004, Math.min(num(cfg.step, 0.04), 1.8 / Math.max(1, parseInt(board.dataset.cnt) || 1))) + 's'); s.setProperty('--tn-d0', Math.max(0, num(cfg.dur, 0.9) * 0.45) + 's');
+                const lp = g(cfg.logoPos, 'left'); s.flexDirection = lp === 'right' ? 'row-reverse' : (lp === 'top' ? 'column' : (lp === 'bottom' ? 'column-reverse' : 'row'));
+                board.className = 'tn-board' + (board.classList.contains('noanim') ? ' noanim' : '') + (board.dataset.in ? ' in-' + board.dataset.in : '') + ' tn-ta-' + g(cfg.textAnim, 'rise') + ' tn-fx-' + g(cfg.fx, 'none');
+            }
+            function split(txt, ctr) {
+                const mode = g(cfg.textAnim, 'rise');
+                const lines = String(txt == null ? '' : txt).split('\n');
+                return lines.map(line => {
+                    if (mode === 'none') return esc(line);
+                    if (mode === 'fade' || mode === 'words') { return line.split(/(\s+)/).map(w => /^\s+$/.test(w) ? w : (w ? '<span class="tn-w"><span class="tn-ch" style="--i:' + (ctr.i++) + '">' + esc(w) + '</span></span>' : '')).join(''); }
+                    return line.split(/(\s+)/).map(w => /^\s+$/.test(w) ? w : (w ? '<span class="tn-w">' + Array.from(w).map(ch => '<span class="tn-ch" style="--i:' + (ctr.i++) + '">' + esc(ch) + '</span>').join('') + '</span>' : '')).join('');
+                }).join('<br>');
+            }
+            function content(noanim) {
+                const ctr = { i: 0 }, lp = g(cfg.logoPos, 'left'), logo = String(cfg.logo || '').trim();
+                const k = String(cfg.kicker || '').trim(), t = String(cfg.title || '').trim(), sb = String(cfg.sub || '').trim();
+                let h = '';
+                if (logo && lp !== 'none') h += '<div class="tn-logo a-' + esc(g(cfg.logoAnim, 'pop')) + (cfg.logoRound ? ' round' : '') + '"><img src="' + esc(logo) + '" alt=""></div>';
+                h += '<div class="tn-txt">' + (k ? '<div class="tn-k">' + split(k, ctr) + '</div>' : '') + (t ? '<div class="tn-t">' + split(t, ctr) + '</div>' : '') +
+                    (cfg.lineOn !== false && t && sb ? '<div class="tn-line a"></div>' : '') + (sb ? '<div class="tn-s">' + split(sb, ctr) + '</div>' : '') + '</div>';
+                board.classList.toggle('noanim', !!noanim); board.dataset.cnt = ctr.i; board.innerHTML = h;
+            }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function playIn() {
+                board.dataset.in = g(cfg.anim, 'slideUp') === 'none' ? '' : g(cfg.anim, 'slideUp');
+                board.classList.remove('noanim'); vars(); void board.offsetWidth;
+            }
+            function apply(c) {
+                cfg = window.__pvE('tn', c) || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v) {
+                    if (ts !== lastTs) { hidden = false; }
+                    if (hidden) { wrap.classList.remove('on'); isOn = false; return; }
+                    const sig = JSON.stringify([cfg.kicker, cfg.title, cfg.sub, cfg.logo, cfg.logoPos, cfg.logoAnim, cfg.logoRound, cfg.lineOn, cfg.textAnim, cfg.fx]);
+                    const replay = !isOn || ts !== lastTs;
+                    if (replay) { board.dataset.in = ''; vars(); board.classList.remove('noanim'); content(false); playIn(); clearTimeout(endT); const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { hidden = true; wrap.classList.remove('on'); isOn = false; }, ah * 1000 + 700); }
+                    else { if (sig !== csig) content(true); vars(); }
+                    csig = sig; lastTs = ts; wrap.classList.add('on'); isOn = true;
+                } else { wrap.classList.remove('on'); isOn = false; hidden = false; clearTimeout(endT); lastTs = cfg.ts || lastTs; }
+            }
+            onValue(ref(db, 'padel/tname'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('tn', () => apply(gcfg || ccfg || mcfg));
+            onValue(ref(db, 'padel/courts/_tname'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
+            window.__tnMirror = (st) => { const v = st && st.tnCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg && !ccfg) apply(mcfg); };
             window.addEventListener('resize', look);
             return { apply };
         })();
