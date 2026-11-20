@@ -4548,7 +4548,7 @@
                 const rsm = cfg.mode === 'results'; board.classList.toggle('res', rsm); board.classList.toggle('dark', rsm && cfg.resTheme === 'dark');
                 if (rsm) { s.setProperty('--rm-w', 'max-content'); s.setProperty('--rr-bg', g(cfg.resTheme, 'light') === 'dark' ? rgba('#0f172a', op) : rgba('#ffffff', op)); }
             }
-            const resCols = () => { const n = arr((cfg.res || {}).courts).filter(x => x && arr(x.teams).length).length, c = parseInt(cfg.cols); if (c >= 1 && c <= 6) return c; return n <= 3 ? Math.max(1, n) : (n === 4 ? 2 : (n <= 6 ? 3 : 4)); };
+            const resCols = () => { const n = arr((cfg.res || {}).courts).filter(x => x && arr(x.teams).length).length, c = parseInt(cfg.cols); if (c >= 1 && c <= 6) return c; return 1; };
             const tkey = t => [norm(t.n1), norm(t.n2)].sort().join('|');
             function roundsCount(r) {
                 if (r.autoRounds === false) return Math.max(1, Math.min(30, parseInt(r.rounds) || 5));
