@@ -401,6 +401,16 @@
         #tv-led:not(.themed) .tl-cell.pt { color: var(--tl-pt, #ffd54a); }
         #tv-led.themed.ptc .tl-cell.pt { color: var(--tl-pt) !important; }
         #tv-led .tl-plate { position: static; z-index: 3; padding: 0.6vh 3vw; border-radius: 99px; font-weight: 900; font-size: min(4.6vh, 3vw); letter-spacing: 0.12em; color: #fff; white-space: nowrap; box-shadow: 0 0 2vh rgba(0,0,0,0.7); animation: tlFade 0.5s ease; }
+        /* ТВ-табло (?tv=1): усі табло — по центру екрана на чорному фоні (перекривають рахунок), плашки трохи більші */
+        html.tvled .rm-wrap.on::before, html.tvled .sc-wrap.on::before, html.tvled .mt-wrap.on::before, html.tvled .ci-wrap.on::before, html.tvled .rs-wrap.on::before, html.tvled .rl-wrap.on::before, html.tvled .tc-wrap.tc-show::before, html.tvled .gr-wrap.visible::before, html.tvled .ic-wrap.visible::before, html.tvled #team-ranking-wrap.visible::before, html.tvled #match-intro-wrap.visible::before, html.tvled .mb-wrap.on::before { content: ''; position: absolute; left: -3000px; top: -3000px; right: -3000px; bottom: -3000px; background: #000; z-index: -1; pointer-events: none; }
+        html.tvled .rm-board, html.tvled .sc-board, html.tvled .mt-board { left: 50% !important; top: 50% !important; zoom: 1.18; }
+        html.tvled .tc-pos { left: 50% !important; top: 50% !important; zoom: 1.25; }
+        html.tvled .rl-box { zoom: 1.1; }
+        html.tvled .ic-panel { zoom: 1.12; }
+        html.tvled .gr-inner { zoom: 1.08; }
+        html.tvled #rk-boards { zoom: 1.5; }
+        html.tvled #match-intro-wrap, html.tvled #team-ranking-wrap { top: 50% !important; left: 50% !important; }
+        html.tvled #match-intro-board { width: 92vw; height: 62vh; }
         html.tvled .scoreboard-wrapper { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
         html.tvled #tv-led { display: flex; flex-direction: column; position: fixed; left: 3vw; top: 3vh; width: 94vw; height: 94vh; z-index: 5; font-family: 'Montserrat', sans-serif; color: #fff; transition: opacity 0.3s; }
         #tv-led.hidden { opacity: 0; }
