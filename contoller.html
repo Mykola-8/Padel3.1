@@ -3789,8 +3789,8 @@
                     ts.forEach((t, i) => {
                         const key = [nmk(t.n1), nmk(t.n2)].sort().join('|'); let o = m[key];
                         if (!o) { o = m[key] = { n: [String(t.n1 || '').trim(), String(t.n2 || '').trim()].filter(Boolean).join(' / '), elo: 0, w: 0, d: 0, l: 0, diff: 0, pts: 0 }; order.push(key); }
-                        const s = num0(t.s), opp = ts.length === 2 ? ts[1 - i] : null; o.elo += num0(t.d); o.pts += s;
-                        if (opp && opp.s !== '' && opp.s !== undefined && t.s !== '' && t.s !== undefined) { const os = num0(opp.s); o.diff += s - os; if (s > os) o.w++; else if (s < os) o.l++; else o.d++; }
+                        const s = num0(t.s), opp = ts.length === 2 ? ts[1 - i] : null; o.elo += num0(t.d);
+                        if (opp && opp.s !== '' && opp.s !== undefined && t.s !== '' && t.s !== undefined) { const os = num0(opp.s); o.diff += s - os; if (s > os) { o.w++; o.pts += 2; } else if (s < os) o.l++; else { o.d++; o.pts += 1; } }   // О: перемога +2, нічия +1, поразка 0; ±: різниця геймів
                     });
                 }));
                 return order.map(k => m[k]);
