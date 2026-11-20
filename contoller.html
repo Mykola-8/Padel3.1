@@ -5199,6 +5199,47 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                 const hint = document.createElement('div'); hint.style.cssText = 'font-size:10px; color:#9bd; margin:0 0 4px;'; hint.textContent = sub; det.insertBefore(hint, sm ? sm.nextSibling : det.firstChild);
                 card.querySelector('#' + slot).appendChild(det);
             };
+            // ===== ПРЯМЕ ПІДКЛЮЧЕННЯ ДО PADO API (через Apps Script; ключ лише в Apps Script) =====
+            {
+                const box = document.createElement('details'); box.style.cssText = 'background:#10241a; border:2px solid #4ade80; border-radius:10px; padding:8px;'; box.open = true;
+                const inpS = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:11px;';
+                box.innerHTML = '<summary style="font-size:13px; font-weight:800; color:#4ade80; cursor:pointer;">🔌 Пряме підключення до PADO (API)</summary>' +
+                    '<div style="font-size:10px; color:#bdb; margin:6px 0;">Ключ API НЕ вводиться в пульт. Відкрийте одноразове посилання з листа (воно покаже ключ лише раз), скопіюйте ключ → Apps Script → ⚙ Налаштування проєкту → Властивості скрипта → додайте <b>PADO_API_KEY</b> = ключ (за потреби <b>PADO_COMMUNITY</b> = 35). Потім оновіть розгортання скрипта (код AppsScript.gs з цього пакета).</div>' +
+                    '<input id="pdapi-url" placeholder="Адреса веб-додатка Apps Script (…/exec)" style="' + inpS + '">' +
+                    '<div style="display:flex; gap:6px; margin-top:6px;"><button type="button" class="btn btn-green" id="pdapi-ev" style="flex:1; padding:8px; font-size:12px;">🔎 Знайти турніри (events)</button></div>' +
+                    '<select id="pdapi-sel" style="' + inpS + ' margin-top:6px; display:none;"></select>' +
+                    '<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"><button type="button" class="btn btn-gray pdapi-q" data-p="standings" style="flex:1; padding:6px; font-size:11px;">standings</button><button type="button" class="btn btn-gray pdapi-q" data-p="matches" style="flex:1; padding:6px; font-size:11px;">matches</button><button type="button" class="btn btn-gray pdapi-q" data-p="group-standings" style="flex:1; padding:6px; font-size:11px;">group-standings</button></div>' +
+                    '<div id="pdapi-st" style="font-size:11px; margin-top:6px;"></div>' +
+                    '<textarea id="pdapi-out" rows="8" readonly placeholder="Тут з’явиться відповідь API (для налаштування полів)" style="' + inpS + ' margin-top:6px; font-family:monospace; font-size:10px;"></textarea>' +
+                    '<button type="button" class="btn btn-gray" id="pdapi-copy" style="margin-top:4px; padding:6px; font-size:11px;">📋 Копіювати відповідь</button>';
+                card.querySelector('#pado-s1').before(box);
+                const $a = id => box.querySelector('#' + id);
+                try { $a('pdapi-url').value = localStorage.getItem('padoApiUrl') || ''; } catch (e) {}
+                $a('pdapi-url').addEventListener('change', () => { try { localStorage.setItem('padoApiUrl', $a('pdapi-url').value.trim()); } catch (e) {} });
+                const say = (m, ok) => { const e = $a('pdapi-st'); e.style.color = ok === false ? '#f66' : (ok ? '#7c7' : '#9bd'); e.innerText = m; };
+                async function q(path, extra) {
+                    const base = $a('pdapi-url').value.trim(); if (!base) { say('⚠️ Вкажіть адресу веб-додатка Apps Script', false); return null; }
+                    say('⏳ Запит ' + path + '…');
+                    try {
+                        const u = base + (base.indexOf('?') >= 0 ? '&' : '?') + 'action=pado&path=' + encodeURIComponent(path) + (extra || '');
+                        const r = await fetch(u), j = await r.json(); $a('pdapi-out').value = JSON.stringify(j, null, 1);
+                        if (!j.ok) { say('⚠️ ' + (j.error || ('HTTP ' + j.status)), false); return null; }
+                        say('✅ ' + path + ' — HTTP ' + j.status, true); return j.data;
+                    } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка мережі') + ' (перевірте адресу й доступ «Усі»)', false); return null; }
+                }
+                const listOf = d => Array.isArray(d) ? d : (d && typeof d === 'object' ? (Object.values(d).find(Array.isArray) || []) : []);
+                const pick = (o, ks) => { for (const k of ks) if (o && o[k] !== undefined && o[k] !== null) return o[k]; return ''; };
+                $a('pdapi-ev').onclick = async () => {
+                    const d = await q('events'); if (!d) return; const l = listOf(d), sel = $a('pdapi-sel');
+                    const rows = l.map(o => ({ id: pick(o, ['id', 'eventId', 'event_id']), n: pick(o, ['name', 'title', 'eventName']), s: pick(o, ['status', 'state']) })).filter(x => x.id !== '');
+                    rows.sort((a, b) => (String(b.s).toUpperCase() === 'IN_PROGRESS') - (String(a.s).toUpperCase() === 'IN_PROGRESS'));
+                    sel.innerHTML = rows.map(x => '<option value="' + x.id + '">' + (String(x.s).toUpperCase() === 'IN_PROGRESS' ? '🟢 ' : '') + x.n + ' [' + x.s + '] #' + x.id + '</option>').join(''); sel.style.display = rows.length ? '' : 'none';
+                    if (rows.length) { say('✅ Знайдено турнірів: ' + rows.length + (rows[0].s && String(rows[0].s).toUpperCase() === 'IN_PROGRESS' ? ' (живий — зверху)' : ''), true); try { localStorage.setItem('padoEventId', String(rows[0].id)); } catch (e) {} }
+                };
+                $a('pdapi-sel').addEventListener('change', () => { try { localStorage.setItem('padoEventId', $a('pdapi-sel').value); } catch (e) {} });
+                box.querySelectorAll('.pdapi-q').forEach(b => b.onclick = () => { const id = $a('pdapi-sel').value || (function () { try { return localStorage.getItem('padoEventId') || ''; } catch (e) { return ''; } })(); if (!id) { say('⚠️ Спершу знайдіть турніри й виберіть потрібний', false); return; } q(b.getAttribute('data-p'), '&eventId=' + encodeURIComponent(id)); });
+                $a('pdapi-copy').onclick = () => { const t = $a('pdapi-out'); t.select(); try { document.execCommand('copy'); say('📋 Скопійовано', true); } catch (e) {} };
+            }
             mv('rkm-imp-go', 'pado-s1', '① Результати → Результати матчів', 'Призначення: табло «Результати матчів» (кнопки показу — в блоці «📊 Рух у рейтингу»).');
             mv('scb-imp-go', 'pado-s2', '② Таблиця → Таблиця рахунків', 'Призначення: табло «Таблиця рахунків» (кнопки показу — в блоці «📋 Таблиця рахунків»).');
             card.querySelectorAll('details').forEach(x => x.removeAttribute('open'));
