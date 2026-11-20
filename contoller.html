@@ -259,6 +259,13 @@
             </div>
             <div id="admin-camera-status" style="font-size:10px; color:#a78bfa; text-align:center; min-height:14px;"></div>
         </div>
+        <div id="match-actions" style="display:flex; flex-direction:column; gap:8px; border:2px solid #b91c1c; border-radius:8px; padding:10px; background:#1a0f0f;">
+                <div style="font-size:12px; font-weight:800; color:#fca5a5; text-transform:uppercase;">⚠️ Матч та корт</div>
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
+                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
+                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
+                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
+            </div>
 
     </div>
 
@@ -1109,13 +1116,6 @@
 
 
 
-            <div id="match-actions" style="display:flex; flex-direction:column; gap:8px; border:2px solid #b91c1c; border-radius:8px; padding:10px; background:#1a0f0f;">
-                <div style="font-size:12px; font-weight:800; color:#fca5a5; text-transform:uppercase;">⚠️ Матч та корт</div>
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatchScore()">↺ Скинути матч (рахунок і статистика в нуль, табло сховати)</button>
-                <button class="btn btn-orange" style="margin-top:5px; padding:12px; font-weight:800;" onclick="resetMatch()">🔄 Повне скидання поточного корту</button>
-                <button class="btn btn-red" id="admin-unlock-btn" style="display:none; padding:12px; font-weight:800;" onclick="adminUnlockCourt()">🔓 Розблокувати корт (Admin)</button>
-                <button class="btn btn-red" style="padding:16px; font-size:14px; font-weight:800;" onclick="finishMatchPro()">🏁 КІНЕЦЬ МАТЧУ (ФІНАЛЬНА СТАТИСТИКА)</button>
-            </div>
 
         </div>
     </div>
@@ -3151,7 +3151,7 @@
             const inner = Array.from(modal.children).find(el => !el.classList.contains('modal-header')); if (!inner) return;
             { const sp = document.getElementById('admin-tournament-panel'); if (sp && !isAdmin) sp.remove(); }
             const cards = Array.from(inner.children).filter(el => el.classList && el.classList.contains('card'));
-            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '🎙 ШІ-коментатор'];
+            const titles = ['🎨 Тема кольорів табла', '👥 Назви команд', '🎯 Режими гри (Американо / Мексикано / Pro-Set)', '⚖️ Розіграш при 40:40', '📊 Статистика (ручна) в OBS', '🔳 QR-код', '🏷️ Лого спонсора (зліва від табло)', '📋 Інформаційна панель під табло', '🖼️ Логотипи спонсорів (карусель)', '📰 Бігучий рядок', '📢 Рекламний рядок', '📐 Масштаб і позиція табла', '📺 Повноекранна медіа-заставка', '📺 ТВ-табло (tv=1)', '💾 Збереження налаштувань'];
             let saved = {}; try { saved = JSON.parse(localStorage.getItem('smcolState') || '{}') || {}; } catch (e) {}
             const heads = [];
             const apply = (i, open) => { cards[i].style.display = open ? '' : 'none'; heads[i].classList.toggle('open', open); saved[i] = open; };
