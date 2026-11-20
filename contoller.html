@@ -5310,9 +5310,11 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                 groups: Object.assign({ name: '👥 Групи (усі корти)' }, ALL('gr', s => s.groups && s.groups.show)),
                 poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
+                weather: Object.assign({ name: '⛅ Погода (усі корти)' }, EXP('wxb-on', 'wxb-off')),
+                sponsorLogos: (() => { const o = ALL('sp', s => s.showSponsorLogos); const f = o.set; o.set = function(w) { try { if (w && S().sponsorLogoDisplayMode === 'all' && window.updateSponsorLogoMode) window.updateSponsorLogoMode('carousel'); } catch (e) {} f.call(o, w); }; o.name = '🤝 Логотипи спонсорів — карусель (усі корти)'; return o; })(),
                 credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
-            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'credits'];
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'weather', 'sponsorLogos', 'credits'];
             const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm' || id === 'sc') ? 20 : (id === 'mt' ? 10 : (id === 'credits' ? 60 : 7)) })) });
             const norm = v => {
                 const base = DEFD(); if (!v || typeof v !== 'object') return base;
