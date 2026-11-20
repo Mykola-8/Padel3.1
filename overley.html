@@ -4394,7 +4394,7 @@
                 return r.slice(0, Math.max(1, Math.min(40, Math.round(num(cfg.maxRows, 12)))));
             }
             window.__scAll = () => { try { const mr = cfg.maxRows; cfg.maxRows = 40; const m = rowsModel(); cfg.maxRows = mr; return m; } catch (e) { return []; } };
-            function countTo(el, to, dur) { const t0 = performance.now(); (function step(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = String(Math.round(to * e)); if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = String(to); })(t0); }
+            function countTo(el, to, dur, fmt) { const f = fmt || String, t0 = performance.now(); (function step(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = f(Math.round(to * e)); if (p < 1 && el.isConnected) requestAnimationFrame(step); else el.textContent = f(to); })(t0); }
             function build() {
                 clearT(); look(); titleEl.textContent = g(cfg.title, 'ТАБЛИЦЯ РАХУНКІВ'); titleEl.style.display = titleEl.textContent ? '' : 'none';
                 const m = rowsModel(), sE = cfg.showElo !== false, sW = cfg.showWdl !== false, sD = cfg.showDiff !== false;
@@ -4406,11 +4406,11 @@
                 list.innerHTML = m.map((t, p) => {
                     const nn = t.n.split(/\s+\/\s+/).slice(0, 2).map(x => '<b>' + esc(x) + '</b>').join('');
                     return '<div class="sc-row ' + (anim === 'none' ? 'in' : 'pre ' + anim) + '" style="grid-template-columns:' + cols + '"><span class="sc-pos"><span class="' + (cfg.medals !== false && p < 3 ? 'm' + (p + 1) : '') + '">' + (p + 1) + '</span></span><span class="sc-name">' + nn + '</span>' +
-                        (sE ? '<span class="sc-elo ' + (t.elo > 0 ? 'pos' : (t.elo < 0 ? 'neg' : '')) + '">' + sgn(t.elo) + '</span>' : '') + (sW ? '<span class="sc-wdl"><i class="w">' + t.w + '</i><u>-</u><i class="d">' + t.d + '</i><u>-</u><i class="l">' + t.l + '</i></span>' : '') +
-                        (sD ? '<span class="sc-diff">' + sgn(t.diff) + '</span>' : '') + '<span class="sc-pts"><em>' + (anim === 'none' ? t.pts : 0) + '</em></span></div>';
+                        (sE ? '<span class="sc-elo ' + (t.elo > 0 ? 'pos' : (t.elo < 0 ? 'neg' : '')) + '">' + sgn(anim === 'none' ? t.elo : 0) + '</span>' : '') + (sW ? '<span class="sc-wdl"><i class="w">' + (anim === 'none' ? t.w : 0) + '</i><u>-</u><i class="d">' + (anim === 'none' ? t.d : 0) + '</i><u>-</u><i class="l">' + (anim === 'none' ? t.l : 0) + '</i></span>' : '') +
+                        (sD ? '<span class="sc-diff">' + sgn(anim === 'none' ? t.diff : 0) + '</span>' : '') + '<span class="sc-pts"><em>' + (anim === 'none' ? t.pts : 0) + '</em></span></div>';
                 }).join('');
                 foot.style.display = cfg.showLegend === false ? 'none' : ''; foot.textContent = '± Різниця · О Очки' + (sE ? ' · ELO' : '') + (sW ? ' · В-Н-П: перемоги / нічиї / поразки' : '');
-                if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); const em = row.querySelector('.sc-pts em'); if (em) countTo(em, m[j].pts, dur); }, 250 + j * st)));
+                if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); const em = row.querySelector('.sc-pts em'); if (em) countTo(em, m[j].pts, dur); const e1 = row.querySelector('.sc-elo'); if (e1) countTo(e1, m[j].elo, dur, sgn); const e2 = row.querySelector('.sc-diff'); if (e2) countTo(e2, m[j].diff, dur, sgn); [['w', 'w'], ['d', 'd'], ['l', 'l']].forEach(k => { const x = row.querySelector('.sc-wdl i.' + k[0]); if (x) countTo(x, m[j][k[1]], dur); }); }, 250 + j * st)));
             }
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function apply(c) {
@@ -4567,13 +4567,19 @@
                 h += '</div><div class="rr-grid" style="grid-template-columns:repeat(' + resCols() + ', auto);">' + courts.map(c => '<div class="rr-court pre"><div class="rr-cn">' + esc(c.name || '') + '</div><div class="rr-card">' + arr(c.teams).filter(t => t).map(t => {
                     const dv = (t.d === '' || t.d === null || t.d === undefined) ? null : (parseInt(t.d) || 0), nm2 = [String(t.n1 || '').trim(), String(t.n2 || '').trim()].filter(Boolean).join(' / ');
                     return '<div class="rr-t"><div class="rr-n' + (up ? ' up' : '') + (t.hl ? ' hl' : '') + '">' + esc(nm2) + '</div>' +
-                        (dv === null ? '' : '<div class="rr-d ' + (dv > 0 ? 'pos' : (dv < 0 ? 'neg' : '')) + '">' + sg(dv) + '</div>') + '<div class="rr-s">' + esc(t.s === undefined || t.s === null ? '' : t.s) + '</div></div>';
+                        (dv === null ? '' : '<div class="rr-d ' + (dv > 0 ? 'pos' : (dv < 0 ? 'neg' : '')) + '" data-v="' + dv + '">' + sg(dv) + '</div>') + '<div class="rr-s">' + esc(t.s === undefined || t.s === null ? '' : t.s) + '</div></div>';
                 }).join('') + '</div></div>').join('') + '</div>';
                 box.innerHTML = h;
                 // підгонка під екран (прямокутне табло може бути широким)
                 const sc = Math.max(30, Math.min(200, num(cfg.scale, 100))) / 100; board.style.setProperty('--rr-fit', '1');
                 const w = board.offsetWidth * sc, hh = board.offsetHeight * sc; board.style.setProperty('--rr-fit', String(Math.min(1, 1840 / Math.max(1, w), 1030 / Math.max(1, hh))));
-                Array.from(box.querySelectorAll('.rr-court')).forEach((el, j) => timers.push(setTimeout(() => el.classList.remove('pre'), 150 + j * 200)));
+                const fm = v => (v > 0 ? '+' + v : (v < 0 ? '−' + Math.abs(v) : '0')), dur = Math.max(400, num(cfg.dur, 1.6) * 700);
+                Array.from(box.querySelectorAll('.rr-court')).forEach((el, j) => {
+                    const els = Array.from(el.querySelectorAll('.rr-d, .rr-s')).filter(x => x.classList.contains('rr-d') || String(x.textContent).trim() !== '');
+                    els.forEach(x => { x.dataset.to = x.classList.contains('rr-d') ? String(x.dataset.v) : String(x.textContent); x.textContent = x.classList.contains('rr-d') ? '0' : '0'; });
+                    timers.push(setTimeout(() => { el.classList.remove('pre'); }, 150 + j * 350));
+                    timers.push(setTimeout(() => els.forEach(x => { const to = parseInt(x.dataset.to) || 0; countTo(x, 0, to, dur, x.classList.contains('rr-d') ? fm : String); }), 450 + j * 350));
+                });
             }
             const rh = () => Math.round(74 * Math.max(40, Math.min(250, num(cfg.textSize, 100))) / 100);
             function order(a, sort) { const r = a.slice(); if (sort) r.sort((x, y) => (y.r - x.r) || (x.i - y.i)); return r; }
