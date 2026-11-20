@@ -3545,6 +3545,54 @@
             try { await w.setParameters({ tessedit_char_whitelist: '0123456789+- ', tessedit_pageseg_mode: '6' }); const r = await w.recognize(cv); return (r && r.data && r.data.text) || ''; }
             finally { try { await w.terminate(); } catch (e) {} }
         }
+
+        // Скрін «Таблиця» PADO: ріжемо на рядки-команди (за проміжками між ними), імена й цифри розпізнаємо окремо — точніше, ніж весь скрін одразу
+        async function scSegText(file, onProg) {
+            const T = await ocrLoad(); window.__scSegWarn = 0;
+            const url = URL.createObjectURL(file);
+            const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Не вдалося відкрити зображення')); i.src = url; });
+            const sc = Math.max(1, Math.min(3, 1600 / img.width)), W = Math.round(img.width * sc), H = Math.round(img.height * sc);
+            const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d', { willReadFrequently: true });
+            cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url);
+            const px = cx.getImageData(0, 0, W, H).data, dark = (x, y) => { const i = (y * W + x) * 4; return Math.min(px[i], px[i + 1], px[i + 2]) < 150; };
+            // 1) рядки тексту в зоні імен (ліва частина)
+            const x0 = Math.round(W * 0.04), x1 = Math.round(W * 0.42), ink = new Array(H).fill(0);
+            for (let y = 0; y < H; y++) { let c = 0; for (let x = x0; x < x1; x += 2) if (dark(x, y)) c++; ink[y] = c; }
+            let runs = [], st = -1; for (let y = 0; y <= H; y++) { const on = y < H && ink[y] > 1; if (on && st < 0) st = y; if (!on && st >= 0) { runs.push([st, y - 1]); st = -1; } }
+            const mh = Math.round(4 * sc); const lines = []; runs.forEach(r => { const l = lines[lines.length - 1]; if (l && r[0] - l[1] <= mh) l[1] = r[1]; else lines.push([r[0], r[1]]); });
+            const lines2 = lines.filter(l => l[1] - l[0] > 8 * sc); if (lines2.length < 2) return '';
+            // 2) групуємо рядки в команди (великі проміжки — між командами)
+            const gaps = []; for (let i = 1; i < lines2.length; i++) gaps.push(lines2[i][0] - lines2[i - 1][1]);
+            const gmax = Math.max.apply(null, gaps), gmin = Math.min.apply(null, gaps); let groups = [];
+            if (gaps.length >= 2 && gmax > gmin * 2.2) { const th = (gmax + gmin) / 2; let cur = [lines2[0]]; for (let i = 1; i < lines2.length; i++) { if (gaps[i - 1] > th) { groups.push(cur); cur = []; } cur.push(lines2[i]); } groups.push(cur); }
+            else for (let i = 0; i < lines2.length; i += 2) groups.push(lines2.slice(i, i + 2));
+            groups = groups.filter(g => g.length >= 1);
+            // 3) межа між іменами та цифрами — найширша порожня вертикаль
+            const colInk = new Array(W).fill(0); groups.forEach(g => { const ya = g[0][0], yb = g[g.length - 1][1]; for (let x = 0; x < W; x++) for (let y = ya; y <= yb; y += 2) if (dark(x, y)) { colInk[x]++; break; } });
+            let bx = Math.round(W * 0.45), best = 0, rs = -1; for (let x = Math.round(W * 0.3); x <= Math.round(W * 0.66); x++) { if (colInk[x] === 0) { if (rs < 0) rs = x; const len = x - rs + 1; if (len > best) { best = len; bx = Math.round(rs + len / 2); } } else rs = -1; }
+            const bin = (sx, sy, sw, sh) => { const c = document.createElement('canvas'), pad = 24; c.width = sw + pad * 2; c.height = sh + pad * 2; const k = c.getContext('2d', { willReadFrequently: true }); k.fillStyle = '#fff'; k.fillRect(0, 0, c.width, c.height); k.drawImage(cv, sx, sy, sw, sh, pad, pad, sw, sh);
+                const id = k.getImageData(0, 0, c.width, c.height), p = id.data; for (let i = 0; i < p.length; i += 4) { const v = Math.min(p[i], p[i + 1], p[i + 2]) < 175 ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; } k.putImageData(id, 0, 0); return c; };
+            const wN = await T.createWorker('ukr+eng', 1), wD = await T.createWorker('eng', 1);
+            const out = [], sums = [];
+            try {
+                await wN.setParameters({ tessedit_pageseg_mode: '6' }); await wD.setParameters({ tessedit_char_whitelist: '0123456789+- ', tessedit_pageseg_mode: '7' });
+                for (let gi = 0; gi < groups.length; gi++) {
+                    const g = groups[gi], ya = Math.max(0, g[0][0] - Math.round(8 * sc)), yb = Math.min(H - 1, g[g.length - 1][1] + Math.round(8 * sc));
+                    const nameTxt = ((await wN.recognize(bin(x0 - Math.round(W * 0.01), ya, bx - x0 + Math.round(W * 0.01) - 4, yb - ya))).data.text) || '';
+                    const numTxt = ((await wD.recognize(bin(bx, ya, W - bx, yb - ya))).data.text) || '';
+                    const names = nameTxt.split(/\r?\n/).map(x => x.replace(/[^A-Za-zА-Яа-яІіЇїЄєҐґ'’\-. ]/g, '').replace(/\s+/g, ' ').trim()).filter(x => (x.match(/[A-Za-zА-Яа-яІіЇїЄєҐґ]/g) || []).length >= 2).slice(0, 2);
+                    const nr = numRows(numTxt)[0] || numRows(numTxt.replace(/\s*\n\s*/g, ' '))[0];
+                    out.push((names.length ? names.join('\n') : 'Команда ' + (gi + 1)) + '\n' + (nr ? ((nr.elo > 0 ? '+' : '') + nr.elo + ' ' + nr.w + ' - ' + nr.d + ' - ' + nr.l + ' ' + (nr.diff > 0 ? '+' : '') + nr.diff + ' ' + nr.pts) : '0 0 - 0 - 0 0 0'));
+                    if (nr) sums.push(nr.w + nr.d + nr.l); else window.__scSegWarn++;
+                    if (names.length < 2) window.__scSegWarn++;
+                    if (onProg) onProg('recognizing text', (gi + 1) / groups.length);
+                }
+            } finally { try { await wN.terminate(); await wD.terminate(); } catch (e) {} }
+            // перевірка: у всіх команд однакова кількість зіграних матчів
+            if (sums.length >= 3) { const cnt = {}; sums.forEach(v => cnt[v] = (cnt[v] || 0) + 1); const mode = +Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0]; sums.forEach(v => { if (v !== mode) window.__scSegWarn++; }); }
+            return out.join('\n');
+        }
+        window.__scSegText = scSegText;
         function ocrBind(box, ta, fileIn, stEl, done, norm, ocrFn) {
             const run = async (file) => {
                 if (!file) return; stEl.style.color = '#9bd'; stEl.innerText = '⏳ Розпізнаю фото…';
@@ -4168,7 +4216,7 @@
             window.__scSetRows = (rowsIn) => { d.rows = rowsIn.map(x => Object.assign({}, x)); d.namesFromRkm = false; d.sort = true; rows(true); refresh(true); save(true); };
             $('scb-names-rkm').addEventListener('change', e => { d.namesFromRkm = e.target.checked; if (d.namesFromRkm) syncNames(); rows(true); save(true); });
             setInterval(() => { try { syncNames(); } catch (e) {} }, 2000);
-            ocrBind($('scb-imp-go').parentNode, $('scb-imp'), $('scb-imp-file'), $('scb-imp-ocr'), () => $('scb-imp-go').click(), txt => ($('scb-imp-num').checked ? numNorm(txt) : ocrNorm(txt)), (f, p) => ($('scb-imp-num').checked ? ocrNumeric(f, p) : ocrImage(f, p)));
+            ocrBind($('scb-imp-go').parentNode, $('scb-imp'), $('scb-imp-file'), $('scb-imp-ocr'), () => $('scb-imp-go').click(), txt => ($('scb-imp-num').checked ? numNorm(txt) : ocrNorm(txt)), (f, p) => ($('scb-imp-num').checked ? ocrNumeric(f, p) : scSegText(f, p).then(t => (t && numRows(t).length >= 2) ? t : ocrImage(f, p))));
             function refresh(force) {
                 F.forEach(f => { const el = card.querySelector('#scb-f-' + f.k); if (!el || document.activeElement === el) return; const v = d[f.k]; if (f.t === 'chk') el.checked = v !== false; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('#scb-f-' + f.k + '-v'); if (lv) lv.innerText = v + (f.u || ''); });
                 { const nc = $('scb-names-rkm'); if (nc && document.activeElement !== nc) nc.checked = d.namesFromRkm !== false; }
@@ -5259,7 +5307,11 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                         const okRs = await window.__rsFromImage(file, m => say(m)); say(okRs ? '✅ Standings записано в таблицю Rankedin (блок нижче). Перевірте рядки.' : '⚠️ Standings не розпізнано', okRs ? '#7c7' : '#f66'); return;
                     }
                     const nrows = numRows(txt).length, deltas = (txt.match(/^[+\-]\d+$/gm) || []).length;
-                    if (nrows >= 2) kind = 'table';
+                    let seg = '';
+                    if (nrows >= 2 || !/(^|\n)(court|корт)\s*\d+/i.test(txt)) { try { say('⏳ Розпізнаю таблицю по рядках…'); seg = await scSegText(file, prog); } catch (e) { console.warn(e); seg = ''; } }
+                    const segN = seg ? numRows(seg).length : 0;
+                    if (segN >= 3 && segN >= nrows) { txt = seg; kind = 'table'; }
+                    else if (nrows >= 2) kind = 'table';
                     else if (/(^|\n)(court|корт)\s*\d+/i.test(txt) || (deltas >= 2 && hasLetters(txt))) kind = 'results';
                     if (!kind || (kind === 'table' && !hasLetters(txt))) {
                         const t2 = await ocrNumeric(file, prog);   // точніше для скріна лише з цифрами
@@ -5269,7 +5321,7 @@ rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y'
                         const ta = document.getElementById('scb-imp'), nc = document.getElementById('scb-imp-num');
                         const named = hasLetters(txt) && /[A-Za-zА-Яа-яІіЇїЄєҐґ]{3,}/.test(txt.replace(/[+\-\d\s]/g, ''));
                         if (nc) nc.checked = !named; ta.value = named ? txt : numNorm(txt);
-                        say('✅ Це «Таблиця» (' + numRows(txt).length + ' рядків) → Таблиця рахунків. Підтвердіть запис.', '#7c7'); document.getElementById('scb-imp-go').click();
+                        say('✅ Це «Таблиця» (' + numRows(txt).length + ' рядків) → Таблиця рахунків. Підтвердіть запис.' + (window.__scSegWarn ? ' ⚠️ Сумнівних значень: ' + window.__scSegWarn + ' — перевірте імена й цифри в списку.' : ''), '#7c7'); document.getElementById('scb-imp-go').click();
                     } else if (kind === 'results') {
                         say('✅ Це «Результати раунду» → табло «Результати матчів»… розпізнаю цифри.', '#7c7');
                         if (window.__rmResFromImage) { const okR = await window.__rmResFromImage(file, (m, c) => say(m, c)); if (!okR) say('⚠️ Результати розпізнано частково — перевірте в блоці «Результати матчів».', '#fa0'); }
