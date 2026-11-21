@@ -1122,7 +1122,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, get, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue, remove, update, goOffline, goOnline } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -1468,10 +1468,10 @@
         function initCourtConnection() {
             const urlParams = new URLSearchParams(window.location.search); courtId = urlParams.get('court') || "1";
             document.getElementById('court-selector').value = courtId; try { updateModalCourtBadge(); } catch (e) {} databasePath = `padel/courts/court_${courtId}`;
-            matchRef = ref(db, databasePath); stateHistory = [];
+            matchRef = ref(db, databasePath); stateHistory = []; try { window.__csConn && window.__csConn(); } catch (e) {}
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; try { window.__wlPub && window.__wlPub(); } catch (e) {} mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; try { window.__wlPub && window.__wlPub(); } catch (e) {} mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__csOnState && window.__csOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
@@ -4715,6 +4715,70 @@ function __clearTournamentName() {
             onValue(ref(db, 'padel/courts/_tname'), snap => { cv = snap.val(); if (cv && !gv) { loaded = true; pick(); } });   // запасний шлях, якщо база не приймає padel/tname
             window.__tnReset = () => { gv = null; cv = null; prim = false; d = JSON.parse(JSON.stringify(DEF)); dirty = 0; refresh(); };
             setTimeout(() => { loaded = true; }, 3000);
+        })();
+
+
+        // ===== СИНХРОНІЗАЦІЯ НАЛАШТУВАНЬ І ТАБЛ НА ВСІ КОРТИ + перезапуск зʼєднання з базою =====
+        (function csInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const LS = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
+            const LSset = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+            const POS = ['scale', 'posX', 'posY'];   // положення й масштаб табла рахунку — окремо для кожного корту (за бажанням синхронізуються)
+            let auto = LS('csAuto', '1') !== '0', withPos = LS('csPos', '0') === '1', last = {}, base = false, pushT = null, busy = false, conn = 0;
+            const keys = () => { let k = []; try { k = settingKeys(); } catch (e) {} const skip = new Set(TS_CONTENT_KEYS.concat(withPos ? [] : POS)); return k.filter(x => !skip.has(x)); };
+            const J = v => { try { return JSON.stringify(v === undefined ? null : v); } catch (e) { return ''; } };
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🔁 Синхронізація кортів і перезапуск бази</span><span class="tcol-arrow">▸</span>';
+            const card = document.createElement('div'); card.id = 'cs-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            card.innerHTML = '<div style="font-size:11px; color:#9bd;">Налаштування, таблиці, плашки, логотипи, імена й цифри, які ви змінюєте на одному корті, самі розсилаються на решту кортів — окремо по змінених полях (дрібними запитами), без повного перезапису. Після переходу на інший корт він спершу підтягує спільні налаштування з корту №1, тому нічого не «стрибає».</div>' +
+                '<label style="font-size:12px; display:flex; gap:8px; align-items:center;"><input type="checkbox" id="cs-auto"> Автоматично синхронізувати всі корти</label>' +
+                '<label style="font-size:11px; color:#ccc; display:flex; gap:8px; align-items:center;"><input type="checkbox" id="cs-pos"> Синхронізувати також положення й масштаб табла рахунку (за замовчуванням — окремо на кожному корті)</label>' +
+                '<button class="btn btn-blue" style="padding:10px; font-weight:800;" id="cs-now">🔁 Синхронізувати зараз усе на всі корти</button>' +
+                '<div id="cs-st" style="font-size:11px; color:#aaa;"></div>' +
+                '<button class="btn btn-orange" style="padding:10px; font-weight:800;" id="cs-restart">♻️ Перезапустити зʼєднання з базою</button>' +
+                '<div style="font-size:10px; color:#9a9;">Перезапуск лише розриває й заново відкриває зʼєднання пульта з базою (як «вийти й зайти в мережу»). Дані, рахунок і налаштування не змінюються й не видаляються.</div>';
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            const $ = id => card.querySelector('#' + id), st = (m, c) => { const e = $('cs-st'); if (e) { e.innerText = m; e.style.color = c || '#aaa'; } };
+            $('cs-auto').checked = auto; $('cs-pos').checked = withPos;
+            $('cs-auto').onchange = e => { auto = e.target.checked; LSset('csAuto', auto ? '1' : '0'); st(auto ? '✅ Автосинхронізацію ввімкнено' : '⏸ Автосинхронізацію вимкнено', auto ? '#7c7' : '#fa0'); if (auto) { base = false; } };
+            $('cs-pos').onchange = e => { withPos = e.target.checked; LSset('csPos', withPos ? '1' : '0'); base = false; };
+            const others = () => { const a = []; for (let i = 1; i <= 10; i++) if (String(i) !== String(courtId)) a.push(i); return a; };
+            const snap = () => { const o = {}; keys().forEach(k => { o[k] = J(state && state[k]); }); return o; };
+            async function push(ks, full) {
+                if (busy || !state) return; busy = true;
+                try {
+                    const patch = {}; ks.forEach(k => { const v = state[k]; patch[k] = (v === undefined) ? null : JSON.parse(JSON.stringify(v)); });
+                    if (!ks.length) { busy = false; return; }
+                    st('⏳ Розсилаю на інші корти (' + ks.length + ' полів)…', '#a78bfa');
+                    await Promise.all(others().map(i => update(ref(db, 'padel/courts/court_' + i), patch)));
+                    ks.forEach(k => { last[k] = J(state[k]); });
+                    st('✅ Синхронізовано ' + new Date().toLocaleTimeString().slice(0, 8) + ' (' + ks.length + ' полів → ' + others().length + ' кортів)', '#7c7');
+                } catch (e) { st('⚠️ Не вдалося синхронізувати: ' + ((e && e.message) || e) + ' — решта роботи не постраждала', '#f66'); }
+                busy = false;
+            }
+            async function pull() {   // перехід на інший корт: підтягуємо спільні налаштування з корту №1
+                if (String(courtId) === '1' || !auto) return;
+                const my = ++conn;
+                try {
+                    const s1 = (await get(ref(db, 'padel/courts/court_1'))).val(); if (!s1 || my !== conn) return;
+                    const patch = {}; let n = 0; keys().forEach(k => { if (s1[k] !== undefined && J(s1[k]) !== J(state && state[k])) { patch[k] = s1[k]; n++; } });
+                    if (n) { await update(matchRef, patch); st('⬇️ Підтягнуто ' + n + ' спільних налаштувань з корту №1', '#7c7'); }
+                } catch (e) { st('⚠️ Не вдалося підтягнути налаштування з корту №1: ' + ((e && e.message) || e), '#f66'); }
+            }
+            window.__csConn = () => { base = false; last = {}; conn++; clearTimeout(pushT); };
+            let pulled = -1;
+            window.__csOnState = () => {
+                if (!auto || !state) return;
+                if (!base) { base = true; last = snap(); if (pulled !== conn) { pulled = conn; setTimeout(pull, 400); } if (String(courtId) === '1' && LS('csFullDone', '') !== '1') { LSset('csFullDone', '1'); setTimeout(() => push(keys().filter(k => state[k] !== undefined), true), 6000); } return; }
+                clearTimeout(pushT);
+                pushT = setTimeout(() => { const cur = snap(), ch = keys().filter(k => cur[k] !== last[k]); if (ch.length) push(ch); }, 1500);
+            };
+            $('cs-now').onclick = () => { if (!state) return; push(keys().filter(k => state[k] !== undefined), true); };
+            $('cs-restart').onclick = () => {
+                st('♻️ Перезапускаю зʼєднання…', '#fa0');
+                try { goOffline(db); } catch (e) {}
+                setTimeout(() => { try { goOnline(db); st('✅ Зʼєднання з базою відновлено', '#7c7'); } catch (e) { st('⚠️ ' + ((e && e.message) || e), '#f66'); } }, 700);
+            };
         })();
 
         // ===== НАСТУПНІ МАТЧІ (padel/nextmatches) =====
