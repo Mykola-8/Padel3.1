@@ -1122,7 +1122,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -2448,7 +2448,10 @@
             return TS_SETTING_KEYS.concat(TS_CONTENT_KEYS, ['sponsorLogos', 'sponsorInfos', 'sponsorQrs', 'sponsorQrDescs', 'qrSponsorSync', 'sponsorLogoDisplayMode', 'sponsorLogoIntervalSec', 'sponsorLogoAnimStyle', 'showSponsorLogos',
                 'sponsorInfoPos', 'tickerSlides', 'tickerLogo', 'tvCfg', 'tournTheme', 'crewCfg', 'spcardCfg', 'creditsCfg', 'rulesCfg', 'rkmCfg', 'tnCfg', 'cbCfg', 'autoSchedCfg', 'brkCfg', 'anCfg', 'mascotId', 'boardOpacity', 'teamNameWidth', 'teamNameFontSize', 'promoBackgroundEffect', 'serverIconType', 'serverIconColor']);
         }
-        window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Усі налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться.")) resetMatchWithoutConfirm(); }
+function __clearTournamentName() {
+            try { set(ref(db, 'padel/tname'), null); set(ref(db, 'padel/courts/_tname'), null); for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/tnCfg'), null); try { state.tnCfg = null; } catch (e0) {} if (window.__tnReset) window.__tnReset(); } catch (e) {}
+        }
+        window.resetMatch = function() { if (confirm("Скинути поточний корт?\n\nРахунок, статистика й назви команд обнуляться. Налаштування пульта та турнірні таблиці (титри, спонсори, організатори…) збережуться, крім табла «Назва турніру» — воно очиститься.")) { __clearTournamentName(); resetMatchWithoutConfirm(); } }
 
         function resetMatchWithoutConfirm() {
             if (statsTimeout) clearTimeout(statsTimeout); gameStartTimestamp = Date.now();
@@ -2484,6 +2487,7 @@
                 animation: { team: 0, type: "", ts: 0 }
             };
             settingKeys().forEach(k => { if (state && state[k] !== undefined && state[k] !== null) __fresh[k] = JSON.parse(JSON.stringify(state[k])); });
+            delete __fresh.tnCfg;   // «Назва турніру» очищається лише повним скиданням корту
             __fresh.pointLog = []; __fresh.matchEndTs = 0;
             set(matchRef, __fresh).then(() => closeModalSettings());
         }
@@ -2531,7 +2535,7 @@
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tname', 'padel/tname', 'tnCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -3283,10 +3287,14 @@
                     : '<div style="font-size:11px; font-weight:700;">Спонсори (кожен — логотип, назва, опис):</div><div id="spc-list" style="display:flex; flex-direction:column; gap:8px;"></div><div style="display:flex; gap:6px; flex-wrap:wrap;"><label class="btn btn-gray" style="padding:7px; cursor:pointer; flex:1; text-align:center;">➕ Додати спонсора (логотип)<input type="file" accept="image/*" multiple style="display:none" id="spc-file"></label><button class="btn btn-gray" style="padding:7px; flex:1;" id="spc-imp">⬇ Взяти з логотипів спонсорів</button></div>';
                 card.innerHTML = '<div style="font-size:11px; font-weight:700;">' + c.title + '</div>' +
                     '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="' + key + '-off">■ СХОВАТИ</button></div>' +
+                    '<button class="btn btn-blue" style="padding:10px; font-weight:800;" id="' + key + '-all">📺 ПОКАЗАТИ НА ВСІХ КОРТАХ</button>' +
                     '<div id="' + key + '-st" style="font-size:11px;"></div>' + list +
                     '<div style="display:flex; flex-direction:column; gap:6px;">' + fields.map(f => field(key, f)).join('') + '</div>';
-                card.querySelector('#' + key + '-on').onclick = () => { data[key].show = true; refresh(key); save(key, true); };
-                card.querySelector('#' + key + '-off').onclick = () => { data[key].show = false; refresh(key); save(key, true); };
+                // показати / сховати — маленьким запитом (без повторного завантаження логотипів), тому спрацьовує одразу
+                const quick = (patch) => { Object.assign(data[key], patch); data[key].ts = Date.now(); refresh(key); dirty[key] = Date.now(); const pp = Object.assign({}, patch, { ts: data[key].ts }); if (!prim[key]) { save(key, true); return; } try { update(ref(db, CFG[key].path), pp).then(() => st(key, true), () => save(key, true)); } catch (e) { save(key, true); } };
+                card.querySelector('#' + key + '-on').onclick = () => quick({ show: true });
+                card.querySelector('#' + key + '-off').onclick = () => quick({ show: false });
+                card.querySelector('#' + key + '-all').onclick = () => quick({ show: true, court: 'all' });
                 card.querySelectorAll('[data-k]').forEach(el => {
                     const f = fields.find(x => x.k === el.getAttribute('data-k'));
                     const handler = () => {
@@ -4649,6 +4657,7 @@
             card.innerHTML = '<div style="font-size:11px; font-weight:700;">🏆 Табло «Назва турніру» (назва + мета / деталі)</div>' +
                 '<div style="font-size:10px; color:#9bd;">Велике табло по центру екрана: назва турніру, під нею мета або деталі (дата, місце, формат). Є різні анімації появи табла й тексту, логотип, масштаб, прозорість фону 0–100%. Фіолетова кнопка «Перегляд» показує табло лише в моніторі пульта.</div>' +
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="tnb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="tnb-off">■ СХОВАТИ</button></div>' +
+                '<button class="btn btn-blue" style="padding:10px; font-weight:800;" id="tnb-all">📺 ПОКАЗАТИ НА ВСІХ КОРТАХ</button>' +
                 '<div id="tnb-st" style="font-size:11px;"></div>' +
                 sec('✍️ Текст', MAIN, true) +
                 '<details open style="background:#161616; border-radius:8px; padding:6px 8px;"><summary style="font-size:12px; font-weight:800; cursor:pointer; color:#e0b878;">🖼 Логотип</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">' +
@@ -4677,8 +4686,10 @@
                 $('tnb-on').style.outline = d.show ? '3px solid #fff' : 'none'; $('tnb-off').style.outline = d.show ? 'none' : '3px solid #fff';
                 const pv = $('tnb-prev'); if (pv) { pv.style.display = d.logo ? 'block' : 'none'; if (d.logo) pv.src = d.logo; }
             }
-            $('tnb-on').onclick = () => { d.show = true; d.ts = Date.now(); save(true); refresh(); };
-            $('tnb-off').onclick = () => { d.show = false; save(true); refresh(); };
+            const quick = (patch) => { Object.assign(d, patch); d.ts = Date.now(); refresh(); dirty = Date.now(); if (!prim) { save(true); return; } try { update(ref(db, 'padel/tname'), Object.assign({}, patch, { ts: d.ts })).then(() => st(true), () => save(true)); } catch (e) { save(true); } };
+            $('tnb-on').onclick = () => quick({ show: true });
+            $('tnb-off').onclick = () => quick({ show: false });
+            $('tnb-all').onclick = () => quick({ show: true, court: 'all' });
             card.querySelectorAll('[data-k]').forEach(el => {
                 const f = F.find(x => x.k === el.getAttribute('data-k'));
                 el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', () => {
@@ -4698,7 +4709,11 @@
             const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); refresh(); };
             const mirror = () => { const m = state && state.tnCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
-            onValue(ref(db, 'padel/tname'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            let gv = null, cv = null;
+            const pick = () => { const v = gv || cv; if (!v) { mirror(); return; } apply(v); };
+            onValue(ref(db, 'padel/tname'), snap => { gv = snap.val(); loaded = true; prim = !!gv; pick(); }, () => { loaded = true; pick(); });
+            onValue(ref(db, 'padel/courts/_tname'), snap => { cv = snap.val(); if (cv && !gv) { loaded = true; pick(); } });   // запасний шлях, якщо база не приймає padel/tname
+            window.__tnReset = () => { gv = null; cv = null; prim = false; d = JSON.parse(JSON.stringify(DEF)); dirty = 0; refresh(); };
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
