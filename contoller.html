@@ -5250,7 +5250,7 @@ function __clearTournamentName() {
         
         (function wxInit() {
             const mbc = document.getElementById('f3-card'); if (!mbc) return;
-            const DEF = { show: false, court: 'all', mode: 'auto', city: '', lat: '', lon: '', lang: 'en', units: 'both', logo1: '', logo2: '', iTemp: true, iFc: true, iWind: true, iHum: true, showLabels: true, showCity: true, mT: 20, mCond: 'clear', mCondText: '', mWs: 10, mWd: 'E', mH: 40, bgL: '#0f1932', opL: 50, bgR: '#14146e', opR: 50, textColor: '#ffffff', border: '#ffffff', borderOp: 16, radius: 23, x: 695, y: 30, scale: 49, sec: 10, showTs: 0 };
+            const DEF = { show: false, court: 'all', mode: 'auto', city: '', lat: '', lon: '', lang: 'en', units: 'both', logo1: '', logo2: '', iTemp: true, iFc: true, iWind: true, iHum: true, showLabels: true, showCity: true, mT: 20, mCond: 'clear', mCondText: '', mWs: 10, mWd: 'E', mH: 40, bgL: '#0f1932', opL: 50, bgR: '#14146e', opR: 50, textColor: '#ffffff', border: '#ffffff', borderOp: 16, radius: 23, anchor: 'tr', mr: 30, mt: 30, x: 695, y: 30, scale: 49, sec: 10, showTs: 0 };
             let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const card = document.createElement('div'); card.id = 'wx-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
@@ -5302,7 +5302,7 @@ rng('opR', 'Непрозорість правого блоку, %', 0, 100, 1) +
 '<div class="row">' + lab('Колір рамки:') + '<input type="color" data-k="border" style="width:60px; height:30px; padding:0;"></div>' +
 rng('borderOp', 'Непрозорість рамки, %', 0, 100, 1) +
 rng('radius', 'Скруглення кутів', 0, 60, 1) +
-rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y', 'Позиція Y (по вертикалі)', 0, 1080, 5) + rng('scale', 'Розмір, %', 30, 200, 1);
+'<div class="row">' + lab('Розташування:') + '<select data-k="anchor"><option value="tr">Правий верхній кут (за замовчуванням)</option><option value="custom">Власна позиція (X, Y)</option></select></div>' + rng('mr', 'Відступ від правого краю (для кута)', 0, 600, 5) + rng('mt', 'Відступ зверху (для кута)', 0, 600, 5) + rng('x', 'Позиція X (по горизонталі)', 0, 1920, 5) + rng('y', 'Позиція Y (по вертикалі)', 0, 1080, 5) + rng('scale', 'Розмір, %', 30, 200, 1);
             const $ = id => document.getElementById(id);
             function st(ok, m) { const e = $('wxb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
             function save(now) {
