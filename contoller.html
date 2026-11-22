@@ -4718,6 +4718,56 @@ function __clearTournamentName() {
         })();
 
 
+        // ===== РЕАКЦІЇ ЯК НА YOUTUBE (padel/reactions) =====
+        (function rxInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const ALL = ['\u2764\uFE0F', '\uD83D\uDD25', '\uD83E\uDD70', '\uD83D\uDE01', '\uD83D\uDD1D', '\u2714\uFE0F', '\uD83C\uDFBE', '\uD83D\uDC4F', '\uD83D\uDCAF', '\uD83C\uDF89', '\uD83D\uDE0D', '\uD83D\uDCAA', '\uD83D\uDC4D', '\uD83D\uDE31'];
+            const DEF = { court: 'all', emojis: ['\u2764\uFE0F'], custom: '', secs: 5, perSec: 4, every: 0, auto: false, size: 56, scale: 100, side: 'right', x: 4, y: 6, spread: 60, rise: 55, float: 3.2, burstTs: 0, stopTs: 0 };
+            let d = JSON.parse(JSON.stringify(DEF)), timer = null, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'rx-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>\u2764\uFE0F Реакції як на YouTube (лайки, що вискакують)</span><span class="tcol-arrow">\u25BE</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const R = (k, l, min, max, step, u) => '<div class="row">' + lab(l + ': <b id="rx-' + k + '-v"></b>') + '<input type="range" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" data-u="' + (u || '') + '"></div>';
+            card.innerHTML = '<div style="font-size:11px; color:#aaa;">Емодзі випливають збоку по екрану, щоб заохотити глядачів лайкати ефір. Обери емодзі, тривалість і частоту — і натисни «Запустити».</div>' +
+                '<div class="row">' + lab('Показувати на:') + '<select data-k="court" style="' + inp + '"><option value="all">Усі корти</option>' + Array.from({ length: 10 }, (_, i) => '<option value="' + (i + 1) + '">Корт ' + (i + 1) + '</option>').join('') + '</select></div>' +
+                '<div>' + lab('Які емодзі показувати (можна кілька):') + '<div id="rx-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">' + ALL.map(e => '<button type="button" data-e="' + e + '" style="font-size:24px; padding:4px 8px; border-radius:10px; border:2px solid #444; background:#222; cursor:pointer;">' + e + '</button>').join('') + '</div></div>' +
+                '<div class="row">' + lab('Свої емодзі (через пробіл, необов’язково):') + '<input type="text" data-k="custom" style="' + inp + '" placeholder="наприклад: \uD83C\uDFC6 \u26A1"></div>' +
+                R('secs', 'Скільки секунд триває запуск', 1, 60, 1, ' с') + R('perSec', 'Частота (емодзі за секунду)', 0.5, 20, 0.5, '/с') +
+                R('every', 'Автоповтор: кожні N секунд (0 = безперервно)', 0, 600, 5, ' с') +
+                R('size', 'Розмір емодзі', 20, 160, 2, 'px') + R('rise', 'Висота підйому', 15, 100, 1, '%') + R('float', 'Тривалість польоту одного емодзі', 1, 8, 0.1, ' с') +
+                '<div class="row">' + lab('Сторона екрана:') + '<select data-k="side" style="' + inp + '"><option value="right">Справа</option><option value="left">Зліва</option></select></div>' +
+                R('x', 'Відступ від краю', 0, 100, 1, '%') + R('y', 'Висота старту знизу', 0, 90, 1, '%') + R('spread', 'Розкид по горизонталі', 0, 400, 5, 'px') +
+                '<div style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" id="rx-go" style="flex:1; padding:10px; border-radius:8px; border:0; background:#e11d48; color:#fff; font-weight:700; cursor:pointer;">\u25B6 Запустити зараз</button>' +
+                '<button type="button" id="rx-auto" style="flex:1; padding:10px; border-radius:8px; border:0; background:#334155; color:#fff; font-weight:700; cursor:pointer;"></button>' +
+                '<button type="button" id="rx-stop" style="flex:1; padding:10px; border-radius:8px; border:0; background:#555; color:#fff; font-weight:700; cursor:pointer;">\u25A0 Стоп</button></div>';
+            const q = s => card.querySelector(s);
+            function refresh() {
+                card.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k; if (document.activeElement !== el && d[k] !== undefined) el.value = d[k]; const v = document.getElementById('rx-' + k + '-v'); if (v) v.textContent = d[k] + (el.dataset.u || ''); });
+                card.querySelectorAll('#rx-chips button').forEach(b => { const on = d.emojis.indexOf(b.dataset.e) >= 0; b.style.borderColor = on ? '#e11d48' : '#444'; b.style.background = on ? '#3b1220' : '#222'; });
+                q('#rx-auto').textContent = d.auto ? '\u23F8 Автоповтор: УВІМК' : '\u21BB Автоповтор: вимк'; q('#rx-auto').style.background = d.auto ? '#16a34a' : '#334155';
+            }
+            function out() { const c = Object.assign({}, d), cu = String(d.custom || '').split(/\s+/).filter(Boolean); c.emojis = d.emojis.concat(cu); if (!c.emojis.length) c.emojis = ['\u2764\uFE0F']; return c; }
+            function save() {
+                dirty = Date.now(); const data = out();
+                try { set(ref(db, 'padel/reactions'), data).catch(() => { try { set(ref(db, 'padel/courts/_reactions'), data); } catch (e) {} }); } catch (e) { try { set(ref(db, 'padel/courts/_reactions'), data); } catch (e2) {} }
+            }
+            const later = () => { clearTimeout(timer); timer = setTimeout(save, 400); };
+            card.addEventListener('input', e => { const el = e.target, k = el.dataset && el.dataset.k; if (!k) return; d[k] = el.type === 'range' ? parseFloat(el.value) : el.value; dirty = Date.now(); refresh(); later(); });
+            card.addEventListener('change', e => { const el = e.target, k = el.dataset && el.dataset.k; if (!k || el.type === 'range') return; d[k] = el.value; dirty = Date.now(); refresh(); later(); });
+            q('#rx-chips').addEventListener('click', e => { const b = e.target.closest('button[data-e]'); if (!b) return; const i = d.emojis.indexOf(b.dataset.e); if (i >= 0) d.emojis.splice(i, 1); else d.emojis.push(b.dataset.e); refresh(); later(); });
+            q('#rx-go').onclick = () => { clearTimeout(timer); d.burstTs = Date.now(); save(); };
+            q('#rx-stop').onclick = () => { clearTimeout(timer); d.stopTs = Date.now(); d.auto = false; refresh(); save(); };
+            q('#rx-auto').onclick = () => { clearTimeout(timer); d.auto = !d.auto; if (!d.auto) d.stopTs = Date.now(); refresh(); save(); };
+            const adopt = v => { if (!v || Date.now() - dirty < 2000) return; const e = Array.isArray(v.emojis) ? v.emojis : []; d = Object.assign({}, DEF, v); d.emojis = e.filter(x => ALL.indexOf(x) >= 0); d.custom = v.custom || ''; refresh(); };
+            onValue(ref(db, 'padel/reactions'), s => adopt(s.val()), () => {});
+            onValue(ref(db, 'padel/courts/_reactions'), s => { if (!d.burstTs) adopt(s.val()); }, () => {});
+            refresh();
+        })();
+
+
         // ===== СИНХРОНІЗАЦІЯ НАЛАШТУВАНЬ І ТАБЛ НА ВСІ КОРТИ + перезапуск зʼєднання з базою =====
         (function csInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
