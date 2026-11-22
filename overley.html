@@ -787,6 +787,8 @@
         body[data-tt-font] #team-ranking-wrap *, body[data-tt-font] .po-wrap *, body[data-tt-font] .cr-wrap *, body[data-tt-font] .ic-wrap *, body[data-tt-font] .tc-wrap *, body[data-tt-font] .gr-wrap *, body[data-tt-font] .rm-wrap *, body[data-tt-font] .sc-wrap *, body[data-tt-font] .mt-wrap *, body[data-tt-font] #match-intro-wrap * { font-family: var(--tt-font) !important; letter-spacing: .02em; }
         body[data-tt-stroke] #team-ranking-wrap *, body[data-tt-stroke] .po-wrap *, body[data-tt-stroke] .cr-wrap *, body[data-tt-stroke] .ic-wrap *, body[data-tt-stroke] .tc-wrap *, body[data-tt-stroke] .gr-wrap *, body[data-tt-stroke] .rm-wrap *, body[data-tt-stroke] .sc-wrap *, body[data-tt-stroke] .mt-wrap *, body[data-tt-stroke] #match-intro-wrap * { -webkit-text-stroke: 3px var(--tt-stroke); paint-order: stroke fill; text-shadow: 0 3px 0 var(--tt-stroke); }
         /* ===== ТАБЛО «НАЗВА ТУРНІРУ» (padel/tname) ===== */
+        #rx-layer { position: fixed; inset: 0; z-index: 10010; pointer-events: none; overflow: hidden; }
+        #rx-layer .rx-e { position: absolute; line-height: 1; will-change: transform, opacity; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; }
         .tn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
         .tn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
         .tn-board { position: absolute; left: calc(var(--tn-x, 50) * 1%); top: calc(var(--tn-y, 50) * 1%); transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); box-sizing: border-box; width: var(--tn-w, max-content); max-width: 1860px; display: flex; align-items: center; gap: 34px; padding: var(--tn-pad, 36px); border-radius: var(--tn-rad, 28px); background: var(--tn-bg, rgba(11,18,38,.85)); border: var(--tn-bw, 0px) solid var(--tn-bc, #f5c542); box-shadow: var(--tn-sh, none); text-align: var(--tn-al, center); }
@@ -2392,6 +2394,7 @@
     <div class="mt-wrap" id="mt-wrap"><div class="mt-board" id="mt-board"><img class="mt-logo" id="mt-logo" alt="" style="display:none"><div class="mt-title" id="mt-title"></div><div id="mt-list"></div></div></div>
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="ci-wrap" id="ci-wrap"><div class="ci-board" id="ci-board"></div></div>
+    <div id="rx-layer"></div>
     <div class="tn-wrap" id="tn-wrap"><div class="tn-board" id="tn-board"></div></div>
     <div class="rs-wrap" id="rs-wrap"><div class="rs-board" id="rs-board"><div class="rs-top"><div class="rs-title" id="rs-title"></div><div class="rs-info" id="rs-info"></div></div><div class="rs-head" id="rs-head"></div><div class="rs-list" id="rs-list"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
@@ -4647,6 +4650,61 @@
 
 
         // ===== ТАБЛО «НАЗВА ТУРНІРУ» (padel/tname): назва + мета/деталі, логотип, анімації =====
+        // ===== РЕАКЦІЇ ЯК НА YOUTUBE (padel/reactions): емодзі, що випливають збоку =====
+        (function rxInit() {
+            const layer = document.getElementById('rx-layer'); if (!layer) return;
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let gcfg = null, ccfg = null, cfg = {}, seenB = null, seenS = null, burstT = null, autoT = null, autoSig = '';
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const applies = c => { const t = c && c.court; return !t || t === 'all' || String(t) === String(courtNum); };
+            function spawn() {
+                const c = cfg, list = (c.emojis && c.emojis.length) ? c.emojis : ['\u2764\uFE0F'];
+                const e = document.createElement('div'); e.className = 'rx-e'; e.textContent = list[Math.floor(Math.random() * list.length)];
+                const W = window.innerWidth, H = window.innerHeight, size = num(c.size, 56) * (0.8 + Math.random() * 0.4) * Math.min(W / 1920, H / 1080) * (num(c.scale, 100) / 100) * 1.0;
+                const side = c.side === 'left' ? 'left' : 'right', xp = Math.max(0, Math.min(100, num(c.x, 4))) / 100 * W, sp = num(c.spread, 60) * (W / 1920);
+                const off = xp + (Math.random() - 0.5) * sp;
+                e.style.fontSize = size + 'px'; e.style[side] = Math.max(0, off) + 'px'; e.style.bottom = (num(c.y, 6) / 100 * H) + 'px';
+                layer.appendChild(e);
+                const rise = num(c.rise, 55) / 100 * H * (0.8 + Math.random() * 0.4), dur = num(c.float, 3.2) * 1000 * (0.85 + Math.random() * 0.3), sway = (Math.random() < .5 ? -1 : 1) * (20 + Math.random() * 40) * (W / 1920), dir = side === 'left' ? 1 : -1;
+                const kf = [
+                    { transform: 'translate(0,0) scale(.2)', opacity: 0 },
+                    { transform: 'translate(' + (sway * .3) + 'px,' + (-rise * .12) + 'px) scale(1.15)', opacity: 1, offset: .12 },
+                    { transform: 'translate(' + (-sway * .6) + 'px,' + (-rise * .5) + 'px) scale(1)', opacity: 1, offset: .5 },
+                    { transform: 'translate(' + (sway * .5) + 'px,' + (-rise * .8) + 'px) scale(.95)', opacity: .9, offset: .8 },
+                    { transform: 'translate(0,' + (-rise) + 'px) scale(.7)', opacity: 0 }
+                ];
+                const an = e.animate ? e.animate(kf, { duration: dur, easing: 'ease-out', fill: 'forwards' }) : null;
+                if (an) an.onfinish = () => e.remove(); else setTimeout(() => e.remove(), dur);
+            }
+            function stop() { if (burstT) { clearInterval(burstT); burstT = null; } }
+            function burst(secs) {
+                stop(); const per = Math.max(0.2, Math.min(40, num(cfg.perSec, 4))), end = secs > 0 ? Date.now() + secs * 1000 : Infinity;
+                const tick = () => { if (Date.now() > end) { stop(); return; } spawn(); };
+                tick(); burstT = setInterval(tick, 1000 / per);
+            }
+            function autoLoop() {
+                const on = !!(cfg.auto && applies(cfg)), every = num(cfg.every, 0), secs = num(cfg.secs, 5), sig = on ? [every, secs, cfg.perSec, (cfg.emojis || []).join('')].join('|') : '';
+                if (sig === autoSig) return; autoSig = sig;
+                if (autoT) { clearInterval(autoT); autoT = null; }
+                if (!on) return;
+                if (every <= 0) { burst(0); return; }
+                burst(secs); autoT = setInterval(() => burst(num(cfg.secs, 5)), Math.max(every, secs + 1) * 1000);
+            }
+            function apply(v) {
+                const first = seenB === null; cfg = v || {};
+                if (first) { seenB = cfg.burstTs || 0; seenS = cfg.stopTs || 0; }
+                else {
+                    if ((cfg.stopTs || 0) !== seenS) { seenS = cfg.stopTs || 0; stop(); }
+                    if ((cfg.burstTs || 0) !== seenB) { seenB = cfg.burstTs || 0; if (applies(cfg)) burst(num(cfg.secs, 5)); }
+                }
+                if (!cfg.auto) { if (autoT) { clearInterval(autoT); autoT = null; } if (autoSig) { autoSig = ''; stop(); } }
+                autoLoop();
+            }
+            onValue(ref(db, 'padel/reactions'), s => { gcfg = s.val(); apply(gcfg || ccfg); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_reactions'), s => { ccfg = s.val(); if (!gcfg) apply(ccfg); }, () => { ccfg = null; });
+            window.__rxTest = (c) => { cfg = c || cfg; burst(num(cfg.secs, 5)); };
+        })();
+
         const TN = (function () {
             const wrap = document.getElementById('tn-wrap'), board = document.getElementById('tn-board'); if (!wrap || !board) return {};
             const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
