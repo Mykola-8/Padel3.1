@@ -4771,7 +4771,7 @@ function __clearTournamentName() {
         // ===== ПЕРЕМОЖЦІ (padel/winners): п'єдестал 1-2-3, нижня сітка, анімації =====
         (function wnInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', ts: 0, title: 'ПЕРЕМОЖЦІ ТУРНІРУ', sub: '', upLabel: 'ГОЛОВНА СІТКА', loLabel: 'НИЖНЯ СІТКА', upN: ['', '', ''], upP: ['', '', ''], loN: ['', '', ''], loP: ['', '', ''], showLower: false, lowerMode: 'side', seqSec: 6,
+            const DEF = { show: false, court: 'all', ts: 0, title: 'ПЕРЕМОЖЦІ ТУРНІРУ', sub: '', upLabel: 'ГОЛОВНА СІТКА', loLabel: 'НИЖНЯ СІТКА', upN: ['', '', ''], upP: ['', '', ''], loN: ['', '', ''], loP: ['', '', ''], showLower: false, lowerFirst: false, lwLabel: 'Переможець · нижня сітка', lowerMode: 'side', seqSec: 6,
                 layout: 'podium', theme: 'gold', medal: 'emoji', trophy: true, pedestal: true, upper: true, confetti: true,
                 anim: 'rise', dur: 0.7, placeAnim: 'rise', order: '321', step: 1.2, pdur: 0.8, exitAnim: 'fade', exitOrder: 'same', exitStep: 0.5,
                 x: 50, y: 50, scale: 100, width: 1500, textSize: 100, nameSize: 34, prizeSize: 26, titleSize: 66, pedH: 100, radius: 32, bgOp: 94, autoHide: 0,
@@ -4799,7 +4799,7 @@ function __clearTournamentName() {
                 TXT('title', 'Заголовок') + TXT('sub', 'Підзаголовок (необов’язково)') +
                 H('Головна сітка') + TXT('upLabel', 'Підпис блоку (коли показуємо дві сітки)') + places('up') +
                 '<button class="btn" style="padding:8px;" id="wnb-fu">⬇ Взяти з фіналу верхньої сітки плей-офф</button>' +
-                H('Нижня сітка') + CHK('showLower', 'Показувати переможців нижньої сітки (вкл/викл)') +
+                H('Нижня сітка') + CHK('lowerFirst', '1 місце нижньої сітки — на табло головної сітки, справа від 3 місця (без п’єдесталу)') + TXT('lwLabel', 'Підпис цього блоку') + CHK('showLower', 'Показувати переможців нижньої сітки (вкл/викл)') +
                 SEL('lowerMode', 'Як показувати нижню сітку', [['side', 'Поруч із головною'], ['seq', 'Спочатку головна, потім нижня']]) + RNG('seqSec', 'Пауза перед нижньою сіткою', 2, 30, 1, ' с') + TXT('loLabel', 'Підпис блоку') + places('lo') +
                 '<button class="btn" style="padding:8px;" id="wnb-fl">⬇ Взяти з фіналу нижньої сітки плей-офф</button>' +
                 H('Вигляд') + SEL('layout', 'Розкладка', [['podium', 'П’єдестал (2-1-3)'], ['rows', 'Рядки 1-2-3']]) +
@@ -5194,7 +5194,7 @@ function __clearTournamentName() {
             setInterval(() => { try { tick(); } catch (e) {} }, 400);
             fit();
             // --- універсальна фіолетова кнопка ПЕРЕГЛЯД для всіх таблиць ---
-            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
+            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
             const pvOn = {};
             function send(k) { try { if (fr.contentWindow) fr.contentWindow.postMessage({ type: 'pvAny', key: k, on: !!pvOn[k] }, '*'); } catch (e) {} }
             function ui(k, b) { b.style.outline = pvOn[k] ? '3px solid #fff' : 'none'; b.innerText = pvOn[k] ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; }
