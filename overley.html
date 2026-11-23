@@ -838,6 +838,9 @@
         @keyframes wnOutUp { to { opacity: 0; transform: translateY(-160px); } }
         @keyframes wnOutZoom { to { opacity: 0; transform: scale(0); } }
         @keyframes wnOutSide { to { opacity: 0; transform: translateX(var(--wn-sx, -300px)); } }
+        .p4 { --pc: var(--wn-tc); } .wn-col.p4 { flex: .9 1 0; } .wn-lbl4 { font-size: calc(18px * var(--wn-k, 1)); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--pc); line-height: 1.2; }
+        .wn-sp { width: 100%; height: calc(98px * var(--wn-phs, 1)); }
+        .wn-pod.rows .wn-sp { display: none; }
         .wn-cf { position: absolute; top: -40px; width: 12px; height: 18px; opacity: .95; border-radius: 2px; pointer-events: none; z-index: 5; }
         .tn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
         .tn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
@@ -4789,7 +4792,7 @@
                 s.setProperty('--wn-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--wn-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
                 s.setProperty('--wn-sc', Math.max(20, Math.min(300, num(cfg.scale, 100))) / 100); s.setProperty('--wn-w', num(cfg.width, 1500) + 'px'); s.setProperty('--wn-rad', num(cfg.radius, 32) + 'px');
                 s.setProperty('--wn-nf', num(cfg.nameSize, 34) + 'px'); s.setProperty('--wn-pf', num(cfg.prizeSize, 26) + 'px'); s.setProperty('--wn-tf', num(cfg.titleSize, 66) + 'px'); s.setProperty('--wn-phs', Math.max(0.3, num(cfg.pedH, 100) / 100));
-                s.setProperty('--wn-k', (blocks().length > 1 ? 0.72 : 1) * Math.max(0.4, num(cfg.textSize, 100) / 100));
+                s.setProperty('--wn-k', (blocks().length > 1 ? 0.72 : 1) * (cfg.lowerFirst && g(cfg.layout, 'podium') === 'podium' ? 0.8 : 1) * Math.max(0.4, num(cfg.textSize, 100) / 100));
                 s.setProperty('--wn-pd', Math.max(0.2, num(cfg.pdur, 0.8)) + 's');
                 board.classList.toggle('glass', !!t.glass);
             }
@@ -4800,8 +4803,8 @@
             function times() {
                 const base = Math.max(0, num(cfg.dur, 0.7)) * 0.6, step = Math.max(0, num(cfg.step, 1.2)), xs = Math.max(0, num(cfg.exitStep, 0.5)), so = seqOrder(g(cfg.order, '321'));
                 const xo = g(cfg.exitOrder, 'same') === 'rev' ? seqOrder(g(cfg.order, '321') === '123' ? '321' : '123') : (g(cfg.exitOrder, 'same') === 'all' ? [] : so);
-                const d = {}, x = {}; [1, 2, 3].forEach(p => { const i = so.indexOf(p), j = xo.indexOf(p); d[p] = base + (i < 0 ? 0 : i * step); x[p] = j < 0 ? 0 : j * xs; });
-                return { d, x, total: base + Math.max(0, so.length - 1) * step + num(cfg.pdur, 0.8), xtotal: Math.max(0, xo.length - 1) * xs + num(cfg.pdur, 0.8) };
+                const d = {}, x = {}; [1, 2, 3].forEach(p => { const i = so.indexOf(p), j = xo.indexOf(p); d[p] = base + (i < 0 ? 0 : i * step); x[p] = j < 0 ? 0 : j * xs; }); d[4] = base + so.length * step; x[4] = 0;
+                return { d, x, total: base + (cfg.lowerFirst ? so.length : Math.max(0, so.length - 1)) * step + num(cfg.pdur, 0.8), xtotal: Math.max(0, xo.length - 1) * xs + num(cfg.pdur, 0.8) };
             }
             function block(set, label, T) {
                 const N = arr(cfg[set + 'N']), P = arr(cfg[set + 'P']), podium = g(cfg.layout, 'podium') === 'podium', ped = podium && cfg.pedestal !== false, pa = g(cfg.placeAnim, 'rise');
@@ -4814,7 +4817,12 @@
                         '<div class="wn-card">' + medal(p) + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' +
                         (ped ? '<div class="wn-ped"><span>' + p + '</span></div>' : '') + '</div>';
                 };
-                return '<div class="wn-blk">' + (label ? '<div class="wn-lb">' + esc(label) + '</div>' : '') + '<div class="wn-pod ' + (podium ? 'pod' : 'rows') + '">' + (podium ? [2, 1, 3] : [1, 2, 3]).map(col).join('') + '</div></div>';
+                const lw = () => {
+                    const nm = String(arr(cfg.loN)[0] || '').trim(), pz = String(arr(cfg.loP)[0] || '').trim(); if (!(set === 'up' && cfg.lowerFirst && nm)) return '';
+                    const inA = pa === 'side' ? 'wnSideR' : (IN[pa] || 'wnRise'), oa = OUT[g(cfg.exitAnim, 'fade')] || 'wnOutFade';
+                    return '<div class="wn-col p4" style="--wn-in:' + inA + ';--wn-d:' + T.d[4].toFixed(2) + 's;--wn-cd:0s;--wn-out:' + oa + ';--wn-xd:0s;--wn-sx:300px"><div class="wn-card"><div class="wn-lbl4">' + esc(g(cfg.lwLabel, 'Переможець · нижня сітка')) + '</div>' + (g(cfg.medal, 'emoji') !== 'none' ? '<div class="wn-md">🥇</div>' : '') + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' + (ped ? '<div class="wn-sp"></div>' : '') + '</div>';
+                };
+                return '<div class="wn-blk">' + (label ? '<div class="wn-lb">' + esc(label) + '</div>' : '') + '<div class="wn-pod ' + (podium ? 'pod' : 'rows') + '">' + (podium ? [2, 1, 3] : [1, 2, 3]).map(col).join('') + lw() + '</div></div>';
             }
             let TT0 = null;
             function content(noanim) {
