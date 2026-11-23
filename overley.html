@@ -789,6 +789,56 @@
         /* ===== ТАБЛО «НАЗВА ТУРНІРУ» (padel/tname) ===== */
         #rx-layer { position: fixed; inset: 0; z-index: 10010; pointer-events: none; overflow: hidden; }
         #rx-layer .rx-e { position: absolute; line-height: 1; will-change: transform, opacity; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; }
+        /* ===== ТАБЛО «ПЕРЕМОЖЦІ» (padel/winners) ===== */
+        .wn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10005; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
+        .wn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
+        html.tvled .wn-wrap.on::before { content: ''; position: absolute; left: -3000px; top: -3000px; right: -3000px; bottom: -3000px; background: #000; z-index: -1; pointer-events: none; }
+        .wn-board { position: absolute; left: calc(var(--wn-x, 50) * 1%); top: calc(var(--wn-y, 50) * 1%); transform: translate(-50%, -50%) scale(var(--wn-sc, 1)); width: var(--wn-w, 1500px); max-width: 1900px; box-sizing: border-box; padding: 36px 40px 40px; border-radius: var(--wn-rad, 32px); background: var(--wn-bg); color: var(--wn-tx); display: flex; flex-direction: column; align-items: center; gap: 22px; box-shadow: 0 18px 60px rgba(0,0,0,.45); }
+        .wn-board.glass { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+        .wn-board.in-fade { animation: wnFade .8s ease both; } .wn-board.in-zoom { animation: wnZoom .8s ease both; } .wn-board.in-rise { animation: wnBoardRise .8s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes wnBoardRise { from { opacity: 0; transform: translate(-50%, calc(-50% + 90px)) scale(var(--wn-sc, 1)); } to { opacity: 1; transform: translate(-50%, -50%) scale(var(--wn-sc, 1)); } }
+        .wn-t { font-size: calc(var(--wn-tf, 66px) * var(--wn-k, 1)); font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--wn-tc); text-align: center; line-height: 1.1; }
+        .wn-st { font-size: calc(30px * var(--wn-k, 1)); font-weight: 600; opacity: .85; text-align: center; margin-top: 6px; }
+        .wn-blocks { display: flex; gap: 40px; width: 100%; justify-content: center; }
+        .wn-blk { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+        .wn-lb { font-size: 28px; font-weight: 800; letter-spacing: .2em; color: var(--wn-c1); text-transform: uppercase; }
+        .wn-pod { display: flex; align-items: flex-end; justify-content: center; gap: 18px; width: 100%; }
+        .wn-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+        .wn-col.empty { visibility: hidden; }
+        .p1 { --pc: var(--wn-c1); } .p2 { --pc: var(--wn-c2); } .p3 { --pc: var(--wn-c3); }
+        .wn-card { width: 100%; box-sizing: border-box; padding: 18px 14px 16px; text-align: center; border-radius: 20px; background: var(--wn-pn); border-top: 8px solid var(--pc); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .wn-md { font-size: calc(64px * var(--wn-k, 1)); line-height: 1; }
+        .wn-md.c { width: calc(70px * var(--wn-k, 1)); height: calc(70px * var(--wn-k, 1)); border-radius: 50%; background: var(--pc); color: #111; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: calc(42px * var(--wn-k, 1)); }
+        .wn-nm { font-size: calc(var(--wn-nf, 34px) * var(--wn-k, 1)); font-weight: 900; line-height: 1.15; }
+        .wn-nm div { overflow-wrap: anywhere; }
+        .wn-pz { font-size: calc(var(--wn-pf, 26px) * var(--wn-k, 1)); font-weight: 800; color: var(--pc); }
+        .wn-ped { width: 100%; height: calc(var(--ph, 100px) * var(--wn-phs, 1)); margin-top: 8px; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--pc), rgba(0,0,0,.28)); display: flex; align-items: center; justify-content: center; transform-origin: bottom; }
+        .p1 .wn-ped { --ph: 190px; } .p2 .wn-ped { --ph: 130px; } .p3 .wn-ped { --ph: 90px; }
+        .wn-ped span { font-size: 90px; font-weight: 900; color: rgba(0,0,0,.4); }
+        .wn-tr { font-size: calc(72px * var(--wn-k, 1)); line-height: 1; margin-bottom: 6px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+        .wn-pod.rows { flex-direction: column; align-items: stretch; gap: 14px; }
+        .wn-pod.rows .wn-col { flex-direction: row; }
+        .wn-pod.rows .wn-card { flex-direction: row; text-align: left; border-top: 0; border-left: 12px solid var(--pc); gap: 22px; padding: 14px 24px; }
+        .wn-pod.rows .wn-nm { flex: 1; } .wn-pod.rows .wn-pz { white-space: nowrap; } .wn-pod.rows .wn-tr, .wn-pod.rows .wn-ped { display: none; }
+        .wn-card, .wn-tr { animation: var(--wn-in, wnRise) var(--wn-pd, .8s) cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--wn-d, 0s) + var(--wn-cd, 0s)); }
+        .wn-ped { animation: wnPed var(--wn-pd, .8s) cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--wn-d, 0s); }
+        .wn-board.noanim .wn-card, .wn-board.noanim .wn-tr, .wn-board.noanim .wn-ped { animation: none !important; }
+        .wn-board.out .wn-col { animation: var(--wn-out, wnOutFade) var(--wn-pd, .8s) ease both; animation-delay: var(--wn-xd, 0s); }
+        .wn-board.out .wn-card, .wn-board.out .wn-tr, .wn-board.out .wn-ped { animation: none !important; opacity: 1; }
+        @keyframes wnRise { from { opacity: 0; transform: translateY(140px) scale(.85); } to { opacity: 1; transform: none; } }
+        @keyframes wnZoom { 0% { opacity: 0; transform: scale(0); } 70% { opacity: 1; transform: scale(1.1); } 100% { opacity: 1; transform: none; } }
+        @keyframes wnFlip { from { opacity: 0; transform: perspective(900px) rotateY(90deg); } to { opacity: 1; transform: none; } }
+        @keyframes wnFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes wnDrop { 0% { opacity: 0; transform: translateY(-320px); } 60% { opacity: 1; transform: translateY(24px); } 80% { transform: translateY(-10px); } 100% { opacity: 1; transform: none; } }
+        @keyframes wnSideL { from { opacity: 0; transform: translateX(-300px); } to { opacity: 1; transform: none; } }
+        @keyframes wnSideR { from { opacity: 0; transform: translateX(300px); } to { opacity: 1; transform: none; } }
+        @keyframes wnPed { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes wnOutFade { to { opacity: 0; } }
+        @keyframes wnOutDown { to { opacity: 0; transform: translateY(140px) scale(.85); } }
+        @keyframes wnOutUp { to { opacity: 0; transform: translateY(-160px); } }
+        @keyframes wnOutZoom { to { opacity: 0; transform: scale(0); } }
+        @keyframes wnOutSide { to { opacity: 0; transform: translateX(var(--wn-sx, -300px)); } }
+        .wn-cf { position: absolute; top: -40px; width: 12px; height: 18px; opacity: .95; border-radius: 2px; pointer-events: none; z-index: 5; }
         .tn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
         .tn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
         .tn-board { position: absolute; left: calc(var(--tn-x, 50) * 1%); top: calc(var(--tn-y, 50) * 1%); transform: translate(-50%, -50%) scale(var(--tn-sc, 1)); box-sizing: border-box; width: var(--tn-w, max-content); max-width: 1860px; display: flex; align-items: center; gap: 34px; padding: var(--tn-pad, 36px); border-radius: var(--tn-rad, 28px); background: var(--tn-bg, rgba(11,18,38,.85)); border: var(--tn-bw, 0px) solid var(--tn-bc, #f5c542); box-shadow: var(--tn-sh, none); text-align: var(--tn-al, center); }
@@ -2396,6 +2446,7 @@
     <div class="sc-wrap" id="sc-wrap"><div class="sc-board" id="sc-board"><div class="sc-title" id="sc-title"></div><div class="sc-head" id="sc-head"></div><div class="sc-list" id="sc-list"></div><div class="sc-foot" id="sc-foot"></div></div></div>
     <div class="ci-wrap" id="ci-wrap"><div class="ci-board" id="ci-board"></div></div>
     <div id="rx-layer"></div>
+    <div class="wn-wrap" id="wn-wrap"><div class="wn-board" id="wn-board"></div></div>
     <div class="tn-wrap" id="tn-wrap"><div class="tn-board" id="tn-board"></div></div>
     <div class="rs-wrap" id="rs-wrap"><div class="rs-board" id="rs-board"><div class="rs-top"><div class="rs-title" id="rs-title"></div><div class="rs-info" id="rs-info"></div></div><div class="rs-head" id="rs-head"></div><div class="rs-list" id="rs-list"></div></div></div>
     <div class="rl-wrap" id="rl-wrap"><div class="rl-dim"></div><div class="rl-box"><div class="rl-title" id="rl-title"></div><div class="rl-view" id="rl-view"><div class="rl-body" id="rl-body"></div></div></div></div>
@@ -4704,6 +4755,119 @@
             onValue(ref(db, 'padel/reactions'), s => { gcfg = s.val(); apply(gcfg || ccfg); }, () => { gcfg = null; });
             onValue(ref(db, 'padel/courts/_reactions'), s => { ccfg = s.val(); if (!gcfg) apply(ccfg); }, () => { ccfg = null; });
             window.__rxTest = (c) => { cfg = c || cfg; burst(num(cfg.secs, 5)); };
+        })();
+
+        // ===== ТАБЛО «ПЕРЕМОЖЦІ» (padel/winners): п'єдестал 1-2-3, нижня сітка, анімації появи/виходу =====
+        const WN = (function () {
+            const wrap = document.getElementById('wn-wrap'), board = document.getElementById('wn-board'); if (!wrap || !board) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let cfg = {}, gcfg = null, ccfg = null, isOn = false, lastTs = 0, hidden = false, csig = '', endT = null, exitT = null, seqT = null, cfT = [], phase = 'up';
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            const TH = {
+                gold: { b1: '#0b1226', b2: '#1b2a5a', tx: '#ffffff', tc: '#f5c542', c1: '#f5c542', c2: '#d5dbe8', c3: '#cd7f32', pn: 'rgba(255,255,255,.10)' },
+                navy: { b1: '#06142e', b2: '#0f3a7a', tx: '#ffffff', tc: '#ffffff', c1: '#ffd24a', c2: '#9fc4ff', c3: '#ff9a5a', pn: 'rgba(255,255,255,.08)' },
+                neon: { b1: '#0a0420', b2: '#2a0a55', tx: '#ffffff', tc: '#00f0ff', c1: '#39ff88', c2: '#00e5ff', c3: '#ff4fd8', pn: 'rgba(255,255,255,.06)' },
+                light: { b1: '#ffffff', b2: '#e8eefc', tx: '#10213f', tc: '#10213f', c1: '#e0a800', c2: '#8d99b3', c3: '#b8692f', pn: '#ffffff' },
+                padel: { b1: '#06402d', b2: '#0c7a52', tx: '#ffffff', tc: '#d7ff3a', c1: '#d7ff3a', c2: '#bfe9ff', c3: '#ffb347', pn: 'rgba(0,0,0,.25)' },
+                fire: { b1: '#2a0707', b2: '#8a1f0a', tx: '#ffffff', tc: '#ffcf3a', c1: '#ffcf3a', c2: '#ffe9c2', c3: '#ff7a3a', pn: 'rgba(0,0,0,.28)' },
+                mono: { b1: '#000000', b2: '#161616', tx: '#ffffff', tc: '#ffffff', c1: '#ffffff', c2: '#b5b5b5', c3: '#7a7a7a', pn: 'rgba(255,255,255,.07)' },
+                glass: { b1: '#0c1430', b2: '#1e3a78', tx: '#ffffff', tc: '#ffffff', c1: '#ffd24a', c2: '#dfe7ff', c3: '#ffa86a', pn: 'rgba(255,255,255,.14)', glass: true }
+            };
+            const theme = () => { const id = g(cfg.theme, 'gold'); if (id === 'custom') return { b1: g(cfg.bg1, '#0b1226'), b2: g(cfg.bg2, '#1b2a5a'), tx: g(cfg.tx, '#ffffff'), tc: g(cfg.tc, '#f5c542'), c1: g(cfg.c1, '#f5c542'), c2: g(cfg.c2, '#d5dbe8'), c3: g(cfg.c3, '#cd7f32'), pn: 'rgba(255,255,255,.10)' }; return TH[id] || TH.gold; };
+            function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
+            const showLower = () => !!cfg.showLower;
+            const blocks = () => showLower() ? (g(cfg.lowerMode, 'side') === 'seq' ? [phase] : ['up', 'lo']) : ['up'];
+            const seqOrder = (mode) => mode === '123' ? [1, 2, 3] : (mode === 'all' ? [] : [3, 2, 1]);
+            function vars() {
+                const s = board.style, t = theme(), op = Math.max(0, Math.min(100, num(cfg.bgOp, 94))) / 100, gl = !!t.glass;
+                s.setProperty('--wn-bg', 'linear-gradient(135deg, ' + rgba(t.b1, gl ? Math.min(op, .62) : op) + ', ' + rgba(t.b2, gl ? Math.min(op, .5) : op) + ')');
+                s.setProperty('--wn-tx', t.tx); s.setProperty('--wn-tc', t.tc); s.setProperty('--wn-c1', t.c1); s.setProperty('--wn-c2', t.c2); s.setProperty('--wn-c3', t.c3); s.setProperty('--wn-pn', t.pn);
+                s.setProperty('--wn-x', Math.max(0, Math.min(100, num(cfg.x, 50)))); s.setProperty('--wn-y', Math.max(0, Math.min(100, num(cfg.y, 50))));
+                s.setProperty('--wn-sc', Math.max(20, Math.min(300, num(cfg.scale, 100))) / 100); s.setProperty('--wn-w', num(cfg.width, 1500) + 'px'); s.setProperty('--wn-rad', num(cfg.radius, 32) + 'px');
+                s.setProperty('--wn-nf', num(cfg.nameSize, 34) + 'px'); s.setProperty('--wn-pf', num(cfg.prizeSize, 26) + 'px'); s.setProperty('--wn-tf', num(cfg.titleSize, 66) + 'px'); s.setProperty('--wn-phs', Math.max(0.3, num(cfg.pedH, 100) / 100));
+                s.setProperty('--wn-k', (blocks().length > 1 ? 0.72 : 1) * Math.max(0.4, num(cfg.textSize, 100) / 100));
+                s.setProperty('--wn-pd', Math.max(0.2, num(cfg.pdur, 0.8)) + 's');
+                board.classList.toggle('glass', !!t.glass);
+            }
+            const IN = { rise: 'wnRise', zoom: 'wnZoom', flip: 'wnFlip', fade: 'wnFade', drop: 'wnDrop', side: 'wnRise' };
+            const OUT = { fade: 'wnOutFade', down: 'wnOutDown', up: 'wnOutUp', zoom: 'wnOutZoom', side: 'wnOutSide' };
+            function nameHtml(v) { const up = cfg.upper !== false; return String(v || '').split(/\s*[\/\n]\s*/).filter(Boolean).map(p => '<div>' + esc(up ? p.toUpperCase() : p) + '</div>').join(''); }
+            function medal(p) { const m = g(cfg.medal, 'emoji'); if (m === 'none') return ''; if (m === 'emoji') return '<div class="wn-md">' + ['🥇', '🥈', '🥉'][p - 1] + '</div>'; return '<div class="wn-md c">' + p + '</div>'; }
+            function times() {
+                const base = Math.max(0, num(cfg.dur, 0.7)) * 0.6, step = Math.max(0, num(cfg.step, 1.2)), xs = Math.max(0, num(cfg.exitStep, 0.5)), so = seqOrder(g(cfg.order, '321'));
+                const xo = g(cfg.exitOrder, 'same') === 'rev' ? seqOrder(g(cfg.order, '321') === '123' ? '321' : '123') : (g(cfg.exitOrder, 'same') === 'all' ? [] : so);
+                const d = {}, x = {}; [1, 2, 3].forEach(p => { const i = so.indexOf(p), j = xo.indexOf(p); d[p] = base + (i < 0 ? 0 : i * step); x[p] = j < 0 ? 0 : j * xs; });
+                return { d, x, total: base + Math.max(0, so.length - 1) * step + num(cfg.pdur, 0.8), xtotal: Math.max(0, xo.length - 1) * xs + num(cfg.pdur, 0.8) };
+            }
+            function block(set, label, T) {
+                const N = arr(cfg[set + 'N']), P = arr(cfg[set + 'P']), podium = g(cfg.layout, 'podium') === 'podium', ped = podium && cfg.pedestal !== false, pa = g(cfg.placeAnim, 'rise');
+                const col = p => {
+                    const nm = String(N[p - 1] || '').trim(), pz = String(P[p - 1] || '').trim();
+                    const inA = pa === 'side' ? (p === 2 ? 'wnSideL' : (p === 3 ? 'wnSideR' : 'wnRise')) : (IN[pa] || 'wnRise');
+                    const oa = OUT[g(cfg.exitAnim, 'fade')] || 'wnOutFade', sx = p === 2 ? '-300px' : (p === 3 ? '300px' : '0px');
+                    return '<div class="wn-col p' + p + (nm ? '' : ' empty') + '" style="--wn-in:' + inA + ';--wn-d:' + T.d[p].toFixed(2) + 's;--wn-cd:' + (ped ? 0.3 : 0) + 's;--wn-out:' + oa + ';--wn-xd:' + T.x[p].toFixed(2) + 's;--wn-sx:' + sx + '">' +
+                        (podium && p === 1 && cfg.trophy !== false ? '<div class="wn-tr">🏆</div>' : '') +
+                        '<div class="wn-card">' + medal(p) + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' +
+                        (ped ? '<div class="wn-ped"><span>' + p + '</span></div>' : '') + '</div>';
+                };
+                return '<div class="wn-blk">' + (label ? '<div class="wn-lb">' + esc(label) + '</div>' : '') + '<div class="wn-pod ' + (podium ? 'pod' : 'rows') + '">' + (podium ? [2, 1, 3] : [1, 2, 3]).map(col).join('') + '</div></div>';
+            }
+            let TT0 = null;
+            function content(noanim) {
+                const T = TT0 = times(), bl = blocks(), two = showLower();
+                const hasAny = set => [1, 2, 3].some(p => String(arr(cfg[set + 'N'])[p - 1] || '').trim());
+                let h = '';
+                if (cfg.title) h += '<div><div class="wn-t">' + esc(cfg.title) + '</div>' + (cfg.sub ? '<div class="wn-st">' + esc(cfg.sub) + '</div>' : '') + '</div>';
+                h += '<div class="wn-blocks">' + bl.map(b => block(b, two ? (b === 'up' ? g(cfg.upLabel, 'ГОЛОВНА СІТКА') : g(cfg.loLabel, 'НИЖНЯ СІТКА')) : '', T)).join('') + '</div>';
+                board.classList.toggle('noanim', !!noanim); board.innerHTML = h;
+            }
+            function confetti() {
+                if (!cfg.confetti || !wrap.animate) return; const cols = [theme().c1, theme().c2, theme().c3, '#ffffff', '#ff4f6d', '#4fc3ff'];
+                for (let i = 0; i < 70; i++) {
+                    const e = document.createElement('div'); e.className = 'wn-cf'; e.style.left = (Math.random() * 1920) + 'px'; e.style.background = cols[i % cols.length]; wrap.appendChild(e);
+                    const dur = 2600 + Math.random() * 2600, dx = (Math.random() - .5) * 300, a = e.animate([{ transform: 'translate(0,0) rotate(0deg)', opacity: 1 }, { transform: 'translate(' + dx + 'px,1160px) rotate(' + (360 + Math.random() * 720) + 'deg)', opacity: 1 }], { duration: dur, delay: Math.random() * 900, easing: 'ease-in', fill: 'both' });
+                    a.onfinish = () => e.remove();
+                }
+            }
+            function clearTimers() { clearTimeout(endT); clearTimeout(seqT); cfT.forEach(clearTimeout); cfT = []; }
+            const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
+            function hideNow() {
+                clearTimers(); wrap.querySelectorAll('.wn-cf').forEach(e => e.remove()); if (!isOn) { return; } isOn = false;
+                if (g(cfg.exitAnim, 'fade') === 'none') { wrap.classList.remove('on'); return; }
+                const T = times(); board.classList.add('out'); clearTimeout(exitT);
+                exitT = setTimeout(() => { wrap.classList.remove('on'); board.classList.remove('out'); }, T.xtotal * 1000 + 200);
+            }
+            function play() {
+                clearTimeout(exitT); board.classList.remove('out'); phase = 'up'; vars(); content(false);
+                const bi = g(cfg.anim, 'rise'); board.classList.remove('in-fade', 'in-zoom', 'in-rise'); void board.offsetWidth; if (bi !== 'none') board.classList.add('in-' + bi);
+                const T = times(); clearTimers();
+                cfT.push(setTimeout(confetti, (T.d[1] || 0) * 1000 + 400));
+                const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { hidden = true; hideNow(); }, ah * 1000);
+                if (showLower() && g(cfg.lowerMode, 'side') === 'seq') seqT = setTimeout(() => {
+                    const X = times(); board.classList.add('out');
+                    cfT.push(setTimeout(() => { board.classList.remove('out'); phase = 'lo'; vars(); content(false); cfT.push(setTimeout(confetti, (X.d[1] || 0) * 1000 + 400)); }, X.xtotal * 1000 + 100));
+                }, (T.total + num(cfg.seqSec, 6)) * 1000);
+            }
+            function apply(c) {
+                cfg = window.__pvE('wn', c) || {}; look();
+                const v = visibleNow(), ts = cfg.ts || 0;
+                if (v) {
+                    if (ts !== lastTs) hidden = false;
+                    if (hidden) { hideNow(); lastTs = ts; return; }
+                    const c2 = Object.assign({}, cfg); delete c2.ts; const sig = JSON.stringify(c2);
+                    if (!isOn || ts !== lastTs) { wrap.classList.add('on'); isOn = true; play(); }
+                    else if (sig !== csig) { vars(); content(true); }
+                    csig = sig; lastTs = ts;
+                } else { hideNow(); hidden = false; lastTs = ts; }
+            }
+            onValue(ref(db, 'padel/winners'), s => { gcfg = s.val(); apply(gcfg || ccfg); }, () => { gcfg = null; }); window.__pvReg('wn', () => apply(gcfg || ccfg));
+            onValue(ref(db, 'padel/courts/_winners'), s => { ccfg = s.val(); try { apply(gcfg || ccfg); } catch (e) {} }, () => { ccfg = null; });
+            window.addEventListener('resize', look);
+            return { apply };
         })();
 
         const TN = (function () {
