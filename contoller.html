@@ -2535,7 +2535,7 @@ function __clearTournamentName() {
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tname', 'padel/tname', 'tnCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tname', 'padel/tname', 'tnCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['winners', 'padel/winners', null], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4768,6 +4768,91 @@ function __clearTournamentName() {
         })();
 
 
+        // ===== ПЕРЕМОЖЦІ (padel/winners): п'єдестал 1-2-3, нижня сітка, анімації =====
+        (function wnInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', ts: 0, title: 'ПЕРЕМОЖЦІ ТУРНІРУ', sub: '', upLabel: 'ГОЛОВНА СІТКА', loLabel: 'НИЖНЯ СІТКА', upN: ['', '', ''], upP: ['', '', ''], loN: ['', '', ''], loP: ['', '', ''], showLower: false, lowerMode: 'side', seqSec: 6,
+                layout: 'podium', theme: 'gold', medal: 'emoji', trophy: true, pedestal: true, upper: true, confetti: true,
+                anim: 'rise', dur: 0.7, placeAnim: 'rise', order: '321', step: 1.2, pdur: 0.8, exitAnim: 'fade', exitOrder: 'same', exitStep: 0.5,
+                x: 50, y: 50, scale: 100, width: 1500, textSize: 100, nameSize: 34, prizeSize: 26, titleSize: 66, pedH: 100, radius: 32, bgOp: 94, autoHide: 0,
+                bg1: '#0b1226', bg2: '#1b2a5a', tx: '#ffffff', tc: '#f5c542', c1: '#f5c542', c2: '#d5dbe8', c3: '#cd7f32' };
+            let d = JSON.parse(JSON.stringify(DEF)), timer = null, dirty = 0, po = null;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'wn-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🏅 Переможці (п’єдестал 1-2-3, нижня сітка)</span><span class="tcol-arrow">▾</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const O = a => a.map(x => '<option value="' + x[0] + '">' + x[1] + '</option>').join('');
+            const SEL = (k, l, o) => '<div class="row">' + lab(l + ':') + '<select data-k="' + k + '" style="' + inp + '">' + O(o) + '</select></div>';
+            const TXT = (k, l) => '<div class="row">' + lab(l + ':') + '<input type="text" data-k="' + k + '" style="' + inp + '"></div>';
+            const CHK = (k, l) => '<label style="font-size:11px; color:#ccc; display:flex; align-items:center; gap:6px;"><input type="checkbox" data-k="' + k + '"> ' + l + '</label>';
+            const RNG = (k, l, mn, mx, st, u) => '<div class="row">' + lab(l + ': <b data-v="' + k + '"></b>' + (u || '')) + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + st + '"></div>';
+            const COL = (k, l) => '<div class="row">' + lab(l + ':') + '<input type="color" data-k="' + k + '" style="width:60px; height:30px; padding:0;"></div>';
+            const H = t => '<div style="font-size:12px; font-weight:800; color:#f5c542; margin-top:6px;">' + t + '</div>';
+            const places = (set) => [1, 2, 3].map(i => '<div style="display:flex; gap:6px; align-items:center;"><span style="width:22px; font-size:16px;">' + ['🥇', '🥈', '🥉'][i - 1] + '</span><input type="text" data-arr="' + set + 'N" data-i="' + (i - 1) + '" placeholder="Гравець 1 / Гравець 2" style="' + inp + 'flex:2;"><input type="text" data-arr="' + set + 'P" data-i="' + (i - 1) + '" placeholder="Приз" style="' + inp + 'flex:1;"></div>').join('');
+            const ST = [['rise', 'Знизу вгору'], ['zoom', 'Збільшення з відскоком'], ['flip', 'Переворот'], ['fade', 'Плавна поява'], ['drop', 'Падає зверху'], ['side', 'Збоку (2 зліва, 3 справа)']];
+            card.innerHTML = '<div style="font-size:11px; color:#aaa;">Табло переможців: 1, 2, 3 місця (дві людини в команді через « / »). Місця виїжджають по черзі, за замовчуванням 3 → 2 → 1.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="wnb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="wnb-off">■ ПРИХОВАТИ</button></div>' +
+                '<button class="btn" style="padding:8px;" id="wnb-re">↻ Програти анімацію ще раз</button>' +
+                SEL('court', 'Показувати на', [['all', 'Усіх кортах']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]))) +
+                TXT('title', 'Заголовок') + TXT('sub', 'Підзаголовок (необов’язково)') +
+                H('Головна сітка') + TXT('upLabel', 'Підпис блоку (коли показуємо дві сітки)') + places('up') +
+                '<button class="btn" style="padding:8px;" id="wnb-fu">⬇ Взяти з фіналу верхньої сітки плей-офф</button>' +
+                H('Нижня сітка') + CHK('showLower', 'Показувати переможців нижньої сітки (вкл/викл)') +
+                SEL('lowerMode', 'Як показувати нижню сітку', [['side', 'Поруч із головною'], ['seq', 'Спочатку головна, потім нижня']]) + RNG('seqSec', 'Пауза перед нижньою сіткою', 2, 30, 1, ' с') + TXT('loLabel', 'Підпис блоку') + places('lo') +
+                '<button class="btn" style="padding:8px;" id="wnb-fl">⬇ Взяти з фіналу нижньої сітки плей-офф</button>' +
+                H('Вигляд') + SEL('layout', 'Розкладка', [['podium', 'П’єдестал (2-1-3)'], ['rows', 'Рядки 1-2-3']]) +
+                SEL('theme', 'Тема', [['gold', 'Золото / темно-синя'], ['navy', 'Синя'], ['neon', 'Неон'], ['light', 'Світла'], ['padel', 'Падел (зелена)'], ['fire', 'Вогонь'], ['mono', 'Чорно-біла'], ['glass', 'Скло (прозора)'], ['custom', 'Власні кольори']]) +
+                SEL('medal', 'Позначка місця', [['emoji', 'Медалі 🥇🥈🥉'], ['circle', 'Номер у колі'], ['none', 'Без']]) +
+                CHK('trophy', 'Кубок 🏆 над переможцем') + CHK('pedestal', 'П’єдестал (стовпчики)') + CHK('upper', 'Імена ВЕЛИКИМИ літерами') + CHK('confetti', 'Конфеті при появі 1 місця') +
+                H('Анімація') + SEL('anim', 'Поява табла', [['rise', 'Знизу вгору'], ['zoom', 'Збільшення'], ['fade', 'Плавно'], ['none', 'Без анімації']]) + RNG('dur', 'Тривалість появи табла', 0.2, 3, 0.1, ' с') +
+                SEL('placeAnim', 'Анімація місць', ST) + SEL('order', 'Порядок появи місць', [['321', '3 → 2 → 1'], ['123', '1 → 2 → 3'], ['all', 'Усі разом']]) + RNG('step', 'Пауза між місцями', 0, 5, 0.1, ' с') + RNG('pdur', 'Тривалість анімації одного місця', 0.2, 3, 0.1, ' с') +
+                SEL('exitAnim', 'Анімація виходу', [['fade', 'Згасання'], ['down', 'Вниз'], ['up', 'Вгору'], ['zoom', 'Зменшення'], ['side', 'Вбік'], ['none', 'Без анімації']]) + SEL('exitOrder', 'Порядок виходу місць', [['same', '3 → 2 → 1 (як появa)'], ['rev', 'У зворотному порядку'], ['all', 'Усі разом']]) + RNG('exitStep', 'Пауза між виходами', 0, 3, 0.1, ' с') +
+                RNG('autoHide', 'Сховати автоматично через (0 = вручну)', 0, 120, 1, ' с') +
+                H('Розмір і положення') + RNG('scale', 'Масштаб табла', 20, 200, 1, '%') + RNG('width', 'Ширина табла', 700, 1900, 10, ' px') + RNG('x', 'Позиція X (центр)', 0, 100, 0.5, '%') + RNG('y', 'Позиція Y (центр)', 0, 100, 0.5, '%') +
+                RNG('textSize', 'Розмір всього тексту', 40, 200, 1, '%') + RNG('nameSize', 'Розмір імен', 16, 80, 1, ' px') + RNG('prizeSize', 'Розмір призу', 12, 70, 1, ' px') + RNG('titleSize', 'Розмір заголовка', 20, 140, 1, ' px') + RNG('pedH', 'Висота п’єдесталу', 30, 250, 5, '%') + RNG('radius', 'Заокруглення', 0, 80, 1, ' px') + RNG('bgOp', 'Непрозорість фону', 0, 100, 1, '%') +
+                H('Власні кольори (тема «Власні кольори»)') + COL('bg1', 'Фон 1') + COL('bg2', 'Фон 2') + COL('tx', 'Текст') + COL('tc', 'Заголовок') + COL('c1', '1 місце') + COL('c2', '2 місце') + COL('c3', '3 місце') +
+                '<div id="wnb-st" style="font-size:11px; color:#aaa;"></div>';
+            const q = s => card.querySelector(s), st = (m, ok) => { const e = q('#wnb-st'); e.textContent = m; e.style.color = ok === false ? '#f66' : '#7c7'; };
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const k = el.dataset.k, v = d[k]; if (el.type === 'checkbox') el.checked = v !== false && !!v; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.textContent = v; });
+                card.querySelectorAll('[data-arr]').forEach(el => { if (document.activeElement === el) return; const a = d[el.dataset.arr] || []; el.value = a[+el.dataset.i] || ''; });
+                q('#wnb-on').style.outline = d.show ? '3px solid #fff' : 'none'; q('#wnb-off').style.outline = d.show ? 'none' : '3px solid #fff';
+            }
+            function save() {
+                dirty = Date.now(); const data = JSON.parse(JSON.stringify(d));
+                const fb = () => { try { set(ref(db, 'padel/courts/_winners'), data).then(() => st('Збережено (запасний шлях) ✅'), e => st('⚠️ ' + (e && e.message || e), false)); } catch (e) { st('⚠️ не збережено', false); } };
+                try { set(ref(db, 'padel/winners'), data).then(() => st('Збережено ✅'), fb); } catch (e) { fb(); }
+            }
+            const later = () => { clearTimeout(timer); timer = setTimeout(save, 350); };
+            card.addEventListener('input', e => { const el = e.target; if (el.dataset.arr) { const a = (d[el.dataset.arr] || ['', '', '']).slice(); a[+el.dataset.i] = el.value; d[el.dataset.arr] = a; dirty = Date.now(); later(); return; } const k = el.dataset.k; if (!k || el.tagName === 'SELECT' || el.type === 'checkbox') return; d[k] = (el.type === 'range') ? parseFloat(el.value) : el.value; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.textContent = d[k]; dirty = Date.now(); later(); });
+            card.addEventListener('change', e => { const el = e.target, k = el.dataset && el.dataset.k; if (!k || el.type === 'range') return; d[k] = el.type === 'checkbox' ? el.checked : el.value; dirty = Date.now(); later(); });
+            const go = patch => { Object.assign(d, patch); clearTimeout(timer); fill(); save(); };
+            q('#wnb-on').onclick = () => go({ show: true, ts: Date.now() });
+            q('#wnb-off').onclick = () => go({ show: false });
+            q('#wnb-re').onclick = () => go({ show: true, ts: Date.now() });
+            // заповнення з фіналу сітки плей-офф
+            const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            const win = m => { const tk = v => String(v === undefined || v === null ? '' : v).split(/[^0-9]+/).filter(x => x !== '').map(Number), a = tk(m.sa), b = tk(m.sb); if (!a.length || !b.length) return 0; let wa = 0, wb = 0; for (let i = 0; i < Math.max(a.length, b.length); i++) { const x = a[i] || 0, y = b[i] || 0; if (x > y) wa++; else if (y > x) wb++; } return wa > wb ? 1 : (wb > wa ? 2 : 0); };
+            function fillFrom(key, set) {
+                let src = null; try { src = (po && po[key]) || (typeof globalPlayoff !== 'undefined' && globalPlayoff && globalPlayoff[key]) || (state && state.playoff && state.playoff[key]); } catch (e) {}
+                const m = src && src.m || {}, f = A(m.f)[0], t = A(m.third)[0], n = d[set + 'N'].slice();
+                if (!f || !(f.a || f.b)) { st('⚠️ У сітці немає фіналу', false); return; }
+                const w = win(f); if (!w) { st('⚠️ У фіналі ще немає переможця (рахунок)', false); return; }
+                n[0] = String(w === 1 ? f.a : f.b || ''); n[1] = String(w === 1 ? f.b : f.a || '');
+                if (t && (t.a || t.b)) { const w3 = win(t); if (w3) n[2] = String(w3 === 1 ? t.a : t.b || ''); }
+                d[set + 'N'] = n; fill(); save(); st('Імена взято з фіналу ✅');
+            }
+            q('#wnb-fu').onclick = () => fillFrom('upper', 'up'); q('#wnb-fl').onclick = () => fillFrom('lower', 'lo');
+            onValue(ref(db, 'padel/playoff'), s => { po = s.val(); }, () => {});
+            const adopt = v => { if (!v || card.contains(document.activeElement) || Date.now() - dirty < 2500) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); ['upN', 'upP', 'loN', 'loP'].forEach(k => { const a = A(d[k]); d[k] = [a[0] || '', a[1] || '', a[2] || '']; }); fill(); };
+            onValue(ref(db, 'padel/winners'), s => adopt(s.val()), () => {});
+            onValue(ref(db, 'padel/courts/_winners'), s => { if (!d.ts) adopt(s.val()); }, () => {});
+            fill();
+        })();
+
+
         // ===== СИНХРОНІЗАЦІЯ НАЛАШТУВАНЬ І ТАБЛ НА ВСІ КОРТИ + перезапуск зʼєднання з базою =====
         (function csInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -5597,11 +5682,12 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                 poU: Object.assign({ name: '🏁 Play-off: верх (усі корти)' }, ALL('po-upper', s => s.playoff && s.playoff.upper && s.playoff.upper.show)),
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
                 tname: Object.assign({ name: '🏆 Назва турніру (усі корти)' }, EXP('tnb-on', 'tnb-off')),
+                winners: Object.assign({ name: '🏅 Переможці (усі корти)' }, EXP('wnb-on', 'wnb-off')),
                 weather: Object.assign({ name: '⛅ Погода (усі корти)' }, EXP('wxb-on', 'wxb-off')),
                 sponsorLogos: (() => { const o = ALL('sp', s => s.showSponsorLogos); const f = o.set; o.set = function(w) { try { if (w && S().sponsorLogoDisplayMode === 'all' && window.updateSponsorLogoMode) window.updateSponsorLogoMode('carousel'); } catch (e) {} f.call(o, w); }; o.name = '🤝 Логотипи спонсорів — карусель (усі корти)'; return o; })(),
                 credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
-            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'tname', 'weather', 'sponsorLogos', 'credits'];
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'tname', 'winners', 'weather', 'sponsorLogos', 'credits'];
             const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm' || id === 'sc') ? 20 : (id === 'mt' ? 10 : (id === 'credits' ? 60 : 7)) })) });
             const norm = v => {
                 const base = DEFD(); if (!v || typeof v !== 'object') return base;
