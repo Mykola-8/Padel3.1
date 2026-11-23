@@ -1208,12 +1208,13 @@
         .po-wrap[data-pt="card"] .po-n .po-t, .po-wrap[data-pt="glass"] .po-n .po-t { padding-left: 18px; }
         /* --- тема «Rankedin»: світла, сірі капсули, великі імена й рахунок праворуч --- */
         .po-wrap[data-pt="pill"] .po-m { border-radius: calc(var(--po-h, 96px) / 2); background: var(--po-frame, #e6e6e8); overflow: hidden; box-shadow: none; }
-        .po-wrap[data-pt="pill"] .po-m::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--po-h, 96px) * 0.62); background: var(--po-line, #313f7a); border-radius: 999px 0 0 999px; }
-        .po-wrap[data-pt="pill"] .po-n { left: calc(var(--po-h, 96px) * 0.62 + 22px); width: calc(100% - var(--po-h, 96px) * 0.62 - 22px - 170px); height: var(--po-h, 96px); background: transparent; }
-        .po-wrap[data-pt="pill"] .po-s { left: auto; right: 26px; width: 150px; height: var(--po-h, 96px); background: transparent; }
+        .po-wrap[data-pt="pill"] .po-m::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--po-h, 96px) * 0.5); background: var(--po-line, #313f7a); border-radius: 999px 0 0 999px; }
+        .po-wrap[data-pt="pill"] .po-n { left: calc(var(--po-h, 96px) * 0.5 + 12px); width: calc(100% - var(--po-h, 96px) * 0.5 - 12px - 104px); height: var(--po-h, 96px); background: transparent; }
+        .po-wrap[data-pt="pill"] .po-s { left: auto; right: 22px; width: 82px; height: var(--po-h, 96px); background: transparent; }
         .po-wrap[data-pt="pill"] .po-t { height: calc(var(--po-h, 96px) / 2); padding: 0; color: var(--po-text, #2b3568); font-weight: 600; }
         .po-wrap[data-pt="pill"] .po-t + .po-t { border-top: 1px solid rgba(49,63,122,.16); }
-        .po-wrap[data-pt="pill"] .po-n .po-t.two { justify-content: center; }
+        .po-wrap[data-pt="pill"] .po-n .po-t.two { justify-content: center; line-height: 1.1; }
+        .po-wrap[data-pt="pill"] .po-n .po-t { letter-spacing: 0; font-weight: 800; }
         .po-wrap[data-pt="pill"] .po-n .po-t.win { font-weight: 900; }
         .po-wrap[data-pt="pill"] .po-s .po-t { justify-content: flex-end; font-size: calc(var(--po-h, 96px) * 0.34 * var(--po-ts, 1)); font-weight: 900; color: var(--po-sc, #313f7a); opacity: .55; }
         .po-wrap[data-pt="pill"] .po-s .po-t.win { opacity: 1; }
@@ -2703,7 +2704,7 @@
         function poBuild(wrap, cfg) {
             const has16 = poHas16((cfg.m || {})), PILL = cfg.shape === 'pill', TWO = PILL ? true : !!cfg.twoLines;
             const TS = Math.max(0.5, Math.min(2, (parseInt(cfg.textSize) || 100) / 100)), NS = Math.max(0.5, Math.min(2.5, (parseInt(cfg.nameSize) || 100) / 100)); let SZ = poPickSizing(cfg.m || {}, has16, TWO, NS), NW = SZ.NW, PO_L;
-            if (PILL) { const n = has16 ? 4 : 3, gp = 99, Wp = Math.floor((1820 - (n - 1) * gp) / n), Hp = has16 ? 96 : 150; PO_L = poLayout(has16, Wp, Hp); NW = Wp - 170; SZ = { fs: Math.max(14, Math.min(48, Math.round(Hp / 2 / 1.9 * NS))), NW }; }
+            if (PILL) { const n = has16 ? 4 : 3, gp = 64, Wp = Math.floor((1840 - (n - 1) * gp) / n), Hp = has16 ? 100 : 150; PO_L = poLayout(has16, Wp, Hp); PO_L.gap = gp; NW = Wp - 140; SZ = { fs: Math.max(14, Math.min(56, Math.round(Hp / 2 / 2.2 * NS))), NW }; }
             else PO_L = poLayout(has16, NW + 150, TWO ? Math.max(100, Math.ceil(SZ.fs * 2 * 1.22) + 18) : Math.max(76, Math.ceil(SZ.fs * 1.5) * 2));
             wrap.style.setProperty('--po-h', PO_L.H + 'px');
             wrap.style.setProperty('--po-nw', NW + 'px'); wrap.style.setProperty('--po-nf', SZ.fs + 'px'); wrap.style.setProperty('--po-ts', TS); wrap.style.setProperty('--po-sf', Math.min(60, Math.round(Math.max(26, PO_L.H * 0.34) * TS)) + 'px'); wrap.dataset.fit = PO_L.fit;
