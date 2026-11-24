@@ -866,7 +866,12 @@
         .pr-team .pr-pl { align-self: center; }
         .pr-team .pls { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
         .pr-team .pl { display: flex; align-items: center; gap: 12px; min-width: 0; } .pr-team { min-width: 0; } .pr-team .pl .pr-n { font-size: 1em; }
-        .pr-avg { flex: 0 0 auto; align-self: center; font-size: .6em; font-weight: 700; opacity: .7; text-align: right; line-height: 1.2; }
+        .pr-avg { flex: 0 0 auto; align-self: center; width: 3.2em; text-align: center; overflow: hidden; }
+        .pr-avg b { display: inline-block; font-size: 1.15em; font-weight: 900; color: var(--pr-ac2); font-variant-numeric: tabular-nums; }
+        .pr-avg b.in, .pr-colh span.in { animation: prAvgIn .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--pr-d, 0s); }
+        @keyframes prAvgIn { from { opacity: 0; transform: translateX(120px); } to { opacity: 1; transform: none; } }
+        .pr-grid.pr-ghead { margin-bottom: -8px; } .pr-colh { display: flex; justify-content: flex-end; padding-right: 16px; }
+        .pr-colh span { width: 6.4em; text-align: center; font-size: .5em; font-weight: 800; letter-spacing: .06em; color: var(--pr-ac2); line-height: 1.15; }
         .pr-pg { text-align: center; font-size: .55em; opacity: .6; font-weight: 700; letter-spacing: .1em; }
         .tn-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 10004; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; font-family: 'Montserrat', 'Arial Black', sans-serif; }
         .tn-wrap.on { opacity: 1; visibility: visible; transition: opacity .4s ease; }
@@ -4798,42 +4803,58 @@
             const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
             const BOLT = '<svg viewBox="0 0 24 24"><path d="M13.5 1 4 14h6l-1.5 9L20 9h-6.5z"/></svg>';
             const TH = {
-                pado: { bg: '#ffffff', bg2: '#f1f2f8', tx: '#1b1b2f', ac: '#6d3df5', acx: '#ffffff', row: '#f3f4f9' },
-                dark: { bg: '#0b1226', bg2: '#16224a', tx: '#ffffff', ac: '#8f6bff', acx: '#ffffff', row: 'rgba(255,255,255,.08)' },
-                navy: { bg: '#06142e', bg2: '#0f3a7a', tx: '#ffffff', ac: '#ffd24a', acx: '#111111', row: 'rgba(255,255,255,.08)' },
-                padel: { bg: '#06402d', bg2: '#0c7a52', tx: '#ffffff', ac: '#d7ff3a', acx: '#06402d', row: 'rgba(0,0,0,.25)' },
-                neon: { bg: '#0a0420', bg2: '#2a0a55', tx: '#ffffff', ac: '#00f0ff', acx: '#0a0420', row: 'rgba(255,255,255,.07)' }
+                pado: { bg: '#ffffff', ac2: '#e8590c', bg2: '#f1f2f8', tx: '#1b1b2f', ac: '#6d3df5', acx: '#ffffff', row: '#f3f4f9' },
+                dark: { bg: '#0b1226', ac2: '#ffd24a', bg2: '#16224a', tx: '#ffffff', ac: '#8f6bff', acx: '#ffffff', row: 'rgba(255,255,255,.08)' },
+                navy: { bg: '#06142e', ac2: '#8fd3ff', bg2: '#0f3a7a', tx: '#ffffff', ac: '#ffd24a', acx: '#111111', row: 'rgba(255,255,255,.08)' },
+                padel: { bg: '#06402d', ac2: '#ffffff', bg2: '#0c7a52', tx: '#ffffff', ac: '#d7ff3a', acx: '#06402d', row: 'rgba(0,0,0,.25)' },
+                neon: { bg: '#0a0420', ac2: '#ff4fd8', bg2: '#2a0a55', tx: '#ffffff', ac: '#00f0ff', acx: '#0a0420', row: 'rgba(255,255,255,.07)' }
             };
             function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
             function rows() { return arr(cfg.rows).map((r, i) => ({ n: String(r && r.n || ''), r: num(r && r.r, 0), t: Math.floor(i / 2), i })).filter(r => r.n); }
             function vars() {
                 const s = board.style, t = TH[g(cfg.theme, 'pado')] || TH.pado, op = Math.max(0, Math.min(100, num(cfg.bgOp, 96))) / 100;
-                s.setProperty('--pr-bg', t.bg + (op < 1 ? Math.round(op * 255).toString(16).padStart(2, '0') : '')); s.setProperty('--pr-tx', t.tx); s.setProperty('--pr-ac', t.ac); s.setProperty('--pr-acx', t.acx); s.setProperty('--pr-row', t.row);
+                s.setProperty('--pr-bg', t.bg + (op < 1 ? Math.round(op * 255).toString(16).padStart(2, '0') : '')); s.setProperty('--pr-tx', t.tx); s.setProperty('--pr-ac', t.ac); s.setProperty('--pr-acx', t.acx); s.setProperty('--pr-ac2', t.ac2 || t.ac); s.setProperty('--pr-row', t.row);
                 s.setProperty('--pr-x', num(cfg.x, 50)); s.setProperty('--pr-y', num(cfg.y, 50)); s.setProperty('--pr-sc', Math.max(20, num(cfg.scale, 100)) / 100); s.setProperty('--pr-w', num(cfg.width, 1300) + 'px'); s.setProperty('--pr-k', Math.max(0.4, num(cfg.textSize, 100) / 100));
             }
+            let phase = 2, seqT1 = null, seqT2 = null;
+            const avgOf = tm => Math.round(tm.reduce((a, b) => a + b.r, 0) / (tm.length || 1));
             function pages() {
                 const R = rows(), team = g(cfg.mode, 'players') === 'teams', per = Math.max(1, num(cfg.perPage, team ? 6 : 12));
-                let items; if (team) { items = []; for (let i = 0; i < R.length; i += 2) items.push(R.slice(i, i + 2)); } else { items = R.slice(); if (cfg.sort !== false) items.sort((a, b) => b.r - a.r); }
+                let items; if (team) { items = []; for (let i = 0; i < R.length; i += 2) { const tm = R.slice(i, i + 2); tm.o = i / 2; tm.avg = avgOf(tm); items.push(tm); } if (cfg.sortAvg !== false) items.sort((a, b) => b.avg - a.avg || a.o - b.o); }
+                else { items = R.slice(); if (cfg.sort !== false) items.sort((a, b) => b.r - a.r); }
                 const pg = []; for (let i = 0; i < items.length; i += per) pg.push(items.slice(i, i + per)); return { pg, team, total: items.length, per, R };
             }
+            const seqOn = () => g(cfg.mode, 'players') === 'teams' && cfg.showAvg !== false;
             function content(noanim) {
-                const P = pages(), team = P.team; if (page >= P.pg.length) page = 0; const list = P.pg[page] || [], up = cfg.upper !== false, nm = x => esc(up ? x.toUpperCase() : x);
+                const P = pages(), team = P.team; if (page >= P.pg.length) page = 0; let list = (P.pg[page] || []).slice(); const up = cfg.upper !== false, nm = x => esc(up ? x.toUpperCase() : x);
+                if (team && page === 0 && phase < 2) list.sort((a, b) => a.o - b.o);
                 const colsN = num(cfg.cols, 0) || (list.length > (team ? 6 : 8) ? 2 : 1); board.style.setProperty('--pr-cols', Math.min(3, colsN));
-                const base = page * P.per, top3 = cfg.topColors !== false;
-                let h = '<div class="pr-hd"><div class="pr-t">' + esc(g(cfg.title, 'РЕЙТИНГ УЧАСНИКІВ PADO')) + '</div>' + (cfg.sub ? '<div class="pr-st">' + esc(cfg.sub) + '</div>' : '') + '</div><div class="pr-grid">';
+                const base = page * P.per, top3 = cfg.topColors !== false, showAvg = team && cfg.showAvg !== false && (phase >= 1 || page > 0);
+                let h = '<div class="pr-hd"><div class="pr-t">' + esc(g(cfg.title, 'РЕЙТИНГ УЧАСНИКІВ PADO')) + '</div>' + (cfg.sub ? '<div class="pr-st">' + esc(cfg.sub) + '</div>' : '') + '</div>';
+                if (team && cfg.showAvg !== false) { const ch = '<div class="pr-colh"><span class="' + (showAvg && phase === 1 && page === 0 ? 'in' : '') + '" style="' + (showAvg ? '' : 'opacity:0') + '">' + esc(g(cfg.avgLabel, 'СЕРЕДНІЙ РЕЙТИНГ')) + '</span></div>'; h += '<div class="pr-grid pr-ghead">' + Array.from({ length: Math.min(3, colsN) }, () => ch).join('') + '</div>'; }
+                h += '<div class="pr-grid">';
                 if (team) {
-                    h += list.map((tm, i) => { const avg = Math.round(tm.reduce((a, b) => a + b.r, 0) / (tm.length || 1)); return '<div class="pr-team" style="--pr-d:' + (i * 0.07).toFixed(2) + 's"><div class="pr-pl">' + (base + i + 1) + '</div><div class="pls">' + tm.map(p => '<div class="pl"><div class="pr-n">' + nm(p.n) + '</div><div class="pr-r">' + BOLT + (p.r || '–') + '</div></div>').join('') + '</div>' + (cfg.showAvg ? '<div class="pr-avg">СЕРЕД.<br><b>' + avg + '</b></div>' : '') + '</div>'; }).join('');
+                    h += list.map((tm, i) => '<div class="pr-team" data-t="' + tm.o + '" style="--pr-d:' + (i * 0.07).toFixed(2) + 's"><div class="pr-pl">' + (base + i + 1) + '</div><div class="pls">' + tm.map(p => '<div class="pl"><div class="pr-n">' + nm(p.n) + '</div><div class="pr-r">' + BOLT + (p.r || '–') + '</div></div>').join('') + '</div>' + (cfg.showAvg !== false ? '<div class="pr-avg">' + (showAvg ? '<b class="' + (phase === 1 && page === 0 ? 'in' : '') + '" style="--pr-d:' + (i * 0.1).toFixed(2) + 's">' + tm.avg + '</b>' : '') + '</div>' : '') + '</div>').join('');
                 } else {
                     h += list.map((p, i) => { const place = base + i + 1, mate = cfg.showMate ? P.R.find(x => x.t === p.t && x.i !== p.i) : null; return '<div class="pr-row" style="--pr-d:' + (i * 0.05).toFixed(2) + 's"><div class="pr-pl' + (top3 && cfg.sort !== false && place <= 3 ? ' g' + place : '') + '">' + place + '</div><div class="pr-n">' + nm(p.n) + (mate ? '<span class="pr-mate">з ' + nm(mate.n) + '</span>' : '') + '</div><div class="pr-r">' + BOLT + (p.r || '–') + '</div></div>'; }).join('');
                 }
                 h += '</div>' + (P.pg.length > 1 ? '<div class="pr-pg">' + (page + 1) + ' / ' + P.pg.length + '</div>' : '');
                 board.classList.toggle('noanim', !!noanim); board.innerHTML = h;
             }
-            function clear() { clearTimeout(endT); clearInterval(pgT); }
+            // плавне переміщення команд на нові місця (FLIP)
+            function reorder() {
+                const old = {}; const k = board.getBoundingClientRect().width / (board.offsetWidth || 1) || 1;
+                board.querySelectorAll('.pr-team').forEach(e => { const r = e.getBoundingClientRect(); old[e.dataset.t] = { x: r.left, y: r.top }; });
+                phase = 2; content(true);
+                if (!board.animate) return;
+                board.querySelectorAll('.pr-team').forEach(e => { const o = old[e.dataset.t], r = e.getBoundingClientRect(); if (!o) return; const dx = (o.x - r.left) / k, dy = (o.y - r.top) / k; if (Math.abs(dx) + Math.abs(dy) < 1) return; e.style.zIndex = '2'; e.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: Math.max(300, num(cfg.moveSec, 1.1) * 1000), easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' }); });
+            }
+            function clear() { clearTimeout(endT); clearInterval(pgT); clearTimeout(seqT1); clearTimeout(seqT2); }
             const visibleNow = () => { const ct = g(cfg.court, 'all'); return !!cfg.show && (ct === 'all' || String(ct) === String(courtNum)); };
             function play() {
-                clear(); page = 0; vars(); content(false); const bi = g(cfg.anim, 'rise'); board.classList.remove('in-fade', 'in-zoom', 'in-rise'); void board.offsetWidth; if (bi !== 'none') board.classList.add('in-' + bi);
-                const P = pages(); if (P.pg.length > 1) pgT = setInterval(() => { page = (page + 1) % pages().pg.length; content(false); }, Math.max(2, num(cfg.pageSec, 7)) * 1000);
+                clear(); page = 0; phase = seqOn() ? 0 : 2; vars(); content(false);
+                if (seqOn()) { seqT1 = setTimeout(() => { phase = 1; content(true); if (cfg.sortAvg !== false) seqT2 = setTimeout(reorder, Math.max(0.3, num(cfg.sortDelay, 1.4)) * 1000); else phase = 2; }, Math.max(0.5, num(cfg.avgDelay, 2)) * 1000); } const bi = g(cfg.anim, 'rise'); board.classList.remove('in-fade', 'in-zoom', 'in-rise'); void board.offsetWidth; if (bi !== 'none') board.classList.add('in-' + bi);
+                const P = pages(); if (P.pg.length > 1) pgT = setInterval(() => { page = (page + 1) % pages().pg.length; if (page > 0 || phase >= 1) phase = 2; content(false); }, Math.max(2, num(cfg.pageSec, 7)) * 1000);
                 const ah = num(cfg.autoHide, 0); if (ah > 0) endT = setTimeout(() => { hidden = true; hideNow(); }, ah * 1000);
             }
             function hideNow() { clear(); if (!isOn) return; isOn = false; wrap.classList.remove('on'); }
