@@ -2535,7 +2535,7 @@ function __clearTournamentName() {
             'serverIconType', 'serverIconColor', 'showServerIndicator', 'showBoardPlate', 'showBoardFlash', 'showBallAnimations', 'showActionLabels',
             'americanoLimit', 'americanoTotal', 'mexicanoLimit', 'proSetLimit', 'superTiebreakLimit', 'tickerWidth', 'adBarWidth'];
         function tsMsg(t, ok) { const el = document.getElementById('ts-status'); if (el) { el.innerText = t; el.style.color = ok === false ? '#f87171' : '#86efac'; } }
-        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tname', 'padel/tname', 'tnCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['winners', 'padel/winners', null], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
+        const TS_EXTRA = [['crew', 'padel/crew', 'crewCfg'], ['spcard', 'padel/spcard', 'spcardCfg'], ['credits', 'padel/credits', 'creditsCfg'], ['rules', 'padel/rules', 'rulesCfg'], ['tname', 'padel/tname', 'tnCfg'], ['rkm', 'padel/rkmove', 'rkmCfg'], ['sc', 'padel/scoretable', 'scCfg'], ['mt', 'padel/nextmatches', 'mtCfg'], ['mb', 'padel/miniboard', 'mbCfg'], ['stinger', 'padel/stinger', 'stCfg'], ['cb', 'padel/cornerBanner', 'cbCfg'], ['prate', 'padel/prate', null], ['winners', 'padel/winners', null], ['seq', 'padel/seq', null], ['tournTheme', 'padel/tournTheme', 'tournTheme'], ['autoSched', 'padel/autoSched', 'autoSchedCfg'], ['breakCfg', 'padel/breakCfg', 'brkCfg'], ['tv', 'padel/tv', 'tvCfg'], ['mascots', 'padel/mascots', null]];
         window.tsExport = async function() {
             try {
                 const extra = {};
@@ -4768,6 +4768,82 @@ function __clearTournamentName() {
         })();
 
 
+        // ===== РЕЙТИНГ ГРАВЦІВ PADO (padel/prate): кожен учасник окремо, навіть якщо вони в одній команді =====
+        (function prInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const DEF = { show: false, court: 'all', ts: 0, title: 'РЕЙТИНГ УЧАСНИКІВ PADO', sub: '', mode: 'players', sort: true, topColors: true, showMate: true, showAvg: true, upper: true, perPage: 12, pageSec: 7, cols: 0, theme: 'pado', anim: 'rise', textSize: 100, scale: 100, width: 1300, x: 50, y: 50, bgOp: 96, autoHide: 0, rows: [] };
+            let d = JSON.parse(JSON.stringify(DEF)), timer = null, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'pr-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>⚡ Рейтинг гравців PADO (кожен учасник окремо)</span><span class="tcol-arrow">▾</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const O = a => a.map(x => '<option value="' + x[0] + '">' + x[1] + '</option>').join('');
+            const SEL = (k, l, o) => '<div class="row">' + lab(l + ':') + '<select data-k="' + k + '" style="' + inp + '">' + O(o) + '</select></div>';
+            const TXT = (k, l) => '<div class="row">' + lab(l + ':') + '<input type="text" data-k="' + k + '" style="' + inp + '"></div>';
+            const CHK = (k, l) => '<label style="font-size:11px; color:#ccc; display:flex; align-items:center; gap:6px;"><input type="checkbox" data-k="' + k + '"> ' + l + '</label>';
+            const RNG = (k, l, mn, mx, st, u) => '<div class="row">' + lab(l + ': <b data-v="' + k + '"></b>' + (u || '')) + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + st + '"></div>';
+            card.innerHTML = '<div style="font-size:11px; color:#aaa;">Рейтинг ⚡ кожного учасника PADO. Показуємо кожного гравця окремо (таблиця за рейтингом) або парами, як у PADO. Рядки йдуть парами: 1-й і 2-й — одна команда, 3-й і 4-й — наступна тощо.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="prb-on">▶ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="prb-off">■ ПРИХОВАТИ</button></div>' +
+                SEL('court', 'Показувати на', [['all', 'Усіх кортах']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]))) +
+                '<details open style="background:#1a1a1a; border-radius:6px; padding:6px;"><summary style="font-size:12px; font-weight:700; cursor:pointer;">⬇ Імпорт з PADO (фото або текст)</summary><div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"><div style="font-size:10px; color:#9bd;">📷 Вставте скрін сторінки учасників (Ctrl+V у цьому блоці) або виберіть фото. Розпізнається «Ім’я Прізвище ⚡ рейтинг», по два гравці на команду.</div><input type="file" accept="image/*" id="prb-file" style="font-size:11px;"><div id="prb-ocr" style="font-size:11px;"></div><textarea id="prb-txt" rows="6" placeholder="Микола ГУРСЬКИЙ 1588&#10;Valentyn HORCHYTSIA 931&#10;Vlad TAIENCHUK 1518&#10;…" style="' + inp + '"></textarea><div style="display:flex; gap:6px;"><button class="btn btn-green" style="flex:1; padding:8px;" id="prb-go">Додати до таблиці</button><button class="btn" style="padding:8px;" id="prb-rep">Замінити таблицю</button></div></div></details>' +
+                '<div><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:12px; font-weight:700;">Учасники (пари: 1+2, 3+4 …)</span><span><button class="btn" style="padding:4px 8px;" id="prb-add">+ рядок</button> <button class="btn btn-red" style="padding:4px 8px;" id="prb-clr">Очистити</button></span></div><div id="prb-rows" style="display:flex; flex-direction:column; gap:4px; margin-top:6px;"></div></div>' +
+                TXT('title', 'Заголовок') + TXT('sub', 'Підзаголовок') +
+                SEL('mode', 'Режим', [['players', 'Кожен гравець окремо (за рейтингом)'], ['teams', 'Парами (як у PADO)']]) + CHK('sort', 'Сортувати за рейтингом (режим «кожен гравець»)') + CHK('topColors', 'Золото / срібло / бронза для 1-3 місць') + CHK('showMate', 'Показувати напарника під іменем (режим «кожен гравець»)') + CHK('showAvg', 'Показувати середній рейтинг пари (режим «парами»)') + CHK('upper', 'Імена ВЕЛИКИМИ літерами') +
+                SEL('theme', 'Тема', [['pado', 'PADO (біла, фіолетова)'], ['dark', 'Темна'], ['navy', 'Синя'], ['padel', 'Падел (зелена)'], ['neon', 'Неон']]) + SEL('anim', 'Анімація появи', [['rise', 'Знизу вгору'], ['zoom', 'Збільшення'], ['fade', 'Плавно'], ['none', 'Без анімації']]) +
+                RNG('perPage', 'Рядків на сторінці (гравців / пар)', 2, 30, 1, '') + RNG('pageSec', 'Зміна сторінок кожні', 2, 30, 1, ' с') + SEL('cols', 'Колонок', [['0', 'Авто'], ['1', '1'], ['2', '2'], ['3', '3']]) +
+                RNG('scale', 'Масштаб табла', 20, 200, 1, '%') + RNG('width', 'Ширина табла', 600, 1900, 10, ' px') + RNG('textSize', 'Розмір тексту', 40, 200, 1, '%') + RNG('x', 'Позиція X', 0, 100, 0.5, '%') + RNG('y', 'Позиція Y', 0, 100, 0.5, '%') + RNG('bgOp', 'Непрозорість фону', 0, 100, 1, '%') + RNG('autoHide', 'Сховати через (0 = вручну)', 0, 120, 1, ' с') +
+                '<div id="prb-st" style="font-size:11px; color:#aaa;"></div>';
+            const q = s => card.querySelector(s), st = (m, ok) => { const e = q('#prb-st'); e.textContent = m; e.style.color = ok === false ? '#f66' : '#7c7'; };
+            const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            function drawRows() {
+                const host = q('#prb-rows'); if (card.contains(document.activeElement) && host.contains(document.activeElement)) return;
+                host.innerHTML = A(d.rows).map((r, i) => '<div style="display:flex; gap:4px; align-items:center;"><span style="width:26px; font-size:10px; color:#9bd;">' + (Math.floor(i / 2) + 1) + (i % 2 ? 'б' : 'а') + '</span><input type="text" data-ri="' + i + '" data-f="n" value="' + String(r.n || '').replace(/"/g, '&quot;') + '" style="' + inp + 'flex:3;"><input type="number" data-ri="' + i + '" data-f="r" value="' + (r.r || '') + '" style="' + inp + 'flex:1;"><button class="btn btn-red" data-rd="' + i + '" style="padding:4px 8px;">✕</button></div>').join('');
+            }
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const k = el.dataset.k, v = d[k]; if (el.type === 'checkbox') el.checked = !!v; else el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.textContent = v; });
+                q('#prb-on').style.outline = d.show ? '3px solid #fff' : 'none'; q('#prb-off').style.outline = d.show ? 'none' : '3px solid #fff'; drawRows();
+            }
+            function save() {
+                dirty = Date.now(); const data = JSON.parse(JSON.stringify(d));
+                const fb = () => { try { set(ref(db, 'padel/courts/_prate'), data).then(() => st('Збережено (запасний шлях) ✅'), e => st('⚠️ ' + (e && e.message || e), false)); } catch (e) { st('⚠️ не збережено', false); } };
+                try { set(ref(db, 'padel/prate'), data).then(() => st('Збережено ✅'), fb); } catch (e) { fb(); }
+            }
+            const later = () => { clearTimeout(timer); timer = setTimeout(save, 350); };
+            card.addEventListener('input', e => { const el = e.target; if (el.dataset.ri !== undefined) { const r = A(d.rows).map(x => Object.assign({}, x)); const i = +el.dataset.ri; r[i][el.dataset.f] = el.dataset.f === 'r' ? (parseInt(el.value) || 0) : el.value; d.rows = r; dirty = Date.now(); later(); return; } const k = el.dataset.k; if (!k || el.tagName === 'SELECT' || el.type === 'checkbox') return; d[k] = el.type === 'range' ? parseFloat(el.value) : el.value; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.textContent = d[k]; dirty = Date.now(); later(); });
+            card.addEventListener('change', e => { const el = e.target, k = el.dataset && el.dataset.k; if (!k || el.type === 'range') return; d[k] = el.type === 'checkbox' ? el.checked : (k === 'cols' ? parseInt(el.value) || 0 : el.value); dirty = Date.now(); later(); });
+            card.addEventListener('click', e => { const b = e.target.closest('[data-rd]'); if (!b) return; const r = A(d.rows).slice(); r.splice(+b.dataset.rd, 1); d.rows = r; drawRows(); save(); });
+            const go = patch => { Object.assign(d, patch); clearTimeout(timer); fill(); save(); };
+            q('#prb-on').onclick = () => go({ show: true, ts: Date.now() }); q('#prb-off').onclick = () => go({ show: false });
+            q('#prb-add').onclick = () => { d.rows = A(d.rows).concat([{ n: '', r: 0 }]); drawRows(); save(); };
+            q('#prb-clr').onclick = () => { if (confirm('Очистити всіх учасників?')) { d.rows = []; drawRows(); save(); } };
+            // розбір тексту: «Ім’я Прізвище ⚡ 1 588» (ім'я і рейтинг в одному рядку або в сусідніх)
+            const nameClean = x => { let n = String(x).replace(/[^A-Za-zА-Яа-яІіЇїЄєҐґ'’\-.\s]/g, ' ').replace(/\s+/g, ' ').trim().split(' '); while (n.length > 1 && n[n.length - 1].length <= 1) n.pop(); return n.join(' '); };
+            // рейтинг: «1 588» (пробіл-роздільник тисяч) або сміття від іконки ⚡ перед числом («4 931»)
+            const rate = x => { const t = String(x).trim().split(/\s+/).map(v => v.replace(/\D/g, '')).filter(Boolean); if (!t.length) return 0; const last = t[t.length - 1]; if (t.length > 1 && (t[t.length - 2] === '1' || t[t.length - 2] === '2') && last.length === 3) return parseInt(t[t.length - 2] + last); return parseInt(last) || 0; };
+            function parse(text) {
+                const out = [], L = /[A-Za-zА-Яа-яІіЇїЄєҐґ]/; let pend = '';
+                String(text || '').split(/\r?\n/).forEach(raw => {
+                    let l = raw.replace(/[|_\\]+/g, ' ').replace(/\s+/g, ' ').trim(); if (!l) return;
+                    const m = l.match(/^(.*?[A-Za-zА-Яа-яІіЇїЄєҐґ])[^A-Za-zА-Яа-яІіЇїЄєҐґ0-9]*?\s*(\d[\d\s.,]*)$/);
+                    if (m) { const r = rate(m[2]); out.push({ n: nameClean(m[1]), r }); pend = ''; }
+                    else if (L.test(l)) { if (pend) out.push({ n: pend, r: 0 }); pend = nameClean(l); }
+                    else if (pend) { out.push({ n: pend, r: rate(l) }); pend = ''; }
+                });
+                if (pend) out.push({ n: pend, r: 0 }); return out.filter(x => x.n);
+            }
+            window.__prParse = parse;
+            const imp = rep => { const res = parse(q('#prb-txt').value); if (!res.length) { st('⚠️ Не розпізнано жодного рядка', false); return; } d.rows = rep ? res : A(d.rows).concat(res); q('#prb-txt').value = ''; fill(); save(); st('Додано ' + res.length + ' учасників' + (res.length % 2 ? ' ⚠️ непарна кількість — перевірте пари' : '') + ' ✅', res.length % 2 === 0); };
+            q('#prb-go').onclick = () => imp(false); q('#prb-rep').onclick = () => { if (!A(d.rows).length || confirm('Замінити поточну таблицю?')) imp(true); };
+            ocrBind(card.querySelector('details'), q('#prb-txt'), q('#prb-file'), q('#prb-ocr'), () => q('#prb-go').click(), s => s);
+            const adopt = v => { if (!v || card.contains(document.activeElement) || Date.now() - dirty < 2500) return; d = Object.assign({}, JSON.parse(JSON.stringify(DEF)), v); d.rows = A(d.rows).map(r => ({ n: String(r && r.n || ''), r: parseInt(r && r.r) || 0 })); fill(); };
+            onValue(ref(db, 'padel/prate'), s => adopt(s.val()), () => {});
+            onValue(ref(db, 'padel/courts/_prate'), s => { if (!d.ts) adopt(s.val()); }, () => {});
+            fill();
+        })();
+
+
         // ===== ПЕРЕМОЖЦІ (padel/winners): п'єдестал 1-2-3, нижня сітка, анімації =====
         (function wnInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
@@ -5194,7 +5270,7 @@ function __clearTournamentName() {
             setInterval(() => { try { tick(); } catch (e) {} }, 400);
             fit();
             // --- універсальна фіолетова кнопка ПЕРЕГЛЯД для всіх таблиць ---
-            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
+            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', pr: 'prb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
             const pvOn = {};
             function send(k) { try { if (fr.contentWindow) fr.contentWindow.postMessage({ type: 'pvAny', key: k, on: !!pvOn[k] }, '*'); } catch (e) {} }
             function ui(k, b) { b.style.outline = pvOn[k] ? '3px solid #fff' : 'none'; b.innerText = pvOn[k] ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; }
@@ -5683,11 +5759,12 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                 poL: Object.assign({ name: '🏁 Play-off: низ (усі корти)' }, ALL('po-lower', s => s.playoff && s.playoff.lower && s.playoff.lower.show)),
                 tname: Object.assign({ name: '🏆 Назва турніру (усі корти)' }, EXP('tnb-on', 'tnb-off')),
                 winners: Object.assign({ name: '🏅 Переможці (усі корти)' }, EXP('wnb-on', 'wnb-off')),
+                prate: Object.assign({ name: '⚡ Рейтинг гравців PADO (усі корти)' }, EXP('prb-on', 'prb-off')),
                 weather: Object.assign({ name: '⛅ Погода (усі корти)' }, EXP('wxb-on', 'wxb-off')),
                 sponsorLogos: (() => { const o = ALL('sp', s => s.showSponsorLogos); const f = o.set; o.set = function(w) { try { if (w && S().sponsorLogoDisplayMode === 'all' && window.updateSponsorLogoMode) window.updateSponsorLogoMode('carousel'); } catch (e) {} f.call(o, w); }; o.name = '🤝 Логотипи спонсорів — карусель (усі корти)'; return o; })(),
                 credits: Object.assign({ name: '🎞 Титри турніру (усі корти)' }, EXP('cr-on', 'cr-off'))
             };
-            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'tname', 'winners', 'weather', 'sponsorLogos', 'credits'];
+            const ORDER = ['icard', 'crew', 'rules', 'rank', 'rkm', 'sc', 'mt', 'spcard', 'groups', 'poU', 'poL', 'intro', 'tname', 'winners', 'prate', 'weather', 'sponsorLogos', 'credits'];
             const DEFD = () => ({ gap: 3, loop: true, items: ORDER.map(id => ({ id: id, on: false, dur: (id === 'rank' || id === 'rkm' || id === 'sc') ? 20 : (id === 'mt' ? 10 : (id === 'credits' ? 60 : 7)) })) });
             const norm = v => {
                 const base = DEFD(); if (!v || typeof v !== 'object') return base;
