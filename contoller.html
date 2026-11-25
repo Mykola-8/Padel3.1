@@ -5684,6 +5684,7 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                     '<div style="font-size:11px; color:#fc6; margin:6px 0 4px;">Крок 2. Номер турніру PADO (з посилання pado.app/d/tournament/<b>9357</b>) — або натисніть «Знайти турніри».</div>' +
                     '<input id="pdapi-id" placeholder="Номер турніру, наприклад 9357 (можна вставити все посилання pado.app)" style="' + inpS + '">' +
                     '<div style="display:flex; gap:6px; margin-top:6px;"><button type="button" class="btn btn-green" id="pdapi-ev" style="flex:1; padding:8px; font-size:12px;">🔎 Знайти турніри (events)</button></div>' +
+                    '<button type="button" class="btn" id="pdapi-probe" style="margin-top:6px; width:100%; padding:8px; font-size:12px; font-weight:800; background:#b45309; color:#fff;">🧪 Автопідбір адрес API для цього турніру (натисніть, якщо кнопки нижче дають 404)</button>' +
                     '<select id="pdapi-sel" style="' + inpS + ' margin-top:6px; display:none;"></select>' +
                     '<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"><button type="button" class="btn btn-gray pdapi-q" data-p="standings" style="flex:1; padding:6px; font-size:11px;">standings</button><button type="button" class="btn btn-gray pdapi-q" data-p="matches" style="flex:1; padding:6px; font-size:11px;">matches</button><button type="button" class="btn btn-gray pdapi-q" data-p="group-standings" style="flex:1; padding:6px; font-size:11px;">group-standings</button></div>' +
                     '<div id="pdapi-st" style="font-size:11px; margin-top:6px;"></div>' +
@@ -5723,6 +5724,17 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                 };
                 $a('pdapi-sel').addEventListener('change', () => { $a('pdapi-id').value = $a('pdapi-sel').value; try { localStorage.setItem('padoEventId', $a('pdapi-sel').value); } catch (e) {} });
                 box.querySelectorAll('.pdapi-q').forEach(b => b.onclick = () => { const id = tid($a('pdapi-id').value) || $a('pdapi-sel').value || (function () { try { return localStorage.getItem('padoEventId') || ''; } catch (e) { return ''; } })(); if (!id) { say('⚠️ Вкажіть номер турніру (Крок 2) або натисніть «Знайти турніри»', false); return; } q(b.getAttribute('data-p'), '&eventId=' + encodeURIComponent(id)); });
+                $a('pdapi-probe').onclick = async () => {
+                    const base = $a('pdapi-url').value.trim(), id = tid($a('pdapi-id').value); if (!base || /pado\.app/i.test(base)) { say('⚠️ У «Крок 1» потрібна адреса Apps Script (…/exec)', false); return; } if (!id) { say('⚠️ Вкажіть номер турніру (Крок 2)', false); return; }
+                    say('⏳ Перебираю варіанти адрес (до 20 с)…');
+                    try {
+                        const r = await fetch(base + (base.indexOf('?') >= 0 ? '&' : '?') + 'action=padoprobe&eventId=' + encodeURIComponent(id)), j = await r.json();
+                        if (!j.ok) { $a('pdapi-out').value = JSON.stringify(j, null, 1); say('⚠️ ' + (j.error || 'помилка') + (/Unknown|action/i.test(String(j.error || '')) ? ' (оновіть AppsScript.gs і розгортання)' : ''), false); return; }
+                        const good = j.tried.filter(x => x.status >= 200 && x.status < 300);
+                        $a('pdapi-out').value = 'РЕЗУЛЬТАТ АВТОПІДБОРУ (статус кожної адреси):\n' + j.tried.map(x => (x.status >= 200 && x.status < 300 ? '✅ ' : '✖ ') + x.status + '  ' + x.path + '  (' + x.len + ' символів)').join('\n') + '\n\n=== ВІДПОВІДІ З УСПІШНИХ АДРЕС ===\n' + Object.keys(j.good || {}).map(k => '--- ' + k + '\n' + j.good[k]).join('\n\n');
+                        say(good.length ? '✅ Робочі адреси: ' + good.map(x => x.path).join(', ') + ' — натисніть «Копіювати відповідь» і надішліть розробнику' : '⚠️ Жодна адреса не відповіла 200. Перевірте ключ (PADO_API_KEY) і номер турніру; скопіюйте цей результат і надішліть розробнику', !!good.length);
+                    } catch (e) { say('⚠️ ' + ((e && e.message) || 'помилка мережі'), false); }
+                };
                 $a('pdapi-copy').onclick = () => { const t = $a('pdapi-out'); t.select(); try { document.execCommand('copy'); say('📋 Скопійовано', true); } catch (e) {} };
             }
             mv('rkm-imp-go', 'pado-s1', '① Результати → Результати матчів', 'Призначення: табло «Результати матчів» (кнопки показу — в блоці «📊 Рух у рейтингу»).');
