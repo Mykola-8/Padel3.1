@@ -1327,6 +1327,15 @@
         .rk-center .rk-title { flex: 0 1 auto; text-align: center; }
         .rk-hlogo { height: 48px; max-width: 160px; object-fit: contain; flex: none; }
         .rk-body { padding: 0 28px; }
+        .ph-st { display: inline-flex; align-items: center; flex: 0 0 auto; vertical-align: middle; }
+        .ph-i { width: var(--ph, 56px); height: var(--ph, 56px); border-radius: 50%; object-fit: cover; object-position: center 22%; border: max(2px, calc(var(--ph, 56px) * .05)) solid var(--ph-bd, rgba(255,255,255,.92)); box-shadow: 0 3px 10px rgba(0,0,0,.45); background: #3a3f4b; box-sizing: border-box; flex: 0 0 auto; }
+        .ph-st .ph-i + .ph-i { margin-left: calc(var(--ph, 56px) * -.22); }
+        .ph-ini { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; background: linear-gradient(135deg, #596072, #343a48); } .ph-ini i { font-style: normal; font-size: calc(var(--ph, 56px) * .38); line-height: 1; }
+        .rk-ph { --ph: calc(40px * var(--rk-ts, 1)); margin-right: calc(12px * var(--rk-ts, 1)); }
+        .sc-name.hasph, .rs-name.hasph { flex-direction: row; align-items: center; gap: 16px; } .ph-nm { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: inherit; }
+        .sc-ph { --ph: calc(64px * var(--sc-ts, 1)); } .rs-ph { --ph: calc(60px * var(--rs-ts, 1)); }
+        .wn-ph { --ph: calc(130px * var(--wn-k, 1)); margin-bottom: 4px; } .wn-col.p1 .wn-ph { --ph: calc(170px * var(--wn-k, 1)); } .wn-pod.rows .wn-ph { --ph: calc(84px * var(--wn-k, 1)); margin: 0; }
+        .pr-ph { --ph: 1.9em; --ph-bd: var(--pr-ac, #6d3df5); }
         .rk-row { display: grid; grid-template-columns: calc(70px * var(--rk-ts, 1)) 1fr calc(120px * var(--rk-ts, 1)); align-items: center; height: calc(54px * var(--rk-ts, 1)); border-top: 1px solid rgba(255,255,255,0.1); font-size: calc(28px * var(--rk-ts, 1)); font-weight: 700; color: var(--rk-text, #fff); }
         .rk-row.rk-head { height: calc(30px * var(--rk-ts, 1)); border-top: none; border-bottom: 1px solid rgba(198,159,102,0.55); font-size: calc(15px * var(--rk-ts, 1)); letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; font-weight: 700; }
         .rk-num { text-align: center; color: var(--rk-num, #c69f66); font-weight: 800; }
@@ -3194,6 +3203,45 @@
             if (rk.sort !== false) teams.sort((a, b) => (b.r - a.r) || (a.i - b.i));
             return teams;
         }
+        // ===== ФОТОБАЗА ГРАВЦІВ (padel/photos/<ключ> = {n, d (dataURL), ok}) — спільна для всіх табло =====
+        const PH = (function () {
+            const g = {}, subs = [], pairC = {}; let s1 = null, s2 = null, ver = 0, cnt = 0, tm = null;
+            const norm = s => String(s == null ? '' : s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().split(' ').filter(Boolean).sort().join('_');
+            const esc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            function rebuild() {
+                const src = Object.assign({}, s2 || {}, s1 || {}); Object.keys(g).forEach(k => delete g[k]); cnt = 0;
+                Object.keys(src).forEach(k => { const v = src[k]; if (v && v.d && v.ok !== false) { g[k] = v.d; cnt++; } });
+                ver++; clearTimeout(tm); tm = setTimeout(() => subs.forEach(f => { try { f(); } catch (e) { } }), 60);
+            }
+            try {
+                onValue(ref(db, 'padel/photos'), x => { s1 = x.val(); rebuild(); }, () => { s1 = null; rebuild(); });
+                onValue(ref(db, 'padel/courts/_photos'), x => { s2 = x.val(); rebuild(); }, () => { s2 = null; });
+            } catch (e) { }
+            const get = n => g[norm(n)] || '';
+            const ini = n => { const w = String(n || '').trim().split(/\s+/).filter(Boolean); return ((w[0] || '')[0] || '') + (w.length > 1 ? (w[w.length - 1][0] || '') : ''); };
+            const list = names => (Array.isArray(names) ? names : String(names || '').split(/\s*[\/\n]\s*/)).map(x => String(x || '').trim()).filter(Boolean).slice(0, 2);
+            function html(names, cls) {
+                const L = list(names); if (!L.length || !cnt) return '';
+                return '<span class="ph-st' + (cls ? ' ' + cls : '') + '">' + L.map(n => { const u = get(n); return u ? '<img class="ph-i" alt="" src="' + u + '">' : '<span class="ph-i ph-ini"><i>' + esc(ini(n).toUpperCase()) + '</i></span>'; }).join('') + '</span>';
+            }
+            const has = names => !!html(names);
+            function pair(names) {
+                const P = list(names).map(get).filter(Boolean); if (!P.length) return ''; if (P.length === 1) return P[0];
+                const k = P.map(x => x.length + ':' + x.slice(-40)).join('|'); if (pairC[k]) return pairC[k];
+                if (pairC[k] === undefined) {
+                    pairC[k] = '';
+                    Promise.all(P.map(u => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = u; }))).then(im => {
+                        if (!im[0] || !im[1]) return; const c = document.createElement('canvas'); c.width = 360; c.height = 360; const x = c.getContext('2d'); x.fillStyle = '#222'; x.fillRect(0, 0, 360, 360);
+                        im.forEach((m, j) => { const w = 180, sc = Math.max(w / m.width, 360 / m.height), dw = m.width * sc, dh = m.height * sc; x.save(); x.beginPath(); x.rect(j * w, 0, w, 360); x.clip(); x.drawImage(m, j * w + (w - dw) / 2, (360 - dh) * 0.25, dw, dh); x.restore(); });
+                        x.fillStyle = 'rgba(255,255,255,.9)'; x.fillRect(178, 0, 4, 360); pairC[k] = c.toDataURL('image/jpeg', 0.85); subs.forEach(f => { try { f(); } catch (e) { } });
+                    });
+                }
+                return pairC[k] || '';
+            }
+            window.__ph = { norm, get, count: () => cnt };
+            return { html, has, pair, get, on: f => subs.push(f), v: () => ver, count: () => cnt };
+        })();
+        PH.on(() => { try { if (rkLast && rkLast.photos === true) rkRender(false); } catch (e) { } try { const m = typeof state !== 'undefined' && state && state.matchIntro; if (m && m.photosAuto === 'on') renderMatchIntro(state); } catch (e) { } });
         function rkFillName(el, name, styled) {
             if (!styled) { el.textContent = name; return; }
             // кожен гравець/частина (розділення "/"): усі слова крім останнього — тонко, останнє (прізвище) — жирно
@@ -3229,6 +3277,7 @@
                 const r = document.createElement('div'); r.className = 'rk-row';
                 const a = document.createElement('div'); a.className = 'rk-num'; a.textContent = String(startNo + k);
                 const n = document.createElement('div'); n.className = 'rk-name' + (upper ? ' rk-upper' : ''); rkFillName(n, it.n, styled);
+                if (rk.photos === true) { const ph = PH.html(String(it.n).split(/\s*\/\s*/), 'rk-ph'); if (ph) { const w = document.createElement('span'); w.innerHTML = ph; n.insertBefore(w.firstChild, n.firstChild); } }
                 r.appendChild(a); r.appendChild(n);
                 if (hasPts) { const p = document.createElement('div'); p.className = 'rk-pts'; p.textContent = it.r > 0 ? String(it.r) : ''; r.appendChild(p); }
                 body.appendChild(r);
@@ -3293,7 +3342,7 @@
             wrap.style.transform = `translate(-50%, -50%) scale(${g(rk.scale, 100) / 100})`;
             const teams = rkSortedTeams(rk);
             const lg = s => (s || '').length + ':' + (s || '').slice(-24);
-            const key = JSON.stringify([rk.title, rk.mode, rk.sort, rk.nameStyle, rk.upper, lg(rk.logoL), lg(rk.logoR1), lg(rk.logoR2), lg(rk.logoF), teams]);
+            const key = JSON.stringify([rk.title, rk.mode, rk.sort, rk.nameStyle, rk.upper, rk.photos === true ? PH.v() : 0, lg(rk.logoL), lg(rk.logoR1), lg(rk.logoR2), lg(rk.logoF), teams]);
             const willShow = !!rk.show && teams.length > 0, hasReveal = rk.reveal === 'rtl' || rk.reveal === 'ttb';
             if (key !== rkKey) { rkKey = key; rkPage = 0; rkRender(false); }
             else if (hasReveal && willShow && !rkWasVisible) { rkPage = 0; rkRender(false); }
@@ -3344,7 +3393,7 @@
             setImg('mi-logo-l', mi.logoL); setImg('mi-logo-r', mi.logoR);
             ['t1', 't2'].forEach(t => {
                 const team = mi[t] || {};
-                setImg('mi-' + t + '-photo', team.photo);
+                setImg('mi-' + t + '-photo', team.photo || (g(mi.photosAuto, 'off') === 'on' ? PH.pair([((team.p1 || {}).f || '') + ' ' + ((team.p1 || {}).l || ''), ((team.p2 || {}).f || '') + ' ' + ((team.p2 || {}).l || '')]) : ''));
                 ['p1', 'p2'].forEach((p, idx) => {
                     const pl = team[p] || {};
                     const base = 'mi-' + t + 'p' + (idx + 1);
@@ -4622,7 +4671,7 @@
                 const anim = g(cfg.anim, 'slide'), st = Math.max(0, num(cfg.stagger, 0.15)) * 1000, dur = Math.max(300, num(cfg.dur, 1.2) * 1000);
                 list.innerHTML = m.map((t, p) => {
                     const nn = t.n.split(/\s+\/\s+/).slice(0, 2).map(x => '<b>' + esc(x) + '</b>').join('');
-                    return '<div class="sc-row ' + (anim === 'none' ? 'in' : 'pre ' + anim) + '" style="grid-template-columns:' + cols + '"><span class="sc-pos"><span class="' + (cfg.medals !== false && p < 3 ? 'm' + (p + 1) : '') + '">' + (p + 1) + '</span></span><span class="sc-name">' + nn + '</span>' +
+                    return '<div class="sc-row ' + (anim === 'none' ? 'in' : 'pre ' + anim) + '" style="grid-template-columns:' + cols + '"><span class="sc-pos"><span class="' + (cfg.medals !== false && p < 3 ? 'm' + (p + 1) : '') + '">' + (p + 1) + '</span></span><span class="sc-name' + (cfg.photos && PH.has(t.n) ? ' hasph' : '') + '">' + (cfg.photos ? PH.html(t.n.split(/\s+\/\s+/), 'sc-ph') + (PH.has(t.n) ? '<span class="ph-nm">' + nn + '</span>' : nn) : nn) + '</span>' +
                         (sE ? '<span class="sc-elo ' + (t.elo > 0 ? 'pos' : (t.elo < 0 ? 'neg' : '')) + '">' + sgn(anim === 'none' ? t.elo : 0) + '</span>' : '') + (sW ? '<span class="sc-wdl"><i class="w">' + (anim === 'none' ? t.w : 0) + '</i><u>-</u><i class="d">' + (anim === 'none' ? t.d : 0) + '</i><u>-</u><i class="l">' + (anim === 'none' ? t.l : 0) + '</i></span>' : '') +
                         (sD ? '<span class="sc-diff">' + sgn(anim === 'none' ? t.diff : 0) + '</span>' : '') + '<span class="sc-pts"><em>' + (anim === 'none' ? t.pts : 0) + '</em></span></div>';
                 }).join('');
@@ -4639,6 +4688,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
                 else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); } }
             }
+            PH.on(() => { if (running && cfg.photos) build(); });
             onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('sc', () => apply(gcfg || mcfg));
             window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
             window.addEventListener('resize', look);
@@ -4682,7 +4732,7 @@
                 const anim = g(cfg.anim, 'fade'), st = Math.max(0, num(cfg.stagger, 0.12)) * 1000;
                 list.innerHTML = m.map((t, p) => {
                     const nn = t.n.split(/\s+\/\s+/).slice(0, 2).map(x => '<b>' + esc(x) + '</b>').join('');
-                    return '<div class="rs-row' + (p === 0 && cfg.hiFirst !== false ? ' lead' : '') + ' ' + (anim === 'none' ? 'in' : 'pre') + '" style="grid-template-columns:' + cols + '"><span class="rs-name">' + nn + '</span><span>' + t.mp + '</span><span>' + t.p + '</span><span>' + t.w + ' - ' + t.l + ' - ' + t.d + '</span><span>' + t.sw + ' - ' + t.sl + ' (' + t.sd + ')</span><span>' + t.gw + ' - ' + t.gl + ' (' + t.gd + ')</span></div>';
+                    return '<div class="rs-row' + (p === 0 && cfg.hiFirst !== false ? ' lead' : '') + ' ' + (anim === 'none' ? 'in' : 'pre') + '" style="grid-template-columns:' + cols + '"><span class="rs-name' + (cfg.photos && PH.has(t.n) ? ' hasph' : '') + '">' + (cfg.photos ? PH.html(t.n.split(/\s+\/\s+/), 'rs-ph') + (PH.has(t.n) ? '<span class="ph-nm">' + nn + '</span>' : nn) : nn) + '</span><span>' + t.mp + '</span><span>' + t.p + '</span><span>' + t.w + ' - ' + t.l + ' - ' + t.d + '</span><span>' + t.sw + ' - ' + t.sl + ' (' + t.sd + ')</span><span>' + t.gw + ' - ' + t.gl + ' (' + t.gd + ')</span></div>';
                 }).join('');
                 if (anim !== 'none') Array.from(list.children).forEach((row, j) => timers.push(setTimeout(() => { row.classList.remove('pre'); row.classList.add('in'); }, 200 + j * st)));
             }
@@ -4698,6 +4748,7 @@
                 } else if (!v && running) { running = false; wrap.classList.remove('on'); clearTimeout(endT); setTimeout(() => { if (!running) clearT(); }, 700); }
                 else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; const keep = list.children.length; build(); Array.from(list.children).forEach(r => { r.classList.remove('pre'); r.classList.add('in'); }); } }
             }
+            PH.on(() => { if (running && cfg.photos) build(); });
             onValue(ref(db, 'padel/rdstand'), s => { gcfg = s.val(); apply(gcfg || ccfg || mcfg); }, () => { gcfg = null; });
             onValue(ref(db, 'padel/courts/_rdstand'), s => { ccfg = s.val(); try { apply(gcfg || ccfg || mcfg); } catch (e) {} }, () => { ccfg = null; });
             if (isPv) window.addEventListener('message', e => { const m = e.data; if (!m || m.type !== 'rsPreview') return; const nv = m.off ? null : (m.cfg || null); if (JSON.stringify(nv) === JSON.stringify(pvCfg)) return; pvCfg = nv; apply(gcfg || ccfg || mcfg); });
@@ -4872,9 +4923,9 @@
                 }
                 h += '<div class="pr-grid">';
                 if (team) {
-                    h += list.map((tm, i) => '<div class="pr-team" data-k="' + tm.k + '" style="--pr-d:' + (i * 0.07).toFixed(2) + 's"><div class="pr-pl">' + (base + i + 1) + '</div><div class="pls">' + tm.map(p => '<div class="pl"><div class="pr-n">' + nm(p.n) + '</div><div class="pr-r">' + BOLT + '<span class="pr-v"' + tw(p) + '>' + (val(p) || '–') + '</span></div>' + chip(p) + '</div>').join('') + '</div>' + mv(tm) + (cfg.showAvg !== false ? '<div class="pr-avg">' + (showAvg ? '<b class="' + (!dl && inc ? 'in' : '') + '" style="--pr-d:' + (i * 0.1).toFixed(2) + 's"' + (ph === 1 && dl ? ' data-from="' + tm.avg0 + '" data-to="' + tm.avg + '"' : '') + '>' + (ph === 0 ? tm.avg0 : (ph === 1 && dl ? tm.avg0 : tm.avg)) + '</b>' : '') + '</div>' : '') + '</div>').join('');
+                    h += list.map((tm, i) => '<div class="pr-team" data-k="' + tm.k + '" style="--pr-d:' + (i * 0.07).toFixed(2) + 's"><div class="pr-pl">' + (base + i + 1) + '</div><div class="pls">' + tm.map(p => '<div class="pl">' + (cfg.photos ? PH.html([p.n], 'pr-ph') : '') + '<div class="pr-n">' + nm(p.n) + '</div><div class="pr-r">' + BOLT + '<span class="pr-v"' + tw(p) + '>' + (val(p) || '–') + '</span></div>' + chip(p) + '</div>').join('') + '</div>' + mv(tm) + (cfg.showAvg !== false ? '<div class="pr-avg">' + (showAvg ? '<b class="' + (!dl && inc ? 'in' : '') + '" style="--pr-d:' + (i * 0.1).toFixed(2) + 's"' + (ph === 1 && dl ? ' data-from="' + tm.avg0 + '" data-to="' + tm.avg + '"' : '') + '>' + (ph === 0 ? tm.avg0 : (ph === 1 && dl ? tm.avg0 : tm.avg)) + '</b>' : '') + '</div>' : '') + '</div>').join('');
                 } else {
-                    h += list.map((p, i) => { const place = base + i + 1, mate = cfg.showMate ? P.R.find(x => x.t === p.t && x.i !== p.i) : null; return '<div class="pr-row" data-k="' + p.k + '" style="--pr-d:' + (i * 0.05).toFixed(2) + 's"><div class="pr-pl' + (top3 && cfg.sort !== false && place <= 3 ? ' g' + place : '') + '">' + place + '</div><div class="pr-n">' + nm(p.n) + (mate ? '<span class="pr-mate">з ' + nm(mate.n) + '</span>' : '') + '</div>' + mv(p) + '<div class="pr-r">' + BOLT + '<span class="pr-v"' + tw(p) + '>' + (val(p) || '–') + '</span></div>' + chip(p) + '</div>'; }).join('');
+                    h += list.map((p, i) => { const place = base + i + 1, mate = cfg.showMate ? P.R.find(x => x.t === p.t && x.i !== p.i) : null; return '<div class="pr-row" data-k="' + p.k + '" style="--pr-d:' + (i * 0.05).toFixed(2) + 's"><div class="pr-pl' + (top3 && cfg.sort !== false && place <= 3 ? ' g' + place : '') + '">' + place + '</div>' + (cfg.photos ? PH.html([p.n], 'pr-ph') : '') + '<div class="pr-n">' + nm(p.n) + (mate ? '<span class="pr-mate">з ' + nm(mate.n) + '</span>' : '') + '</div>' + mv(p) + '<div class="pr-r">' + BOLT + '<span class="pr-v"' + tw(p) + '>' + (val(p) || '–') + '</span></div>' + chip(p) + '</div>'; }).join('');
                 }
                 h += '</div>' + (P.pg.length > 1 ? '<div class="pr-pg">' + (page + 1) + ' / ' + P.pg.length + '</div>' : '');
                 board.classList.toggle('noanim', !!noanim); board.innerHTML = h;
@@ -4913,6 +4964,7 @@
                     csig = sig; lastTs = ts;
                 } else { hideNow(); hidden = false; lastTs = ts; }
             }
+            PH.on(() => { if (isOn && cfg.photos) content(true); });
             onValue(ref(db, 'padel/prate'), s => { gcfg = s.val(); apply(gcfg || ccfg); }, () => { gcfg = null; }); window.__pvReg('pr', () => apply(gcfg || ccfg));
             onValue(ref(db, 'padel/courts/_prate'), s => { ccfg = s.val(); try { apply(gcfg || ccfg); } catch (e) {} }, () => { ccfg = null; });
             window.addEventListener('resize', look);
@@ -4972,13 +5024,13 @@
                     const oa = OUT[g(cfg.exitAnim, 'fade')] || 'wnOutFade', sx = p === 2 ? '-300px' : (p === 3 ? '300px' : '0px');
                     return '<div class="wn-col p' + p + (nm ? '' : ' empty') + '" style="--wn-in:' + inA + ';--wn-d:' + T.d[p].toFixed(2) + 's;--wn-cd:' + (ped ? 0.3 : 0) + 's;--wn-out:' + oa + ';--wn-xd:' + T.x[p].toFixed(2) + 's;--wn-sx:' + sx + '">' +
                         (podium && p === 1 && cfg.trophy !== false ? '<div class="wn-tr">🏆</div>' : '') +
-                        '<div class="wn-card">' + medal(p) + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' +
+                        '<div class="wn-card">' + (cfg.photos && nm ? PH.html(nm, 'wn-ph') : '') + medal(p) + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' +
                         (ped ? '<div class="wn-ped"><span>' + p + '</span></div>' : '') + '</div>';
                 };
                 const lw = () => {
                     const nm = String(arr(cfg.loN)[0] || '').trim(), pz = String(arr(cfg.loP)[0] || '').trim(); if (!(set === 'up' && cfg.lowerFirst && nm)) return '';
                     const inA = pa === 'side' ? 'wnSideR' : (IN[pa] || 'wnRise'), oa = OUT[g(cfg.exitAnim, 'fade')] || 'wnOutFade';
-                    return '<div class="wn-col p4" style="--wn-in:' + inA + ';--wn-d:' + T.d[4].toFixed(2) + 's;--wn-cd:0s;--wn-out:' + oa + ';--wn-xd:0s;--wn-sx:300px"><div class="wn-card"><div class="wn-lbl4">' + esc(g(cfg.lwLabel, 'Переможець · нижня сітка')) + '</div>' + (g(cfg.medal, 'emoji') !== 'none' ? '<div class="wn-md">🥇</div>' : '') + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' + (ped ? '<div class="wn-sp"></div>' : '') + '</div>';
+                    return '<div class="wn-col p4" style="--wn-in:' + inA + ';--wn-d:' + T.d[4].toFixed(2) + 's;--wn-cd:0s;--wn-out:' + oa + ';--wn-xd:0s;--wn-sx:300px"><div class="wn-card"><div class="wn-lbl4">' + esc(g(cfg.lwLabel, 'Переможець · нижня сітка')) + '</div>' + (cfg.photos ? PH.html(nm, 'wn-ph') : '') + (g(cfg.medal, 'emoji') !== 'none' ? '<div class="wn-md">🥇</div>' : '') + '<div class="wn-nm">' + nameHtml(nm) + '</div>' + (pz ? '<div class="wn-pz">' + esc(pz) + '</div>' : '') + '</div>' + (ped ? '<div class="wn-sp"></div>' : '') + '</div>';
                 };
                 return '<div class="wn-blk">' + (label ? '<div class="wn-lb">' + esc(label) + '</div>' : '') + '<div class="wn-pod ' + (podium ? 'pod' : 'rows') + '">' + (podium ? [2, 1, 3] : [1, 2, 3]).map(col).join('') + lw() + '</div></div>';
             }
@@ -5030,6 +5082,7 @@
                     csig = sig; lastTs = ts;
                 } else { hideNow(); hidden = false; lastTs = ts; }
             }
+            PH.on(() => { if (isOn && cfg.photos) content(true); });
             onValue(ref(db, 'padel/winners'), s => { gcfg = s.val(); apply(gcfg || ccfg); }, () => { gcfg = null; }); window.__pvReg('wn', () => apply(gcfg || ccfg));
             onValue(ref(db, 'padel/courts/_winners'), s => { ccfg = s.val(); try { apply(gcfg || ccfg); } catch (e) {} }, () => { ccfg = null; });
             window.addEventListener('resize', look);
