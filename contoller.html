@@ -5679,7 +5679,10 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                 const inpS = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box; font-size:11px;';
                 box.innerHTML = '<summary style="font-size:13px; font-weight:800; color:#4ade80; cursor:pointer;">🔌 Пряме підключення до PADO (API)</summary>' +
                     '<div style="font-size:10px; color:#bdb; margin:6px 0;">Ключ API НЕ вводиться в пульт. Відкрийте одноразове посилання з листа (воно покаже ключ лише раз), скопіюйте ключ → Apps Script → ⚙ Налаштування проєкту → Властивості скрипта → додайте <b>PADO_API_KEY</b> = ключ (за потреби <b>PADO_COMMUNITY</b> = 35). Потім оновіть розгортання скрипта (код AppsScript.gs з цього пакета).</div>' +
-                    '<input id="pdapi-url" placeholder="Адреса веб-додатка Apps Script (…/exec)" style="' + inpS + '">' +
+                    '<div style="font-size:11px; color:#fc6; margin-bottom:4px;">Крок 1. Вставте тут адресу <b>веб-додатка Apps Script</b> (закінчується на <b>/exec</b>) — НЕ посилання pado.app.</div>' +
+                    '<input id="pdapi-url" placeholder="https://script.google.com/macros/s/…/exec" style="' + inpS + '">' +
+                    '<div style="font-size:11px; color:#fc6; margin:6px 0 4px;">Крок 2. Номер турніру PADO (з посилання pado.app/d/tournament/<b>9357</b>) — або натисніть «Знайти турніри».</div>' +
+                    '<input id="pdapi-id" placeholder="Номер турніру, наприклад 9357 (можна вставити все посилання pado.app)" style="' + inpS + '">' +
                     '<div style="display:flex; gap:6px; margin-top:6px;"><button type="button" class="btn btn-green" id="pdapi-ev" style="flex:1; padding:8px; font-size:12px;">🔎 Знайти турніри (events)</button></div>' +
                     '<select id="pdapi-sel" style="' + inpS + ' margin-top:6px; display:none;"></select>' +
                     '<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;"><button type="button" class="btn btn-gray pdapi-q" data-p="standings" style="flex:1; padding:6px; font-size:11px;">standings</button><button type="button" class="btn btn-gray pdapi-q" data-p="matches" style="flex:1; padding:6px; font-size:11px;">matches</button><button type="button" class="btn btn-gray pdapi-q" data-p="group-standings" style="flex:1; padding:6px; font-size:11px;">group-standings</button></div>' +
@@ -5689,10 +5692,18 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                 card.querySelector('#pado-s1').before(box);
                 const $a = id => box.querySelector('#' + id);
                 try { $a('pdapi-url').value = localStorage.getItem('padoApiUrl') || ''; } catch (e) {}
-                $a('pdapi-url').addEventListener('change', () => { try { localStorage.setItem('padoApiUrl', $a('pdapi-url').value.trim()); } catch (e) {} });
+                try { $a('pdapi-id').value = localStorage.getItem('padoEventId') || ''; } catch (e) {}
+                const tid = v => { const m = String(v || '').match(/tournament\/(\d+)|^\s*(\d{2,})\s*$/); return m ? (m[1] || m[2]) : ''; };
+                $a('pdapi-id').addEventListener('input', () => { const id = tid($a('pdapi-id').value); if (id) { try { localStorage.setItem('padoEventId', id); } catch (e) {} if (/\D/.test($a('pdapi-id').value.trim())) $a('pdapi-id').value = id; } });
+                $a('pdapi-url').addEventListener('change', () => {
+                    const v = $a('pdapi-url').value.trim(), id = /pado\.app/i.test(v) ? tid(v) : '';
+                    if (id) { $a('pdapi-id').value = id; try { localStorage.setItem('padoEventId', id); } catch (e) {} $a('pdapi-url').value = ''; try { localStorage.removeItem('padoApiUrl'); } catch (e) {} say('ℹ️ Це посилання на PADO — номер турніру ' + id + ' збережено в «Крок 2». У «Крок 1» потрібна адреса Apps Script (…/exec).', false); return; }
+                    try { localStorage.setItem('padoApiUrl', v); } catch (e) {}
+                    if (v && !/script\.google\.com\/macros\/s\/.+\/exec/i.test(v)) say('⚠️ Схоже, це не адреса Apps Script. Вона має виглядати як https://script.google.com/macros/s/…/exec', false);
+                });
                 const say = (m, ok) => { const e = $a('pdapi-st'); e.style.color = ok === false ? '#f66' : (ok ? '#7c7' : '#9bd'); e.innerText = m; };
                 async function q(path, extra) {
-                    const base = $a('pdapi-url').value.trim(); if (!base) { say('⚠️ Вкажіть адресу веб-додатка Apps Script', false); return null; }
+                    const base = $a('pdapi-url').value.trim(); if (!base || !/^https?:\/\//i.test(base) || /pado\.app/i.test(base)) { say('⚠️ У «Крок 1» потрібна адреса веб-додатка Apps Script (…/exec), а не посилання pado.app', false); return null; }
                     say('⏳ Запит ' + path + '…');
                     try {
                         const u = base + (base.indexOf('?') >= 0 ? '&' : '?') + 'action=pado&path=' + encodeURIComponent(path) + (extra || '');
@@ -5710,8 +5721,8 @@ rng('radius', 'Скруглення кутів', 0, 60, 1) +
                     sel.innerHTML = rows.map(x => '<option value="' + x.id + '">' + (String(x.s).toUpperCase() === 'IN_PROGRESS' ? '🟢 ' : '') + x.n + ' [' + x.s + '] #' + x.id + '</option>').join(''); sel.style.display = rows.length ? '' : 'none';
                     if (rows.length) { say('✅ Знайдено турнірів: ' + rows.length + (rows[0].s && String(rows[0].s).toUpperCase() === 'IN_PROGRESS' ? ' (живий — зверху)' : ''), true); try { localStorage.setItem('padoEventId', String(rows[0].id)); } catch (e) {} }
                 };
-                $a('pdapi-sel').addEventListener('change', () => { try { localStorage.setItem('padoEventId', $a('pdapi-sel').value); } catch (e) {} });
-                box.querySelectorAll('.pdapi-q').forEach(b => b.onclick = () => { const id = $a('pdapi-sel').value || (function () { try { return localStorage.getItem('padoEventId') || ''; } catch (e) { return ''; } })(); if (!id) { say('⚠️ Спершу знайдіть турніри й виберіть потрібний', false); return; } q(b.getAttribute('data-p'), '&eventId=' + encodeURIComponent(id)); });
+                $a('pdapi-sel').addEventListener('change', () => { $a('pdapi-id').value = $a('pdapi-sel').value; try { localStorage.setItem('padoEventId', $a('pdapi-sel').value); } catch (e) {} });
+                box.querySelectorAll('.pdapi-q').forEach(b => b.onclick = () => { const id = tid($a('pdapi-id').value) || $a('pdapi-sel').value || (function () { try { return localStorage.getItem('padoEventId') || ''; } catch (e) { return ''; } })(); if (!id) { say('⚠️ Вкажіть номер турніру (Крок 2) або натисніть «Знайти турніри»', false); return; } q(b.getAttribute('data-p'), '&eventId=' + encodeURIComponent(id)); });
                 $a('pdapi-copy').onclick = () => { const t = $a('pdapi-out'); t.select(); try { document.execCommand('copy'); say('📋 Скопійовано', true); } catch (e) {} };
             }
             mv('rkm-imp-go', 'pado-s1', '① Результати → Результати матчів', 'Призначення: табло «Результати матчів» (кнопки показу — в блоці «📊 Рух у рейтингу»).');
