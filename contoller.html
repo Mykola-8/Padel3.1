@@ -353,6 +353,8 @@
                     </select></label>
                 <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🔗 Імена на табло рахунку — з табла «Хто грає»
                     <select data-mi="syncNames" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="on">Синхронізувати (в обидва боки)</option><option value="off">Не синхронізувати</option></select></label>
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">📸 Фото команди — брати з «Фотобази гравців», якщо своє фото команди не завантажено
+                    <select data-mi="photosAuto" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="off">Вимкнено</option><option value="on">Увімкнено (колаж із двох гравців)</option></select></label>
                 <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">Формат імені на табло рахунку
                     <select data-mi="nameFmt" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="last">Прізвище</option><option value="initial">І. Прізвище</option><option value="full">Ім'я Прізвище</option></select></label>
             </div>
@@ -516,6 +518,7 @@
                     <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір тексту <input type="color" data-rk="textColor" value="#ffffff" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
                     <label style="display:flex; gap:6px; align-items:center; font-size:11px; color:#ccc;">🎨 Колір номерів <input type="color" data-rk="numColor" value="#c69f66" oninput="rkInput(this)" style="width:42px; height:26px; padding:0; border:1px solid #444; background:none;"></label>
                     </div>
+                    <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="photos" onchange="rkInput(this)"> 📸 Показувати фото гравців (з «Фотобази»)</label>
                     <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="nameStyle" onchange="rkInput(this)"> Ім'я — тонким, прізвище — жирним (як на фото)</label>
                     <label style="display:flex; gap:8px; align-items:center; font-size:11px; color:#ccc;"><input type="checkbox" data-rk="upper" onchange="rkInput(this)"> ВЕЛИКІ ЛІТЕРИ в назвах</label>
                 </div>
@@ -4110,7 +4113,7 @@ function __clearTournamentName() {
         // ===== ТАБЛИЦЯ РАХУНКІВ (padel/scoretable) =====
         (function scInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'ТАБЛИЦЯ РАХУНКІВ', anim: 'slide', dur: 1.2, stagger: 0.15, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 90, showElo: true, showWdl: true, showDiff: true, showLegend: true, medals: true, sort: true, namesFromRkm: true, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', rows: [] };
+            const DEF = { photos: false, show: false, court: 'all', title: 'ТАБЛИЦЯ РАХУНКІВ', anim: 'slide', dur: 1.2, stagger: 0.15, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 90, showElo: true, showWdl: true, showDiff: true, showLegend: true, medals: true, sort: true, namesFromRkm: true, bg1: '#0b1226', bg2: '#101c3d', accent: '#f5c542', up: '#4ade80', dn: '#f87171', textColor: '#ffffff', rows: [] };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' },
@@ -4119,7 +4122,7 @@ function __clearTournamentName() {
                 { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 }, { k: 'maxRows', l: 'Скільки рядків показувати', t: 'num', step: 1 },
                 { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
                 { k: 'x', l: 'Позиція по горизонталі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'y', l: 'Позиція по вертикалі', t: 'rng', min: 0, max: 100, u: '%' }, { k: 'bgOpacity', l: 'Непрозорість фону', t: 'rng', min: 0, max: 100, u: '%' },
-                { k: 'sort', l: 'Сортувати автоматично (очки → різниця → ELO)', t: 'chk' }, { k: 'medals', l: 'Медалі 🥇🥈🥉 для топ-3', t: 'chk' }, { k: 'showElo', l: 'Колонка ELO (+84)', t: 'chk' }, { k: 'showWdl', l: 'Колонка В-Н-П', t: 'chk' }, { k: 'showDiff', l: 'Колонка ± (різниця)', t: 'chk' }, { k: 'showLegend', l: 'Підпис-легенда знизу', t: 'chk' },
+                { k: 'sort', l: 'Сортувати автоматично (очки → різниця → ELO)', t: 'chk' }, { k: 'medals', l: 'Медалі 🥇🥈🥉 для топ-3', t: 'chk' }, { k: 'photos', l: '📸 Фото гравців (з «Фотобази»)', t: 'chk' }, { k: 'showElo', l: 'Колонка ELO (+84)', t: 'chk' }, { k: 'showWdl', l: 'Колонка В-Н-П', t: 'chk' }, { k: 'showDiff', l: 'Колонка ± (різниця)', t: 'chk' }, { k: 'showLegend', l: 'Підпис-легенда знизу', t: 'chk' },
                 { k: 'bg1', l: 'Колір фону (верх)', t: 'col' }, { k: 'bg2', l: 'Колір фону (низ)', t: 'col' }, { k: 'accent', l: 'Колір заголовка й рамки', t: 'col' }, { k: 'up', l: 'Колір «+» / перемог', t: 'col' }, { k: 'dn', l: 'Колір «−» / поразок', t: 'col' }, { k: 'textColor', l: 'Колір тексту', t: 'col' }
             ];
             let d = JSON.parse(JSON.stringify(DEF)), timer, loaded = false, prim = false, dirty = 0;
@@ -4256,12 +4259,12 @@ function __clearTournamentName() {
         // ===== STANDINGS у стилі Rankedin (padel/rdstand): скрін → таблиця =====
         (function rsInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
-            const DEF = { show: false, court: 'all', title: 'Таблиця рахунків', showInfo: false, infoText: 'Info', hdrLang: 'ua', hiFirst: true, sort: false, anim: 'fade', stagger: 0.12, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg: '#ffffff', rowBg: '#ececf0', leadBg: '#dedee8', textColor: '#2a2f6b', pill: '#2a2f6b', rows: [] };
+            const DEF = { photos: false, show: false, court: 'all', title: 'Таблиця рахунків', showInfo: false, infoText: 'Info', hdrLang: 'ua', hiFirst: true, sort: false, anim: 'fade', stagger: 0.12, autoHide: 0, maxRows: 12, scale: 100, width: 100, textSize: 100, x: 50, y: 50, bgOpacity: 100, bg: '#ffffff', rowBg: '#ececf0', leadBg: '#dedee8', textColor: '#2a2f6b', pill: '#2a2f6b', rows: [] };
             const COURTS = [['all', 'Усі корти']].concat(Array.from({ length: 10 }, (_, i) => [String(i + 1), 'Корт ' + (i + 1)]));
             const F = [
                 { k: 'court', l: 'Показувати на', t: 'sel', o: COURTS }, { k: 'title', l: 'Заголовок', t: 'txt' }, { k: 'showInfo', l: 'Кнопка «Info»', t: 'chk' }, { k: 'infoText', l: 'Текст кнопки', t: 'txt' },
                 { k: 'hdrLang', l: 'Мова таблиці', t: 'sel', o: [['ua', 'Українська (Очки, Ігри, Матчі (В-П-Н), Сети, Гейми)'], ['en', 'English (M.P, P, M (W-L-D), Sets, Games)']] },
-                { k: 'hiFirst', l: 'Виділяти перший рядок (лідер)', t: 'chk' }, { k: 'sort', l: 'Сортувати автоматично (M.P → різниця сетів → геймів)', t: 'chk' },
+                { k: 'hiFirst', l: 'Виділяти перший рядок (лідер)', t: 'chk' }, { k: 'photos', l: '📸 Фото гравців (з «Фотобази»)', t: 'chk' }, { k: 'sort', l: 'Сортувати автоматично (M.P → різниця сетів → геймів)', t: 'chk' },
                 { k: 'anim', l: 'Анімація', t: 'sel', o: [['fade', 'Рядки проявляються по черзі'], ['none', 'Без анімації']] }, { k: 'stagger', l: 'Затримка між рядками (сек)', t: 'num', step: 0.05 },
                 { k: 'autoHide', l: 'Сховати автоматично через (сек, 0 = вручну)', t: 'num', step: 1 }, { k: 'maxRows', l: 'Скільки рядків показувати', t: 'num', step: 1 },
                 { k: 'scale', l: 'Масштаб табла', t: 'rng', min: 30, max: 200, u: '%' }, { k: 'width', l: 'Ширина табла', t: 'rng', min: 40, max: 160, u: '%' }, { k: 'textSize', l: 'Розмір тексту', t: 'rng', min: 50, max: 220, u: '%' },
@@ -4773,6 +4776,83 @@ function __clearTournamentName() {
 
 
         // ===== РЕЙТИНГ ГРАВЦІВ PADO (padel/prate): кожен учасник окремо, навіть якщо вони в одній команді =====
+        // ===== ФОТОБАЗА ГРАВЦІВ: одне фото на гравця, галочка «дозволено показувати» (padel/photos/<ключ> = {n, d, ok}) =====
+        (function phInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const norm = s => String(s == null ? '' : s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().split(' ').filter(Boolean).sort().join('_');
+            const esc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const A = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
+            let s1 = null, s2 = null;
+            const card = document.createElement('div'); card.id = 'phb-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>📸 Фотобаза гравців (фото для табло)</span><span class="tcol-arrow">▾</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            { let tries = 0; const mv = setInterval(() => { const pc = document.getElementById('pr-card'), pd = document.getElementById('pado-card'); if (pc && pd && pc.previousElementSibling && pc.previousElementSibling.previousElementSibling === pd) { pc.after(head); head.after(card); clearInterval(mv); } else if (++tries > 60) clearInterval(mv); }, 250); }
+            const inp = 'padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            card.innerHTML = '<div style="font-size:11px; color:#aaa;">Завантаж фото кожного гравця один раз — воно стискається до квадрата ~320 px. Фото з\'являється на табло лише там, де увімкнено «📸 Показувати фото гравців», і лише для гравців із галочкою «дозволено». Гравці зіставляються за іменем (порядок «Ім\'я Прізвище» не важливий).</div>' +
+                '<div style="display:flex; gap:6px;"><input type="text" id="phb-name" placeholder="Ім\'я Прізвище" style="flex:1; ' + inp + '"><button class="btn" id="phb-add" style="padding:6px 10px;">➕ Додати</button></div>' +
+                '<div style="display:flex; gap:6px;"><button class="btn" id="phb-imp" style="flex:1; padding:8px;">📥 Додати імена з табло та списків</button></div>' +
+                '<div id="phb-list" style="display:flex; flex-direction:column; gap:6px;"></div><div id="phb-st" style="font-size:11px; color:#aaa;"></div>';
+            const q = s => card.querySelector(s), st = (m, ok) => { const e = q('#phb-st'); e.textContent = m; e.style.color = ok === false ? '#f66' : '#7c7'; };
+            const all = () => Object.assign({}, s2 || {}, s1 || {});
+            function write(k, obj) { return set(ref(db, 'padel/photos/' + k), obj).catch(() => set(ref(db, 'padel/courts/_photos/' + k), obj)); }
+            function patch(k, o) { return update(ref(db, 'padel/photos/' + k), o).catch(() => update(ref(db, 'padel/courts/_photos/' + k), o)); }
+            function del(k) { return Promise.all([remove(ref(db, 'padel/photos/' + k)).catch(() => 0), remove(ref(db, 'padel/courts/_photos/' + k)).catch(() => 0)]); }
+            function draw() {
+                const host = q('#phb-list'); if (host.contains(document.activeElement) && document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'text') return;
+                const src = all(), keys = Object.keys(src).sort((a, b) => String(src[a].n || a).localeCompare(String(src[b].n || b), 'uk'));
+                const have = keys.filter(k => src[k] && src[k].d).length;
+                if (!keys.length) { host.innerHTML = '<div style="font-size:11px; color:#888;">Список порожній. Додай гравця або імпортуй імена.</div>'; return; }
+                host.innerHTML = keys.map(k => { const v = src[k] || {}, nm = v.n || k;
+                    const th = v.d ? '<img src="' + v.d + '" style="width:48px; height:48px; border-radius:50%; object-fit:cover; object-position:center 22%; border:2px solid #555; flex:0 0 auto;">' : '<div style="width:48px; height:48px; border-radius:50%; background:#333; color:#999; display:flex; align-items:center; justify-content:center; font-size:11px; flex:0 0 auto;">нема</div>';
+                    return '<div data-k="' + esc(k) + '" style="display:flex; align-items:center; gap:8px; background:#1a1a1a; border-radius:8px; padding:6px;">' + th +
+                        '<div style="flex:1; min-width:0; font-size:12px; font-weight:700; word-break:break-word;">' + esc(nm) + '</div>' +
+                        '<label style="font-size:11px; color:#ccc; display:flex; align-items:center; gap:4px;" title="Дозволено показувати на табло"><input type="checkbox" data-ok ' + (v.ok !== false ? 'checked' : '') + '>дозв.</label>' +
+                        '<label class="btn" style="padding:6px 8px; font-size:12px; cursor:pointer; margin:0;">📷<input type="file" accept="image/*" data-nokey data-up style="display:none;"></label>' +
+                        '<button class="btn" data-del style="padding:6px 8px;">✖</button></div>'; }).join('');
+                st(have + ' з ' + keys.length + ' мають фото', true);
+            }
+            card.addEventListener('change', e => {
+                const t = e.target, row = t.closest && t.closest('[data-k]'); if (!row) return; const k = row.dataset.k;
+                if (t.hasAttribute('data-ok')) { patch(k, { ok: t.checked }).then(() => st('Збережено', true)); return; }
+                if (t.hasAttribute('data-up')) {
+                    const f = t.files && t.files[0]; if (!f) return; st('⏳ Стискаю фото…', true);
+                    const rd = new FileReader();
+                    rd.onload = () => { const im = new Image(); im.onload = () => {
+                        const S = 320, side = Math.min(im.width, im.height), sx = (im.width - side) / 2, sy = (im.height - side) * 0.3, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+                        const cx = cv.getContext('2d'); cx.fillStyle = '#222'; cx.fillRect(0, 0, S, S); cx.drawImage(im, sx, sy, side, side, 0, 0, S, S);
+                        const cur = all()[k] || {}; write(k, { n: cur.n || k, d: cv.toDataURL('image/jpeg', 0.82), ok: cur.ok !== false }).then(() => st('✅ Фото збережено', true)).catch(() => st('❌ Не вдалося зберегти', false)); t.value = '';
+                    }; im.onerror = () => st('❌ Не вдалося прочитати фото', false); im.src = rd.result; };
+                    rd.readAsDataURL(f);
+                }
+            });
+            card.addEventListener('click', e => {
+                const b = e.target.closest && e.target.closest('[data-del]'); if (!b) return; const row = b.closest('[data-k]'); const k = row.dataset.k, nm = (all()[k] || {}).n || k;
+                if (confirm('Видалити «' + nm + '» з фотобази?')) del(k).then(() => st('Видалено', true));
+            });
+            q('#phb-add').onclick = () => { const n = q('#phb-name').value.replace(/\s+/g, ' ').trim(); if (!n) return; const k = norm(n); if (!k) return; if (all()[k]) { st('Такий гравець уже є', false); return; } write(k, { n, d: '', ok: true }).then(() => { q('#phb-name').value = ''; st('Додано. Тепер завантаж фото кнопкою 📷', true); }); };
+            q('#phb-imp').onclick = async () => {
+                const names = [], push1 = x => { String(x || '').split(/\s*[\/\n]\s*/).forEach(p => { p = p.replace(/\s+/g, ' ').trim(); if (p && p.length < 60) names.push(p); }); };
+                const tryGet = async p => { try { const s = await get(ref(db, p)); return s.val(); } catch (e) { return null; } };
+                try {
+                    const pr = (await tryGet('padel/prate')) || (await tryGet('padel/courts/_prate')); A(pr && pr.rows).forEach(r => push1(r && r.n));
+                    const sc = (await tryGet('padel/scoretable')) || (await tryGet('padel/courts/_scoretable')); A(sc && sc.rows).forEach(r => push1(r && r.n));
+                    const rs = (await tryGet('padel/rdstand')) || (await tryGet('padel/courts/_rdstand')); A(rs && rs.rows).forEach(r => push1(r && r.n));
+                    const wn = (await tryGet('padel/winners')) || (await tryGet('padel/courts/_winners')); if (wn) ['upN', 'loN'].forEach(k => A(wn[k]).forEach(push1));
+                    if (typeof state !== 'undefined' && state) {
+                        const mi = state.matchIntro || {}; ['t1', 't2'].forEach(t => ['p1', 'p2'].forEach(p => { const pl = (mi[t] || {})[p] || {}; push1(((pl.f || '') + ' ' + (pl.l || '')).trim()); }));
+                        A(state.teamRanking && state.teamRanking.teams).forEach(r => push1(r && r.n));
+                    }
+                } catch (e) { }
+                const src = all(); let added = 0; const seen = {}; const jobs = [];
+                names.forEach(n => { const k = norm(n); if (!k || src[k] || seen[k]) return; seen[k] = 1; added++; jobs.push(write(k, { n, d: '', ok: true })); });
+                await Promise.all(jobs); st(added ? 'Додано імен: ' + added : 'Нових імен не знайдено', true);
+            };
+            const onS = (p, f) => onValue(ref(db, p), s => { f(s.val()); draw(); }, () => { f(null); draw(); });
+            onS('padel/photos', v => { s1 = v; }); onS('padel/courts/_photos', v => { s2 = v; });
+            window.__phbDraw = draw;
+        })();
+
         (function prInit() {
             const tab = document.getElementById('tab-tournament'); if (!tab) return;
             const DEF = { show: false, court: 'all', ts: 0, title: 'РЕЙТИНГ УЧАСНИКІВ PADO', sub: '', mode: 'players', sort: true, topColors: true, showMate: true, showAvg: true, showDelta: false, autoSync: true, split: 'same', deltaLabel: 'ЗМІНА', ratingLabel: 'РЕЙТИНГ', tweenSec: 1.4, sortAvg: true, avgLabel: 'СЕРЕДНІЙ РЕЙТИНГ', avgDelay: 2, sortDelay: 1.4, moveSec: 1.1, upper: true, perPage: 12, pageSec: 7, cols: 0, theme: 'pado', anim: 'rise', textSize: 100, scale: 100, width: 1300, x: 50, y: 50, bgOp: 96, autoHide: 0, rows: [] };
@@ -4800,7 +4880,7 @@ function __clearTournamentName() {
                 RNG('tweenSec', 'Тривалість зміни цифр', 0.4, 5, 0.1, ' с') + TXT('ratingLabel', 'Напис над колонкою рейтингу') + TXT('deltaLabel', 'Напис над колонкою зміни') +
                 TXT('title', 'Заголовок') + TXT('sub', 'Підзаголовок') +
                 SEL('mode', 'Режим', [['players', 'Кожен гравець окремо (за рейтингом)'], ['teams', 'Парами (як у PADO)']]) + CHK('sort', 'Сортувати за рейтингом (режим «кожен гравець»)') + CHK('topColors', 'Золото / срібло / бронза для 1-3 місць') + CHK('showMate', 'Показувати напарника під іменем (режим «кожен гравець»)') + CHK('showAvg', 'Режим «парами»: через паузу показати середній рейтинг пари справа') + CHK('sortAvg', 'Режим «парами»: потім переставити пари від більшого середнього до меншого') + TXT('avgLabel', 'Напис над стовпчиком середнього') + RNG('avgDelay', 'Пауза перед появою середнього', 0.5, 10, 0.5, ' с') + RNG('sortDelay', 'Пауза перед перестановкою пар', 0.3, 10, 0.1, ' с') + RNG('moveSec', 'Тривалість переміщення пар', 0.3, 4, 0.1, ' с') + CHK('upper', 'Імена ВЕЛИКИМИ літерами') +
-                SEL('theme', 'Тема', [['pado', 'PADO (біла, фіолетова)'], ['dark', 'Темна'], ['navy', 'Синя'], ['padel', 'Падел (зелена)'], ['neon', 'Неон'],['gold','Золото (темна)'],['fire','Вогонь'],['ice','Лід (світла блакитна)'],['mono','Моно (чорно-біла)'],['light','Світла'],['purple','Фіолетова'],['red','Червона'],['sunset','Захід сонця'],['lime','Лайм'],['mint','М\'ята (світла)'],['clay','Грунт (корт)'],['ocean','Океан'],['pink','Рожева (світла)']]) + SEL('anim', 'Анімація появи', [['rise', 'Знизу вгору'], ['zoom', 'Збільшення'], ['fade', 'Плавно'], ['none', 'Без анімації']]) +
+                CHK('photos', '📸 Показувати фото гравців (з «Фотобази»)') + SEL('theme', 'Тема', [['pado', 'PADO (біла, фіолетова)'], ['dark', 'Темна'], ['navy', 'Синя'], ['padel', 'Падел (зелена)'], ['neon', 'Неон'],['gold','Золото (темна)'],['fire','Вогонь'],['ice','Лід (світла блакитна)'],['mono','Моно (чорно-біла)'],['light','Світла'],['purple','Фіолетова'],['red','Червона'],['sunset','Захід сонця'],['lime','Лайм'],['mint','М\'ята (світла)'],['clay','Грунт (корт)'],['ocean','Океан'],['pink','Рожева (світла)']]) + SEL('anim', 'Анімація появи', [['rise', 'Знизу вгору'], ['zoom', 'Збільшення'], ['fade', 'Плавно'], ['none', 'Без анімації']]) +
                 RNG('perPage', 'Рядків на сторінці (гравців / пар)', 2, 30, 1, '') + RNG('pageSec', 'Зміна сторінок кожні', 2, 30, 1, ' с') + SEL('cols', 'Колонок', [['0', 'Авто'], ['1', '1'], ['2', '2'], ['3', '3']]) +
                 RNG('scale', 'Масштаб табла', 20, 200, 1, '%') + RNG('width', 'Ширина табла', 600, 1900, 10, ' px') + RNG('textSize', 'Розмір тексту', 40, 200, 1, '%') + RNG('x', 'Позиція X', 0, 100, 0.5, '%') + RNG('y', 'Позиція Y', 0, 100, 0.5, '%') + RNG('bgOp', 'Непрозорість фону', 0, 100, 1, '%') + RNG('autoHide', 'Сховати через (0 = вручну)', 0, 120, 1, ' с') +
                 '<div id="prb-st" style="font-size:11px; color:#aaa;"></div>';
@@ -4910,7 +4990,7 @@ function __clearTournamentName() {
                 SEL('lowerMode', 'Як показувати нижню сітку', [['side', 'Поруч із головною'], ['seq', 'Спочатку головна, потім нижня']]) + RNG('seqSec', 'Пауза перед нижньою сіткою', 2, 30, 1, ' с') + TXT('loLabel', 'Підпис блоку') + places('lo') +
                 '<button class="btn" style="padding:8px;" id="wnb-fl">⬇ Взяти з фіналу нижньої сітки плей-офф</button>' +
                 H('Вигляд') + SEL('layout', 'Розкладка', [['podium', 'П’єдестал (2-1-3)'], ['rows', 'Рядки 1-2-3']]) +
-                SEL('theme', 'Тема', [['gold', 'Золото / темно-синя'], ['navy', 'Синя'], ['neon', 'Неон'], ['light', 'Світла'], ['padel', 'Падел (зелена)'], ['fire', 'Вогонь'], ['mono', 'Чорно-біла'], ['glass', 'Скло (прозора)'], ['custom', 'Власні кольори']]) +
+                CHK('photos', '📸 Показувати фото гравців (з «Фотобази»)') + SEL('theme', 'Тема', [['gold', 'Золото / темно-синя'], ['navy', 'Синя'], ['neon', 'Неон'], ['light', 'Світла'], ['padel', 'Падел (зелена)'], ['fire', 'Вогонь'], ['mono', 'Чорно-біла'], ['glass', 'Скло (прозора)'], ['custom', 'Власні кольори']]) +
                 SEL('medal', 'Позначка місця', [['emoji', 'Медалі 🥇🥈🥉'], ['circle', 'Номер у колі'], ['none', 'Без']]) +
                 CHK('trophy', 'Кубок 🏆 над переможцем') + CHK('pedestal', 'П’єдестал (стовпчики)') + CHK('upper', 'Імена ВЕЛИКИМИ літерами') + CHK('confetti', 'Конфеті при появі 1 місця') +
                 H('Анімація') + SEL('anim', 'Поява табла', [['rise', 'Знизу вгору'], ['zoom', 'Збільшення'], ['fade', 'Плавно'], ['none', 'Без анімації']]) + RNG('dur', 'Тривалість появи табла', 0.2, 3, 0.1, ' с') +
@@ -6202,7 +6282,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
         })();
 
         // ===== РЕЙТИНГ КОМАНД =====
-        const RK_DEFAULT = { show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, reveal: "none", revealDelay: 30, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
+        const RK_DEFAULT = { photos: false, show: false, title: "РЕЙТИНГ КОМАНД", mode: "alt", sort: true, interval: 15, x: 50, y: 50, scale: 100, blur: 12, textSize: 100, widthExtra: 0, reveal: "none", revealDelay: 30, bgColor: "#080808", bgOpacity: 80, headColor: "#0f1f3d", titleColor: "#ffffff", textColor: "#ffffff", numColor: "#c69f66", nameStyle: true, upper: true, logoL: "", logoR1: "", logoR2: "", logoF: "", teams: [] };
         let rkRowsSig = null, rkSaveTimer = null;
         function rkEnsure() {
             if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
@@ -6317,7 +6397,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
-            show: false, title: "Товариська гра", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", nameFmt: "full",
+            show: false, title: "Товариська гра", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", photosAuto: "off", nameFmt: "full",
             x: 50, y: 80, scale: 70, w: 50, h: 25, nameScale: 100, logoL: "", logoR: "", anim: "wipe", animDur: 15, bgOpacity: 80,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
