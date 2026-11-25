@@ -4848,9 +4848,10 @@ function __clearTournamentName() {
                 names.forEach(n => { const k = norm(n); if (!k || src[k] || seen[k]) return; seen[k] = 1; added++; jobs.push(write(k, { n, d: '', ok: true })); });
                 await Promise.all(jobs); st(added ? 'Додано імен: ' + added : 'Нових імен не знайдено', true);
             };
-            const onS = (p, f) => onValue(ref(db, p), s => { f(s.val()); draw(); }, () => { f(null); draw(); });
+            const onS = (p, f) => onValue(ref(db, p), s => { f(s.val()); draw(); try { window.__phbOnChange && window.__phbOnChange(); } catch (e) { } }, () => { f(null); draw(); });
             onS('padel/photos', v => { s1 = v; }); onS('padel/courts/_photos', v => { s2 = v; });
             window.__phbDraw = draw;
+            window.__phbList = () => { const src = all(); return Object.keys(src).map(k => ({ k, n: (src[k] && src[k].n) || k, has: !!(src[k] && src[k].d) })).sort((a, b) => a.n.localeCompare(b.n, 'uk')); };
         })();
 
         (function prInit() {
@@ -5100,6 +5101,86 @@ function __clearTournamentName() {
                 st('♻️ Перезапускаю зʼєднання…', '#fa0');
                 try { goOffline(db); } catch (e) {}
                 setTimeout(() => { try { goOnline(db); st('✅ Зʼєднання з базою відновлено', '#7c7'); } catch (e) { st('⚠️ ' + ((e && e.message) || e), '#f66'); } }, 700);
+            };
+        })();
+
+        // ===== ВИПАДАЮЧИЙ СПИСОК «ГРАВЕЦЬ З ФОТОБАЗИ» у табло «Хто грає» =====
+        (function miPickInit() {
+            const PATHS = ['t1.p1', 't1.p2', 't2.p1', 't2.p2'], sels = [];
+            const fire = (el, v) => { el.value = v; };
+            PATHS.forEach(p => {
+                const f = document.querySelector('[data-mi="' + p + '.f"]'), l = document.querySelector('[data-mi="' + p + '.l"]'); if (!f || !f.parentElement) return;
+                const sel = document.createElement('select'); sel.dataset.miPick = p; sel.style.cssText = 'width:100%; padding:5px 6px; font-size:12px; background:#111; color:#e0b878; border:1px solid #555; border-radius:4px; box-sizing:border-box; margin-bottom:4px;';
+                f.parentElement.parentNode.insertBefore(sel, f.parentElement); sels.push(sel);
+                sel.onchange = () => {
+                    const it = (window.__phbList ? window.__phbList() : []).find(x => x.k === sel.value); sel.value = ''; if (!it) return;
+                    const w = String(it.n || '').trim().split(/\s+/).filter(Boolean); if (!w.length) return;
+                    const last = w.length > 1 ? w.pop() : w.pop(), first = w.join(' ');
+                    try { const mi = miEnsure(); miSetPath(mi, p + '.f', first); miSetPath(mi, p + '.l', last); miSave(true); } catch (e) { }
+                    fire(f, first); fire(l, last);
+                };
+            });
+            function fill() {
+                const L = window.__phbList ? window.__phbList() : [];
+                sels.forEach(sel => { const cur = sel.value; sel.innerHTML = '<option value="">👤 Обрати гравця з фотобази' + (L.length ? ' (' + L.length + ')' : ' — порожньо') + '…</option>' + L.map(x => '<option value="' + String(x.k).replace(/"/g, '&quot;') + '">' + (x.has ? '📷 ' : '▫️ ') + String(x.n).replace(/[<&]/g, '') + '</option>').join(''); sel.value = cur || ''; });
+            }
+            window.__phbOnChange = fill; fill();
+        })();
+
+        // ===== ОЧИЩЕННЯ БАЗИ: корти, учасники, фото, історія, табло — з копією у файл і відновленням =====
+        (function clrInit() {
+            const tab = document.getElementById('tab-tournament'); if (!tab) return;
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🧹 Очищення бази (почати з чистого)</span><span class="tcol-arrow">▸</span>';
+            const card = document.createElement('div'); card.id = 'clr-card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            const CK = (id, t) => '<label style="font-size:12px; color:#ddd; display:flex; gap:8px; align-items:flex-start;"><input type="checkbox" id="' + id + '" style="margin-top:2px;"><span>' + t + '</span></label>';
+            card.innerHTML = '<div style="font-size:11px; color:#fa9;">Позначте, що видалити з бази Firebase. Видалення безповоротне, тому перед ним можна автоматично зберегти копію у файл — її можна повернути кнопкою «Відновити» нижче. Налаштування доступу (padel/access) і файли в Storage не чіпаються.</div>' +
+                CK('clr-cur', '<b>Поточний корт</b> — рахунок, імена, налаштування, фото команд') + CK('clr-all', '<b>Усі корти 1–10</b> — рахунок, імена, налаштування, фото команд') +
+                CK('clr-pl', '<b>База гравців</b> (учасники для підказок імен)') + CK('clr-ph', '<b>Фотобаза</b> гравців') + CK('clr-hi', '<b>Історія матчів</b>') +
+                CK('clr-gl', '<b>Спільні табло й таблиці</b> — PADO, переможці, рейтинг, наступні матчі, групи, плей-оф, спонсори, погода тощо') +
+                '<div style="display:flex; gap:6px;"><button class="btn" id="clr-sel" style="flex:1; padding:8px;">☑ Позначити все</button><button class="btn" id="clr-none" style="flex:1; padding:8px;">☐ Зняти все</button></div>' +
+                CK('clr-bk', 'Спершу завантажити копію (JSON-файл)') +
+                '<button class="btn btn-red" style="padding:12px; font-weight:800;" id="clr-go">🧹 ОЧИСТИТИ ПОЗНАЧЕНЕ</button>' +
+                '<div id="clr-st" style="font-size:11px; color:#aaa;"></div>' +
+                '<div style="border-top:1px dashed #444; padding-top:8px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:12px; font-weight:700;">♻️ Відновити з копії</div><input type="file" accept=".json,application/json" id="clr-file" data-nokey style="font-size:11px;"><div style="font-size:10px; color:#9a9;">Дані з файлу записуються назад у ті самі місця бази, після цього сторінка перезавантажується.</div></div>';
+            tab.appendChild(head); tab.appendChild(card); setTimeout(() => card.classList.add('card'), 0);
+            const q = s => card.querySelector(s), st = (m, c) => { const e = q('#clr-st'); e.textContent = m; e.style.color = c || '#aaa'; };
+            const ids = ['clr-cur', 'clr-all', 'clr-pl', 'clr-ph', 'clr-hi', 'clr-gl']; q('#clr-bk').checked = true;
+            q('#clr-sel').onclick = () => ids.forEach(i => { q('#' + i).checked = true; }); q('#clr-none').onclick = () => ids.forEach(i => { q('#' + i).checked = false; });
+            const KEEP = ['access'];
+            async function collect() {
+                const root = (await get(ref(db, 'padel'))).val() || {}, courts = root.courts || {}, it = {}, add = (p, v) => { if (v !== undefined && v !== null) it[p] = v; };
+                if (q('#clr-cur').checked) add('padel/courts/court_' + courtId, courts['court_' + courtId]);
+                if (q('#clr-all').checked) Object.keys(courts).forEach(k => { if (/^court_\d+$/.test(k)) add('padel/courts/' + k, courts[k]); });
+                if (q('#clr-pl').checked) add('padel/courts/players', courts.players);
+                if (q('#clr-ph').checked) { add('padel/photos', root.photos); add('padel/courts/_photos', courts._photos); }
+                if (q('#clr-hi').checked) add('padel/history', root.history);
+                if (q('#clr-gl').checked) {
+                    Object.keys(root).forEach(k => { if (k !== 'courts' && k !== 'photos' && k !== 'history' && KEEP.indexOf(k) < 0) add('padel/' + k, root[k]); });
+                    Object.keys(courts).forEach(k => { if (k.charAt(0) === '_' && k !== '_photos') add('padel/courts/' + k, courts[k]); });
+                }
+                return it;
+            }
+            function download(obj, nm) { const b = new Blob([JSON.stringify(obj)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nm; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+            q('#clr-go').onclick = async () => {
+                if (!ids.some(i => q('#' + i).checked)) { st('Нічого не позначено', '#f66'); return; }
+                try {
+                    st('⏳ Читаю базу…', '#9bd'); const items = await collect(), paths = Object.keys(items);
+                    if (!paths.length) { st('✅ Позначені розділи вже порожні', '#7c7'); return; }
+                    const bk = q('#clr-bk').checked;
+                    if (!confirm('Буде БЕЗПОВОРОТНО видалено розділів бази: ' + paths.length + '.\n' + (bk ? 'Копію буде збережено у файл.' : 'Копії НЕ буде!') + '\n\nПродовжити?')) { st('Скасовано', '#aaa'); return; }
+                    if (bk) { const d = new Date(), p2 = n => String(n).padStart(2, '0'); download({ fmt: 'padel-db-backup', ts: Date.now(), items }, 'padel-backup-' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()) + '.json'); await new Promise(r => setTimeout(r, 600)); }
+                    st('🧹 Видаляю…', '#fa0'); await Promise.all(paths.map(p => remove(ref(db, p))));
+                    st('✅ Очищено розділів: ' + paths.length + '. Перезавантажую пульт…', '#7c7'); setTimeout(() => location.reload(), 1500);
+                } catch (e) { st('❌ Помилка: ' + ((e && e.message) || e), '#f66'); }
+            };
+            q('#clr-file').onchange = async e => {
+                const f = e.target.files && e.target.files[0]; if (!f) return;
+                try {
+                    const j = JSON.parse(await f.text()); if (!j || j.fmt !== 'padel-db-backup' || !j.items) { st('❌ Це не файл копії бази', '#f66'); return; }
+                    const paths = Object.keys(j.items).filter(p => /^padel\//.test(p)); if (!confirm('Відновити з копії розділів: ' + paths.length + '? Наявні дані в цих місцях буде замінено.')) return;
+                    st('⏳ Відновлюю…', '#fa0'); await Promise.all(paths.map(p => set(ref(db, p), j.items[p]))); st('✅ Відновлено розділів: ' + paths.length + '. Перезавантажую…', '#7c7'); setTimeout(() => location.reload(), 1500);
+                } catch (er) { st('❌ Не вдалося: ' + ((er && er.message) || er), '#f66'); } finally { e.target.value = ''; }
             };
         })();
 
