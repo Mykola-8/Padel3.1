@@ -4815,7 +4815,20 @@
                 dark: { bg: '#0b1226', ac2: '#ffd24a', bg2: '#16224a', tx: '#ffffff', ac: '#8f6bff', acx: '#ffffff', row: 'rgba(255,255,255,.08)' },
                 navy: { bg: '#06142e', ac2: '#8fd3ff', bg2: '#0f3a7a', tx: '#ffffff', ac: '#ffd24a', acx: '#111111', row: 'rgba(255,255,255,.08)' },
                 padel: { bg: '#06402d', ac2: '#ffffff', bg2: '#0c7a52', tx: '#ffffff', ac: '#d7ff3a', acx: '#06402d', row: 'rgba(0,0,0,.25)' },
-                neon: { bg: '#0a0420', ac2: '#ff4fd8', bg2: '#2a0a55', tx: '#ffffff', ac: '#00f0ff', acx: '#0a0420', row: 'rgba(255,255,255,.07)' }
+                neon: { bg: '#0a0420', ac2: '#ff4fd8', bg2: '#2a0a55', tx: '#ffffff', ac: '#00f0ff', acx: '#0a0420', row: 'rgba(255,255,255,.07)' },
+                gold: { bg: '#14110a', ac2: '#f5d487', bg2: '#2a2210', tx: '#fff6dc', ac: '#d4a017', acx: '#14110a', row: 'rgba(212,160,23,.14)' },
+                fire: { bg: '#1c0903', ac2: '#ffb347', bg2: '#4a1608', tx: '#fff1e6', ac: '#ff5a1f', acx: '#ffffff', row: 'rgba(255,90,31,.14)' },
+                ice: { bg: '#eaf6ff', ac2: '#0a7bbf', bg2: '#d3eafb', tx: '#0b2a40', ac: '#00a3e0', acx: '#ffffff', row: '#f7fbff' },
+                mono: { bg: '#0d0d0d', ac2: '#bdbdbd', bg2: '#222222', tx: '#ffffff', ac: '#ffffff', acx: '#0d0d0d', row: 'rgba(255,255,255,.09)' },
+                light: { bg: '#fafafa', ac2: '#1f9d55', bg2: '#ececec', tx: '#161616', ac: '#111111', acx: '#ffffff', row: '#ffffff' },
+                purple: { bg: '#1a0b33', ac2: '#e9b8ff', bg2: '#3a1470', tx: '#ffffff', ac: '#b46bff', acx: '#ffffff', row: 'rgba(180,107,255,.16)' },
+                red: { bg: '#2a0509', ac2: '#ffd0d0', bg2: '#5c0a14', tx: '#ffffff', ac: '#ff3b4e', acx: '#ffffff', row: 'rgba(255,255,255,.08)' },
+                sunset: { bg: '#2b0f2e', ac2: '#ffc371', bg2: '#6a1b4d', tx: '#fff4ea', ac: '#ff6a88', acx: '#ffffff', row: 'rgba(255,195,113,.13)' },
+                lime: { bg: '#0b1a05', ac2: '#d7ff3a', bg2: '#1f4a0d', tx: '#f3ffd6', ac: '#7dff2a', acx: '#0b1a05', row: 'rgba(125,255,42,.12)' },
+                mint: { bg: '#e8fbf3', ac2: '#0b8f63', bg2: '#c9f1e0', tx: '#073b2a', ac: '#12b886', acx: '#ffffff', row: '#f6fffb' },
+                clay: { bg: '#2b150c', ac2: '#ffd9b8', bg2: '#6b3419', tx: '#fff3ea', ac: '#e8743b', acx: '#ffffff', row: 'rgba(232,116,59,.16)' },
+                ocean: { bg: '#021f2e', ac2: '#5eead4', bg2: '#06506b', tx: '#e8fbff', ac: '#22d3ee', acx: '#021f2e', row: 'rgba(34,211,238,.12)' },
+                pink: { bg: '#fff0f6', ac2: '#c2255c', bg2: '#ffd6e7', tx: '#3b0a1f', ac: '#f0508f', acx: '#ffffff', row: '#fff9fc' }
             };
             function look() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%, -50%) scale(' + k + ')'; }
             function rows() { return arr(cfg.rows).map((r, i) => { const a = num(r && r.r, 0), dd = cfg.showDelta ? num(r && r.d, 0) : 0; return { n: String(r && r.n || ''), r: a, d: dd, f: a + dd, t: Math.floor(i / 2), i }; }).filter(r => r.n); }
