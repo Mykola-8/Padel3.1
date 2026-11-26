@@ -3143,6 +3143,9 @@ function __clearTournamentName() {
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                     ${sel('anim', '✨ Анімація появи/зникнення', [['fade', 'Плавно (fade)'], ['zoom', 'Збільшення'], ['slideUp', 'Знизу вгору'], ['slideDown', 'Зверху вниз'], ['slideLeft', 'Зліва'], ['slideRight', 'Справа'], ['wipe', 'Розкриття від центру'], ['flip', 'Переворот'], ['logoMorph', '🔷 Логотип → табло (трансформація)'], ['none', 'Без анімації']])}
+                    ${sel('animOut', '🚪 Анімація виходу (закриття)', [['same', 'Як поява (у зворотний бік)'], ['fade', 'Плавне згасання'], ['zoomOut', 'Збільшення і зникнення'], ['shrink', 'Стиснення в точку'], ['slideUp', 'Виїзд угору'], ['slideDown', 'Виїзд униз'], ['slideLeft', 'Виїзд вліво'], ['slideRight', 'Виїзд вправо'], ['wipeV', 'Закриття до центру (горизонтально)'], ['wipeH', 'Закриття до центру (вертикально)'], ['flip', 'Переворот'], ['blur', 'Розмиття'], ['text', 'Спершу зникає текст, потім табло']])}
+                    ${sel('shine', '✨ Блиск назви зліва направо', [['1', 'Один раз після появи'], ['2', 'Постійно (кожні кілька секунд)'], ['0', 'Вимкнено']])}
+                    ${color('shineColor', '🎨 Колір блиску', d.shineColor || '#ffd84a')}
                     ${slider('animDur', '⏱ Тривалість анімації', 1, 30, 6)}
                     ${sel('float3d', '🧊 3D-ефект «висить у повітрі»', [['0', 'Вимкнено'], ['1', 'Легкий'], ['2', 'Середній'], ['3', 'Сильний']])}
                 </div>`;
@@ -5496,7 +5499,7 @@ function __clearTournamentName() {
             setInterval(() => { try { tick(); } catch (e) {} }, 400);
             fit();
             // --- універсальна фіолетова кнопка ПЕРЕГЛЯД для всіх таблиць ---
-            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', pr: 'prb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle' };
+            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', pr: 'prb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle', gt: 'gtb-on' };
             const pvOn = {};
             function send(k) { try { if (fr.contentWindow) fr.contentWindow.postMessage({ type: 'pvAny', key: k, on: !!pvOn[k] }, '*'); } catch (e) {} }
             function ui(k, b) { b.style.outline = pvOn[k] ? '3px solid #fff' : 'none'; b.innerText = pvOn[k] ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; }
