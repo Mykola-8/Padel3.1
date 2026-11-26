@@ -1123,7 +1123,53 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
+(function(){
+  var KINDS={rk:'Рейтинг команд',gr:'Групи',ic:'Вступне табло',mi:'Хто грає'};
+  function load(k){try{var a=JSON.parse(localStorage.getItem('ms_'+k)||'null');if(Array.isArray(a)&&a.length)return a.map(Number).filter(function(n){return n>=1&&n<=10;});}catch(e){}return null;}
+  window.__msList=function(k){var a=load(k);if(!a||a.length>=10)return [1,2,3,4,5,6,7,8,9,10];return a.slice().sort(function(x,y){return x-y;});};
+  function save(k,a){try{if(!a||!a.length||a.length>=10)localStorage.removeItem('ms_'+k);else localStorage.setItem('ms_'+k,JSON.stringify(a));}catch(e){}}
+  function paint(k,box,btns){var a=load(k);box.querySelectorAll('[data-n]').forEach(function(b){var n=b.getAttribute('data-n');var on=n==='all'?!a:(a&&a.indexOf(+n)>=0);b.style.background=on?'#f5c542':'#2b2f3a';b.style.color=on?'#111':'#ddd';});
+    btns.forEach(function(b){var t=b.textContent;if(a){b.textContent=t.replace(/НА ВСІХ КОРТАХ|НА ВСІХ|НА ВИБРАНИХ/,'НА ВИБРАНИХ ('+a.slice().sort(function(x,y){return x-y;}).join(',')+')').replace(/НА ВИБРАНИХ \([^)]*\) \([^)]*\)/,'НА ВИБРАНИХ ('+a.slice().sort(function(x,y){return x-y;}).join(',')+')');}else{b.textContent=t.replace(/НА ВИБРАНИХ \([^)]*\)/,b.getAttribute('data-hide')==='1'?'НА ВСІХ':'НА ВСІХ КОРТАХ');}});}
+  function enhance(row,k){
+    row.setAttribute('data-ms','1');
+    var btns=[].slice.call(row.querySelectorAll('button'));btns.forEach(function(b,i){b.setAttribute('data-hide',/СХОВАТИ/.test(b.textContent)?'1':'0');});
+    var box=document.createElement('div');box.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;';
+    var h='<span style="font-size:10px;color:#9aa;align-self:center;margin-right:2px;">Корти для кнопок нижче:</span><button type="button" data-n="all" class="btn" style="padding:3px 8px;font-size:11px;">Усі</button>';
+    for(var n=1;n<=10;n++)h+='<button type="button" data-n="'+n+'" class="btn" style="padding:3px 8px;font-size:11px;min-width:26px;">'+n+'</button>';
+    box.innerHTML=h;row.parentNode.insertBefore(box,row);
+    box.addEventListener('click',function(e){var b=e.target.closest('[data-n]');if(!b)return;e.preventDefault();e.stopPropagation();var n=b.getAttribute('data-n'),a=load(k)||[];
+      if(n==='all')a=[];else{n=+n;var i=a.indexOf(n);if(i>=0)a.splice(i,1);else a.push(n);}save(k,a);paint(k,box,btns);});
+    paint(k,box,btns);
+  }
+  setInterval(function(){document.querySelectorAll('button[onclick]').forEach(function(b){var oc=b.getAttribute('onclick')||'',m=oc.match(/showAllCourts\('(rk|gr|mi)'|icShowAll\(true\)/);if(!m)return;var k=m[1]||'ic';if(!/true/.test(oc))return;var row=b.parentElement;if(row&&!row.getAttribute('data-ms'))enhance(row,k);});},700);
+})();
+</script>
+<script>
+(function(){
+  var d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+  function lbl(v){return 'Корти '+String(v).split(',').join(', ');}
+  function ensure(sel,v){ if(!v||v==='all')return; for(var i=0;i<sel.options.length;i++) if(sel.options[i].value===v) return; var o=document.createElement('option');o.value=v;o.textContent=lbl(v);sel.appendChild(o); }
+  Object.defineProperty(HTMLSelectElement.prototype,'value',{configurable:true,get:function(){return d.get.call(this);},set:function(v){ if(this.getAttribute&&this.getAttribute('data-k')==='court'&&v!=null) ensure(this,String(v)); d.set.call(this,v); }});
+  function cur(sel){var v=sel.value;if(!v||v==='all')return null;return v.split(',').filter(Boolean);}
+  function paint(sel,box){var c=cur(sel);box.querySelectorAll('[data-n]').forEach(function(b){var n=b.getAttribute('data-n');var on=n==='all'?!c:(c&&c.indexOf(n)>=0);b.style.background=on?'#f5c542':'#2b2f3a';b.style.color=on?'#111':'#ddd';});}
+  function enhance(sel){
+    sel.setAttribute('data-ct','1');
+    var box=document.createElement('div');box.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px;';
+    var h='<span style="font-size:10px;color:#9aa;align-self:center;margin-right:2px;">Кілька кортів:</span><button type="button" data-n="all" class="btn" style="padding:3px 8px;font-size:11px;">Усі</button>';
+    for(var n=1;n<=10;n++) h+='<button type="button" data-n="'+n+'" class="btn" style="padding:3px 8px;font-size:11px;min-width:26px;">'+n+'</button>';
+    box.innerHTML=h;
+    var row=sel.closest('.row')||sel.parentNode; row.parentNode.insertBefore(box,row.nextSibling);
+    box.addEventListener('click',function(e){var b=e.target.closest('[data-n]');if(!b)return;e.preventDefault();var n=b.getAttribute('data-n'),c=cur(sel)||[],v;
+      if(n==='all')v='all';else{var i=c.indexOf(n);if(i>=0)c.splice(i,1);else c.push(n);c.sort(function(a,b){return a-b;});v=c.length&&c.length<10?c.join(','):'all';}
+      ensure(sel,v);d.set.call(sel,v);sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));paint(sel,box);});
+    sel.addEventListener('change',function(){paint(sel,box);});
+    sel.__ctBox=box;paint(sel,box);
+  }
+  setInterval(function(){document.querySelectorAll('select[data-k="court"]').forEach(function(sel){ if(!sel.getAttribute('data-ct'))enhance(sel); else if(sel.__ctBox)paint(sel,sel.__ctBox); });},500);
+})();
+</script>
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, get, push, onValue, remove, update, goOffline, goOnline } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -3049,9 +3095,10 @@ function __clearTournamentName() {
         window.icShowAll = function(v) {
             if (v) syncIntroGlobal(true);
             // «Показати на всіх» з корту №1: усі корти знову наслідують шаблон (знімаємо «own»), щоб не треба було нічого чіпати на інших кортах
-            if (v && icIsMaster()) for (let i = 2; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/own'), false);
-            for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v);
-            icEnsure().show = !!v; icRefreshUI();
+            const MS = window.__msList ? window.__msList('ic') : [1,2,3,4,5,6,7,8,9,10];
+            if (v && icIsMaster()) MS.forEach(i => { if (i >= 2) set(ref(db, 'padel/courts/court_' + i + '/introCard/own'), false); });
+            MS.forEach(i => set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v));
+            if (MS.indexOf(parseInt(courtId)) >= 0) { icEnsure().show = !!v; icRefreshUI(); }
         };
         window.icInput = function(el) {
             const k = el.getAttribute('data-path'), c = icEnsure();
@@ -3225,7 +3272,7 @@ function __clearTournamentName() {
                     else if (kind === 'sp') { ensureSponsorLogosArray(); const o = { logos: state.sponsorLogos.slice(0, 10) }; ensureSponsorInfosArray(); o.infos = state.sponsorInfos.slice(0, 10); ensureSponsorQrs(); o.qrs = state.sponsorQrs.slice(0, 10); o.qrDescs = state.sponsorQrDescs.slice(0, 10); globalSponsors = o; set(ref(db, 'padel/sponsors'), o); }
                 } catch (e) { console.error(e); }
             }
-            for (let i = 1; i <= 10; i++) paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); });
+            (window.__msList ? window.__msList(kind) : [1,2,3,4,5,6,7,8,9,10]).forEach(i => paths.forEach(([p, val]) => { set(ref(db, 'padel/courts/court_' + i + '/' + p), val); }));
         };
 
         // ===== РІЗДВЯНА ТЕМА ВСІХ ТУРНІРНИХ ТАБЛ (padel/tournTheme) =====
