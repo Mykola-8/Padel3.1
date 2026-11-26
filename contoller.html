@@ -1612,11 +1612,8 @@
 
         window.hardResetAllFirebase = function() { if (window.__clrRun) window.__clrRun(true); else window.__say("Картка очищення ще не завантажилась — оновіть сторінку."); };
 
-        window.resetAllCourts = async function() {
-            if (!await __ask("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
-            if (!await __ask("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
-
-            const freshCourtState = {
+        function __freshCourt() {
+            return {
                 p1name: "Команда A", p2name: "Команда B", p1Index: 0, p2Index: 0, currentServer: 1, p1ServerSlot: 1, p2ServerSlot: 1, currentSet: 1,
                 scale: 1, posX: 30, posY: 30, tournamentStage: "",
                 isTiebreak: false, isAmericano: false, americanoLimit: 17, americanoTotal: false,
@@ -1640,6 +1637,14 @@
                 t1_s1: 0, t2_s1: 0, t1_tb_s1: "", t2_tb_s1: "", t1_tb_s2: "", t2_tb_s2: "", t1_tb_s3: "", t2_tb_s3: "",
                 animation: { team: 0, type: "", ts: 0 }
             };
+        }
+        window.__freshCourt = __freshCourt;
+
+        window.resetAllCourts = async function() {
+            if (!await __ask("🔄 Скинути ВСІ 10 кортів до чистого стану?\n\nОчиститься на кожному корті: назви команд, рахунки, логотипи, зображення-заставки та анімації.")) return;
+            if (!await __ask("Це незворотньо застосується одразу до всіх 10 кортів. Підтверджуєте?")) return;
+
+            const freshCourtState = __freshCourt();
 
             const writes = [];
             for (let i = 1; i <= 10; i++) {
@@ -5160,18 +5165,31 @@ function __clearTournamentName() {
             const ids = ['clr-cur', 'clr-all', 'clr-pl', 'clr-ph', 'clr-hi', 'clr-gl']; q('#clr-bk').checked = true;
             q('#clr-sel').onclick = () => ids.forEach(i => { q('#' + i).checked = true; }); q('#clr-none').onclick = () => ids.forEach(i => { q('#' + i).checked = false; });
             const KEEP = ['access'];
+            const GL = ['tname', 'sponsors', 'scoretable', 'playoff', 'winners', 'weather', 'tv', 'tournTheme', 'stinger', 'seq', 'rules', 'rkmove', 'reactions', 'rdstand', 'ranking', 'qr', 'prate', 'nextmatches', 'miniboard', 'introCard', 'groups', 'gametimer', 'float', 'credits', 'courtinfo', 'cornerBanner', 'breakCfg', 'bars', 'autoSched', 'watch', 'teamRanking', 'matchIntro', 'tvled', 'epilogue'];
+            const tryGet = async p => { try { return { ok: true, v: (await get(ref(db, p))).val() }; } catch (e) { return { ok: false, v: undefined }; } };
+            // список шляхів (без читання всього кореня — на ньому у правилах може бути заборонено читання)
             async function collect() {
-                const root = (await get(ref(db, 'padel'))).val() || {}, courts = root.courts || {}, it = {}, add = (p, v) => { if (v !== undefined && v !== null) it[p] = v; };
-                if (q('#clr-cur').checked) add('padel/courts/court_' + courtId, courts['court_' + courtId]);
-                if (q('#clr-all').checked) Object.keys(courts).forEach(k => { if (/^court_\d+$/.test(k)) add('padel/courts/' + k, courts[k]); });
-                if (q('#clr-pl').checked) add('padel/courts/players', courts.players);
-                if (q('#clr-ph').checked) { add('padel/photos', root.photos); add('padel/courts/_photos', courts._photos); }
-                if (q('#clr-hi').checked) add('padel/history', root.history);
+                const P = [], push = (p, kind) => { if (!P.some(x => x.p === p)) P.push({ p, kind }); };
+                const root = await tryGet('padel'), rv = (root.ok && root.v) || {}, cv = rv.courts || {};
+                if (q('#clr-cur').checked) push('padel/courts/court_' + courtId, 'court');
+                if (q('#clr-all').checked) { for (let n = 1; n <= 10; n++) push('padel/courts/court_' + n, 'court'); Object.keys(cv).forEach(k => { if (/^court_\d+$/.test(k)) push('padel/courts/' + k, 'court'); }); }
+                if (q('#clr-pl').checked) push('padel/courts/players', '');
+                if (q('#clr-ph').checked) { push('padel/photos', ''); push('padel/courts/_photos', ''); }
+                if (q('#clr-hi').checked) push('padel/history', '');
                 if (q('#clr-gl').checked) {
-                    Object.keys(root).forEach(k => { if (k !== 'courts' && k !== 'photos' && k !== 'history' && KEEP.indexOf(k) < 0) add('padel/' + k, root[k]); });
-                    Object.keys(courts).forEach(k => { if (k.charAt(0) === '_' && k !== '_photos') add('padel/courts/' + k, courts[k]); });
+                    GL.forEach(k => { push('padel/' + k, ''); push('padel/courts/_' + k, ''); });
+                    Object.keys(rv).forEach(k => { if (k !== 'courts' && k !== 'photos' && k !== 'history' && KEEP.indexOf(k) < 0) push('padel/' + k, ''); });
+                    Object.keys(cv).forEach(k => { if (k.charAt(0) === '_' && k !== '_photos') push('padel/courts/' + k, ''); });
                 }
-                return it;
+                const got = await Promise.all(P.map(x => tryGet(x.p))), items = {}, list = [];
+                P.forEach((x, i) => { if (got[i].ok && (got[i].v === null || got[i].v === undefined)) return; if (got[i].ok) items[x.p] = got[i].v; list.push(x); });
+                return { items, list };
+            }
+            async function wipe(x) {   // видалити; якщо правила не дозволяють — скинути іншим способом
+                const errs = [];
+                try { await remove(ref(db, x.p)); return { ok: true }; } catch (e) { errs.push(e.message || e); }
+                try { await set(ref(db, x.p), x.kind === 'court' && window.__freshCourt ? window.__freshCourt() : null); return { ok: true, soft: true }; } catch (e) { errs.push(e.message || e); }
+                return { ok: false, err: errs.join(' / ') };
             }
             function download(obj, nm) { const b = new Blob([JSON.stringify(obj)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nm; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
             const run = async (preset) => {
@@ -5179,12 +5197,13 @@ function __clearTournamentName() {
                 const say = (m, c) => { st(m, c); if (preset && c === '#f66') window.__say(m); };
                 if (!ids.some(i => q('#' + i).checked)) { st('Нічого не позначено', '#f66'); return; }
                 try {
-                    st('⏳ Читаю базу…', '#9bd'); const items = await collect(), paths = Object.keys(items);
+                    st('⏳ Читаю базу…', '#9bd'); const col = await collect(), items = col.items, paths = col.list.map(x => x.p);
                     if (!paths.length) { st('✅ Позначені розділи вже порожні', '#7c7'); return; }
                     const bk = q('#clr-bk').checked;
                     if (!(await window.__ask('Буде БЕЗПОВОРОТНО видалено розділів бази: ' + paths.length + '.\n' + (bk ? 'Копію буде збережено у файл.' : 'Копії НЕ буде!') + '\n\nПродовжити?', 'Очистити'))) { st('Скасовано', '#aaa'); return; }
                     if (bk) { const d = new Date(), p2 = n => String(n).padStart(2, '0'); download({ fmt: 'padel-db-backup', ts: Date.now(), items }, 'padel-backup-' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()) + '.json'); await new Promise(r => setTimeout(r, 600)); }
-                    st('🧹 Видаляю…', '#fa0'); await Promise.all(paths.map(p => remove(ref(db, p))));
+                    st('🧹 Видаляю…', '#fa0'); const res = await Promise.all(col.list.map(wipe)), bad = col.list.filter((x, i) => !res[i].ok);
+                    if (bad.length) { say('⚠️ Очищено: ' + (paths.length - bad.length) + ' з ' + paths.length + '. Не вдалося (правила Firebase забороняють запис):\n' + bad.map(x => x.p.replace('padel/', '')).join(', ') + '\n\n' + (res[col.list.indexOf(bad[0])].err || ''), '#f66'); if (paths.length - bad.length > 0) setTimeout(() => location.reload(), 6000); return; }
                     st('✅ Очищено розділів: ' + paths.length + '. Перезавантажую пульт…', '#7c7'); setTimeout(() => location.reload(), 1500);
                 } catch (e) { say('❌ Не вдалося очистити: ' + ((e && e.message) || e) + '\n(Якщо це PERMISSION_DENIED — правила Firebase забороняють видалення.)', '#f66'); }
             };
@@ -5194,7 +5213,7 @@ function __clearTournamentName() {
                 try {
                     const j = JSON.parse(await f.text()); if (!j || j.fmt !== 'padel-db-backup' || !j.items) { st('❌ Це не файл копії бази', '#f66'); return; }
                     const paths = Object.keys(j.items).filter(p => /^padel\//.test(p)); if (!(await window.__ask('Відновити з копії розділів: ' + paths.length + '? Наявні дані в цих місцях буде замінено.', 'Відновити'))) return;
-                    st('⏳ Відновлюю…', '#fa0'); await Promise.all(paths.map(p => set(ref(db, p), j.items[p]))); st('✅ Відновлено розділів: ' + paths.length + '. Перезавантажую…', '#7c7'); setTimeout(() => location.reload(), 1500);
+                    st('⏳ Відновлюю…', '#fa0'); const rs = await Promise.allSettled(paths.map(p => set(ref(db, p), j.items[p]))); const nb = rs.filter(r => r.status === 'rejected').length; if (nb) { st('⚠️ Відновлено ' + (paths.length - nb) + ', не вдалося ' + nb + ' (немає прав запису)', '#f66'); return; } st('✅ Відновлено розділів: ' + paths.length + '. Перезавантажую…', '#7c7'); setTimeout(() => location.reload(), 1500);
                 } catch (er) { st('❌ Не вдалося: ' + ((er && er.message) || er), '#f66'); } finally { e.target.value = ''; }
             };
         })();
