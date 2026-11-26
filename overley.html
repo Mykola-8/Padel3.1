@@ -582,6 +582,18 @@
         }
 
         body.ic-active #statistics-panel { display: none !important; }
+        /* --- Вступне табло: ПОВНОЕКРАННИЙ варіант (лого зверху, лого спонсора, назва | рік/дата) --- */
+        .ic-wrap[data-lay=full] .ic-panel { left: 0; top: 0; width: 1920px; height: 1080px; margin: 0 !important; zoom: 1 !important; box-shadow: none; display: block; overflow: hidden; }
+        .ic-wrap[data-lay=full] .ic-panel::before { background: linear-gradient(135deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); }
+        .ic-wrap[data-lay=full] .ic-panel::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(118deg, transparent 63%, rgba(255,255,255,.045) 63%, rgba(255,255,255,.045) 80%, transparent 80%), linear-gradient(118deg, transparent 80%, rgba(255,255,255,.03) 80%); opacity: var(--ic-op, 1); }
+        .ic-fs { position: absolute; inset: 0; z-index: 1; color: var(--ic-text, #fff); display: flex; flex-direction: column; align-items: center; }
+        .ic-fs .fs-top { position: absolute; top: 56px; left: 0; right: 0; display: flex; justify-content: center; }
+        .ic-fs .fs-top img { height: calc(170px * var(--fs-ls, 1)); max-width: 1100px; object-fit: contain; }
+        .ic-fs .fs-main { position: absolute; left: 0; right: 0; top: 52%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 22px; }
+        .ic-fs .fs-brand { height: calc(150px * var(--fs-bs, 1)); max-width: 1500px; object-fit: contain; }
+        .ic-fs .fs-title { display: flex; align-items: center; gap: 0.32em; font-weight: 800; font-style: italic; text-transform: uppercase; font-size: calc(150px * var(--fs-ts, 1)); line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
+        .ic-fs .fs-title i { display: block; width: 3px; height: 1.15em; background: currentColor; opacity: .85; transform: skewX(-12deg); }
+        .ic-fs .ic-cd { position: static; margin-top: 10px; }
         .ic-panel { position: absolute; left: 370px; top: 170px; width: 1180px; height: 740px; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,calc(.55 * var(--ic-op, 1))); clip-path: inset(0 0 0 0); transform: none; opacity: 1; transition: opacity var(--ic-d, 0.6s) ease, transform var(--ic-d, 0.6s) cubic-bezier(.2,.8,.2,1), clip-path var(--ic-d, 0.6s) ease; }
         .ic-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); opacity: var(--ic-op, 1); z-index: 0; }
         .ic-top, .ic-body, .ic-foot { position: relative; z-index: 1; }
@@ -3126,16 +3138,26 @@
             s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
             s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
             s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100); s.setProperty('--ic-d', dur + 's');
-            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0')));
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0'))); const FULL = g(cfg.layout, 'card') === 'full'; wrap.setAttribute('data-lay', FULL ? 'full' : 'card'); s.setProperty('--fs-ls', (parseInt(g(cfg.fsLogoSize, 100)) || 100) / 100); s.setProperty('--fs-bs', (parseInt(g(cfg.fsBrandSize, 100)) || 100) / 100); s.setProperty('--fs-ts', (parseInt(g(cfg.fsTitleSize, 100)) || 100) / 100);
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
             s.setProperty('--ic-cd', g(cfg.cdColor, '#ffffff')); s.setProperty('--ic-cd-s', (parseInt(g(cfg.cdSize, 34)) || 34) + 'px'); s.setProperty('--ic-sl', (parseInt(g(cfg.sideLogoSize, 90)) || 90) + 'px');
-            const key = JSON.stringify([cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
+            const key = JSON.stringify([FULL, cfg.fsLogo, cfg.fsBrand, cfg.fsTitle, cfg.fsDate, cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
             if (key !== icKeyCache || !panel.firstChild) {
                 icKeyCache = key;
                 const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
                 const logo = String(cfg.logo || '').trim();
+                if (FULL) {
+                    let f = '<div class="ic-fs">';
+                    if (cfg.fsLogo) f += '<div class="fs-top"><img src="' + esc(String(cfg.fsLogo).trim()) + '"></div>';
+                    f += '<div class="fs-main">';
+                    if (cfg.fsBrand) f += '<img class="fs-brand" src="' + esc(String(cfg.fsBrand).trim()) + '">';
+                    const ft = String(g(cfg.fsTitle, '')).trim(), fd = String(g(cfg.fsDate, '')).trim();
+                    if (ft || fd) f += '<div class="fs-title">' + (ft ? '<span class="ic-shine">' + esc(ft) + '</span>' : '') + (ft && fd ? '<i></i>' : '') + (fd ? '<span>' + esc(fd) + '</span>' : '') + '</div>';
+                    if (icCd.show && icCd.ts) f += '<div class="ic-cd" id="ic-cd"><span class="ic-cd-l">' + esc(icCd.label) + '</span><span class="ic-cd-t" id="ic-cd-t"></span></div>';
+                    panel.innerHTML = f + '</div></div>';
+                } else {
                 let h = '<div class="ic-top">' + esc(cfg.topText) + '</div><div class="ic-body">';
                 if (logo) h += '<img class="ic-logo" style="max-width:' + Math.round(1000 * ls) + 'px; max-height:' + Math.round(330 * ls) + 'px;" src="' + esc(logo) + '">';
                 else if (cfg.line3) h += '<div class="ic-bigtext ic-shine" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
@@ -3152,6 +3174,7 @@
                 h += '<div class="ic-mw">' + (logo ? '<img src="' + esc(logo) + '">' : esc(cfg.topText || cfg.line3 || '')) + '</div>';
                 panel.innerHTML = h;
                 const bd = panel.querySelector('.ic-body'); if (bd && icCd.show && icCd.ts) bd.classList.add('has-cd');
+                }
             }
             icTick();
             if (!cfg.show) icEndedTs = 0; const vis = !!cfg.show && !(icEndedTs && icEndedTs === icCd.ts); { const was = wrap.classList.contains('visible');
