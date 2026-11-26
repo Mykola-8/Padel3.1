@@ -546,6 +546,28 @@
 
         /* ===== ВСТУПНЕ ТАБЛО ===== */
         .ic-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); transform-origin: center center; z-index: 10004; pointer-events: none; visibility: hidden; transition: visibility 0s linear var(--ic-d, 0.6s); font-family: var(--ic-font, 'Montserrat'), sans-serif; }
+        /* ===== Вступне табло: окрема анімація виходу + блиск назви ===== */
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=fade] .ic-panel { transform: none; clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=zoomOut] .ic-panel { transform: scale(1.6); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=shrink] .ic-panel { transform: scale(.25); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=slideUp] .ic-panel { transform: translateY(-620px); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=slideDown] .ic-panel { transform: translateY(620px); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=slideLeft] .ic-panel { transform: translateX(-1200px); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=slideRight] .ic-panel { transform: translateX(1200px); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=wipeV] .ic-panel { transform: none; clip-path: inset(50% 0 50% 0); opacity: 1; }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=wipeH] .ic-panel { transform: none; clip-path: inset(0 50% 0 50%); opacity: 1; }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=flip] .ic-panel { transform: perspective(1400px) rotateX(-90deg); clip-path: inset(0 0 0 0); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=blur] .ic-panel { transform: scale(1.06); clip-path: inset(0 0 0 0); filter: blur(26px); transition: opacity var(--ic-d, .6s) ease, transform var(--ic-d, .6s) ease, filter var(--ic-d, .6s) ease; }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=text] { transition-delay: calc(var(--ic-d, .6s) + .55s); }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-panel { transform: none; clip-path: inset(0 0 0 0); transition: opacity var(--ic-d, .6s) ease .5s; }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-top, .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-foot, .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-body > *, .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-sl { opacity: 0; transform: translateY(-34px); filter: blur(6px); transition: opacity .38s ease, transform .38s ease, filter .38s ease; }
+        .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-body > *:nth-child(2) { transition-delay: .08s; } .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-body > *:nth-child(3) { transition-delay: .16s; } .ic-wrap[data-ph=out]:not(.visible)[data-out=text] .ic-foot { transition-delay: .22s; }
+        @keyframes icShine { 0% { background-position: 92% 0; } 32% { background-position: 8% 0; } 100% { background-position: 8% 0; } }
+        @keyframes icShineOnce { 0% { background-position: 92% 0; } 100% { background-position: 8% 0; } }
+        .ic-shine { background-image: linear-gradient(105deg, currentColor 0 38%, var(--ic-shine, #ffd84a) 50%, currentColor 62% 100%); background-size: 300% 100%; background-position: 92% 0; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--ic-text, #fff); text-shadow: none !important; filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+        .ic-wrap.visible[data-shine='1'] .ic-shine { animation: icShineOnce 1.5s ease-in-out calc(var(--ic-d, .6s) + .25s) both; }
+        .ic-wrap.visible[data-shine='2'] .ic-shine { animation: icShine 5s ease-in-out calc(var(--ic-d, .6s) + .25s) infinite; }
+        .ic-wrap[data-shine='0'] .ic-shine { background-image: none; -webkit-text-fill-color: currentColor; }
         .ic-wrap.visible { visibility: visible; transition-delay: 0s; }
         .ic-wrap[data-f3d='1'], .ic-wrap[data-f3d='2'], .ic-wrap[data-f3d='3'] { perspective: 1700px; perspective-origin: 50% 45%; }
         .ic-wrap[data-f3d='1'] { --f3-y: 3deg; --f3-x: 1.6deg; --f3-t: 7px; } .ic-wrap[data-f3d='2'] { --f3-y: 6deg; --f3-x: 3deg; --f3-t: 12px; } .ic-wrap[data-f3d='3'] { --f3-y: 10deg; --f3-x: 5deg; --f3-t: 18px; }
@@ -3010,7 +3032,7 @@
         function icTick() {
             const el = document.getElementById('ic-cd-t');
             { const ms0 = icCd.ts - Date.now(), w0 = document.getElementById('ic-wrap');
-              if (icCd.show && icCd.ts) { if (icPrevMs !== null && icPrevMs > 0 && ms0 <= 0 && w0 && w0.classList.contains('visible')) { icEndedTs = icCd.ts; w0.classList.remove('visible'); document.body.classList.remove('ic-active'); } icPrevMs = ms0; } else icPrevMs = null; }
+              if (icCd.show && icCd.ts) { if (icPrevMs !== null && icPrevMs > 0 && ms0 <= 0 && w0 && w0.classList.contains('visible')) { icEndedTs = icCd.ts; w0.setAttribute('data-ph', 'out'); w0.classList.remove('visible'); document.body.classList.remove('ic-active'); } icPrevMs = ms0; } else icPrevMs = null; }
             if (!el) return;
             let ms = icCd.ts - Date.now();
             if (ms <= 0) { el.textContent = icCd.end || '00:00:00'; const l = document.querySelector('#ic-cd .ic-cd-l'); if (l) l.style.display = 'none'; return; }
@@ -3028,7 +3050,7 @@
             s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
             s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
             s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100); s.setProperty('--ic-d', dur + 's');
-            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0')));
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0')));
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
@@ -3040,7 +3062,7 @@
                 const logo = String(cfg.logo || '').trim();
                 let h = '<div class="ic-top">' + esc(cfg.topText) + '</div><div class="ic-body">';
                 if (logo) h += '<img class="ic-logo" style="max-width:' + Math.round(1000 * ls) + 'px; max-height:' + Math.round(330 * ls) + 'px;" src="' + esc(logo) + '">';
-                else if (cfg.line3) h += '<div class="ic-bigtext" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
+                else if (cfg.line3) h += '<div class="ic-bigtext ic-shine" style="font-size:' + Math.round(120 * ls) + 'px;">' + esc(cfg.line3) + '</div>';
                 const l4 = String(cfg.line4 || '').trim();
                 const l4h = l4 ? '<div class="ic-line4" style="font-size:' + (parseInt(g(cfg.line4Size, 40)) || 40) + 'px;">' + esc(l4) + '</div>' : '';
                 if (!logo) h += l4h;
@@ -3056,7 +3078,10 @@
                 const bd = panel.querySelector('.ic-body'); if (bd && icCd.show && icCd.ts) bd.classList.add('has-cd');
             }
             icTick();
-            if (!cfg.show) icEndedTs = 0; const vis = !!cfg.show && !(icEndedTs && icEndedTs === icCd.ts); wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis);
+            if (!cfg.show) icEndedTs = 0; const vis = !!cfg.show && !(icEndedTs && icEndedTs === icCd.ts); { const was = wrap.classList.contains('visible');
+              if (vis && !was) { wrap.setAttribute('data-ph', 'in'); const pn = panel; pn.style.transition = 'none'; void pn.offsetWidth; pn.style.transition = ''; void pn.offsetWidth; }
+              else if (!vis && was) wrap.setAttribute('data-ph', 'out');
+              wrap.classList.toggle('visible', vis); document.body.classList.toggle('ic-active', vis); }
         }
 
 
@@ -4482,16 +4507,17 @@
             function render() {
                 const c = cfg(), ct = g(c.court, 'all'), forCourt = (ct === 'all' || String(ct) === String(courtNum));
                 if (c.showTs && c.showTs !== lastTs) { const first = lastTs === null; lastTs = c.showTs; if (!first && Date.now() - c.showTs < 15000) showUntil = Date.now() + Math.max(2, num(c.sec, 8)) * 1000; } else if (lastTs === null) lastTs = c.showTs || 0;
-                const vis = forCourt && (c.enabled === true || Date.now() < showUntil);
+                const pvG = !!(window.__pvOn && window.__pvOn.gt), vis = (forCourt || pvG) && (c.enabled === true || Date.now() < showUntil || pvG);
                 const k = (num(c.scale, 1)).toFixed(3), x = num(c.x, 60), y = num(c.y, 60);
                 plate.style.left = x + 'px'; plate.style.top = y + 'px';
                 const bg = rgba(g(c.bg, '#000000'), Math.max(0, Math.min(1, num(c.bgOpacity, 70) / 100)));
                 plate.style.setProperty('--gt-bg', bg); plate.style.setProperty('--gt-tx', g(c.color, '#ffffff')); plate.style.setProperty('--gt-bd', g(c.border, 'transparent'));
                 const sh = 'sh-' + g(c.shape, 'pill'); const cls = 'gt-plate ' + sh + (vis ? ' on' : ''); if (cls !== lastCls) { plate.className = cls; lastCls = cls; }
                 plate.style.scale = k;
-                if (!vis || !T) return;
-                const now = (T.fin && T.endAt) ? T.endAt : Date.now(), mode = g(c.mode, 'game'), lb = { g: g(c.lGame, 'ГЕЙМ'), s: g(c.lSet, 'СЕТ'), m: g(c.lMatch, 'МАТЧ') }, sl = c.showLabel !== false;
-                const part = key => (sl && lb[key] ? '<span class="gt-l">' + esc(lb[key]) + '</span>' : '') + '<span class="gt-t">' + fmt(now - T[key]) + '</span>';
+                if (!vis || (!T && !pvG)) return;
+                const TT0 = T || { m: Date.now() - 2538000, s: Date.now() - 754000, g: Date.now() - 47000 };
+                const now = (T && T.fin && T.endAt) ? T.endAt : Date.now(), mode = g(c.mode, 'game'), lb = { g: g(c.lGame, 'ГЕЙМ'), s: g(c.lSet, 'СЕТ'), m: g(c.lMatch, 'МАТЧ') }, sl = c.showLabel !== false;
+                const part = key => (sl && lb[key] ? '<span class="gt-l">' + esc(lb[key]) + '</span>' : '') + '<span class="gt-t">' + fmt(now - TT0[key]) + '</span>';
                 const keys = { game: ['g'], set: ['s'], match: ['m'], gs: ['g', 's'], all: ['g', 's', 'm'] }[mode] || ['g'];
                 const html = keys.map(part).join('<i class="gt-sep"></i>'); if (html !== lastHtml) { plate.innerHTML = html; lastHtml = html; }
             }
