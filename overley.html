@@ -1443,6 +1443,61 @@
         .mi-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqh; min-width: 0; }
         .mi-round { font-size: min(1.5cqw, 6.2cqh); font-style: italic; font-weight: 800; color: var(--mi-tx, #fff); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
         .mi-vs { width: 80%; height: 46%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--mi-acc, #7a7a7a); border-radius: min(1cqw, 4cqh); background: linear-gradient(var(--mi-vs-a, #232323), var(--mi-vs-b, #0d0d0d)); color: var(--mi-vst, #fff); font-weight: 900; font-size: min(5.4cqw, 22cqh); line-height: 1; overflow: hidden; white-space: nowrap; }
+
+        /* --- «Хто грає»: варіанти показу 2 (wc) і 3 (duel), фото гравців, кружечки --- */
+        .mi-pp { display: none; height: 80%; aspect-ratio: 1; object-fit: cover; object-position: 50% 18%; border-radius: var(--mi-pr, 0.8cqw); border: 2px solid rgba(255,255,255,0.4); flex: none; }
+        .mi-photo { border-radius: var(--mi-pr, 1cqw) !important; }
+        .mi2 { display: none; }
+        #match-intro-wrap[data-mi-layout] .mi-head, #match-intro-wrap[data-mi-layout] .mi-body { display: none !important; }
+        #match-intro-wrap[data-mi-layout] .mi2 { display: block; position: absolute; inset: 0; overflow: hidden; }
+        #match-intro-wrap[data-mi-layout] #match-intro-board { position: relative; background: var(--m2-bg, #0b1a45); border: none; border-radius: 0; box-shadow: none; }
+        .m2-side { position: absolute; top: 0; bottom: 0; width: 56%; display: flex; background: linear-gradient(120deg, #1b2c55, #0a1230); overflow: hidden; }
+        .m2-l { left: 0; } .m2-r { right: 0; flex-direction: row-reverse; }
+        .m2-ph { display: none; flex: 1 1 0; min-width: 0; height: 100%; object-fit: cover; object-position: 50% 14%; }
+        .m2-l .m2-ph + .m2-ph, .m2-r .m2-ph + .m2-ph { border-left: 3px solid var(--m2-acc, #ffd400); }
+        .m2-r .m2-ph + .m2-ph { border-left: 0; border-right: 3px solid var(--m2-acc, #ffd400); }
+        .m2-sf { display: none; position: absolute; bottom: 0; height: 17cqh; width: 26cqw; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+        .m2-l .m2-sf { left: 0; } .m2-r .m2-sf { right: 0; }
+        .m2-panel { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 36%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 3cqh 4cqw; box-sizing: border-box; background: var(--m2-bg, #0b1a45); color: #fff; text-align: center; font-family: 'Montserrat', sans-serif; min-height: 0; }
+        .m2-top { display: flex; align-items: center; gap: 1.6cqw; max-width: 100%; }
+        .m2-top img { display: none; height: 14cqh; max-width: 9cqw; object-fit: contain; }
+        .m2-title { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(4.6cqh * var(--mi-ns, 1)); line-height: 1; letter-spacing: -.01em; }
+        .m2-team { display: flex; align-items: center; justify-content: center; gap: 2cqw; width: 100%; min-width: 0; }
+        .m2-fc { display: none; width: 9.5cqh; height: 9.5cqh; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+        .m2-nm { font-weight: 900; text-transform: uppercase; line-height: .98; font-size: calc(6.6cqh * var(--mi-ns, 1)); min-width: 0; text-align: left; overflow-wrap: anywhere; }
+        .m2-vs { display: flex; align-items: center; gap: 1.2cqw; width: 100%; font-weight: 900; font-style: italic; }
+        .m2-vs i { flex: 1; height: 2px; background: #fff; display: block; }
+        .m2-vs b { font-size: calc(4.4cqh * var(--mi-ns, 1)); font-weight: 900; }
+        .m2-plate { display: none; background: var(--m2-acc, #ffd400); color: #0a1230; font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(7cqh * var(--mi-ns, 1)); padding: 1cqh 3cqw; transform: skewX(-10deg); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .m2-ft { display: none; font-weight: 900; text-transform: uppercase; line-height: 1; font-size: calc(4.8cqh * var(--mi-ns, 1)); }
+        .m2-sub { display: none; font-size: 2.4cqh; font-weight: 700; opacity: .85; letter-spacing: .05em; }
+        /* варіант 2 («wc»): трапеція, логотип + заголовок угорі, прапорці-кружечки, жовта плашка внизу */
+        #match-intro-wrap[data-mi-layout=wc] .m2-side { width: 35%; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-panel { clip-path: polygon(7% 0, 93% 0, 100% 100%, 0 100%); width: 40%; padding: 3cqh 5cqw; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-fc { display: block; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-fc:not([src]) { display: none; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-team { justify-content: flex-start; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-ft { display: none; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-plate.on { display: block; }
+        #match-intro-wrap[data-mi-layout=wc] .m2-sub.on { display: block; }
+        /* варіант 3 («duel»): прямокутна панель із золотими краями, імена стовпчиком, великий VS, прапори на фото */
+        #match-intro-wrap[data-mi-layout=duel] .m2-panel { width: 32%; border-left: 4px solid var(--m2-acc, #ffd400); border-right: 4px solid var(--m2-acc, #ffd400); }
+        #match-intro-wrap[data-mi-layout=duel] .m2-top { display: none; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-team { justify-content: center; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-nm { text-align: center; font-size: calc(8.4cqh * var(--mi-ns, 1)); }
+        #match-intro-wrap[data-mi-layout=duel] .m2-vs i { display: none; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-vs b { font-size: calc(15cqh * var(--mi-ns, 1)); -webkit-text-stroke: 3px #fff; color: #0b1a45; paint-order: stroke fill; text-shadow: 0 0 0 #fff; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-vs { justify-content: center; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-ft.on { display: block; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-plate.on { display: block; font-size: calc(4.6cqh * var(--mi-ns, 1)); }
+        #match-intro-wrap[data-mi-layout=duel] .m2-sub.on { display: block; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-sf.on { display: block; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-side { width: 35%; }
+        /* фото в кружечку: бічні фото стають колами (стовпчик по центру) */
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-side { flex-direction: column; align-items: center; justify-content: center; gap: 3cqh; padding-bottom: 0; }
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-ph { flex: none; height: auto; width: min(24cqw, 40cqh); aspect-ratio: 1; border-radius: 50%; border: 4px solid var(--m2-acc, #ffd400) !important; object-position: 50% 15%; }
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-side[data-n="1"] .m2-ph { width: min(28cqw, 66cqh); }
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-l { padding-right: 14cqw; box-sizing: border-box; } #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-r { padding-left: 14cqw; box-sizing: border-box; }
         .mi-date { font-size: min(1.4cqw, 5.6cqh); color: var(--mi-dt, #cfcfcf); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
         /* DORMILONA (смеш з поверненням) — м'яч зигзагом летить вправо до "скла" і повертається назад */
@@ -2537,12 +2592,25 @@
             <div class="mi-head">
                 <img id="mi-logo-l" alt=""><span class="mi-title" id="mi-title"></span><span class="mi-spacer"></span><span class="mi-court" id="mi-court"></span><img id="mi-logo-r" alt="">
             </div>
+            <div class="mi2" id="mi2">
+                <div class="m2-side m2-l" id="m2-l"><img class="m2-ph" id="m2-t1p1-ph" alt=""><img class="m2-ph" id="m2-t1p2-ph" alt=""><img class="m2-sf" id="m2-t1-sf" alt=""></div>
+                <div class="m2-side m2-r" id="m2-r"><img class="m2-ph" id="m2-t2p1-ph" alt=""><img class="m2-ph" id="m2-t2p2-ph" alt=""><img class="m2-sf" id="m2-t2-sf" alt=""></div>
+                <div class="m2-panel">
+                    <div class="m2-top"><img id="m2-logo" alt=""><div class="m2-title" id="m2-title"></div></div>
+                    <div class="m2-team"><img class="m2-fc" id="m2-t1-fc" alt=""><div class="m2-nm" id="m2-t1-nm"></div></div>
+                    <div class="m2-vs"><i></i><b id="m2-vs">VS</b><i></i></div>
+                    <div class="m2-team"><img class="m2-fc" id="m2-t2-fc" alt=""><div class="m2-nm" id="m2-t2-nm"></div></div>
+                    <div class="m2-plate" id="m2-plate"></div>
+                    <div class="m2-ft" id="m2-ft"></div>
+                    <div class="m2-sub" id="m2-sub"></div>
+                </div>
+            </div>
             <div class="mi-body">
                 <div class="mi-team mi-left">
                     <img class="mi-photo" id="mi-t1-photo" alt="">
                     <div class="mi-players">
-                        <div class="mi-pl"><img class="mi-flag" id="mi-t1p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p1-f"></div><div class="mi-last" id="mi-t1p1-l"></div></div></div>
-                        <div class="mi-pl"><img class="mi-flag" id="mi-t1p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p2-f"></div><div class="mi-last" id="mi-t1p2-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-pp" id="mi-t1p1-ph" alt=""><img class="mi-flag" id="mi-t1p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p1-f"></div><div class="mi-last" id="mi-t1p1-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-pp" id="mi-t1p2-ph" alt=""><img class="mi-flag" id="mi-t1p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t1p2-f"></div><div class="mi-last" id="mi-t1p2-l"></div></div></div>
                     </div>
                 </div>
                 <div class="mi-center">
@@ -2552,8 +2620,8 @@
                 </div>
                 <div class="mi-team mi-right">
                     <div class="mi-players">
-                        <div class="mi-pl"><img class="mi-flag" id="mi-t2p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p1-f"></div><div class="mi-last" id="mi-t2p1-l"></div></div></div>
-                        <div class="mi-pl"><img class="mi-flag" id="mi-t2p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p2-f"></div><div class="mi-last" id="mi-t2p2-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-pp" id="mi-t2p1-ph" alt=""><img class="mi-flag" id="mi-t2p1-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p1-f"></div><div class="mi-last" id="mi-t2p1-l"></div></div></div>
+                        <div class="mi-pl"><img class="mi-pp" id="mi-t2p2-ph" alt=""><img class="mi-flag" id="mi-t2p2-flag" alt=""><div class="mi-nm"><div class="mi-first" id="mi-t2p2-f"></div><div class="mi-last" id="mi-t2p2-l"></div></div></div>
                     </div>
                     <img class="mi-photo" id="mi-t2-photo" alt="">
                 </div>
@@ -3422,11 +3490,16 @@
             const mi = st.matchIntro || {};
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const board = document.getElementById('match-intro-board');
-            wrap.style.left = g(mi.x, 50) + '%';
-            wrap.style.top = g(mi.y, 82) + '%';
-            wrap.style.transform = `translate(-50%, -50%) scale(${g(mi.scale, 100) / 100})`;
-            board.style.width = g(mi.w, 62) + 'vw';
-            board.style.height = g(mi.h, 28) + 'vh';
+            const LAY = g(mi.layout, 'classic'), alt = LAY === 'wc' || LAY === 'duel';
+            if (alt) wrap.setAttribute('data-mi-layout', LAY); else wrap.removeAttribute('data-mi-layout');
+            wrap.setAttribute('data-mi-round', g(mi.photoShape, 'rect') === 'round' ? '1' : '0');
+            wrap.style.setProperty('--mi-pr', g(mi.photoShape, 'rect') === 'round' ? '50%' : '1cqw');
+            wrap.style.setProperty('--m2-bg', g(mi.m2bg, '#0b1a45')); wrap.style.setProperty('--m2-acc', g(mi.m2acc, '#ffd400'));
+            wrap.style.left = g(alt ? mi.x2 : mi.x, 50) + '%';
+            wrap.style.top = g(alt ? mi.y2 : mi.y, alt ? 50 : 82) + '%';
+            wrap.style.transform = `translate(-50%, -50%) scale(${g(alt ? mi.scale2 : mi.scale, 100) / 100})`;
+            board.style.width = g(alt ? mi.w2 : mi.w, alt ? 100 : 62) + 'vw';
+            board.style.height = g(alt ? mi.h2 : mi.h, alt ? 100 : 28) + 'vh';
             const setTxt = (id, v) => { const el = document.getElementById(id); if (el && el.textContent !== (v || '')) el.textContent = v || ''; };
             const setImg = (id, src, cc) => {
                 const el = document.getElementById(id); if (!el) return;
@@ -3457,6 +3530,32 @@
                     setImg(base + '-flag', /^[a-z]{2,3}(-[a-z]{2,3})?$/.test(cc) ? 'https://flagcdn.com/w80/' + cc + '.png' : '');
                 });
             });
+            // фото кожного гравця: своє → з фотобази (якщо ввімкнено) ; дві на команду
+            const plPh = {}; let anyPh = false;
+            ['t1', 't2'].forEach(t => ['p1', 'p2'].forEach((p, idx) => {
+                const pl = (mi[t] || {})[p] || {}; const nm = ((pl.f || '') + ' ' + (pl.l || '')).trim();
+                const u = pl.photo || (g(mi.photosAuto, 'off') === 'on' && nm ? PH.get(nm) : '');
+                plPh[t + p] = u || ''; if (u) anyPh = true;
+                setImg('mi-' + t + p + '-ph', u); setImg('m2-' + t + p + '-ph', alt ? u : '');
+            }));
+            if (anyPh && !alt) ['t1', 't2'].forEach(t => setImg('mi-' + t + '-photo', ''));
+            if (alt) {
+                const esc2 = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+                const flagOf = pl => { const cc = String((pl || {}).c || '').trim().toLowerCase(); return /^[a-z]{2,3}(-[a-z]{2,3})?$/.test(cc) ? 'https://flagcdn.com/w160/' + cc + '.png' : ''; };
+                ['t1', 't2'].forEach(t => {
+                    const tm = mi[t] || {}, ns = [tm.p1, tm.p2].map(pl => ((pl || {}).l || (pl || {}).f || '').trim()).filter(Boolean);
+                    const el = document.getElementById('m2-' + t + '-nm'); const html = (LAY === 'wc' && ns.length > 1) ? esc2(ns[0]) + '/<br>' + esc2(ns[1]) : ns.map(esc2).join('<br>');
+                    if (el && el.innerHTML !== html) el.innerHTML = html;
+                    const fl = flagOf(tm.p1) || flagOf(tm.p2);
+                    setImg('m2-' + t + '-fc', LAY === 'wc' ? fl : ''); setImg('m2-' + t + '-sf', LAY === 'duel' ? fl : '');
+                    const sf = document.getElementById('m2-' + t + '-sf'); if (sf) sf.classList.toggle('on', !!fl && LAY === 'duel');
+                    const side = document.getElementById('m2-' + (t === 't1' ? 'l' : 'r')); if (side) side.setAttribute('data-n', String(['p1', 'p2'].filter(p => plPh[t + p]).length));
+                });
+                setTxt('m2-vs', g(mi.vs, 'VS')); setTxt('m2-title', LAY === 'wc' ? mi.title : ''); setImg('m2-logo', LAY === 'wc' ? (mi.logoL || mi.logoR) : '');
+                const pl = document.getElementById('m2-plate'); if (pl) { pl.textContent = mi.round || ''; pl.classList.toggle('on', !!mi.round); }
+                const ft = document.getElementById('m2-ft'); if (ft) { ft.innerHTML = (LAY === 'duel' ? (() => { const w = String(mi.title || '').trim().split(/\s+/).filter(Boolean); const k = Math.ceil(w.length / 2); return w.length > 2 ? esc2(w.slice(0, k).join(' ')) + '<br>' + esc2(w.slice(k).join(' ')) : esc2(w.join(' ')); })() : ''); ft.classList.toggle('on', LAY === 'duel' && !!mi.title); }
+                const sb = document.getElementById('m2-sub'); if (sb) { const t = [mi.court, mi.date].filter(Boolean).join(' · '); sb.textContent = t; sb.classList.toggle('on', !!t); }
+            }
             const miDur = Math.max(0.1, Math.min(3, (parseInt(g(mi.animDur, 6)) || 6) / 10));
             wrap.setAttribute('data-anim', g(mi.anim, 'slide'));
             wrap.style.setProperty('--mi-ns', Math.max(50, Math.min(300, parseInt(g(mi.nameScale, 100)) || 100)) / 100);
