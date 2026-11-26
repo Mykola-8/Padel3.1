@@ -320,10 +320,22 @@
                     <input type="text" data-mi="t1.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t1.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
                 </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото гравця 1:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t1.p1.photo', this, 800, 1000, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t1.p1.photo')">✖</button>
+                    <span id="mi-st-t1.p1.photo" style="font-size:11px; color:#8c8;"></span>
+                </div>
                 <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
                     <input type="text" data-mi="t1.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t1.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t1.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото гравця 2:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t1.p2.photo', this, 800, 1000, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t1.p2.photo')">✖</button>
+                    <span id="mi-st-t1.p2.photo" style="font-size:11px; color:#8c8;"></span>
                 </div>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
@@ -339,11 +351,36 @@
                     <input type="text" data-mi="t2.p1.l" placeholder="ПРІЗВИЩЕ 1" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t2.p1.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
                 </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото гравця 1:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t2.p1.photo', this, 800, 1000, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t2.p1.photo')">✖</button>
+                    <span id="mi-st-t2.p1.photo" style="font-size:11px; color:#8c8;"></span>
+                </div>
                 <div style="display:grid; grid-template-columns:1fr 1.3fr 54px; gap:5px;">
                     <input type="text" data-mi="t2.p2.f" placeholder="Ім'я 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t2.p2.l" placeholder="ПРІЗВИЩЕ 2" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"  oninput="miInput(this)">
                     <input type="text" data-mi="t2.p2.c" placeholder="Країна" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;" maxlength="3" title="Код країни: es, ar, ua, fr..." oninput="miInput(this)">
                 </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:11px; color:#ccc;">📷 Фото гравця 2:</span>
+                    <input type="file" accept="image/*" style="font-size:11px; max-width:150px;" onchange="miUpload('t2.p2.photo', this, 800, 1000, 'image/jpeg')">
+                    <button class="btn btn-gray" style="padding:4px 8px !important; font-size:11px !important; width:auto;" onclick="miClear('t2.p2.photo')">✖</button>
+                    <span id="mi-st-t2.p2.photo" style="font-size:11px; color:#8c8;"></span>
+                </div>
+            </div>
+            <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🖼 Варіант показу табла
+                    <select data-mi="layout" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="classic">1 — Класичний (нижня плашка)</option><option value="wc">2 — Великі фото з боків + центральна панель (World Cup)</option><option value="duel">3 — Дуель: імена стовпчиком, великий VS, прапори на фото</option></select></label>
+                <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">⭕ Форма фото гравців
+                    <select data-mi="photoShape" onchange="miInput(this)" style="width:100%; padding:5px 6px; font-size:12px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; box-sizing:border-box;"><option value="rect">Прямокутні</option><option value="round">У кружечку</option></select></label>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:11px; color:#ccc;">Фон панелі (варіанти 2–3): <input type="color" data-mi="m2bg" value="#0b1a45" oninput="miInput(this)" style="width:40px; height:26px; padding:0; border:0; background:none;"> Акцент / плашка: <input type="color" data-mi="m2acc" value="#ffd400" oninput="miInput(this)" style="width:40px; height:26px; padding:0; border:0; background:none;"></div>
+                <div style="font-size:10px; color:#9a9;">У варіантах 2–3 фото гравців беруться з полів «📷 Фото гравця» (або з фотобази, якщо ввімкнено нижче). Імена — прізвища, назва → заголовок, «Раунд» → жовта плашка (напр. MATCH 3). Країна — код прапора.</div>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↔ Позиція по горизонталі, варіанти 2–3 (%): <b id="mi-val-x2" style="color:#e0b878;">50</b></span><input type="range" data-mi="x2" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">↕ Позиція по вертикалі, варіанти 2–3 (%): <b id="mi-val-y2" style="color:#e0b878;">50</b></span><input type="range" data-mi="y2" min="0" max="100" step="1" value="50" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">🔍 Масштаб, варіанти 2–3 (%): <b id="mi-val-scale2" style="color:#e0b878;">100</b></span><input type="range" data-mi="scale2" min="30" max="200" step="1" value="100" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇔ Ширина, варіанти 2–3 (% екрана): <b id="mi-val-w2" style="color:#e0b878;">100</b></span><input type="range" data-mi="w2" min="30" max="100" step="1" value="100" oninput="miInput(this)"></label>
+            <label style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:#ccc;">⇕ Висота, варіанти 2–3 (% екрана): <b id="mi-val-h2" style="color:#e0b878;">100</b></span><input type="range" data-mi="h2" min="30" max="100" step="1" value="100" oninput="miInput(this)"></label>
             </div>
             <div style="border-top:1px dashed #444; padding-top:6px; display:flex; flex-direction:column; gap:5px;">
                 <label style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#ccc;">🎨 Тема табла «Хто грає»
@@ -6562,7 +6599,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
 
         // ===== ТАБЛО «ХТО ГРАЄ» =====
         const MI_DEFAULT = {
-            show: false, title: "Товариська гра", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", photosAuto: "off", nameFmt: "full",
+            show: false, title: "Товариська гра", court: "", round: "", vs: "VS", date: "", theme: "auto", syncNames: "on", photosAuto: "off", nameFmt: "full", layout: "classic", photoShape: "rect", m2bg: "#0b1a45", m2acc: "#ffd400", x2: 50, y2: 50, scale2: 100, w2: 100, h2: 100,
             x: 50, y: 80, scale: 70, w: 50, h: 25, nameScale: 100, logoL: "", logoR: "", anim: "wipe", animDur: 15, bgOpacity: 80,
             t1: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } },
             t2: { photo: "", p1: { f: "", l: "", c: "" }, p2: { f: "", l: "", c: "" } }
@@ -6615,7 +6652,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
             miSave(true);
         };
         window.miResetLayout = function() {
-            const mi = miEnsure(); mi.x = 50; mi.y = 82; mi.scale = 100; mi.w = 62; mi.h = 28; miSave(true); renderMatchIntroUI();
+            const mi = miEnsure(); mi.x = 50; mi.y = 82; mi.scale = 100; mi.w = 62; mi.h = 28; mi.x2 = 50; mi.y2 = 50; mi.scale2 = 100; mi.w2 = 100; mi.h2 = 100; miSave(true); renderMatchIntroUI();
         };
         window.miUpload = function(path, input, maxW, maxH, mime) {
             const file = input.files && input.files[0]; if (!file) return;
@@ -6659,7 +6696,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
                 if (el.type === 'range') { el.value = val; const l = document.getElementById('mi-val-' + el.getAttribute('data-mi')); if (l) l.innerText = (el.getAttribute('data-mi') === 'animDur') ? (val / 10).toFixed(1) + ' с' : val; }
                 else if (el.value !== String(val)) el.value = val;
             });
-            ['t1.photo', 't2.photo', 'logoL', 'logoR'].forEach(p => {
+            ['t1.photo', 't2.photo', 't1.p1.photo', 't1.p2.photo', 't2.p1.photo', 't2.p2.photo', 'logoL', 'logoR'].forEach(p => {
                 const st = document.getElementById('mi-st-' + p);
                 if (st && !st.innerText.startsWith('⏳')) st.innerText = miGetPath(mi, p) ? "✅ є" : "";
             });
