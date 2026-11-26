@@ -1497,7 +1497,14 @@
         #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-side { flex-direction: column; align-items: center; justify-content: center; gap: 3cqh; padding-bottom: 0; }
         #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-ph { flex: none; height: auto; width: min(24cqw, 40cqh); aspect-ratio: 1; border-radius: 50%; border: 4px solid var(--m2-acc, #ffd400) !important; object-position: 50% 15%; }
         #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-side[data-n="1"] .m2-ph { width: min(28cqw, 66cqh); }
-        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-l { padding-right: 14cqw; box-sizing: border-box; } #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-r { padding-left: 14cqw; box-sizing: border-box; }
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-l { align-items: flex-end; padding-right: 2.5cqw; box-sizing: border-box; } #match-intro-wrap[data-mi-round='1'][data-mi-layout] .m2-r { align-items: flex-start; padding-left: 2.5cqw; box-sizing: border-box; }
+        #match-intro-wrap[data-mi-round='1'][data-mi-layout=wc] .m2-l { padding-right: 6cqw; } #match-intro-wrap[data-mi-round='1'][data-mi-layout=wc] .m2-r { padding-left: 6cqw; }
+        /* імена: ліва команда — зліва, права — справа (зрозуміло, яка команда на якому фото) */
+        .m2-panel > .m2-team:nth-of-type(2) { justify-content: flex-start; } .m2-panel > .m2-team:nth-of-type(2) .m2-nm { text-align: left; }
+        #match-intro-wrap[data-mi-layout] .m2-panel > .m2-team .m2-nm { flex: 1; } #match-intro-wrap[data-mi-layout] .m2-panel > .m2-team.m2-tr .m2-fc { order: 2; } #match-intro-wrap[data-mi-layout] .m2-panel > .m2-team.m2-tr { justify-content: flex-end; } #match-intro-wrap[data-mi-layout] .m2-panel > .m2-team.m2-tr .m2-nm { text-align: right; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-panel > .m2-team.m2-tl { justify-content: flex-start; } #match-intro-wrap[data-mi-layout=duel] .m2-panel > .m2-team.m2-tl .m2-nm { text-align: left; }
+        #match-intro-wrap[data-mi-layout=duel] .m2-panel > .m2-team.m2-tr .m2-nm { text-align: right; }
+        #match-intro-wrap[data-mi-layout] .m2-vs { justify-content: center; }
         .mi-date { font-size: min(1.4cqw, 5.6cqh); color: var(--mi-dt, #cfcfcf); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
         /* DORMILONA (смеш з поверненням) — м'яч зигзагом летить вправо до "скла" і повертається назад */
@@ -2597,9 +2604,9 @@
                 <div class="m2-side m2-r" id="m2-r"><img class="m2-ph" id="m2-t2p1-ph" alt=""><img class="m2-ph" id="m2-t2p2-ph" alt=""><img class="m2-sf" id="m2-t2-sf" alt=""></div>
                 <div class="m2-panel">
                     <div class="m2-top"><img id="m2-logo" alt=""><div class="m2-title" id="m2-title"></div></div>
-                    <div class="m2-team"><img class="m2-fc" id="m2-t1-fc" alt=""><div class="m2-nm" id="m2-t1-nm"></div></div>
+                    <div class="m2-team m2-tl"><img class="m2-fc" id="m2-t1-fc" alt=""><div class="m2-nm" id="m2-t1-nm"></div></div>
                     <div class="m2-vs"><i></i><b id="m2-vs">VS</b><i></i></div>
-                    <div class="m2-team"><img class="m2-fc" id="m2-t2-fc" alt=""><div class="m2-nm" id="m2-t2-nm"></div></div>
+                    <div class="m2-team m2-tr"><img class="m2-fc" id="m2-t2-fc" alt=""><div class="m2-nm" id="m2-t2-nm"></div></div>
                     <div class="m2-plate" id="m2-plate"></div>
                     <div class="m2-ft" id="m2-ft"></div>
                     <div class="m2-sub" id="m2-sub"></div>
