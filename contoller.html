@@ -3086,7 +3086,7 @@ function __clearTournamentName() {
         // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
         let IC_GLOBAL_KEYS = [];
         function icDefault() {
-            return { show: false, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
+            return { show: false, layout: 'card', fsLogo: '', fsBrand: '', fsTitle: 'FIP TOUR', fsDate: '2027', fsLogoSize: 100, fsBrandSize: 100, fsTitleSize: 100, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
                 logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, bgOpacity: 100, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
         }
         function icEnsure() {
@@ -3150,7 +3150,7 @@ function __clearTournamentName() {
         window.icCdSet = function(v) { const t = v ? new Date(v).getTime() : 0; icEnsure().cdTs = isFinite(t) ? t : 0; icSave(true); };
         window.icCdToggle = function(v) { icEnsure().cdShow = !!v; icSave(true); };
         window.icLogoUpload = function(input, key) {
-            key = key || 'logo'; const maxW = key === 'logo' ? 1100 : 500, maxH = key === 'logo' ? 450 : 250;
+            key = key || 'logo'; const big = (key === 'logo' || key === 'fsLogo' || key === 'fsBrand'); const maxW = big ? 1100 : 500, maxH = big ? 450 : 250;
             const file = input.files && input.files[0]; if (!file) return;
             const st = document.getElementById('ic-st-' + key); if (st) st.innerText = '⏳';
             const reader = new FileReader();
@@ -3185,6 +3185,22 @@ function __clearTournamentName() {
                     <button class="btn btn-gray" style="flex:1; padding:7px !important; font-size:11px !important;" onclick="icShowAll(false)">🛑 СХОВАТИ НА ВСІХ</button>
                 </div>
                 <button class="btn btn-gray" id="ic-btn-reset" style="padding:6px !important; font-size:11px !important; display:none;" onclick="icResetToMaster()">↺ Повернути до налаштувань корту №1</button>
+                ${sel('layout', '🖥 Вигляд табла', [['card', 'Картка (як було)'], ['full', 'Повний екран: лого зверху + лого спонсора + назва | рік']])}
+                <div style="border:1px solid #c69f66; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:11px; font-weight:800; color:#e0b878;">🖥 Повноекранний вигляд — працює, коли вибрано «Повний екран»</div>
+                    <div style="font-size:11px; color:#e0b878; font-weight:700;">🖼 Логотип зверху (лого турніру / федерації) <span id="ic-st-fsLogo" style="color:#8f8;"></span></div>
+                    <input type="text" id="ic-url-fsLogo" placeholder="URL (або завантажте файл)" ${IN} onchange="icLogoUrl(this.value, 'fsLogo')">
+                    <div style="display:flex; gap:6px; align-items:center;"><input type="file" accept="image/*" onchange="icLogoUpload(this, 'fsLogo')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="icLogoClear('fsLogo')">✖</button></div>
+                    <div style="font-size:11px; color:#e0b878; font-weight:700;">🖼 Напис з логотипом (напр. CUPRA, по центру) <span id="ic-st-fsBrand" style="color:#8f8;"></span></div>
+                    <input type="text" id="ic-url-fsBrand" placeholder="URL (або завантажте файл)" ${IN} onchange="icLogoUrl(this.value, 'fsBrand')">
+                    <div style="display:flex; gap:6px; align-items:center;"><input type="file" accept="image/*" onchange="icLogoUpload(this, 'fsBrand')" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><button class="btn btn-gray" style="width:auto; padding:5px 10px !important; font-size:12px !important;" onclick="icLogoClear('fsBrand')">✖</button></div>
+                    ${txt('fsTitle', 'Назва турніру (FIP TOUR)')}
+                    ${txt('fsDate', 'Рік або дата (2027 чи 10.12.2027)')}
+                    ${slider('fsLogoSize', 'Розмір логотипа зверху (%)', 30, 250, 100)}
+                    ${slider('fsBrandSize', 'Розмір напису/лого спонсора (%)', 30, 250, 100)}
+                    ${slider('fsTitleSize', 'Розмір назви та року (%)', 30, 250, 100)}
+                    <div style="font-size:10px; color:#9a9;">Кольори — «Фон (верх/низ)» і «Текст» нижче. Анімації появи/виходу, блиск, показ на кількох кортах — ті самі.</div>
+                </div>
                 ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
                 ${txt('city', 'Місто / підзаголовок (Perugia)')}
                 ${txt('line3', 'Назва турніру (під містом; без логотипу — великим)')}
@@ -3242,7 +3258,7 @@ function __clearTournamentName() {
                 if (el.type === 'range') { el.value = v; const l = document.getElementById('ic-val-' + k); if (l) l.innerText = (k === 'animDur') ? (v / 10).toFixed(1) + ' с' : v; }
                 else { const s = (v === undefined || v === null) ? '' : String(v); if (el.value !== s) el.value = s; }
             });
-            ['logo', 'logoL', 'logoR'].forEach(k => {
+            ['logo', 'logoL', 'logoR', 'fsLogo', 'fsBrand'].forEach(k => {
                 const u = document.getElementById('ic-url-' + k); if (u && document.activeElement !== u) u.value = (c[k] && c[k].indexOf('data:') !== 0) ? c[k] : '';
                 const st = document.getElementById('ic-st-' + k); if (st && st.innerText !== '⏳') st.innerText = c[k] ? '✅ є' : '';
             });
