@@ -5692,6 +5692,8 @@ function __clearTournamentName() {
             const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🖼 Фото-табло (скрін таблиці груп / плей-офф)</span><span class="tcol-arrow">▸</span>';
             head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
             anchor.after(head); head.after(card);
+            // розташування: у вкладці Tournament, під «Фотобаза гравців»
+            { let tries = 0; const mv = setInterval(() => { const ph = document.getElementById('phb-card'); if (ph && head.previousElementSibling !== ph) { ph.after(head); head.after(card); } if (++tries > 160) clearInterval(mv); }, 250); }
             const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
             const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
             const clr = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="color" data-k="' + k + '"></div>';
