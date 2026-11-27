@@ -50,8 +50,8 @@
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .score-btn { height: 190px; border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.4); transition: transform 0.05s ease, filter 0.05s ease; }
         .score-btn span { font-size: 56px; font-weight: 900; }
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        .btn-sub-action { padding: 10px 4px; font-size: 11px; font-weight: 800; border-radius: 6px; background: #2a2a2a; border: 1px solid #444; color: #ddd; text-align: center; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+        .btn-sub-action { padding: 5px 4px; font-size: 10.5px; line-height: 1.2; font-weight: 800; border-radius: 6px; background: #2a2a2a; border: 1px solid #444; color: #ddd; text-align: center; }
         .serve-box { display: flex; gap: 10px; width: 100%; }
         .serve-btn { flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
         .serve-btn.active { background: #b28a55; color: white; border-color: #b28a55; }
@@ -198,30 +198,30 @@
         </div>
 
         <div class="action-grid" id="action-grid-admin">
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'ace')">🎯 Ace — виліт на подачі (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Повернення (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3 (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_cuatro')">🚀 Por Cuatro - X4 (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'killer_ball')">☠️ Killer ball (К1)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'ball_out')">🚪 М'яч за двері / Ball out the door (К1)</button>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+                <button class="btn btn-sub-action" onclick="registerNetCord(1)">🕸️ Від сітки</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'ace')">🎯 Ace — виліт на подачі</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1)">💥 Смеш</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_tres')">🚀 Por Tres - X3</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'por_cuatro')">🚀 Por Cuatro - X4</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'killer_ball')">☠️ Killer ball</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'dormilona')">😴 Повернення</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(1, 'ball_out')">🚪 Ball out the door</button>
             </div>
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'ace')">🎯 Ace — виліт на подачі (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Повернення (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3 (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_cuatro')">🚀 Por Cuatro - X4 (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'killer_ball')">☠️ Killer ball (К2)</button>
-                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'ball_out')">🚪 М'яч за двері / Ball out the door (К2)</button>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+                <button class="btn btn-sub-action" onclick="registerNetCord(2)">🕸️ Від сітки</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'ace')">🎯 Ace — виліт на подачі</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2)">💥 Смеш</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_tres')">🚀 Por Tres - X3</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'por_cuatro')">🚀 Por Cuatro - X4</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'killer_ball')">☠️ Killer ball</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'dormilona')">😴 Повернення</button>
+                <button class="btn btn-sub-action" onclick="registerSmashWinner(2, 'ball_out')">🚪 Ball out the door</button>
             </div>
         </div>
         <div id="action-toggles-admin" style="display:flex; gap:4px; margin-top:2px;">
-            <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Анімація м'яча команди, яка забила"><span>🎾 М'яч</span><input type="checkbox" id="ball-anim-checkbox" checked onchange="toggleBallAnimations(this.checked)"></div>
-            <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Текст (Smash, Por Tres...) у правому куті рядка команди, яка забила"><span>🔤 Текст</span><input type="checkbox" id="action-label-checkbox" checked onchange="toggleActionLabels(this.checked)"></div>
+            <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Анімація м'яча команди, яка забила"><span>🎾 М'яч</span><input type="checkbox" id="ball-anim-checkbox" onchange="toggleBallAnimations(this.checked)"></div>
+            <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Текст (Smash, Por Tres...) у правому куті рядка команди, яка забила"><span>🔤 Текст</span><input type="checkbox" id="action-label-checkbox" onchange="toggleActionLabels(this.checked)"></div>
             <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Напис на весь рядок команди (жовтий / синій-електрик, 2 сек) — перекриває назву команди"><span>📺 ТАБЛО</span><input type="checkbox" id="board-flash-checkbox" onchange="toggleBoardFlash(this.checked)"></div>
             <div class="switch-row" style="flex:1; font-size:10px; padding:6px 4px;" title="Плашка з назвою удару виїжджає зліва направо на весь рядок команди (2.5 сек) і ховається вправо"><span>➡️ Плашка</span><input type="checkbox" id="board-plate-checkbox" onchange="toggleBoardPlate(this.checked)"></div>
         </div>
@@ -1714,7 +1714,7 @@
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0,
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Killer: 0, p2Killer: 0, p1BallOut: 0, p2BallOut: 0, p1Aces: 0, p2Aces: 0,
                 p1BreakPoints: 0, p2BreakPoints: 0, p1GoldenPoints: 0, p2GoldenPoints: 0,
-                showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
+                showBoardFlash: false, showBallAnimations: false, showActionLabels: false, showBoardPlate: true, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0,
                 cameraCommand: { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
                 logoUrl: "", logoSrc: "", customLogoText: "",
@@ -2575,7 +2575,7 @@ function __clearTournamentName() {
                 isSuperTiebreak: state.isSuperTiebreak || false, superTiebreakLimit: state.superTiebreakLimit || 10, 
                 activeMatchRibbon: "NONE", boardTheme: "graydark", cornerSlideLang: "en", deuceStyle: "classic", deuceCounter: 0, 
                 p1DoubleFaults: 0, p2DoubleFaults: 0, p1NetCords: 0, p2NetCords: 0, p1Smashes: 0, p2Smashes: 0, p1PorTres: 0, p2PorTres: 0, p1PorCuatro: 0, p2PorCuatro: 0, p1Dormilona: 0, p2Dormilona: 0, p1Killer: 0, p2Killer: 0, p1BallOut: 0, p2BallOut: 0, p1Aces: 0, p2Aces: 0,
-                showBoardFlash: true, showBallAnimations: false, showActionLabels: false, showBoardPlate: false, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
+                showBoardFlash: false, showBallAnimations: false, showActionLabels: false, showBoardPlate: true, p1BreakPoints: 0, p2BreakPoints: 0, showStatsBetweenGames: false, completedGamesCount: 0, statsAutoTrigger: 0, 
                 cameraCommand: state.cameraCommand || { key: "", ts: 0 }, replayLabelTrigger: 0,
                 showStatsOverlay: false, showSetOverlayTrigger: false, statsBgOpacity: 75, statsBoardScale: 75, statsTextScale: 75, gamesTimeHistory: [], showLogo: false,
                 logoUrl: state.logoUrl || "", logoSrc: state.logoSrc || "", customLogoText: state.customLogoText || "",
