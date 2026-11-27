@@ -594,6 +594,38 @@
         .ic-fs .fs-title { display: flex; align-items: center; gap: 0.32em; font-weight: 800; font-style: italic; text-transform: uppercase; font-size: calc(150px * var(--fs-ts, 1)); line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
         .ic-fs .fs-title i { display: block; width: 3px; height: 1.15em; background: currentColor; opacity: .85; transform: skewX(-12deg); }
         .ic-fs .ic-cd { position: static; margin-top: 10px; }
+        /* повноекранне табло: швидкість, напрям блиску, анімації появи назви / року / логотипів */
+        .ic-wrap[data-lay=full].visible[data-shine='1'] .ic-shine { animation-duration: calc(1.5s / var(--fs-sp, 1)); }
+        .ic-wrap[data-lay=full].visible[data-shine='2'] .ic-shine { animation-duration: calc(5s / var(--fs-sp, 1)); }
+        .ic-wrap[data-lay=full][data-fs-dir='rtl'].visible[data-shine='1'] .ic-shine { animation-direction: reverse; }
+        .ic-wrap[data-lay=full][data-fs-dir='rtl'].visible[data-shine='2'] .ic-shine { animation-name: icShineR; }
+        @keyframes icShineR { 0% { background-position: 8% 0; } 32% { background-position: 92% 0; } 100% { background-position: 92% 0; } }
+        .ic-fs .ch { display: inline-block; font: inherit; }
+        .ic-fs .ch.ic-shine { color: inherit; }
+        .ic-wrap[data-lay=full][data-fs-anim=letters].visible[data-shine='1'] .ch.ic-shine { animation: fsLet calc(.55s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) calc(.6s + var(--n, 0) * .07s / var(--fs-sp, 1)) both, icShineOnce calc(1.5s / var(--fs-sp, 1)) ease-in-out calc(1.6s + 0.5s / var(--fs-sp, 1)) both; }
+        .ic-wrap[data-lay=full][data-fs-anim=letters].visible[data-shine='2'] .ch.ic-shine { animation: fsLet calc(.55s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) calc(.6s + var(--n, 0) * .07s / var(--fs-sp, 1)) both, icShine calc(5s / var(--fs-sp, 1)) ease-in-out calc(1.6s + 0.5s / var(--fs-sp, 1)) infinite; }
+        @keyframes fsUp { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: none; } }
+        @keyframes fsDn { from { opacity: 0; transform: translateY(-60px); } to { opacity: 1; transform: none; } }
+        @keyframes fsL { from { opacity: 0; transform: translateX(-220px); } to { opacity: 1; transform: none; } }
+        @keyframes fsR { from { opacity: 0; transform: translateX(220px); } to { opacity: 1; transform: none; } }
+        @keyframes fsZ { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+        @keyframes fsB { from { opacity: 0; filter: blur(30px); transform: scale(1.12); } to { opacity: 1; filter: blur(0); transform: none; } }
+        @keyframes fsLet { from { opacity: 0; transform: translateY(.6em) rotateX(70deg); } to { opacity: 1; transform: none; } }
+        @keyframes fsLine { from { transform: skewX(-12deg) scaleY(0); } to { transform: skewX(-12deg) scaleY(1); } }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=fadeUp] .fs-top img { animation: fsDn calc(.8s / var(--fs-sp, 1)) ease-out .15s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=fadeUp] .fs-brand { animation: fsZ calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .4s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=fadeUp] .fs-t1 { animation: fsUp calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .7s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=fadeUp] .fs-t2 { animation: fsUp calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) 1s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=slide] .fs-top img { animation: fsDn calc(.8s / var(--fs-sp, 1)) ease-out .15s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=slide] .fs-brand { animation: fsZ calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .4s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=slide] .fs-t1 { animation: fsL calc(.9s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .6s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=slide] .fs-t2 { animation: fsR calc(.9s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .6s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=slide] .fs-title i, .ic-wrap[data-lay=full].visible[data-fs-anim=fadeUp] .fs-title i, .ic-wrap[data-lay=full].visible[data-fs-anim=letters] .fs-title i { animation: fsLine calc(.6s / var(--fs-sp, 1)) ease-out .85s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=zoom] .fs-top img, .ic-wrap[data-lay=full].visible[data-fs-anim=zoom] .fs-brand, .ic-wrap[data-lay=full].visible[data-fs-anim=zoom] .fs-t1, .ic-wrap[data-lay=full].visible[data-fs-anim=zoom] .fs-t2 { animation: fsZ calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .3s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=blur] .fs-top img, .ic-wrap[data-lay=full].visible[data-fs-anim=blur] .fs-brand, .ic-wrap[data-lay=full].visible[data-fs-anim=blur] .fs-t1, .ic-wrap[data-lay=full].visible[data-fs-anim=blur] .fs-t2 { animation: fsB calc(1.1s / var(--fs-sp, 1)) ease-out .3s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=letters] .fs-top img { animation: fsDn calc(.8s / var(--fs-sp, 1)) ease-out .15s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=letters] .fs-brand { animation: fsZ calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .4s both; }
+        .ic-wrap[data-lay=full].visible[data-fs-anim=letters] .ch { animation: fsLet calc(.55s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) calc(.6s + var(--n, 0) * .07s / var(--fs-sp, 1)) both; }
         .ic-panel { position: absolute; left: 370px; top: 170px; width: 1180px; height: 740px; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(0,0,0,calc(.55 * var(--ic-op, 1))); clip-path: inset(0 0 0 0); transform: none; opacity: 1; transition: opacity var(--ic-d, 0.6s) ease, transform var(--ic-d, 0.6s) cubic-bezier(.2,.8,.2,1), clip-path var(--ic-d, 0.6s) ease; }
         .ic-panel::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); opacity: var(--ic-op, 1); z-index: 0; }
         .ic-top, .ic-body, .ic-foot { position: relative; z-index: 1; }
@@ -1027,6 +1059,23 @@
 
         /* ===== СКОРОЧЕНЕ ТАБЛО (padel/miniboard) ===== */
 
+        /* --- ФОТО-ТАБЛО (скрін / фото турнірної таблиці) --- */
+        .pb-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9300; pointer-events: none; font-family: 'Montserrat', sans-serif; }
+        .pb-board { position: absolute; left: 50%; top: 50%; display: none; flex-direction: column; align-items: center; box-sizing: border-box; transform-origin: center center; opacity: 0; transition: opacity var(--pb-d, .6s) ease, transform var(--pb-d, .6s) cubic-bezier(.2,.8,.2,1), clip-path var(--pb-d, .6s) ease; }
+        .pb-board.vis { display: flex; }
+        .pb-board.on { opacity: 1; }
+        .pb-board[data-anim=none] { transition: none; }
+        .pb-title, .pb-cap { text-align: center; font-weight: 800; line-height: 1.15; max-width: 100%; white-space: pre-line; }
+        .pb-box { overflow: hidden; position: relative; flex: none; }
+        .pb-box img { display: block; position: absolute; max-width: none; user-select: none; }
+        .pb-board { transform: translate(-50%, -50%) scale(var(--pb-s, 1)); }
+        .pb-board[data-anim=zoom]:not(.on) { transform: translate(-50%, -50%) scale(calc(var(--pb-s, 1) * .6)); }
+        .pb-board[data-anim=slideUp]:not(.on) { transform: translate(-50%, calc(-50% + 400px)) scale(var(--pb-s, 1)); }
+        .pb-board[data-anim=slideDown]:not(.on) { transform: translate(-50%, calc(-50% - 400px)) scale(var(--pb-s, 1)); }
+        .pb-board[data-anim=slideLeft]:not(.on) { transform: translate(calc(-50% - 900px), -50%) scale(var(--pb-s, 1)); }
+        .pb-board[data-anim=slideRight]:not(.on) { transform: translate(calc(-50% + 900px), -50%) scale(var(--pb-s, 1)); }
+        .pb-board[data-anim=wipe]:not(.on) { clip-path: inset(0 50% 0 50%); }
+        .pb-board[data-anim=wipe].on { clip-path: inset(0 0 0 0); }
         .gt-wrap { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; z-index: 9100; pointer-events: none; font-family: 'Montserrat', sans-serif; }
         .gt-plate { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; padding: 12px 30px; color: var(--gt-tx, #fff); background: var(--gt-bg, rgba(0,0,0,.7)); border: 3px solid var(--gt-bd, transparent); box-sizing: border-box; white-space: nowrap; font-weight: 800; transform-origin: 0 0; opacity: 0; visibility: hidden; transition: opacity .45s ease, visibility 0s linear .45s; }
         .gt-plate.on { opacity: 1; visibility: visible; transition: opacity .45s ease; }
@@ -2584,6 +2633,8 @@
     <div class="st-wrap" id="st-wrap"><div class="st-bg"></div><div class="st-sparks" id="st-sparks"></div><div class="st-streak"></div><div class="st-streak s2"></div><img class="st-logo" id="st-logo" alt=""><video class="st-video" id="st-video" muted playsinline style="display:none"></video></div>
     <div class="wx-wrap" id="wx-wrap"><div class="wx-bar" id="wx-bar"></div></div>
     <div class="gt-wrap" id="gt-wrap"><div class="gt-plate sh-pill" id="gt-plate"></div></div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="pb-sharp" color-interpolation-filters="sRGB"><feConvolveMatrix id="pb-conv" order="3" preserveAlpha="true" kernelMatrix="0 0 0 0 1 0 0 0 0"/></filter></svg>
+    <div class="pb-wrap" id="pb-wrap"><div class="pb-board" id="pb-board" data-anim="fade"><div class="pb-title" id="pb-title"></div><div class="pb-box" id="pb-box"><img id="pb-img" alt=""></div><div class="pb-cap" id="pb-cap"></div></div></div>
     <div class="mb-wrap" id="mb-wrap"><div class="mb-board" id="mb-board"><div class="mb-top">
         <div class="mb-side a"><div class="mb-card"><div class="mb-lg" id="mb-lga"></div><i class="mb-srv" id="mb-sra">🎾</i><span class="mb-pt" id="mb-pa">0</span></div><div class="mb-g" id="mb-ga">0</div></div>
         <div class="mb-midcol"><div class="mb-mid" id="mb-mid">VS</div><div class="mb-sets" id="mb-sets">0 - 0</div></div>
@@ -3138,12 +3189,12 @@
             s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
             s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
             s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100); s.setProperty('--ic-d', dur + 's');
-            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0'))); const FULL = g(cfg.layout, 'card') === 'full'; wrap.setAttribute('data-lay', FULL ? 'full' : 'card'); s.setProperty('--fs-ls', (parseInt(g(cfg.fsLogoSize, 100)) || 100) / 100); s.setProperty('--fs-bs', (parseInt(g(cfg.fsBrandSize, 100)) || 100) / 100); s.setProperty('--fs-ts', (parseInt(g(cfg.fsTitleSize, 100)) || 100) / 100);
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0'))); const FULL = g(cfg.layout, 'card') === 'full'; wrap.setAttribute('data-lay', FULL ? 'full' : 'card'); wrap.setAttribute('data-fs-anim', g(cfg.fsAnim, 'fadeUp')); wrap.setAttribute('data-fs-dir', g(cfg.fsShineDir, 'ltr')); s.setProperty('--fs-sp', Math.max(0.3, Math.min(3, (parseInt(g(cfg.fsSpeed, 100)) || 100) / 100))); s.setProperty('--fs-ls', (parseInt(g(cfg.fsLogoSize, 100)) || 100) / 100); s.setProperty('--fs-bs', (parseInt(g(cfg.fsBrandSize, 100)) || 100) / 100); s.setProperty('--fs-ts', (parseInt(g(cfg.fsTitleSize, 100)) || 100) / 100);
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
             s.setProperty('--ic-cd', g(cfg.cdColor, '#ffffff')); s.setProperty('--ic-cd-s', (parseInt(g(cfg.cdSize, 34)) || 34) + 'px'); s.setProperty('--ic-sl', (parseInt(g(cfg.sideLogoSize, 90)) || 90) + 'px');
-            const key = JSON.stringify([FULL, cfg.fsLogo, cfg.fsBrand, cfg.fsTitle, cfg.fsDate, cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
+            const key = JSON.stringify([FULL, cfg.fsTitleColor, cfg.fsDateColor, cfg.fsShineOn, cfg.fsAnim, cfg.fsLogo, cfg.fsBrand, cfg.fsTitle, cfg.fsDate, cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
             if (key !== icKeyCache || !panel.firstChild) {
                 icKeyCache = key;
                 const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
@@ -3154,7 +3205,9 @@
                     f += '<div class="fs-main">';
                     if (cfg.fsBrand) f += '<img class="fs-brand" src="' + esc(String(cfg.fsBrand).trim()) + '">';
                     const ft = String(g(cfg.fsTitle, '')).trim(), fd = String(g(cfg.fsDate, '')).trim();
-                    if (ft || fd) f += '<div class="fs-title">' + (ft ? '<span class="ic-shine">' + esc(ft) + '</span>' : '') + (ft && fd ? '<i></i>' : '') + (fd ? '<span>' + esc(fd) + '</span>' : '') + '</div>';
+                    const so = g(cfg.fsShineOn, 'both'), LET = g(cfg.fsAnim, 'fadeUp') === 'letters'; let ci = 0;
+                    const chs = (t, sh) => LET ? Array.from(t).map(c => '<b class="ch' + (sh ? ' ic-shine' : '') + '" style="--n:' + (ci++) + '">' + (c === ' ' ? '&nbsp;' : esc(c)) + '</b>').join('') : esc(t);
+                    if (ft || fd) f += '<div class="fs-title">' + (ft ? '<span class="fs-t1' + (!LET && (so === 'both' || so === 'title') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsTitleColor, '#ffffff')) + '">' + chs(ft, so === 'both' || so === 'title') + '</span>' : '') + (ft && fd ? '<i></i>' : '') + (fd ? '<span class="fs-t2' + (!LET && (so === 'both' || so === 'date') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsDateColor, '#ffffff')) + '">' + chs(fd, so === 'both' || so === 'date') + '</span>' : '') + '</div>';
                     if (icCd.show && icCd.ts) f += '<div class="ic-cd" id="ic-cd"><span class="ic-cd-l">' + esc(icCd.label) + '</span><span class="ic-cd-t" id="ic-cd-t"></span></div>';
                     panel.innerHTML = f + '</div></div>';
                 } else {
@@ -4655,6 +4708,65 @@
             onValue(ref(db, 'padel/courts/_gametimer'), sn => { ccfg = sn.val(); }, () => { ccfg = null; });
             window.__gtMirror = (st) => { const v = st && st.gtCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; };
             setInterval(() => { try { track(); render(); } catch (e) {} }, 250);
+            return {};
+        })();
+
+
+        // ===== ФОТО-ТАБЛО: скрін/фото таблиці на трансляції (padel/photoboard) =====
+        const PB = (function () {
+            const wrap = document.getElementById('pb-wrap'), board = document.getElementById('pb-board'), box = document.getElementById('pb-box'), img = document.getElementById('pb-img'), tt = document.getElementById('pb-title'), cp = document.getElementById('pb-cap'), conv = document.getElementById('pb-conv'); if (!wrap || !board) return {};
+            const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
+            let gcfg = null, ccfg = null, lastSrc = '', hideT = null;
+            const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
+            const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+            const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+            function fit() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')'; }
+            window.addEventListener('resize', fit); fit();
+            const cfg = () => gcfg || ccfg || {};
+            let lastSig = '';
+            function render() {
+                const c = cfg(), pv = !!(window.__pvOn && window.__pvOn.pb);
+                const want = (!!c.enabled && __ctOk(g(c.court, 'all'), courtNum)) || pv;
+                const src = String(c.img || '');
+                const vis = want && !!src;
+                const sig = JSON.stringify(Object.assign({}, c, { img: src.length + ':' + src.slice(-40) })) + '|' + vis;
+                if (sig !== lastSig) {
+                    lastSig = sig;
+                    const dur = Math.max(0.05, Math.min(3, num(c.animDur, 6) / 10));
+                    board.style.setProperty('--pb-d', dur + 's'); board.setAttribute('data-anim', g(c.anim, 'fade'));
+                    const L = Math.max(0, Math.min(90, num(c.cropL, 0))) / 100, R = Math.max(0, Math.min(90 - L * 100, num(c.cropR, 0))) / 100, T = Math.max(0, Math.min(90, num(c.cropT, 0))) / 100, B = Math.max(0, Math.min(90 - T * 100, num(c.cropB, 0))) / 100;
+                    const k = Math.max(0.1, num(c.scale, 100) / 100), pad = Math.max(0, num(c.pad, 20));
+                    board.style.left = Math.max(0, Math.min(100, num(c.x, 50))) + '%'; board.style.top = Math.max(0, Math.min(100, num(c.y, 50))) + '%';
+                    board.dataset.k = k; board.style.setProperty('--pb-k', k);
+                    board.style.background = rgba(g(c.bg, '#0c1a3d'), Math.max(0, Math.min(1, num(c.bgOpacity, 100) / 100)));
+                    board.style.padding = pad + 'px'; board.style.borderRadius = num(c.radius, 16) + 'px';
+                    board.style.border = num(c.bw, 0) > 0 ? num(c.bw, 0) + 'px solid ' + g(c.border, '#ffffff') : 'none';
+                    board.style.boxShadow = num(c.shadow, 1) ? '0 20px 60px rgba(0,0,0,' + (0.55 * Math.max(0, Math.min(1, num(c.bgOpacity, 100) / 100))) + ')' : 'none';
+                    board.style.gap = (num(c.gap, 14)) + 'px';
+                    const tr = g(c.tc, '#ffffff'); tt.style.color = tr; cp.style.color = g(c.cc, tr);
+                    tt.style.fontSize = num(c.tsize, 44) + 'px'; cp.style.fontSize = num(c.csize, 28) + 'px';
+                    tt.textContent = g(c.title, ''); cp.textContent = g(c.caption, ''); tt.style.display = c.title ? '' : 'none'; cp.style.display = c.caption ? '' : 'none';
+                    const a = Math.max(0, Math.min(100, num(c.sharp, 0))) / 100 * 1.2;
+                    if (conv) conv.setAttribute('kernelMatrix', '0 ' + (-a) + ' 0 ' + (-a) + ' ' + (1 + 4 * a) + ' ' + (-a) + ' 0 ' + (-a) + ' 0');
+                    const f = 'brightness(' + Math.max(0, num(c.bright, 100)) / 100 + ') contrast(' + Math.max(0, num(c.contrast, 100)) / 100 + ') saturate(' + Math.max(0, num(c.sat, 100)) / 100 + ')';
+                    img.style.filter = (a > 0 ? 'url(#pb-sharp) ' : '') + f;
+                    if (src !== lastSrc) { lastSrc = src; img.src = src; }
+                    const layout = () => {
+                        const nw = img.naturalWidth, nh = img.naturalHeight; if (!nw || !nh) return;
+                        const vw = Math.max(20, num(c.width, 1100)), iw = vw / Math.max(0.05, 1 - L - R), ih = iw * nh / nw;
+                        box.style.width = vw + 'px'; box.style.height = Math.max(10, ih * (1 - T - B)) + 'px';
+                        img.style.width = iw + 'px'; img.style.height = ih + 'px'; img.style.left = (-L * iw) + 'px'; img.style.top = (-T * ih) + 'px';
+                    };
+                    img.onload = layout; if (img.complete) layout();
+                }
+                if (vis) { clearTimeout(hideT); if (!board.classList.contains('vis')) { board.classList.add('vis'); void board.offsetWidth; } if (!board.classList.contains('on')) requestAnimationFrame(() => board.classList.add('on')); }
+                else if (board.classList.contains('on')) { board.classList.remove('on'); clearTimeout(hideT); hideT = setTimeout(() => board.classList.remove('vis'), (parseFloat(board.style.getPropertyValue('--pb-d')) || 0.6) * 1000 + 100); }
+                const k = parseFloat(board.dataset.k) || 1;
+                board.style.setProperty('--pb-s', k);
+            }
+            onValue(ref(db, 'padel/photoboard'), sn => { gcfg = sn.val(); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/courts/_photoboard'), sn => { ccfg = sn.val(); }, () => { ccfg = null; });
+            setInterval(() => { try { render(); } catch (e) {} }, 300);
             return {};
         })();
 
