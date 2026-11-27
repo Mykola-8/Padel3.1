@@ -1506,6 +1506,7 @@
         .mi-vs { width: 80%; height: 46%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--mi-acc, #7a7a7a); border-radius: min(1cqw, 4cqh); background: linear-gradient(var(--mi-vs-a, #232323), var(--mi-vs-b, #0d0d0d)); color: var(--mi-vst, #fff); font-weight: 900; font-size: min(5.4cqw, 22cqh); line-height: 1; overflow: hidden; white-space: nowrap; }
 
         /* --- «Хто грає»: варіанти показу 2 (wc) і 3 (duel), фото гравців, кружечки --- */
+        .mi-pp, .m2-ph, .mi-photo { overflow: hidden; }
         .mi-pp { display: none; height: 80%; aspect-ratio: 1; object-fit: cover; object-position: 50% 18%; border-radius: var(--mi-pr, 0.8cqw); border: 2px solid rgba(255,255,255,0.4); flex: none; }
         .mi-photo { border-radius: var(--mi-pr, 1cqw) !important; }
         .mi2 { display: none; }
@@ -3580,9 +3581,9 @@
             wrap.style.setProperty('--m2-bg', g(mi.m2bg, '#0b1a45')); wrap.style.setProperty('--m2-acc', g(mi.m2acc, '#ffd400'));
             wrap.style.left = g(alt ? mi.x2 : mi.x, 50) + '%';
             wrap.style.top = g(alt ? mi.y2 : mi.y, alt ? 50 : 82) + '%';
-            wrap.style.transform = `translate(-50%, -50%) scale(${g(alt ? mi.scale2 : mi.scale, 100) / 100})`;
+            wrap.style.transform = `translate(-50%, -50%) scale(${g(alt ? mi.scale2 : mi.scale, alt ? 80 : 100) / 100})`;
             board.style.width = g(alt ? mi.w2 : mi.w, alt ? 100 : 62) + 'vw';
-            board.style.height = g(alt ? mi.h2 : mi.h, alt ? 100 : 28) + 'vh';
+            board.style.height = g(alt ? mi.h2 : mi.h, alt ? 60 : 28) + 'vh';
             const setTxt = (id, v) => { const el = document.getElementById(id); if (el && el.textContent !== (v || '')) el.textContent = v || ''; };
             const setImg = (id, src, cc) => {
                 const el = document.getElementById(id); if (!el) return;
@@ -3614,13 +3615,15 @@
                 });
             });
             // фото кожного гравця: своє → з фотобази (якщо ввімкнено) ; дві на команду
+            const focal = (id, o) => { const e = document.getElementById(id); if (!e) return; const px = g((o || {}).px, 50), py = g((o || {}).py, 50), pz = Math.max(100, parseFloat(g((o || {}).pz, 100)) || 100) / 100; e.style.objectPosition = px + '% ' + py + '%'; try { const f = 1 / pz, ok = window.CSS && CSS.supports && CSS.supports('object-view-box', 'inset(0)'); e.style.objectViewBox = (ok && pz > 1.001) ? 'inset(' + ((1 - f) * py).toFixed(2) + '% ' + ((1 - f) * (100 - px)).toFixed(2) + '% ' + ((1 - f) * (100 - py)).toFixed(2) + '% ' + ((1 - f) * px).toFixed(2) + '%)' : ''; } catch (e2) {} };
             const plPh = {}; let anyPh = false;
             ['t1', 't2'].forEach(t => ['p1', 'p2'].forEach((p, idx) => {
                 const pl = (mi[t] || {})[p] || {}; const nm = ((pl.f || '') + ' ' + (pl.l || '')).trim();
                 const u = pl.photo || (g(mi.photosAuto, 'off') === 'on' && nm ? PH.get(nm) : '');
                 plPh[t + p] = u || ''; if (u) anyPh = true;
-                setImg('mi-' + t + p + '-ph', u); setImg('m2-' + t + p + '-ph', alt ? u : '');
+                setImg('mi-' + t + p + '-ph', u); setImg('m2-' + t + p + '-ph', alt ? u : ''); focal('mi-' + t + p + '-ph', pl); focal('m2-' + t + p + '-ph', pl);
             }));
+            ['t1', 't2'].forEach(t => focal('mi-' + t + '-photo', mi[t] || {}));
             if (anyPh && !alt) ['t1', 't2'].forEach(t => setImg('mi-' + t + '-photo', ''));
             if (alt) {
                 const esc2 = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
