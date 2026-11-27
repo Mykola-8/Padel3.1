@@ -2723,7 +2723,7 @@
                     <span id="lbl-game-time-footer">Гейм: <b id="st-time-game">00:00</b></span>
                 </div>
                 <div class="stats-broadcast-collbls">
-                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-ac">ACE</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">STAR</span>
+                    <span>КОМАНДА</span><span id="col-lbl-df">DF</span><span id="col-lbl-ac">ACE</span><span id="col-lbl-nc">NET</span><span id="col-lbl-sm">SMASH</span><span id="col-lbl-dm">DORM</span><span id="col-lbl-p3">X3</span><span id="col-lbl-p4">X4</span><span id="col-lbl-bo">DOOR</span><span id="col-lbl-bp">BREAK</span><span id="col-lbl-gp">STAR</span>
                 </div>
                 <div class="stats-broadcast-table">
                     <div class="stats-broadcast-row">
@@ -2735,6 +2735,7 @@
                         <span class="stats-broadcast-cell" id="st-dm1">0</span>
                         <span class="stats-broadcast-cell" id="st-p31">0</span>
                         <span class="stats-broadcast-cell" id="st-p41">0</span>
+                        <span class="stats-broadcast-cell" id="st-bo1">0</span>
                         <span class="stats-broadcast-cell" id="st-bp1">0</span>
                         <span class="stats-broadcast-cell" id="st-gp1">0</span>
                     </div>
@@ -2747,6 +2748,7 @@
                         <span class="stats-broadcast-cell" id="st-dm2">0</span>
                         <span class="stats-broadcast-cell" id="st-p32">0</span>
                         <span class="stats-broadcast-cell" id="st-p42">0</span>
+                        <span class="stats-broadcast-cell" id="st-bo2">0</span>
                         <span class="stats-broadcast-cell" id="st-bp2">0</span>
                         <span class="stats-broadcast-cell" id="st-gp2">0</span>
                     </div>
@@ -2772,6 +2774,7 @@
             <div class="sm-row"><div class="sm-val" id="stm-dm1">0</div><div class="sm-label" id="stm-lbl-dormilona">Dormilona</div><div class="sm-val" id="stm-dm2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-p31">0</div><div class="sm-label" id="stm-lbl-portres">Por Tres - X3</div><div class="sm-val" id="stm-p32">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-p41">0</div><div class="sm-label" id="stm-lbl-porcuatro">Por Cuatro - X4</div><div class="sm-val" id="stm-p42">0</div></div>
+            <div class="sm-row"><div class="sm-val" id="stm-bo1">0</div><div class="sm-label" id="stm-lbl-ballout">Ball out the door</div><div class="sm-val" id="stm-bo2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-bp1">0</div><div class="sm-label" id="stm-lbl-breakpoints">Брейк-поінти</div><div class="sm-val" id="stm-bp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-gp1">0</div><div class="sm-label" id="stm-lbl-goldenpoints">Стар-поінти</div><div class="sm-val" id="stm-gp2">0</div></div>
             <div class="sm-row"><div class="sm-val" id="stm-lg1">0</div><div class="sm-label" id="stm-lbl-lovegames">Геймів "в суху"</div><div class="sm-val" id="stm-lg2">0</div></div>
@@ -2875,6 +2878,7 @@
             portres: { en: 'Por Tres - X3', ua: 'Por Tres - X3' },
             porcuatro: { en: 'Por Cuatro - X4', ua: 'Por Cuatro - X4' },
             dormilona: { en: 'Dormilona', ua: 'Повернення' },
+            ballout: { en: 'Ball out the door', ua: "М'яч за двері" },
             aces: { en: 'Aces', ua: 'Ейси' },
             lovegames: { en: 'Games "to love"', ua: 'Геймів "в суху"' },
             setTime: { en: 'Set time', ua: 'Час сету' },
@@ -3995,7 +3999,7 @@
         // написи на командах (Smash, Por Tres, Por Cuatro, Dormilona, Net Cord, Double Fault) — показуються 3 с на смузі команди
         function tvFxHook(st) {
             if (!(TV_LED || TV_MODE) || !st || !st.animation) return;
-            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', killer_ball: 'KILLER BALL', ace: 'ACE', double_fault: 'DOUBLE FAULT' };
+            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', killer_ball: 'KILLER BALL', ball_out: 'BALL OUT THE DOOR', ace: 'ACE', double_fault: 'DOUBLE FAULT' };
             const t = st.animation.type; if (!labelTexts[t]) return;
             window.__tvFx = { team: st.animation.team, text: labelTexts[t], cls: (t === 'dormilona' || t === 'net_cord') ? 'blue' : (t === 'double_fault' ? 'red' : ''), until: Date.now() + 3000 };
         }
@@ -5785,7 +5789,7 @@
                 total: ['Total points won', 'Всього виграно очок'], srvw: ['Points won on serve', 'Очки на своїй подачі'], retw: ['Points won on return', 'Очки на прийомі'],
                 bpc: ['Break points converted', 'Брейк-пойнти реалізовано'], bps: ['Break points saved', 'Брейк-пойнти відбито'], gp: ['Golden points won', 'Золоті очки'], adv: ['Advantage converted', 'Переваги реалізовано'], kp: ['Key points won', 'Ключові очки (BP/GP/SP/MP)'],
                 hold: ['Service games held', 'Свої подачі втримано'], brk: ['Breaks', 'Брейки'], love: ['Games won to love', 'Гейми «насухо»'], tbw: ['Tie-breaks won', 'Тайбрейки виграно'],
-                shots: ['Shots', 'Удари'], df: ['Double faults', 'Дабл-фоли'], smash: ['Smashes', 'Смеші'], ptr: ['Por tres', 'Пор трес'], pcu: ['Por cuatro', 'Пор куатро'], dorm: ['Dormilona', 'Дормілона'], kill: ['Killer ball', 'Killer ball'], netc: ['Net cord', 'Від сітки'], press: ['Pressure points', 'Тиск-очки'], pr1: ['At 30:30', 'При 30:30'], pr2: ['At 40:40 (deuce)', 'При 40:40 (рівно)'], pr3: ['On advantage', 'При перевазі'], prall: ['All pressure points', 'Усі тиск-очки'], mkBrk: ['Break of serve', 'Брейк'], mkLead: ['Biggest lead', 'Найбільший відрив'], nopress: ['Collected from new points', 'Зʼявиться з нових очок'],
+                shots: ['Shots', 'Удари'], df: ['Double faults', 'Дабл-фоли'], smash: ['Smashes', 'Смеші'], ptr: ['Por tres', 'Пор трес'], pcu: ['Por cuatro', 'Пор куатро'], dorm: ['Dormilona', 'Дормілона'], kill: ['Killer ball', 'Killer ball'], bout: ['Ball out the door', "М'яч за двері"], netc: ['Net cord', 'Від сітки'], press: ['Pressure points', 'Тиск-очки'], pr1: ['At 30:30', 'При 30:30'], pr2: ['At 40:40 (deuce)', 'При 40:40 (рівно)'], pr3: ['On advantage', 'При перевазі'], prall: ['All pressure points', 'Усі тиск-очки'], mkBrk: ['Break of serve', 'Брейк'], mkLead: ['Biggest lead', 'Найбільший відрив'], nopress: ['Collected from new points', 'Зʼявиться з нових очок'],
                 sp: ['Longest point streak', 'Найдовша серія очків'], sg: ['Longest game streak', 'Найдовша серія геймів'],
                 avgp: ['Avg time between points', 'Середній час між очками'], longp: ['Longest point', 'Найдовше очко'], longpause: ['Longest pause', 'Найдовша пауза'], avgg: ['Avg game duration', 'Середній гейм'], longg: ['Longest game', 'Найдовший гейм'], shortg: ['Shortest game', 'Найкоротший гейм'], longgp: ['Longest game (points)', 'Найдовший гейм (очок)'], sets: ['Set durations', 'Тривалість сетів'], match: ['Match time', 'Час матчу'], none: ['No data yet', 'Даних ще немає']
             };
@@ -5962,7 +5966,7 @@
                 s.setProperty('--an-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 92)))) / 100); s.setProperty('--an-c1', g(cfg.c1, '#38bdf8')); s.setProperty('--an-c2', g(cfg.c2, '#fb923c'));
                 s.setProperty('--an-bg1', g(cfg.bg1, '#0b1220')); s.setProperty('--an-bg2', g(cfg.bg2, '#131c33'));
                 const B = cfg.blocks || {}, on = key => B[key] !== false;
-                const sig = JSON.stringify([ph, st.pointLog, st.p1Aces, st.p2Aces, st.p1DoubleFaults, st.p2DoubleFaults, st.p1Smashes, st.p2Smashes, st.p1NetCords, st.p2NetCords, st.p1PorTres, st.p2PorTres, st.p1PorCuatro, st.p2PorCuatro, st.p1Dormilona, st.p2Dormilona, st.p1Killer, st.p2Killer, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
+                const sig = JSON.stringify([ph, st.pointLog, st.p1Aces, st.p2Aces, st.p1DoubleFaults, st.p2DoubleFaults, st.p1Smashes, st.p2Smashes, st.p1NetCords, st.p2NetCords, st.p1PorTres, st.p2PorTres, st.p1BallOut, st.p2BallOut, st.p1PorCuatro, st.p2PorCuatro, st.p1Dormilona, st.p2Dormilona, st.p1Killer, st.p2Killer, st.p1name, st.p2name, B, lang, st.t1_lg_s1, st.t2_lg_s1]);
                 if (sig === lastSig) return; lastSig = sig;
                 const c = compute(st), A = c.T[1], Bt = c.T[2]; let h = '<div class="an-head"><div class="an-team t1">' + esc(st.p1name || 'Team 1') + '</div><div class="an-title">' + t('title') + '</div><div class="an-team t2">' + esc(st.p2name || 'Team 2') + '</div></div>';
                 if (!c.n) { panel.innerHTML = h + '<div class="an-empty">' + t('none') + '</div>'; return; }
@@ -5973,7 +5977,7 @@
                 if (on('streak')) h += '<div class="an-card" data-k="streak"><div class="an-ct">' + t('streak') + '</div>' + row(t('sp'), A.sp, Bt.sp, A.sp, Bt.sp) + row(t('sg'), A.gs, Bt.gs, A.gs, Bt.gs) + '<div class="an-single"><span>' + t('longgp') + '</span><b>' + c.longGP + '</b></div></div>';
                 if (on('timing')) { const T2 = c.time; h += '<div class="an-card" data-k="timing"><div class="an-ct">' + t('timing') + '</div><div class="an-single"><span>' + t('match') + '</span><b>' + fmt(T2.match) + '</b></div><div class="an-single"><span>' + t('avgp') + '</span><b>' + fmt(T2.avgP) + '</b></div><div class="an-single"><span>' + t('longp') + '</span><b>' + fmt(T2.longP) + '</b></div><div class="an-single"><span>' + t('longpause') + '</span><b>' + fmt(T2.longPause) + '</b></div><div class="an-single"><span>' + t('avgg') + '</span><b>' + fmt(T2.avgG) + '</b></div><div class="an-single"><span>' + t('longg') + ' / ' + t('shortg') + '</span><b>' + fmt(T2.longG) + ' / ' + fmt(T2.shortG) + '</b></div>' + (T2.sets.length ? '<div class="an-single"><span>' + t('sets') + '</span><b>' + T2.sets.map(fmt).join(' · ') + '</b></div>' : '') + '</div>'; }
                 if (on('mom')) h += '<div class="an-card" data-k="mom"><div class="an-ct">' + t('mom') + '</div><div class="an-chart">' + chart(c) + '</div><div class="an-legend"><span><i style="background:var(--an-c1)"></i><i style="background:var(--an-c2)"></i>' + t('mkBrk') + '</span><span>+N — ' + t('mkLead') + '</span></div></div>';
-                if (on('shots')) { const sh = (k1, lab) => { const a1 = st['p1' + k1] || 0, a2 = st['p2' + k1] || 0; return (a1 || a2) ? row(t(lab), a1, a2, a1, a2) : ''; }; const body = sh('Aces', 'aces') + sh('DoubleFaults', 'df') + sh('Smashes', 'smash') + sh('NetCords', 'netc') + sh('PorTres', 'ptr') + sh('PorCuatro', 'pcu') + sh('Dormilona', 'dorm') + sh('Killer', 'kill'); if (body) h += '<div class="an-card" data-k="shots"><div class="an-ct">' + t('shots') + '</div>' + body + '</div>'; }
+                if (on('shots')) { const sh = (k1, lab) => { const a1 = st['p1' + k1] || 0, a2 = st['p2' + k1] || 0; return (a1 || a2) ? row(t(lab), a1, a2, a1, a2) : ''; }; const body = sh('Aces', 'aces') + sh('DoubleFaults', 'df') + sh('Smashes', 'smash') + sh('NetCords', 'netc') + sh('PorTres', 'ptr') + sh('PorCuatro', 'pcu') + sh('Dormilona', 'dorm') + sh('Killer', 'kill') + sh('BallOut', 'bout'); if (body) h += '<div class="an-card" data-k="shots"><div class="an-ct">' + t('shots') + '</div>' + body + '</div>'; }
                 if (on('press')) { const P = c.PR, pr = (k, lab) => P[k].n ? rowRatio(t(lab), P[k][1], P[k].n, P[k][2], P[k].n) : '', tot = P.a.n + P.b.n + P.c.n; const body = pr('a', 'pr1') + pr('b', 'pr2') + pr('c', 'pr3') + (tot ? rowRatio(t('prall'), P.a[1] + P.b[1] + P.c[1], tot, P.a[2] + P.b[2] + P.c[2], tot) : ''); h += '<div class="an-card" data-k="press"><div class="an-ct">' + t('press') + '</div>' + (body || '<div class="an-single"><span>' + t('nopress') + '</span></div>') + '</div>'; }
                 panel.innerHTML = h + '</div>';
                 afterBuild(k);
@@ -6800,6 +6804,8 @@
                         document.getElementById('st-p32').innerText = state.p2PorTres || 0;
                         document.getElementById('st-p41').innerText = state.p1PorCuatro || 0;
                         document.getElementById('st-p42').innerText = state.p2PorCuatro || 0;
+                        document.getElementById('st-bo1').innerText = state.p1BallOut || 0;
+                        document.getElementById('st-bo2').innerText = state.p2BallOut || 0;
                         document.getElementById('st-dm1').innerText = state.p1Dormilona || 0;
                         document.getElementById('st-dm2').innerText = state.p2Dormilona || 0;
                         document.getElementById('st-bp1').innerText = state.p1BreakPoints || 0; 
@@ -6816,6 +6822,7 @@
                             { label: 'col-lbl-dm', cells: ['st-dm1', 'st-dm2'], width: '55px', val: (state.p1Dormilona || 0) + (state.p2Dormilona || 0) },
                             { label: 'col-lbl-p3', cells: ['st-p31', 'st-p32'], width: '40px', val: (state.p1PorTres || 0) + (state.p2PorTres || 0) },
                             { label: 'col-lbl-p4', cells: ['st-p41', 'st-p42'], width: '40px', val: (state.p1PorCuatro || 0) + (state.p2PorCuatro || 0) },
+                            { label: 'col-lbl-bo', cells: ['st-bo1', 'st-bo2'], width: '55px', val: (state.p1BallOut || 0) + (state.p2BallOut || 0) },
                             { label: 'col-lbl-bp', cells: ['st-bp1', 'st-bp2'], width: '55px', val: (state.p1BreakPoints || 0) + (state.p2BreakPoints || 0) },
                             { label: 'col-lbl-gp', cells: ['st-gp1', 'st-gp2'], width: '55px', val: (state.p1GoldenPoints || 0) + (state.p2GoldenPoints || 0) }
                         ];
@@ -6881,7 +6888,7 @@
                     document.getElementById('stm-sm1').innerText = sm1; document.getElementById('stm-sm2').innerText = sm2;
                     document.getElementById('stm-sm1').closest('.sm-row').style.display = (sm1 === 0 && sm2 === 0) ? 'none' : 'grid';
 
-                    [['p3', 'PorTres'], ['p4', 'PorCuatro'], ['dm', 'Dormilona']].forEach(([k, f]) => {
+                    [['p3', 'PorTres'], ['p4', 'PorCuatro'], ['dm', 'Dormilona'], ['bo', 'BallOut']].forEach(([k, f]) => {
                         const v1 = state['p1' + f] || 0, v2 = state['p2' + f] || 0;
                         document.getElementById('stm-' + k + '1').innerText = v1; document.getElementById('stm-' + k + '2').innerText = v2;
                         document.getElementById('stm-' + k + '1').closest('.sm-row').style.display = (v1 === 0 && v2 === 0) ? 'none' : 'grid';
@@ -6911,6 +6918,7 @@
                     if(document.getElementById('stm-lbl-portres')) document.getElementById('stm-lbl-portres').innerText = getStatsLabel('portres', state);
                     if(document.getElementById('stm-lbl-porcuatro')) document.getElementById('stm-lbl-porcuatro').innerText = getStatsLabel('porcuatro', state);
                     if(document.getElementById('stm-lbl-dormilona')) document.getElementById('stm-lbl-dormilona').innerText = getStatsLabel('dormilona', state);
+                    if(document.getElementById('stm-lbl-ballout')) document.getElementById('stm-lbl-ballout').innerText = getStatsLabel('ballout', state);
                     document.getElementById('stm-lbl-breakpoints').innerText = getStatsLabel('breakpoints', state);
                     document.getElementById('stm-lbl-goldenpoints').innerText = getStatsLabel('goldenpoints', state);
                     document.getElementById('stm-lbl-lovegames').innerText = getStatsLabel('lovegames', state); document.getElementById('stm-lbl-set-time').innerText = getStatsLabel('setTime', state);
@@ -6942,11 +6950,11 @@
                         if (state.animation.type === 'double_fault') {
                             tBlock.classList.add('double-fault-red-flash'); setTimeout(() => tBlock.classList.remove('double-fault-red-flash'), 900);
                             showCornerSlide(getCornerSlideText('doublefault', state), 'csp-doublefault');
-                        } else if (['smash', 'net_cord', 'por_tres', 'por_cuatro', 'dormilona', 'killer_ball', 'ace'].includes(state.animation.type)) {
+                        } else if (['smash', 'net_cord', 'por_tres', 'por_cuatro', 'dormilona', 'killer_ball', 'ball_out', 'ace'].includes(state.animation.type)) {
                             const aType = state.animation.type;
                             const ballEl = document.getElementById(`ball-fx-${state.animation.team}`);
                             const labelEl = document.getElementById(`action-label-${state.animation.team}`);
-                            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', killer_ball: 'KILLER BALL', ace: 'ACE' };
+                            const labelTexts = { net_cord: 'NET CORD WINNER', smash: 'SMASH', por_tres: 'Por Tres - X3', por_cuatro: 'Por Cuatro - X4', dormilona: 'Dormilona', killer_ball: 'KILLER BALL', ball_out: 'BALL OUT THE DOOR', ace: 'ACE' };
 
                             // ТЕКСТ-НАПИС — окрема функція (вмикається/вимикається чекбоксом "Тексти-написи", не залежить від м'яча)
                             if (labelEl && state.showActionLabels !== false) {
