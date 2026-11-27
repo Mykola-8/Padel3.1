@@ -5681,80 +5681,130 @@ function __clearTournamentName() {
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
-        // ===== ФОТО-ТАБЛО: скрін/фото турнірної таблиці (padel/photoboard) =====
+        // ===== ФОТО-ТАБЛО: до 12 скрінів/фото таблиць (padel/photoboard) =====
         (function pbInit() {
             const anchor = document.getElementById('gt-card'); if (!anchor) return;
-            const DEF = { enabled: false, court: 'all', img: '', title: '', caption: '', tc: '#ffffff', cc: '#ffffff', tsize: 44, csize: 28, bg: '#0c1a3d', bgOpacity: 100, border: '#ffffff', bw: 0, radius: 16, pad: 20, gap: 14, shadow: 1,
-                cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0, scale: 100, x: 50, y: 50, width: 1100, anim: 'fade', animDur: 6 };
-            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
+            const DEF = { enabled: false, court: 'all', mode: 'seq', sel: 1, showSec: 8, pauseSec: 1, loop: true, startTs: 0, tc: '#ffffff', cc: '#ffffff', tsize: 44, csize: 28, bg: '#0c1a3d', bgOpacity: 100, border: '#ffffff', bw: 0, radius: 16, pad: 20, gap: 14, shadow: 1, width: 1100, anim: 'fade', animDur: 6 };
+            const SDEF = { inc: true, title: '', caption: '', cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0, scale: 100, x: 50, y: 50 };
+            const SKEYS = Object.keys(SDEF);
+            let d = Object.assign({}, DEF), slides = [], imgs = [], timer, loaded = false, prim = false, dirty = 0;
+            for (let n = 0; n < 12; n++) { slides[n] = Object.assign({}, SDEF); imgs[n] = ''; }
             const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
             const card = document.createElement('div'); card.id = 'pb-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
-            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🖼 Фото-табло (скрін таблиці груп / плей-офф)</span><span class="tcol-arrow">▸</span>';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🖼 Фото-табло (до 12 скрінів таблиць груп / плей-офф)</span><span class="tcol-arrow">▸</span>';
             head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
             anchor.after(head); head.after(card);
-            // розташування: у вкладці Tournament, під «Фотобаза гравців»
             { let tries = 0; const mv = setInterval(() => { const ph = document.getElementById('phb-card'); if (ph && head.previousElementSibling !== ph) { ph.after(head); head.after(card); } if (++tries > 160) clearInterval(mv); }, 250); }
             const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
-            const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
+            const rng = (k, t, mn, mx, stp, si) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"' + (si ? ' data-s="' + si + '"' : '') + '></b>') + '<input type="range" data-k="' + k + '"' + (si ? ' data-s="' + si + '"' : '') + ' min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
             const clr = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="color" data-k="' + k + '"></div>';
-            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Завантажте скріншот або фото таблиці (групи, плей-офф…) — воно з’явиться на трансляції. Можна вставити зі буфера: Ctrl+V / ⌘V, коли картка відкрита. Налаштування спільні для всіх кортів; корти для показу — нижче.</div>' +
+            const slideHtml = n => {
+                const S = String(n);
+                return '<div class="pbs" data-i="' + n + '" style="border:1px solid #333; border-radius:8px; overflow:hidden;">' +
+                    '<button type="button" class="tcol-head pbs-h" style="margin:0;"><span>📷 Фото ' + n + ' <b class="pbs-st" style="font-weight:700;"></b></span><span class="tcol-arrow">▸</span></button>' +
+                    '<div class="pbs-b" style="display:none; flex-direction:column; gap:8px; padding:8px;">' +
+                    '<div style="display:flex; gap:6px; align-items:center;"><input type="file" class="pbs-file" accept="image/*" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><button type="button" class="btn btn-gray pbs-clear" style="width:auto; padding:5px 10px !important; font-size:12px !important;">✖</button></div>' +
+                    '<div class="row">' + lab('Показувати це фото в серії:') + '<input type="checkbox" data-k="inc" data-s="' + S + '" style="width:20px; height:20px;"></div>' +
+                    '<div class="row">' + lab('Заголовок:') + '<input type="text" data-k="title" data-s="' + S + '" style="' + inp + '" placeholder="Група A — турнірна таблиця"></div>' +
+                    '<div class="row">' + lab('Підпис:') + '<input type="text" data-k="caption" data-s="' + S + '" style="' + inp + '" placeholder="Оновлено після 3-го туру"></div>' +
+                    '<div style="font-size:11px; font-weight:700; color:#e0b878;">✂ Обрізати краї (%)</div>' + rng('cropT', 'Зверху', 0, 60, 1, S) + rng('cropB', 'Знизу', 0, 60, 1, S) + rng('cropL', 'Зліва', 0, 60, 1, S) + rng('cropR', 'Справа', 0, 60, 1, S) +
+                    '<div style="font-size:11px; font-weight:700; color:#e0b878;">🎛 Корекція</div>' + rng('bright', '☀ Освітлення (100 = як є)', 0, 200, 1, S) + rng('contrast', '◐ Чіткість / контраст (100 = як є)', 0, 200, 1, S) + rng('sharp', '🔍 Різкість', 0, 100, 1, S) + rng('sat', '🎨 Насиченість', 0, 200, 1, S) +
+                    '<div style="font-size:11px; font-weight:700; color:#e0b878;">📐 Розмір і позиція</div>' + rng('scale', 'Масштаб, %', 10, 300, 1, S) + rng('x', 'По горизонталі, %', 0, 100, 1, S) + rng('y', 'По вертикалі, %', 0, 100, 1, S) +
+                    '<button type="button" class="btn btn-gray pbs-rst" style="padding:6px; font-size:11px;">↺ Скинути корекцію, обрізку й розмір</button>' +
+                    '</div></div>';
+            };
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Завантажте до 12 скріншотів/фото таблиць (кожне — у своєму згортному блоці нижче). Показ — окремим фото або послідовно. Ctrl+V / ⌘V вставляє скрін зі буфера у відкритий блок. Налаштування спільні для всіх кортів.</div>' +
                 '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="pbb-on">✅ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="pbb-off">⏹ СХОВАТИ</button></div><div id="pbb-st" style="font-size:11px;"></div>' +
                 '<div class="row">' + lab('Показувати на кортах:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
-                '<div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; color:#e0b878; font-weight:700;">📷 Фото / скрін <span id="pbb-imst" style="color:#8f8;"></span></div>' +
-                '<div style="display:flex; gap:6px; align-items:center;"><input type="file" id="pbb-file" accept="image/*" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><button class="btn btn-gray" id="pbb-clear" style="width:auto; padding:5px 10px !important; font-size:12px !important;">✖</button></div></div>' +
-                '<div class="row">' + lab('Заголовок над фото:') + '<input type="text" data-k="title" style="' + inp + '" placeholder="Наприклад: Група A — турнірна таблиця"></div>' +
-                '<div class="row">' + lab('Підпис під фото:') + '<input type="text" data-k="caption" style="' + inp + '" placeholder="Наприклад: Оновлено після 3-го туру"></div>' +
-                clr('tc', 'Колір заголовка') + clr('cc', 'Колір підпису') + rng('tsize', 'Розмір заголовка (px)', 16, 120, 1) + rng('csize', 'Розмір підпису (px)', 12, 80, 1) +
-                '<div style="font-size:11px; font-weight:700; color:#e0b878;">✂ Обрізати краї фото (%)</div>' + rng('cropT', 'Зверху', 0, 60, 1) + rng('cropB', 'Знизу', 0, 60, 1) + rng('cropL', 'Зліва', 0, 60, 1) + rng('cropR', 'Справа', 0, 60, 1) +
-                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🎛 Корекція зображення</div>' + rng('bright', '☀ Освітлення (100 = як є, більше — світліше)', 0, 200, 1) + rng('contrast', '◐ Чіткість / контраст (100 = як є)', 0, 200, 1) + rng('sharp', '🔍 Різкість (0 = без змін)', 0, 100, 1) + rng('sat', '🎨 Насиченість (100 = як є)', 0, 200, 1) +
-                '<button class="btn btn-gray" id="pbb-rst" style="padding:6px; font-size:11px;">↺ Скинути корекцію і обрізку</button>' +
-                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🖼 Фон і рамка</div>' + clr('bg', 'Колір фону') + rng('bgOpacity', 'Фон: 0% = прозорий, 100% = суцільний', 0, 100, 1) + clr('border', 'Колір рамки') + rng('bw', 'Товщина рамки (px)', 0, 20, 1) + rng('radius', 'Заокруглення (px)', 0, 60, 1) + rng('pad', 'Відступ усередині (px)', 0, 80, 1) +
-                '<div style="font-size:11px; font-weight:700; color:#e0b878;">📐 Розмір і позиція</div>' + rng('scale', 'Масштаб, %', 10, 300, 1) + rng('x', 'Позиція по горизонталі, %', 0, 100, 1) + rng('y', 'Позиція по вертикалі, %', 0, 100, 1) +
+                '<div class="row">' + lab('Режим показу:') + '<select data-k="mode"><option value="seq">Послідовно (усі завантажені фото по черзі)</option><option value="one">Одне фото (вибране нижче)</option></select></div>' +
+                '<div class="row">' + lab('Яке фото показувати (режим «Одне фото»):') + '<select data-k="sel">' + [1,2,3,4,5,6,7,8,9,10,11,12].map(n => '<option value="' + n + '">Фото ' + n + '</option>').join('') + '</select></div>' +
+                rng('showSec', '⏱ Показ одного фото, секунд', 1, 120, 1) + rng('pauseSec', '⏸ Пауза між фото, секунд (0 = без паузи)', 0, 60, 1) +
+                '<div class="row">' + lab('Повторювати по колу:') + '<input type="checkbox" data-k="loop" style="width:20px; height:20px;"></div>' +
+                '<div id="pbb-slides" style="display:flex; flex-direction:column; gap:6px;">' + [1,2,3,4,5,6,7,8,9,10,11,12].map(slideHtml).join('') + '</div>' +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🔤 Текст (спільне для всіх фото)</div>' + clr('tc', 'Колір заголовка') + clr('cc', 'Колір підпису') + rng('tsize', 'Розмір заголовка (px)', 16, 120, 1) + rng('csize', 'Розмір підпису (px)', 12, 80, 1) +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🖼 Фон і рамка (спільне)</div>' + clr('bg', 'Колір фону') + rng('bgOpacity', 'Фон: 0% = прозорий, 100% = суцільний', 0, 100, 1) + clr('border', 'Колір рамки') + rng('bw', 'Товщина рамки (px)', 0, 20, 1) + rng('radius', 'Заокруглення (px)', 0, 60, 1) + rng('pad', 'Відступ усередині (px)', 0, 80, 1) +
                 '<div class="row">' + lab('Анімація появи/зникнення:') + '<select data-k="anim"><option value="fade">Плавно</option><option value="zoom">Збільшення</option><option value="slideUp">Знизу</option><option value="slideDown">Зверху</option><option value="slideLeft">Зліва</option><option value="slideRight">Справа</option><option value="wipe">Шторка</option><option value="none">Без анімації</option></select></div>' + rng('animDur', 'Тривалість анімації (×0.1 с)', 1, 30, 1);
             const $ = id => document.getElementById(id);
+            const SB = n => card.querySelector('.pbs[data-i="' + n + '"]');
             function st(ok, m) { const e = $('pbb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function cfgData() { const o = JSON.parse(JSON.stringify(d)); o.slides = slides.map(x => JSON.parse(JSON.stringify(x))); delete o.img; return o; }
             function save(now) {
                 const run = () => {
                     if (!loaded) { setTimeout(run, 500); return; }
-                    const data = JSON.parse(JSON.stringify(d));
+                    const data = cfgData();
                     const fail = () => set(ref(db, 'padel/courts/_photoboard'), data).then(() => st(true, 'окремо від кортів'), e2 => st(false, (e2 && e2.message) || 'помилка'));
                     try { set(ref(db, 'padel/photoboard'), data).then(() => st(true), fail); } catch (e) { fail(); }
                 };
                 dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
             }
+            function saveImg(n) {
+                const v = imgs[n] || '', k = 's' + (n + 1); dirty = Date.now();
+                const fb = () => set(ref(db, 'padel/courts/_photoboard_img/' + k), v).then(() => st(true, 'фото ' + (n + 1) + ' (окремо від кортів)'), e2 => st(false, (e2 && e2.message) || 'помилка фото'));
+                try { set(ref(db, 'padel/photoboard_img/' + k), v).then(() => st(true, 'фото ' + (n + 1)), fb); } catch (e) { fb(); }
+            }
             function fill() {
-                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + el.dataset.k + '"]'); if (lv) lv.innerText = v; });
+                card.querySelectorAll('[data-k]').forEach(el => {
+                    if (document.activeElement === el) return;
+                    const si = el.dataset.s, k = el.dataset.k, v = si ? slides[parseInt(si) - 1][k] : d[k];
+                    if (el.type === 'checkbox') el.checked = v !== false && !!v; else el.value = (v === undefined || v === null) ? '' : v;
+                    const lv = card.querySelector('[data-v="' + k + '"]' + (si ? '[data-s="' + si + '"]' : ':not([data-s])')); if (lv) lv.innerText = v;
+                });
                 $('pbb-on').style.outline = d.enabled ? '3px solid #fff' : 'none'; $('pbb-off').style.outline = d.enabled ? 'none' : '3px solid #fff';
-                $('pbb-imst').innerText = d.img ? '✅ є (' + Math.round(d.img.length / 1024) + ' КБ)' : '— немає';
+                for (let n = 1; n <= 12; n++) { const b = SB(n); if (!b) continue; const im = imgs[n - 1]; b.querySelector('.pbs-st').innerText = im ? '✅ ' + Math.round(im.length / 1024) + ' КБ' + (slides[n - 1].inc === false ? ' · вимкн.' : '') : '— порожньо'; b.querySelector('.pbs-st').style.color = im ? '#8f8' : '#888'; }
             }
             card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
-                const k = el.dataset.k; d[k] = (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.innerText = d[k]; save(false);
+                const si = el.dataset.s, k = el.dataset.k; let v;
+                if (el.type === 'checkbox') v = el.checked; else if (el.type === 'range' || el.type === 'number' || k === 'sel') v = parseFloat(el.value); else v = el.value;
+                if (si) slides[parseInt(si) - 1][k] = v; else d[k] = v;
+                const lv = card.querySelector('[data-v="' + k + '"]' + (si ? '[data-s="' + si + '"]' : ':not([data-s])')); if (lv) lv.innerText = v;
+                if (k === 'inc') fill(); save(false);
             }));
-            $('pbb-on').onclick = () => { d.enabled = true; save(true); fill(); }; $('pbb-off').onclick = () => { d.enabled = false; save(true); fill(); };
-            $('pbb-rst').onclick = () => { Object.assign(d, { cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0 }); fill(); save(true); };
-            $('pbb-clear').onclick = () => { d.img = ''; fill(); save(true); };
-            function loadFile(file) {
-                if (!file) return; $('pbb-imst').innerText = '⏳';
+            card.querySelectorAll('.pbs').forEach(b => {
+                const n = parseInt(b.dataset.i), h = b.querySelector('.pbs-h'), body = b.querySelector('.pbs-b');
+                h.onclick = () => { const o = body.style.display === 'none'; body.style.display = o ? 'flex' : 'none'; h.classList.toggle('open', o); };
+                b.querySelector('.pbs-file').onchange = e => loadFile(e.target.files && e.target.files[0], n - 1, e.target);
+                b.querySelector('.pbs-clear').onclick = () => { imgs[n - 1] = ''; fill(); saveImg(n - 1); };
+                b.querySelector('.pbs-rst').onclick = () => { Object.assign(slides[n - 1], { cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0, scale: 100, x: 50, y: 50 }); fill(); save(true); };
+            });
+            $('pbb-on').onclick = () => { d.enabled = true; d.startTs = Date.now(); save(true); fill(); }; $('pbb-off').onclick = () => { d.enabled = false; save(true); fill(); };
+            function loadFile(file, n, inputEl) {
+                if (!file) return; const stEl = SB(n + 1).querySelector('.pbs-st'); stEl.innerText = '⏳';
                 const rd = new FileReader();
                 rd.onload = ev => {
                     const im = new Image();
                     im.onload = () => {
-                        let w = im.width, h = im.height; const MAX = 2200; if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                        let w = im.width, h = im.height; const MAX = 1920; if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
                         let q = 0.9, out = '';
-                        for (let i = 0; i < 6; i++) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h); out = cv.toDataURL('image/jpeg', q); if (out.length < 900000) break; q -= 0.1; w = Math.round(w * 0.85); h = Math.round(h * 0.85); }
-                        d.img = out; fill(); save(true); $('pbb-file').value = '';
+                        for (let i = 0; i < 6; i++) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h); out = cv.toDataURL('image/jpeg', q); if (out.length < 650000) break; q -= 0.1; w = Math.round(w * 0.85); h = Math.round(h * 0.85); }
+                        imgs[n] = out; fill(); saveImg(n); if (inputEl) inputEl.value = '';
                     };
-                    im.onerror = () => { $('pbb-imst').innerText = '❌'; };
+                    im.onerror = () => { stEl.innerText = '❌'; };
                     im.src = ev.target.result;
                 };
                 rd.readAsDataURL(file);
             }
-            $('pbb-file').onchange = e => loadFile(e.target.files && e.target.files[0]);
-            document.addEventListener('paste', e => { if (card.style.display === 'none') return; const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type && x.type.indexOf('image') === 0); if (it) { e.preventDefault(); loadFile(it.getAsFile()); } });
+            document.addEventListener('paste', e => {
+                if (card.style.display === 'none') return; const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type && x.type.indexOf('image') === 0); if (!it) return;
+                let n = -1; card.querySelectorAll('.pbs').forEach(b => { if (n < 0 && b.querySelector('.pbs-b').style.display !== 'none') n = parseInt(b.dataset.i) - 1; });
+                if (n < 0) n = imgs.findIndex(x => !x); if (n < 0) n = 0;
+                e.preventDefault(); loadFile(it.getAsFile(), n);
+            });
             fill();
-            const apply = v => { if (card.contains(document.activeElement) && document.activeElement.type !== 'file' || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
+            const busy = () => (card.contains(document.activeElement) && document.activeElement.type !== 'file') || Date.now() - dirty < 3000;
+            const apply = v => {
+                if (busy()) return; d = Object.assign({}, DEF, v); delete d.slides; delete d.img;
+                const arr = Array.isArray(v.slides) ? v.slides : (v.slides && typeof v.slides === 'object' ? Object.keys(v.slides).sort((a, b) => a - b).map(k => v.slides[k]) : [v]);
+                for (let n = 0; n < 12; n++) slides[n] = Object.assign({}, SDEF, SKEYS.reduce((o, k) => { if (arr[n] && arr[n][k] !== undefined) o[k] = arr[n][k]; return o; }, {}));
+                if (!v.slides && v.img && !imgs[0]) { imgs[0] = v.img; saveImg(0); }   // міграція зі старого формату (одне фото)
+                fill();
+            };
             onValue(ref(db, 'padel/photoboard'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (v) apply(v); }, () => { loaded = true; });
             onValue(ref(db, 'padel/courts/_photoboard'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; apply(v); } });
+            for (let n = 0; n < 12; n++) {
+                const k = 's' + (n + 1), setI = v => { if (Date.now() - dirty < 3000 || typeof v !== 'string') return; if (v || !imgs[n]) imgs[n] = v || ''; else if (!v) imgs[n] = ''; fill(); };
+                onValue(ref(db, 'padel/photoboard_img/' + k), snap => setI(snap.val()), () => {});
+                onValue(ref(db, 'padel/courts/_photoboard_img/' + k), snap => { const v = snap.val(); if (v && !imgs[n]) setI(v); }, () => {});
+            }
             setTimeout(() => { loaded = true; }, 3000);
         })();
 
