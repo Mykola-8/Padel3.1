@@ -3086,7 +3086,7 @@ function __clearTournamentName() {
         // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
         let IC_GLOBAL_KEYS = [];
         function icDefault() {
-            return { show: false, layout: 'card', fsLogo: '', fsBrand: '', fsTitle: 'FIP TOUR', fsDate: '2027', fsLogoSize: 100, fsBrandSize: 100, fsTitleSize: 100, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
+            return { show: false, layout: 'card', fsLogo: '', fsBrand: '', fsTitle: 'FIP TOUR', fsDate: '2027', fsLogoSize: 100, fsBrandSize: 100, fsTitleSize: 100, fsTitleColor: '#ffffff', fsDateColor: '#ffffff', fsShineOn: 'both', fsShineDir: 'ltr', fsAnim: 'fadeUp', fsSpeed: 100, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
                 logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, bgOpacity: 100, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
         }
         function icEnsure() {
@@ -3199,6 +3199,12 @@ function __clearTournamentName() {
                     ${slider('fsLogoSize', 'Розмір логотипа зверху (%)', 30, 250, 100)}
                     ${slider('fsBrandSize', 'Розмір напису/лого спонсора (%)', 30, 250, 100)}
                     ${slider('fsTitleSize', 'Розмір назви та року (%)', 30, 250, 100)}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${color('fsTitleColor', '🎨 Колір назви', d.fsTitleColor)}${color('fsDateColor', '🎨 Колір року/дати', d.fsDateColor)}${color('shineColor', '🎨 Колір блиску', d.shineColor || '#ffd84a')}</div>
+                    ${sel('fsShineOn', '✨ Блиск на тексті', [['both', 'Назва і рік/дата'], ['title', 'Лише назва'], ['date', 'Лише рік/дата'], ['off', 'Без блиску']])}
+                    ${sel('shine', '✨ Режим блиску', [['1', 'Один раз після появи'], ['2', 'Постійно (кожні кілька секунд)'], ['0', 'Вимкнено']])}
+                    ${sel('fsShineDir', '↔ Напрямок блиску', [['ltr', 'Зліва направо'], ['rtl', 'Справа наліво']])}
+                    ${sel('fsAnim', '🎞 Анімація появи (лого, назва, рік)', [['fadeUp', 'Знизу вгору (за черги)'], ['slide', 'Назва зліва, рік справа'], ['letters', 'По літерах'], ['zoom', 'Збільшення'], ['blur', 'Із розфокусу'], ['none', 'Без анімації']])}
+                    ${slider('fsSpeed', '⚡ Швидкість анімацій і блиску (%)', 30, 300, 100)}
                     <div style="font-size:10px; color:#9a9;">Кольори — «Фон (верх/низ)» і «Текст» нижче. Анімації появи/виходу, блиск, показ на кількох кортах — ті самі.</div>
                 </div>
                 ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
@@ -5599,7 +5605,7 @@ function __clearTournamentName() {
             setInterval(() => { try { tick(); } catch (e) {} }, 400);
             fit();
             // --- універсальна фіолетова кнопка ПЕРЕГЛЯД для всіх таблиць ---
-            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', pr: 'prb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle', gt: 'gtb-on' };
+            const PV = { cr: 'cr-on', rl: 'rl-on', rm: 'rkm-on', ci: 'cib-on', tn: 'tnb-on', wn: 'wnb-on', pr: 'prb-on', sc: 'scb-on', mt: 'mtb-on', poU: 'po-btn-upper', poL: 'po-btn-lower', groups: 'gr-btn-show', introCard: 'ic-btn-show', teamRanking: 'btn-rk-toggle', matchIntro: 'btn-mi-toggle', gt: 'gtb-on', pb: 'pbb-on' };
             const pvOn = {};
             function send(k) { try { if (fr.contentWindow) fr.contentWindow.postMessage({ type: 'pvAny', key: k, on: !!pvOn[k] }, '*'); } catch (e) {} }
             function ui(k, b) { b.style.outline = pvOn[k] ? '3px solid #fff' : 'none'; b.innerText = pvOn[k] ? '👁 ПЕРЕГЛЯД ✓' : '👁 ПЕРЕГЛЯД'; }
@@ -5674,6 +5680,82 @@ function __clearTournamentName() {
             onValue(ref(db, 'padel/courts/_gametimer'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; prim = true; apply(v); } });
             setTimeout(() => { loaded = true; }, 3000);
         })();
+
+        // ===== ФОТО-ТАБЛО: скрін/фото турнірної таблиці (padel/photoboard) =====
+        (function pbInit() {
+            const anchor = document.getElementById('gt-card'); if (!anchor) return;
+            const DEF = { enabled: false, court: 'all', img: '', title: '', caption: '', tc: '#ffffff', cc: '#ffffff', tsize: 44, csize: 28, bg: '#0c1a3d', bgOpacity: 100, border: '#ffffff', bw: 0, radius: 16, pad: 20, gap: 14, shadow: 1,
+                cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0, scale: 100, x: 50, y: 50, width: 1100, anim: 'fade', animDur: 6 };
+            let d = Object.assign({}, DEF), timer, loaded = false, prim = false, dirty = 0;
+            const inp = 'width:100%; padding:6px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; box-sizing:border-box;';
+            const card = document.createElement('div'); card.id = 'pb-card'; card.className = 'card'; card.style.cssText = 'display:none; flex-direction:column; gap:8px;';
+            const head = document.createElement('button'); head.type = 'button'; head.className = 'tcol-head'; head.innerHTML = '<span>🖼 Фото-табло (скрін таблиці груп / плей-офф)</span><span class="tcol-arrow">▸</span>';
+            head.onclick = () => { const o = card.style.display === 'none'; card.style.display = o ? 'flex' : 'none'; head.classList.toggle('open', o); };
+            anchor.after(head); head.after(card);
+            const lab = t => '<span style="font-size:11px; color:#ccc;">' + t + '</span>';
+            const rng = (k, t, mn, mx, stp) => '<div class="row">' + lab(t + ': <b data-v="' + k + '"></b>') + '<input type="range" data-k="' + k + '" min="' + mn + '" max="' + mx + '" step="' + stp + '"></div>';
+            const clr = (k, t) => '<div class="row">' + lab(t + ':') + '<input type="color" data-k="' + k + '"></div>';
+            card.innerHTML = '<div style="font-size:10px; color:#9bd;">Завантажте скріншот або фото таблиці (групи, плей-офф…) — воно з’явиться на трансляції. Можна вставити зі буфера: Ctrl+V / ⌘V, коли картка відкрита. Налаштування спільні для всіх кортів; корти для показу — нижче.</div>' +
+                '<div style="display:flex; gap:8px;"><button class="btn btn-green" style="flex:1; padding:12px; font-weight:800;" id="pbb-on">✅ ПОКАЗАТИ</button><button class="btn btn-red" style="flex:1; padding:12px; font-weight:800;" id="pbb-off">⏹ СХОВАТИ</button></div><div id="pbb-st" style="font-size:11px;"></div>' +
+                '<div class="row">' + lab('Показувати на кортах:') + '<select data-k="court"><option value="all">Усі корти</option>' + [1,2,3,4,5,6,7,8,9,10].map(n => '<option value="' + n + '">Корт ' + n + '</option>').join('') + '</select></div>' +
+                '<div style="border:1px solid #333; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:6px;"><div style="font-size:11px; color:#e0b878; font-weight:700;">📷 Фото / скрін <span id="pbb-imst" style="color:#8f8;"></span></div>' +
+                '<div style="display:flex; gap:6px; align-items:center;"><input type="file" id="pbb-file" accept="image/*" style="font-size:11px; color:#ccc; flex:1; min-width:0;"><button class="btn btn-gray" id="pbb-clear" style="width:auto; padding:5px 10px !important; font-size:12px !important;">✖</button></div></div>' +
+                '<div class="row">' + lab('Заголовок над фото:') + '<input type="text" data-k="title" style="' + inp + '" placeholder="Наприклад: Група A — турнірна таблиця"></div>' +
+                '<div class="row">' + lab('Підпис під фото:') + '<input type="text" data-k="caption" style="' + inp + '" placeholder="Наприклад: Оновлено після 3-го туру"></div>' +
+                clr('tc', 'Колір заголовка') + clr('cc', 'Колір підпису') + rng('tsize', 'Розмір заголовка (px)', 16, 120, 1) + rng('csize', 'Розмір підпису (px)', 12, 80, 1) +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">✂ Обрізати краї фото (%)</div>' + rng('cropT', 'Зверху', 0, 60, 1) + rng('cropB', 'Знизу', 0, 60, 1) + rng('cropL', 'Зліва', 0, 60, 1) + rng('cropR', 'Справа', 0, 60, 1) +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🎛 Корекція зображення</div>' + rng('bright', '☀ Освітлення (100 = як є, більше — світліше)', 0, 200, 1) + rng('contrast', '◐ Чіткість / контраст (100 = як є)', 0, 200, 1) + rng('sharp', '🔍 Різкість (0 = без змін)', 0, 100, 1) + rng('sat', '🎨 Насиченість (100 = як є)', 0, 200, 1) +
+                '<button class="btn btn-gray" id="pbb-rst" style="padding:6px; font-size:11px;">↺ Скинути корекцію і обрізку</button>' +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">🖼 Фон і рамка</div>' + clr('bg', 'Колір фону') + rng('bgOpacity', 'Фон: 0% = прозорий, 100% = суцільний', 0, 100, 1) + clr('border', 'Колір рамки') + rng('bw', 'Товщина рамки (px)', 0, 20, 1) + rng('radius', 'Заокруглення (px)', 0, 60, 1) + rng('pad', 'Відступ усередині (px)', 0, 80, 1) +
+                '<div style="font-size:11px; font-weight:700; color:#e0b878;">📐 Розмір і позиція</div>' + rng('scale', 'Масштаб, %', 10, 300, 1) + rng('x', 'Позиція по горизонталі, %', 0, 100, 1) + rng('y', 'Позиція по вертикалі, %', 0, 100, 1) +
+                '<div class="row">' + lab('Анімація появи/зникнення:') + '<select data-k="anim"><option value="fade">Плавно</option><option value="zoom">Збільшення</option><option value="slideUp">Знизу</option><option value="slideDown">Зверху</option><option value="slideLeft">Зліва</option><option value="slideRight">Справа</option><option value="wipe">Шторка</option><option value="none">Без анімації</option></select></div>' + rng('animDur', 'Тривалість анімації (×0.1 с)', 1, 30, 1);
+            const $ = id => document.getElementById(id);
+            function st(ok, m) { const e = $('pbb-st'); if (e) { e.innerText = ok ? '☁️ Збережено ✅' + (m ? ' — ' + m : '') : '⚠️ ' + m; e.style.color = ok ? '#7c7' : '#f66'; } }
+            function save(now) {
+                const run = () => {
+                    if (!loaded) { setTimeout(run, 500); return; }
+                    const data = JSON.parse(JSON.stringify(d));
+                    const fail = () => set(ref(db, 'padel/courts/_photoboard'), data).then(() => st(true, 'окремо від кортів'), e2 => st(false, (e2 && e2.message) || 'помилка'));
+                    try { set(ref(db, 'padel/photoboard'), data).then(() => st(true), fail); } catch (e) { fail(); }
+                };
+                dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
+            }
+            function fill() {
+                card.querySelectorAll('[data-k]').forEach(el => { if (document.activeElement === el) return; const v = d[el.dataset.k]; el.value = (v === undefined || v === null) ? '' : v; const lv = card.querySelector('[data-v="' + el.dataset.k + '"]'); if (lv) lv.innerText = v; });
+                $('pbb-on').style.outline = d.enabled ? '3px solid #fff' : 'none'; $('pbb-off').style.outline = d.enabled ? 'none' : '3px solid #fff';
+                $('pbb-imst').innerText = d.img ? '✅ є (' + Math.round(d.img.length / 1024) + ' КБ)' : '— немає';
+            }
+            card.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+                const k = el.dataset.k; d[k] = (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value; const lv = card.querySelector('[data-v="' + k + '"]'); if (lv) lv.innerText = d[k]; save(false);
+            }));
+            $('pbb-on').onclick = () => { d.enabled = true; save(true); fill(); }; $('pbb-off').onclick = () => { d.enabled = false; save(true); fill(); };
+            $('pbb-rst').onclick = () => { Object.assign(d, { cropT: 0, cropR: 0, cropB: 0, cropL: 0, bright: 100, contrast: 100, sat: 100, sharp: 0 }); fill(); save(true); };
+            $('pbb-clear').onclick = () => { d.img = ''; fill(); save(true); };
+            function loadFile(file) {
+                if (!file) return; $('pbb-imst').innerText = '⏳';
+                const rd = new FileReader();
+                rd.onload = ev => {
+                    const im = new Image();
+                    im.onload = () => {
+                        let w = im.width, h = im.height; const MAX = 2200; if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                        let q = 0.9, out = '';
+                        for (let i = 0; i < 6; i++) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h); out = cv.toDataURL('image/jpeg', q); if (out.length < 900000) break; q -= 0.1; w = Math.round(w * 0.85); h = Math.round(h * 0.85); }
+                        d.img = out; fill(); save(true); $('pbb-file').value = '';
+                    };
+                    im.onerror = () => { $('pbb-imst').innerText = '❌'; };
+                    im.src = ev.target.result;
+                };
+                rd.readAsDataURL(file);
+            }
+            $('pbb-file').onchange = e => loadFile(e.target.files && e.target.files[0]);
+            document.addEventListener('paste', e => { if (card.style.display === 'none') return; const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type && x.type.indexOf('image') === 0); if (it) { e.preventDefault(); loadFile(it.getAsFile()); } });
+            fill();
+            const apply = v => { if (card.contains(document.activeElement) && document.activeElement.type !== 'file' || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); fill(); };
+            onValue(ref(db, 'padel/photoboard'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (v) apply(v); }, () => { loaded = true; });
+            onValue(ref(db, 'padel/courts/_photoboard'), snap => { const v = snap.val(); if (v && !prim) { loaded = true; apply(v); } });
+            setTimeout(() => { loaded = true; }, 3000);
+        })();
+
 
 
 
