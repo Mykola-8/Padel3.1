@@ -4712,44 +4712,61 @@
         })();
 
 
-        // ===== ФОТО-ТАБЛО: скрін/фото таблиці на трансляції (padel/photoboard) =====
+        // ===== ФОТО-ТАБЛО: до 12 скрінів/фото таблиць, окремо або послідовно (padel/photoboard) =====
         const PB = (function () {
             const wrap = document.getElementById('pb-wrap'), board = document.getElementById('pb-board'), box = document.getElementById('pb-box'), img = document.getElementById('pb-img'), tt = document.getElementById('pb-title'), cp = document.getElementById('pb-cap'), conv = document.getElementById('pb-conv'); if (!wrap || !board) return {};
             const courtNum = parseInt((String(databasePath).match(/court_(\d+)/) || [0, 1])[1]) || 1;
-            let gcfg = null, ccfg = null, lastSrc = '', hideT = null;
+            let gcfg = null, ccfg = null, hideT = null, pvStart = 0;
+            const I1 = [], I2 = [];
             const g = (v, d) => (v === undefined || v === null || v === '') ? d : v;
             const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
             const rgba = (hex, a) => { let h = String(hex || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
             function fit() { const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080); wrap.style.transform = 'translate(-50%,-50%) scale(' + k + ')'; }
             window.addEventListener('resize', fit); fit();
             const cfg = () => gcfg || ccfg || {};
-            let lastSig = '';
+            const slides = G => Array.isArray(G.slides) ? G.slides : (G.slides && typeof G.slides === 'object' ? Object.keys(G.slides).sort((a, b) => a - b).map(k => G.slides[k]) : [G]);
+            const imgOf = (G, n) => I1[n] || I2[n] || (n === 0 && !G.slides ? G.img : '') || '';
+            let lastSig = '', lastSrc = '';
+            // яка з фото зараз у ефірі: -1 = пауза / завершено
+            function pick(G, pv) {
+                const SL = slides(G), list = [];
+                for (let n = 0; n < 12; n++) { const sc = SL[n]; if (sc && sc.inc === false) continue; if (imgOf(G, n)) list.push(n); }
+                if (!list.length) return { n: -1, SL };
+                if (g(G.mode, 'seq') === 'one') { const w = Math.max(1, Math.min(12, parseInt(G.sel) || 1)) - 1; return { n: imgOf(G, w) ? w : list[0], SL }; }
+                const show = Math.max(1, num(G.showSec, 8)), pause = Math.max(0, num(G.pauseSec, 1)), per = show + pause, tot = per * list.length;
+                const t0 = pv && !G.enabled ? pvStart : (num(G.startTs, 0) || pvStart); let pos = (Date.now() - t0) / 1000;
+                if (pos < 0) pos = 0;
+                if (G.loop === false && pos >= tot - pause) return { n: -1, SL, done: true };
+                pos = pos % tot; const k = Math.floor(pos / per), within = pos - k * per;
+                return { n: within < show ? list[k] : -1, SL };
+            }
             function render() {
-                const c = cfg(), pv = !!(window.__pvOn && window.__pvOn.pb);
-                const want = (!!c.enabled && __ctOk(g(c.court, 'all'), courtNum)) || pv;
-                const src = String(c.img || '');
-                const vis = want && !!src;
-                const sig = JSON.stringify(Object.assign({}, c, { img: src.length + ':' + src.slice(-40) })) + '|' + vis;
-                if (sig !== lastSig) {
+                const G = cfg(), pv = !!(window.__pvOn && window.__pvOn.pb); if (pv && !pvStart) pvStart = Date.now(); if (!pv) pvStart = 0;
+                const want = (!!G.enabled && __ctOk(g(G.court, 'all'), courtNum)) || pv;
+                const P = want ? pick(G, pv) : { n: -1, SL: [] };
+                const vis = want && P.n >= 0;
+                let c = G, src = '';
+                if (P.n >= 0) { c = Object.assign({}, G, P.SL[P.n] || (P.n === 0 ? G : {})); src = imgOf(G, P.n); }
+                const sig = vis ? JSON.stringify(Object.assign({}, c, { img: '', slides: '', n: P.n, isrc: src.length + ':' + src.slice(-40) })) : 'off';
+                if (vis && sig !== lastSig) {
                     lastSig = sig;
                     const dur = Math.max(0.05, Math.min(3, num(c.animDur, 6) / 10));
                     board.style.setProperty('--pb-d', dur + 's'); board.setAttribute('data-anim', g(c.anim, 'fade'));
                     const L = Math.max(0, Math.min(90, num(c.cropL, 0))) / 100, R = Math.max(0, Math.min(90 - L * 100, num(c.cropR, 0))) / 100, T = Math.max(0, Math.min(90, num(c.cropT, 0))) / 100, B = Math.max(0, Math.min(90 - T * 100, num(c.cropB, 0))) / 100;
                     const k = Math.max(0.1, num(c.scale, 100) / 100), pad = Math.max(0, num(c.pad, 20));
                     board.style.left = Math.max(0, Math.min(100, num(c.x, 50))) + '%'; board.style.top = Math.max(0, Math.min(100, num(c.y, 50))) + '%';
-                    board.dataset.k = k; board.style.setProperty('--pb-k', k);
+                    board.style.setProperty('--pb-s', k);
                     board.style.background = rgba(g(c.bg, '#0c1a3d'), Math.max(0, Math.min(1, num(c.bgOpacity, 100) / 100)));
                     board.style.padding = pad + 'px'; board.style.borderRadius = num(c.radius, 16) + 'px';
                     board.style.border = num(c.bw, 0) > 0 ? num(c.bw, 0) + 'px solid ' + g(c.border, '#ffffff') : 'none';
                     board.style.boxShadow = num(c.shadow, 1) ? '0 20px 60px rgba(0,0,0,' + (0.55 * Math.max(0, Math.min(1, num(c.bgOpacity, 100) / 100))) + ')' : 'none';
-                    board.style.gap = (num(c.gap, 14)) + 'px';
+                    board.style.gap = num(c.gap, 14) + 'px';
                     const tr = g(c.tc, '#ffffff'); tt.style.color = tr; cp.style.color = g(c.cc, tr);
                     tt.style.fontSize = num(c.tsize, 44) + 'px'; cp.style.fontSize = num(c.csize, 28) + 'px';
                     tt.textContent = g(c.title, ''); cp.textContent = g(c.caption, ''); tt.style.display = c.title ? '' : 'none'; cp.style.display = c.caption ? '' : 'none';
                     const a = Math.max(0, Math.min(100, num(c.sharp, 0))) / 100 * 1.2;
                     if (conv) conv.setAttribute('kernelMatrix', '0 ' + (-a) + ' 0 ' + (-a) + ' ' + (1 + 4 * a) + ' ' + (-a) + ' 0 ' + (-a) + ' 0');
-                    const f = 'brightness(' + Math.max(0, num(c.bright, 100)) / 100 + ') contrast(' + Math.max(0, num(c.contrast, 100)) / 100 + ') saturate(' + Math.max(0, num(c.sat, 100)) / 100 + ')';
-                    img.style.filter = (a > 0 ? 'url(#pb-sharp) ' : '') + f;
+                    img.style.filter = (a > 0 ? 'url(#pb-sharp) ' : '') + 'brightness(' + Math.max(0, num(c.bright, 100)) / 100 + ') contrast(' + Math.max(0, num(c.contrast, 100)) / 100 + ') saturate(' + Math.max(0, num(c.sat, 100)) / 100 + ')';
                     if (src !== lastSrc) { lastSrc = src; img.src = src; }
                     const layout = () => {
                         const nw = img.naturalWidth, nh = img.naturalHeight; if (!nw || !nh) return;
@@ -4759,17 +4776,18 @@
                     };
                     img.onload = layout; if (img.complete) layout();
                 }
-                if (vis) { clearTimeout(hideT); if (!board.classList.contains('vis')) { board.classList.add('vis'); void board.offsetWidth; } if (!board.classList.contains('on')) requestAnimationFrame(() => board.classList.add('on')); }
-                else if (board.classList.contains('on')) { board.classList.remove('on'); clearTimeout(hideT); hideT = setTimeout(() => board.classList.remove('vis'), (parseFloat(board.style.getPropertyValue('--pb-d')) || 0.6) * 1000 + 100); }
-                const k = parseFloat(board.dataset.k) || 1;
-                board.style.setProperty('--pb-s', k);
+                if (vis) { clearTimeout(hideT); hideT = null; if (!board.classList.contains('vis')) { board.classList.add('vis'); void board.offsetWidth; } if (!board.classList.contains('on')) requestAnimationFrame(() => board.classList.add('on')); }
+                else if (board.classList.contains('on')) { board.classList.remove('on'); lastSig = ''; clearTimeout(hideT); hideT = setTimeout(() => board.classList.remove('vis'), (parseFloat(board.style.getPropertyValue('--pb-d')) || 0.6) * 1000 + 100); }
             }
             onValue(ref(db, 'padel/photoboard'), sn => { gcfg = sn.val(); }, () => { gcfg = null; });
             onValue(ref(db, 'padel/courts/_photoboard'), sn => { ccfg = sn.val(); }, () => { ccfg = null; });
-            setInterval(() => { try { render(); } catch (e) {} }, 300);
+            for (let n = 0; n < 12; n++) {
+                onValue(ref(db, 'padel/photoboard_img/s' + (n + 1)), sn => { I1[n] = sn.val() || ''; }, () => { I1[n] = ''; });
+                onValue(ref(db, 'padel/courts/_photoboard_img/s' + (n + 1)), sn => { I2[n] = sn.val() || ''; }, () => { I2[n] = ''; });
+            }
+            setInterval(() => { try { render(); } catch (e) {} }, 250);
             return {};
         })();
-
 
         // ===== 3D-ЕФЕКТ «У ПОВІТРІ» ДЛЯ ТАБЛО (padel/float3d) =====
         (function () {
