@@ -273,6 +273,12 @@
 
     <div id="tab-tournament" class="tab-content">
         <h2>🏆 Tournament</h2>
+        <div class="card" style="display:flex; flex-direction:column; gap:6px; border:2px solid #6d3df5;">
+            <div style="font-size:12px; font-weight:800; color:#a78bfa; text-transform:uppercase;">👫 Категорія турніру</div>
+            <div style="display:flex; gap:8px;"><button class="btn" id="cat-btn-men" onclick="setEditCat('men')">♂ MEN</button><button class="btn" id="cat-btn-women" onclick="setEditCat('women')">♀ WOMEN</button></div>
+            <div id="cat-note" style="font-size:10px; color:#9bd;"></div>
+            <div style="font-size:10px; color:#888;">Окремі дані для Men і Women: рейтинг, групи (A, B…), плей-офф, таблиця рахунків. Оберіть категорію → заповніть → «Показати». Можна показувати Men на одному корті, Women на іншому.</div>
+        </div>
         <div class="card" style="display:flex; flex-direction:column; gap:8px; border:2px solid #22c55e;">
             <div style="font-size:12px; font-weight:800; color:#4ade80; text-transform:uppercase;">💾 Збереження турніру (файл)</div>
             <div style="font-size:10px; color:#9a9;">У файл потрапляють: усі логотипи (спонсори, заставки, рейтинг, «хто грає»), назви команд, табло «Хто грає», рейтинг, play-off, групи та шаховий рахунок, масштаби/позиції/кольори, база гравців. Рахунок поточного матчу не зберігається.</div>
@@ -1477,6 +1483,10 @@
         }
         onValue(ref(db, 'padel/qr'), (snap) => { globalQr = snap.val(); if (globalQr && typeof state === 'object' && state) { mergeGlobalQr(); try { renderUI(); } catch (e) {} } });
 
+        // ===== КАТЕГОРІЯ ТУРНІРУ: MEN / WOMEN (окремі дані: рейтинг, групи, плей-офф, таблиця) =====
+        window.__EC = (() => { try { return localStorage.getItem('padelCat') === 'women' ? 'women' : 'men'; } catch (e) { return 'men'; } })();
+        const catP = n => (window.__EC === 'women' ? 'padel/w/' : 'padel/') + n;
+        const __G = { rk: {}, gr: {}, po: {} };
         // ===== СПІЛЬНИЙ РЕЙТИНГ ГРАВЦІВ/КОМАНД для всіх кортів: padel/ranking (список; показ, позиція, стиль — окремо для корту) =====
         let globalRanking = null, lastRkTeamsSig = null;
         function rkTeamsArr(t) { return Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : []); }
@@ -1493,9 +1503,9 @@
             const sig = rkSig(teams); if (!force && sig === lastRkTeamsSig) return;
             lastRkTeamsSig = sig;
             globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
-            set(ref(db, 'padel/ranking'), globalRanking);
+            set(ref(db, catP('ranking')), globalRanking);
         }
-        onValue(ref(db, 'padel/ranking'), (snap) => { globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (globalRanking && typeof state === 'object' && state) { mergeGlobalRanking(); try { renderUI(); } catch (e) {} } });
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/ranking' : 'padel/ranking'), (snap) => { __G.rk[cat] = snap.val(); if (cat !== window.__EC) return; globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk'); try { renderUI(); } catch (e) {} } }));
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
@@ -1530,15 +1540,45 @@
         function syncGroupsGlobal(force) {
             if (typeof state !== 'object' || !state) return;
             const o = grContent(), sig = JSON.stringify(o); if (!force && sig === lastGrSig) return;
-            lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, 'padel/groups'), o);
+            lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, catP('groups')), o);
         }
         function syncPlayoffGlobal(force) {
             if (typeof state !== 'object' || !state) return;
             const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
-            lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, 'padel/playoff'), o);
+            lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, catP('playoff')), o);
         }
-        onValue(ref(db, 'padel/groups'), (snap) => { globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (globalGroups && typeof state === 'object' && state) { mergeGlobalGroups(); try { renderUI(); } catch (e) {} } });
-        onValue(ref(db, 'padel/playoff'), (snap) => { globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (globalPlayoff && typeof state === 'object' && state) { mergeGlobalPlayoff(); try { renderUI(); } catch (e) {} } });
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/groups' : 'padel/groups'), (snap) => { __G.gr[cat] = snap.val(); if (cat !== window.__EC) return; globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/playoff' : 'padel/playoff'), (snap) => { __G.po[cat] = snap.val(); if (cat !== window.__EC) return; globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po'); try { renderUI(); } catch (e) {} } }));
+        // скидання вмісту (не стилю) при переході на порожню категорію
+        function catReset(k) {
+            try {
+                if (k === 'gr') { const cc = grEnsure(); cc.g = grDefault().g; syncGroupsGlobal(true); }
+                else if (k === 'po') { ['upper', 'lower'].forEach(key => { poEnsure(key).m = poDefault(key).m; }); syncPlayoffGlobal(true); }
+                else if (k === 'rk') { if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = []; saveRankingGlobal(true); }
+            } catch (e) { console.error(e); }
+        }
+        window.setEditCat = function(cat) {
+            cat = cat === 'women' ? 'women' : 'men'; window.__EC = cat;
+            try { localStorage.setItem('padelCat', cat); } catch (e) {}
+            globalGroups = __G.gr[cat] || null; globalPlayoff = __G.po[cat] || null; globalRanking = __G.rk[cat] || null;
+            if (typeof state === 'object' && state) {
+                if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr');
+                if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po');
+                if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk');
+            }
+            try { window.__scSwitch && window.__scSwitch(); } catch (e) {}
+            try { renderUI(); } catch (e) {}
+            try { catUiRefresh(); } catch (e) {}
+        };
+        function catUiRefresh() {
+            const m = document.getElementById('cat-btn-men'), w = document.getElementById('cat-btn-women'), t = document.getElementById('cat-note');
+            const on = 'background:#2563eb; color:#fff;', off = 'background:#222; color:#aaa;';
+            if (m) m.style.cssText = 'flex:1; padding:12px; font-weight:900; font-size:14px; ' + (window.__EC === 'men' ? on : off);
+            if (w) w.style.cssText = 'flex:1; padding:12px; font-weight:900; font-size:14px; ' + (window.__EC === 'women' ? 'background:#db2777; color:#fff;' : off);
+            if (t) t.innerText = 'Зараз редагуєте і показуєте: ' + (window.__EC === 'women' ? 'WOMEN' : 'MEN') + '. «Показати» на табло бере саме цю категорію.';
+            ['tab-tournament'].forEach(id => { const e = document.getElementById(id); if (e) e.style.borderLeft = '4px solid ' + (window.__EC === 'women' ? '#db2777' : '#2563eb'); });
+        }
+        setTimeout(() => { try { catUiRefresh(); } catch (e) {} }, 0);
 
         function updateModalCourtBadge() { const b = document.getElementById('modal-court-badge'); if (b) b.value = (typeof courtId !== 'undefined' ? courtId : '1'); }
         window.switchCourtFromModal = function(v) { const cs = document.getElementById('court-selector'); if (cs) cs.value = v; switchCourt(v); try { updateModalCourtBadge(); } catch (e) {} };
@@ -1547,12 +1587,12 @@
         // інакше інші корти показували б порожні табла.
         function bootGlobals() {
             if (typeof state !== 'object' || !state || String(courtId) !== '1') return;
-            if (gLoaded.gr && !globalGroups && state.groups) syncGroupsGlobal(true);
-            if (gLoaded.po && !globalPlayoff && state.playoff) syncPlayoffGlobal(true);
+            if (window.__EC === 'men' && gLoaded.gr && !globalGroups && state.groups) syncGroupsGlobal(true);
+            if (window.__EC === 'men' && gLoaded.po && !globalPlayoff && state.playoff) syncPlayoffGlobal(true);
             // перехід на спільний вигляд: якщо у глобальних даних ще немає стилю — публікуємо стиль корту №1
             if (gLoaded.gr && globalGroups && globalGroups.pattern === undefined && state.groups) syncGroupsGlobal(true);
             if (gLoaded.po && globalPlayoff && globalPlayoff.upper && globalPlayoff.upper.shape === undefined && state.playoff) syncPlayoffGlobal(true);
-            if (gLoaded.rk && !globalRanking && state.teamRanking && rkTeamsArr(state.teamRanking.teams).length) saveRankingGlobal(true);
+            if (window.__EC === 'men' && gLoaded.rk && !globalRanking && state.teamRanking && rkTeamsArr(state.teamRanking.teams).length) saveRankingGlobal(true);
             if (gLoaded.sp && !globalSponsors && Array.isArray(state.sponsorLogos) && state.sponsorLogos.some(Boolean)) saveSponsorsGlobal();
         }
 
@@ -2776,7 +2816,7 @@ function __clearTournamentName() {
         };
         window.poLogoClear = function(key) { poEnsure(key).logo = ''; poRefreshUI(); poSave(true); };
         window.poToggle = function(key) {
-            const c = poEnsure(key); c.show = !c.show;
+            const c = poEnsure(key); c.show = !c.show; if (c.show) c.cat = window.__EC;
             if (c.show) { poEnsure(key === 'upper' ? 'lower' : 'upper').show = false; if (state.groups) state.groups.show = false; }   // сітки на весь екран — показуємо одну
             poSave(true); poRefreshUI();
         };
@@ -2959,7 +2999,7 @@ function __clearTournamentName() {
         window.grReplay = function() { const c = grEnsure(); c.animTs = Date.now(); grSave(true); };
         window.poReplay = function(key) { const c = poEnsure(key); c.animTs = Date.now(); poSave(true); };
         window.grToggle = function() {
-            const c = grEnsure(); c.show = !c.show;
+            const c = grEnsure(); c.show = !c.show; if (c.show) c.cat = window.__EC;
             if (c.show) { poEnsure('upper').show = false; poEnsure('lower').show = false; }
             grSave(true); grRefreshUI(); poRefreshUI();
         };
@@ -3317,13 +3357,13 @@ function __clearTournamentName() {
         window.showAllCourts = function(kind, v) {
             v = !!v;
             const paths = [];   // [шлях усередині корту, значення]
-            if (kind === 'rk') paths.push(['teamRanking/show', v]);
+            if (kind === 'rk') { paths.push(['teamRanking/show', v]); if (v) paths.push(['teamRanking/cat', window.__EC]); }
             else if (kind === 'po-upper' || kind === 'po-lower') {
                 const other = kind === 'po-upper' ? 'lower' : 'upper';
-                paths.push(['playoff/' + kind.slice(3) + '/show', v]);
+                paths.push(['playoff/' + kind.slice(3) + '/show', v]); if (v) paths.push(['playoff/' + kind.slice(3) + '/cat', window.__EC]);
                 if (v) { paths.push(['playoff/' + other + '/show', false]); paths.push(['groups/show', false]); }   // сітки й групи — на весь екран, показуємо одне
             } else if (kind === 'gr') {
-                paths.push(['groups/show', v]);
+                paths.push(['groups/show', v]); if (v) paths.push(['groups/cat', window.__EC]);
                 if (v) { paths.push(['playoff/upper/show', false]); paths.push(['playoff/lower/show', false]); }
             } else if (kind === 'sp') paths.push(['showSponsorLogos', v]);
             else if (kind === 'ic') paths.push(['introCard/show', v]);   // шаблон вступного табла спільний (padel/introCard), показ — на кожному корті
@@ -4292,7 +4332,7 @@ function __clearTournamentName() {
                     if (!loaded) { setTimeout(run, 500); return; }
                     const data = JSON.parse(JSON.stringify(d));
                     const fail = (e) => { try { try { state.scCfg = data; } catch (e0) {} for (let i = 1; i <= 10; i++) set(ref(db, 'padel/courts/court_' + i + '/scCfg'), data); st(true, 'padel/scoretable відхилено — працює через корти'); } catch (e2) { st(false, (e && e.message) || 'помилка'); } };
-                    try { set(ref(db, 'padel/scoretable'), data).then(() => st(true), fail); } catch (e) { fail(e); }
+                    try { set(ref(db, catP('scoretable')), data).then(() => st(true), fail); } catch (e) { fail(e); }
                 };
                 dirty = Date.now(); clearTimeout(timer); if (now) run(); else timer = setTimeout(run, 300);
             }
@@ -4385,7 +4425,9 @@ function __clearTournamentName() {
             const apply = v => { if (card.contains(document.activeElement) || Date.now() - dirty < 3000) return; d = Object.assign({}, DEF, v); refresh(true); };
             const mirror = () => { const m = state && state.scCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
-            onValue(ref(db, 'padel/scoretable'), snap => { const v = snap.val(); loaded = true; prim = !!v; if (!v) { mirror(); return; } apply(v); }, () => { loaded = true; mirror(); });
+            const scV = { men: null, women: null };
+            ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/scoretable' : 'padel/scoretable'), snap => { const v = snap.val(); scV[cat] = v; if (cat !== window.__EC) return; loaded = true; prim = !!v; if (!v) { if (cat === 'women') { dirty = 0; d = Object.assign({}, DEF, scV.men || {}, { rows: [], show: false }); refresh(true); } else mirror(); return; } apply(v); }, () => { loaded = true; if (cat === 'men') mirror(); }));
+            window.__scSwitch = () => { dirty = 0; const v = scV[window.__EC]; if (v) d = Object.assign({}, DEF, v); else d = Object.assign({}, DEF, scV.men || {}, { rows: [], show: false }); loaded = true; try { refresh(true); } catch (e) {} };
             setTimeout(() => { loaded = true; }, 3000);
             window.__scParse = parseTable;
         })();
@@ -6683,7 +6725,7 @@ const h2 = tab.querySelector('h2'); if (h2) { const sw = document.createElement(
             reader.readAsDataURL(file);
         };
         window.rkClearLogo = function(key) { rkEnsure()[key] = ''; const st = document.getElementById('rk-st-' + key); if (st) st.innerText = ''; rkSave(true); };
-        window.rkToggle = function() { const rk = rkEnsure(); rk.show = !rk.show; rkSave(true); };
+        window.rkToggle = function() { const rk = rkEnsure(); rk.show = !rk.show; if (rk.show) rk.cat = window.__EC; rkSave(true); };
         function rkRebuildRows() {
             const box = document.getElementById('rk-rows'); if (!box) return;
             const teams = (state.teamRanking && Array.isArray(state.teamRanking.teams)) ? state.teamRanking.teams : [];
