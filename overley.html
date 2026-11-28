@@ -4292,12 +4292,12 @@
         }, 1000);
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
-        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalRkW = null, __globalGrW = null, __globalPoW = null, __globalIc = null, __lastSnap = null;
+        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalRkW = null, __mirRk = null, __mirGr = null, __mirPo = null, __globalGrW = null, __globalPoW = null, __globalIc = null, __lastSnap = null;
         const __BARS_KEYS = ['tickerSlides', 'tickerSlideSec', 'tickerSlideAnim', 'tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
-            const __rkG = (s.teamRanking && s.teamRanking.cat === 'women') ? (__globalRkW || { teams: [] }) : __globalRk;
+            const __rkG = (s.teamRanking && s.teamRanking.cat === 'women') ? (__globalRkW || { teams: [] }) : (__globalRk || __mirRk);
             if (__rkG) { s = Object.assign({}, s); const t = __rkG.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
             if (__globalQr) { s = Object.assign({}, s); if (__globalQr.show !== undefined) s.showQrCode = !!__globalQr.show; if (__globalQr.url !== undefined) s.qrCodeUrl = __globalQr.url; if (__globalQr.desc !== undefined) s.qrCodeDescription = __globalQr.desc; }
             if (__globalIc && !/court_1$/.test(String(databasePath)) && !(s.introCard && s.introCard.own)) {
@@ -4306,17 +4306,18 @@
                 ic.show = !!(s.introCard && s.introCard.show); s.introCard = ic;
             }
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-            const __grG = (s.groups && s.groups.cat === 'women') ? (__globalGrW || { g: [] }) : __globalGr;
+            const __grG = (s.groups && s.groups.cat === 'women') ? (__globalGrW || { g: [] }) : (__globalGr || __mirGr);
             if (__grG) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
                 ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo', 'bgColor', 'cardColor', 'headColor', 'accent', 'textColor', 'numColor', 'titleColor', 'bgOpacity', 'font', 'fontHead', 'pattern', 'headStyle', 'cardStyle', 'line', 'sub', 'pc', 'pc2', 'theme', 'bgImgFit', 'bgDim', 'bgLogoSize', 'bgLogoOpacity', 'bgLogoPos'].forEach(k => { if (__grG[k] !== undefined) g[k] = __grG[k]; });
                 if (__grG.g !== undefined) g.g = __arr(__grG.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
                 s.groups = g;
             }
-            if (__globalPo || __globalPoW) {
+            const __poM = __globalPo || __mirPo;
+            if (__poM || __globalPoW) {
                 s = Object.assign({}, s); const p = Object.assign({}, s.playoff || {});
                 ['upper', 'lower'].forEach(key => {
-                    const __w = p[key] && p[key].cat === 'women', __src = __w ? __globalPoW : __globalPo; let gp = __src && __src[key]; if (__w && !gp) gp = { m: {} }; if (!gp || typeof gp !== 'object') return;
+                    const __w = p[key] && p[key].cat === 'women', __src = __w ? __globalPoW : __poM; let gp = __src && __src[key]; if (__w && !gp) gp = { m: {} }; if (!gp || typeof gp !== 'object') return;
                     const c = Object.assign({}, p[key] || {});
                     ['title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines', 'textSize', 'nameSize', 'nameAlign'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
                     if (gp.labels) c.labels = Object.assign({}, c.labels || {}, gp.labels);
@@ -6199,6 +6200,9 @@
             onValue(ref(db, 'padel/introCard'), (snap) => { __globalIc = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/groups'), (snap) => { __globalGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/playoff'), (snap) => { __globalPo = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/courts/_m_ranking'), (snap) => { __mirRk = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/courts/_m_groups'), (snap) => { __mirGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/courts/_m_playoff'), (snap) => { __mirPo = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/courts/_w_ranking'), (snap) => { __globalRkW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/courts/_w_groups'), (snap) => { __globalGrW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/courts/_w_playoff'), (snap) => { __globalPoW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
