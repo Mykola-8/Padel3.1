@@ -1487,6 +1487,9 @@
         window.__EC = (() => { try { return localStorage.getItem('padelCat') === 'women' ? 'women' : 'men'; } catch (e) { return 'men'; } })();
         const catP = n => (window.__EC === 'women' ? 'padel/courts/_w_' : 'padel/') + n;
         const __G = { rk: {}, gr: {}, po: {} };
+        // маркер «чий вміст зараз у state» (men/women) — захист від змішування списків між категоріями й пристроями
+        const ccGet = k => ((state && state.__cc && state.__cc[k]) || 'men');
+        const ccSet = (k, v) => { if (!state) return; if (!state.__cc || typeof state.__cc !== 'object') state.__cc = {}; state.__cc[k] = v; };
         // ===== СПІЛЬНИЙ РЕЙТИНГ ГРАВЦІВ/КОМАНД для всіх кортів: padel/ranking (список; показ, позиція, стиль — окремо для корту) =====
         let globalRanking = null, lastRkTeamsSig = null;
         function rkTeamsArr(t) { return Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : []); }
@@ -1494,12 +1497,13 @@
             if (typeof state !== 'object' || !state) return;
             if (globalRanking) {
                 if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT));
-                state.teamRanking.teams = rkTeamsArr(globalRanking.teams).filter(t => t && typeof t === 'object');
+                state.teamRanking.teams = rkTeamsArr(globalRanking.teams).filter(t => t && typeof t === 'object'); ccSet('rk', window.__EC);
             }
             lastRkTeamsSig = rkSig(state.teamRanking ? rkTeamsArr(state.teamRanking.teams) : []);
         }
         function saveRankingGlobal(force) {
             const teams = state.teamRanking ? rkTeamsArr(state.teamRanking.teams) : [];
+            if (ccGet('rk') !== window.__EC) return;
             const sig = rkSig(teams); if (!force && sig === lastRkTeamsSig) return;
             lastRkTeamsSig = sig;
             globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
@@ -1529,21 +1533,23 @@
         function poContent() { const o = {}; ['upper', 'lower'].forEach(key => { const c = poEnsure(key), x = {}; PO_GLOBAL_KEYS.forEach(k => { x[k] = JSON.parse(JSON.stringify(c[k])); }); o[key] = x; }); return o; }
         function mergeGlobalGroups() {
             if (typeof state !== 'object' || !state) return;
-            if (globalGroups) { const c = grEnsure(); GR_GLOBAL_KEYS.forEach(k => { if (globalGroups[k] !== undefined) c[k] = JSON.parse(JSON.stringify(globalGroups[k])); }); grEnsure(); }
+            if (globalGroups) { const c = grEnsure(); GR_GLOBAL_KEYS.forEach(k => { if (globalGroups[k] !== undefined) c[k] = JSON.parse(JSON.stringify(globalGroups[k])); }); grEnsure(); ccSet('gr', window.__EC); }
             lastGrSig = JSON.stringify(state.groups ? grContent() : null);
         }
         function mergeGlobalPlayoff() {
             if (typeof state !== 'object' || !state) return;
-            if (globalPlayoff) ['upper', 'lower'].forEach(key => { const g = globalPlayoff[key]; if (!g || typeof g !== 'object') return; const c = poEnsure(key); PO_GLOBAL_KEYS.forEach(k => { if (g[k] !== undefined) c[k] = JSON.parse(JSON.stringify(g[k])); }); poEnsure(key); });
+            if (globalPlayoff) ['upper', 'lower'].forEach(key => { const g = globalPlayoff[key]; if (!g || typeof g !== 'object') return; const c = poEnsure(key); PO_GLOBAL_KEYS.forEach(k => { if (g[k] !== undefined) c[k] = JSON.parse(JSON.stringify(g[k])); }); poEnsure(key); }); if (globalPlayoff) ccSet('po', window.__EC);
             lastPoSig = JSON.stringify(state.playoff ? poContent() : null);
         }
         function syncGroupsGlobal(force) {
             if (typeof state !== 'object' || !state) return;
+            if (ccGet('gr') !== window.__EC) return;
             const o = grContent(), sig = JSON.stringify(o); if (!force && sig === lastGrSig) return;
             lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, catP('groups')), o);
         }
         function syncPlayoffGlobal(force) {
             if (typeof state !== 'object' || !state) return;
+            if (ccGet('po') !== window.__EC) return;
             const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
             lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, catP('playoff')), o);
         }
@@ -1552,19 +1558,20 @@
         // скидання вмісту (не стилю) при переході на порожню категорію
         function catReset(k) {
             try {
-                if (k === 'gr') { const cc = grEnsure(); cc.g = grDefault().g; syncGroupsGlobal(true); }
-                else if (k === 'po') { ['upper', 'lower'].forEach(key => { poEnsure(key).m = poDefault(key).m; }); syncPlayoffGlobal(true); }
-                else if (k === 'rk') { if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = []; saveRankingGlobal(true); }
+                if (k === 'gr') { const cc = grEnsure(); cc.g = grDefault().g; ccSet('gr', window.__EC); syncGroupsGlobal(true); }
+                else if (k === 'po') { ['upper', 'lower'].forEach(key => { poEnsure(key).m = poDefault(key).m; }); ccSet('po', window.__EC); syncPlayoffGlobal(true); }
+                else if (k === 'rk') { if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = []; ccSet('rk', window.__EC); saveRankingGlobal(true); }
             } catch (e) { console.error(e); }
         }
         window.setEditCat = function(cat) {
+            try { rkSave(true); grSave(true); poSave(true); } catch (e) {}   // дозберегти незбережене в ПОТОЧНУ категорію до перемикання
             cat = cat === 'women' ? 'women' : 'men'; window.__EC = cat;
             try { localStorage.setItem('padelCat', cat); } catch (e) {}
             globalGroups = __G.gr[cat] || null; globalPlayoff = __G.po[cat] || null; globalRanking = __G.rk[cat] || null;
             if (typeof state === 'object' && state) {
-                if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr');
-                if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po');
-                if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk');
+                if (globalGroups) mergeGlobalGroups(); else if (ccGet('gr') !== cat) catReset('gr');
+                if (globalPlayoff) mergeGlobalPlayoff(); else if (ccGet('po') !== cat) catReset('po');
+                if (globalRanking) mergeGlobalRanking(); else if (ccGet('rk') !== cat) catReset('rk');
             }
             // табло, що зараз в ефірі на вибраних кортах, одразу переходять на вибрану категорію (кожна має свій список)
             try {
@@ -1614,7 +1621,7 @@
             matchRef = ref(db, databasePath); stateHistory = []; try { window.__csConn && window.__csConn(); } catch (e) {}
             if (unsubscribeCurrentOnValue) unsubscribeCurrentOnValue();
             unsubscribeCurrentOnValue = onValue(matchRef, (snapshot) => {
-                const data = snapshot.val(); if (data) { state = data; try { window.__wlPub && window.__wlPub(); } catch (e) {} mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__csOnState && window.__csOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
+                const data = snapshot.val(); if (data) { state = data; try { window.__wlPub && window.__wlPub(); } catch (e) {} mergeGlobalSponsors(); mergeGlobalBars(); mergeGlobalQr(); mergeGlobalRanking(); mergeGlobalGroups(); mergeGlobalPlayoff(); try { [['rk', globalRanking], ['gr', globalGroups], ['po', globalPlayoff]].forEach(([k, g]) => { if (gLoaded[k] && !g && ccGet(k) !== window.__EC) catReset(k); }); } catch (e) {} mergeGlobalIntro(); renderUI(); try { bootGlobals(); } catch (e) {} try { window.__accOnState && window.__accOnState(); } catch (e) {} try { window.__csOnState && window.__csOnState(); } catch (e) {} try { window.__mirrorSync && window.__mirrorSync(); } catch (e) {} } else { if (isHelper) return; resetMatchWithoutConfirm(); }
             });
         }
         window.switchCourt = function(v) {
