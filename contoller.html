@@ -1507,9 +1507,9 @@
             const sig = rkSig(teams); if (!force && sig === lastRkTeamsSig) return;
             lastRkTeamsSig = sig;
             globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
-            set(ref(db, catP('ranking')), globalRanking);
+            set(ref(db, catP('ranking')), globalRanking); if (window.__EC === 'men') { try { set(ref(db, 'padel/courts/_m_ranking'), globalRanking); } catch (e) {} }
         }
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_ranking' : 'padel/ranking'), (snap) => { __G.rk[cat] = snap.val(); if (cat !== window.__EC) return; globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_ranking' : 'padel/ranking'), (snap) => { __G.rk[cat] = snap.val(); if (cat !== window.__EC) return; globalRanking = snap.val() || (cat === 'men' ? __G.rk.mm : null) || null; gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk'); try { renderUI(); } catch (e) {} } }));
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
@@ -1545,16 +1545,16 @@
             if (typeof state !== 'object' || !state) return;
             if (ccGet('gr') !== window.__EC) return;
             const o = grContent(), sig = JSON.stringify(o); if (!force && sig === lastGrSig) return;
-            lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, catP('groups')), o);
+            lastGrSig = sig; o.ts = Date.now(); globalGroups = o; set(ref(db, catP('groups')), o); if (window.__EC === 'men') { try { set(ref(db, 'padel/courts/_m_groups'), o); } catch (e) {} }
         }
         function syncPlayoffGlobal(force) {
             if (typeof state !== 'object' || !state) return;
             if (ccGet('po') !== window.__EC) return;
             const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
-            lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, catP('playoff')), o);
+            lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, catP('playoff')), o); if (window.__EC === 'men') { try { set(ref(db, 'padel/courts/_m_playoff'), o); } catch (e) {} }
         }
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_groups' : 'padel/groups'), (snap) => { __G.gr[cat] = snap.val(); if (cat !== window.__EC) return; globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr'); try { renderUI(); } catch (e) {} } }));
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_playoff' : 'padel/playoff'), (snap) => { __G.po[cat] = snap.val(); if (cat !== window.__EC) return; globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_groups' : 'padel/groups'), (snap) => { __G.gr[cat] = snap.val(); if (cat !== window.__EC) return; globalGroups = snap.val() || (cat === 'men' ? __G.gr.mm : null) || null; gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_playoff' : 'padel/playoff'), (snap) => { __G.po[cat] = snap.val(); if (cat !== window.__EC) return; globalPlayoff = snap.val() || (cat === 'men' ? __G.po.mm : null) || null; gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po'); try { renderUI(); } catch (e) {} } }));
         // скидання вмісту (не стилю) при переході на порожню категорію
         function catReset(k) {
             try {
@@ -1563,11 +1563,23 @@
                 else if (k === 'rk') { if (!state.teamRanking || typeof state.teamRanking !== 'object') state.teamRanking = JSON.parse(JSON.stringify(RK_DEFAULT)); state.teamRanking.teams = []; ccSet('rk', window.__EC); saveRankingGlobal(true); }
             } catch (e) { console.error(e); }
         }
+        [['rk', 'ranking'], ['gr', 'groups'], ['po', 'playoff']].forEach(([k, n]) => onValue(ref(db, 'padel/courts/_m_' + n), (snap) => {
+            __G[k].mm = snap.val();
+            if (window.__EC !== 'men' || __G[k].men || !snap.val() || typeof state !== 'object' || !state) return;
+            if (k === 'rk') { globalRanking = snap.val(); mergeGlobalRanking(); } else if (k === 'gr') { globalGroups = snap.val(); mergeGlobalGroups(); } else { globalPlayoff = snap.val(); mergeGlobalPlayoff(); }
+            try { renderUI(); } catch (e) {}
+        }));
         window.setEditCat = function(cat) {
+            try {   // запам'ятати вміст поточної категорії, навіть якщо база його не прийняла
+                const e0 = window.__EC;
+                if (ccGet('rk') === e0 && state.teamRanking && !__G.rk[e0] && !(e0 === 'men' && __G.rk.mm)) __G.rk[e0] = { teams: JSON.parse(JSON.stringify(state.teamRanking.teams || [])) };
+                if (ccGet('gr') === e0 && state.groups && !__G.gr[e0] && !(e0 === 'men' && __G.gr.mm)) __G.gr[e0] = JSON.parse(JSON.stringify(grContent()));
+                if (ccGet('po') === e0 && state.playoff && !__G.po[e0] && !(e0 === 'men' && __G.po.mm)) __G.po[e0] = JSON.parse(JSON.stringify(poContent()));
+            } catch (e) {}
             try { rkSave(true); grSave(true); poSave(true); } catch (e) {}   // дозберегти незбережене в ПОТОЧНУ категорію до перемикання
             cat = cat === 'women' ? 'women' : 'men'; window.__EC = cat;
             try { localStorage.setItem('padelCat', cat); } catch (e) {}
-            globalGroups = __G.gr[cat] || null; globalPlayoff = __G.po[cat] || null; globalRanking = __G.rk[cat] || null;
+            globalGroups = __G.gr[cat] || (cat === 'men' ? __G.gr.mm : null) || null; globalPlayoff = __G.po[cat] || (cat === 'men' ? __G.po.mm : null) || null; globalRanking = __G.rk[cat] || (cat === 'men' ? __G.rk.mm : null) || null;
             if (typeof state === 'object' && state) {
                 if (globalGroups) mergeGlobalGroups(); else if (ccGet('gr') !== cat) catReset('gr');
                 if (globalPlayoff) mergeGlobalPlayoff(); else if (ccGet('po') !== cat) catReset('po');
