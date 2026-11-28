@@ -1566,6 +1566,15 @@
                 if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po');
                 if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk');
             }
+            // табло, що зараз в ефірі на вибраних кортах, одразу переходять на вибрану категорію (кожна має свій список)
+            try {
+                if (state.groups) state.groups.cat = cat;
+                if (state.teamRanking) state.teamRanking.cat = cat;
+                if (state.playoff) ['upper', 'lower'].forEach(k => { if (state.playoff[k]) state.playoff[k].cat = cat; });
+                [['gr', ['groups/cat']], ['po-upper', ['playoff/upper/cat']], ['po-lower', ['playoff/lower/cat']], ['rk', ['teamRanking/cat']]].forEach(([k, ps]) => {
+                    (window.__msList ? window.__msList(k) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).forEach(i => ps.forEach(p => set(ref(db, 'padel/courts/court_' + i + '/' + p), cat)));
+                });
+            } catch (e) { console.error(e); }
             try { window.__scSwitch && window.__scSwitch(); } catch (e) {}
             try { renderUI(); } catch (e) {}
             try { catUiRefresh(); } catch (e) {}
@@ -1575,7 +1584,7 @@
             const on = 'background:#2563eb; color:#fff;', off = 'background:#222; color:#aaa;';
             if (m) m.style.cssText = 'flex:1; padding:12px; font-weight:900; font-size:14px; ' + (window.__EC === 'men' ? on : off);
             if (w) w.style.cssText = 'flex:1; padding:12px; font-weight:900; font-size:14px; ' + (window.__EC === 'women' ? 'background:#db2777; color:#fff;' : off);
-            if (t) t.innerText = 'Зараз редагуєте і показуєте: ' + (window.__EC === 'women' ? 'WOMEN' : 'MEN') + '. «Показати» на табло бере саме цю категорію.';
+            if (t) t.innerText = 'Зараз редагуєте і показуєте: ' + (window.__EC === 'women' ? 'WOMEN' : 'MEN') + '. Табло, що в ефірі на вибраних кортах, одразу перемикається на цю категорію (кожна зі своїм списком).';
             ['tab-tournament'].forEach(id => { const e = document.getElementById(id); if (e) e.style.borderLeft = '4px solid ' + (window.__EC === 'women' ? '#db2777' : '#2563eb'); });
         }
         setTimeout(() => { try { catUiRefresh(); } catch (e) {} }, 0);
