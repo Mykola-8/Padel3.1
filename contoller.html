@@ -1485,7 +1485,7 @@
 
         // ===== КАТЕГОРІЯ ТУРНІРУ: MEN / WOMEN (окремі дані: рейтинг, групи, плей-офф, таблиця) =====
         window.__EC = (() => { try { return localStorage.getItem('padelCat') === 'women' ? 'women' : 'men'; } catch (e) { return 'men'; } })();
-        const catP = n => (window.__EC === 'women' ? 'padel/w/' : 'padel/') + n;
+        const catP = n => (window.__EC === 'women' ? 'padel/courts/_w_' : 'padel/') + n;
         const __G = { rk: {}, gr: {}, po: {} };
         // ===== СПІЛЬНИЙ РЕЙТИНГ ГРАВЦІВ/КОМАНД для всіх кортів: padel/ranking (список; показ, позиція, стиль — окремо для корту) =====
         let globalRanking = null, lastRkTeamsSig = null;
@@ -1505,7 +1505,7 @@
             globalRanking = { teams: JSON.parse(JSON.stringify(teams)), n: teams.length, ts: Date.now() };
             set(ref(db, catP('ranking')), globalRanking);
         }
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/ranking' : 'padel/ranking'), (snap) => { __G.rk[cat] = snap.val(); if (cat !== window.__EC) return; globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_ranking' : 'padel/ranking'), (snap) => { __G.rk[cat] = snap.val(); if (cat !== window.__EC) return; globalRanking = snap.val(); gLoaded.rk = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalRanking) mergeGlobalRanking(); else if (cat === 'women') catReset('rk'); try { renderUI(); } catch (e) {} } }));
 
         function saveSponsorsGlobal() {
             ensureSponsorLogosArray();
@@ -1547,8 +1547,8 @@
             const o = poContent(), sig = JSON.stringify(o); if (!force && sig === lastPoSig) return;
             lastPoSig = sig; o.ts = Date.now(); globalPlayoff = o; set(ref(db, catP('playoff')), o);
         }
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/groups' : 'padel/groups'), (snap) => { __G.gr[cat] = snap.val(); if (cat !== window.__EC) return; globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr'); try { renderUI(); } catch (e) {} } }));
-        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/playoff' : 'padel/playoff'), (snap) => { __G.po[cat] = snap.val(); if (cat !== window.__EC) return; globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_groups' : 'padel/groups'), (snap) => { __G.gr[cat] = snap.val(); if (cat !== window.__EC) return; globalGroups = snap.val(); gLoaded.gr = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalGroups) mergeGlobalGroups(); else if (cat === 'women') catReset('gr'); try { renderUI(); } catch (e) {} } }));
+        ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_playoff' : 'padel/playoff'), (snap) => { __G.po[cat] = snap.val(); if (cat !== window.__EC) return; globalPlayoff = snap.val(); gLoaded.po = true; try { bootGlobals(); } catch (e) {} if (typeof state === 'object' && state) { if (globalPlayoff) mergeGlobalPlayoff(); else if (cat === 'women') catReset('po'); try { renderUI(); } catch (e) {} } }));
         // скидання вмісту (не стилю) при переході на порожню категорію
         function catReset(k) {
             try {
@@ -4426,7 +4426,7 @@ function __clearTournamentName() {
             const mirror = () => { const m = state && state.scCfg; if (!m || prim || !loaded || JSON.stringify(m) === JSON.stringify(d)) return; apply(m); };
             { const pm = window.__mirrorSync; window.__mirrorSync = () => { if (pm) pm(); try { mirror(); } catch (e) {} }; }
             const scV = { men: null, women: null };
-            ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/w/scoretable' : 'padel/scoretable'), snap => { const v = snap.val(); scV[cat] = v; if (cat !== window.__EC) return; loaded = true; prim = !!v; if (!v) { if (cat === 'women') { dirty = 0; d = Object.assign({}, DEF, scV.men || {}, { rows: [], show: false }); refresh(true); } else mirror(); return; } apply(v); }, () => { loaded = true; if (cat === 'men') mirror(); }));
+            ['men', 'women'].forEach(cat => onValue(ref(db, cat === 'women' ? 'padel/courts/_w_scoretable' : 'padel/scoretable'), snap => { const v = snap.val(); scV[cat] = v; if (cat !== window.__EC) return; loaded = true; prim = !!v; if (!v) { if (cat === 'women') { dirty = 0; d = Object.assign({}, DEF, scV.men || {}, { rows: [], show: false }); refresh(true); } else mirror(); return; } apply(v); }, () => { loaded = true; if (cat === 'men') mirror(); }));
             window.__scSwitch = () => { dirty = 0; const v = scV[window.__EC]; if (v) d = Object.assign({}, DEF, v); else d = Object.assign({}, DEF, scV.men || {}, { rows: [], show: false }); loaded = true; try { refresh(true); } catch (e) {} };
             setTimeout(() => { loaded = true; }, 3000);
             window.__scParse = parseTable;
