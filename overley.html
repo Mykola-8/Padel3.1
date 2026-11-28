@@ -1593,6 +1593,12 @@
         #match-intro-wrap[data-mi-layout=wc] .m2-plate.on { display: block; }
         #match-intro-wrap[data-mi-layout=wc] .m2-sub.on { display: block; }
         /* варіант 3 («duel»): прямокутна панель із золотими краями, імена стовпчиком, великий VS, прапори на фото */
+        /* теми «Хто грає» діють і на варіанти 2 та 3 (коли тема не «Класична») */
+        #match-intro-wrap[data-mi-layout][data-mi-theme] { --m2-bg: linear-gradient(160deg, var(--mib-a), var(--mib-b)); --m2-acc: var(--mi-acc); }
+        #match-intro-wrap[data-mi-layout][data-mi-theme] .m2-panel { color: var(--mi-tx); }
+        #match-intro-wrap[data-mi-layout][data-mi-theme] .m2-vs i { background: var(--mi-acc); }
+        #match-intro-wrap[data-mi-layout][data-mi-theme] .m2-sub { color: var(--mi-sub); opacity: 1; }
+        #match-intro-wrap[data-mi-layout][data-mi-theme] .m2-plate { background: linear-gradient(180deg, var(--mih-a), var(--mih-b)); color: var(--mih-t); }
         #match-intro-wrap[data-mi-layout=duel] .m2-panel { width: 32%; border-left: 4px solid var(--m2-acc, #ffd400); border-right: 4px solid var(--m2-acc, #ffd400); }
         #match-intro-wrap[data-mi-layout=duel] .m2-top { display: none; }
         #match-intro-wrap[data-mi-layout=duel] .m2-team { justify-content: center; }
@@ -3637,7 +3643,7 @@
             if (alt) wrap.setAttribute('data-mi-layout', LAY); else wrap.removeAttribute('data-mi-layout');
             wrap.setAttribute('data-mi-round', g(mi.photoShape, 'rect') === 'round' ? '1' : '0');
             wrap.style.setProperty('--mi-pr', g(mi.photoShape, 'rect') === 'round' ? '50%' : '1cqw');
-            wrap.style.setProperty('--m2-bg', g(mi.m2bg, '#0b1a45')); wrap.style.setProperty('--m2-acc', g(mi.m2acc, '#ffd400'));
+            { const tv0 = g(mi.theme, 'classic'), tn0 = (tv0 === 'auto') ? (st.boardTheme || 'graydark') : tv0; if (tn0 && tn0 !== 'classic' && tn0 !== 'default') { wrap.style.removeProperty('--m2-bg'); wrap.style.removeProperty('--m2-acc'); } else { wrap.style.setProperty('--m2-bg', g(mi.m2bg, '#0b1a45')); wrap.style.setProperty('--m2-acc', g(mi.m2acc, '#ffd400')); } }
             wrap.style.left = g(alt ? mi.x2 : mi.x, 50) + '%';
             wrap.style.top = g(alt ? mi.y2 : mi.y, alt ? 50 : 82) + '%';
             wrap.style.transform = `translate(-50%, -50%) scale(${g(alt ? mi.scale2 : mi.scale, alt ? 80 : 100) / 100})`;
