@@ -586,6 +586,56 @@
         .ic-wrap[data-lay=full] .ic-panel { left: 0; top: 0; width: 1920px; height: 1080px; margin: 0 !important; zoom: 1 !important; box-shadow: none; display: block; overflow: hidden; }
         .ic-wrap[data-lay=full] .ic-panel::before { background: linear-gradient(135deg, var(--ic-bg, #0c1a3d), var(--ic-bg2, #14295a)); }
         .ic-wrap[data-lay=full] .ic-panel::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(118deg, transparent 63%, rgba(255,255,255,.045) 63%, rgba(255,255,255,.045) 80%, transparent 80%), linear-gradient(118deg, transparent 80%, rgba(255,255,255,.03) 80%); opacity: var(--ic-op, 1); }
+
+        /* --- Вступне табло (повний екран): ТЕМИ ФОНУ, додаткові тексти, анімації літер і фону --- */
+        .ic-fs .fs-bg { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(135deg, var(--fs-a, #0c1a3d), var(--fs-b, #14295a)); }
+        .ic-fs .fs-bg s { position: absolute; inset: 0; display: block; text-decoration: none; }
+        .ic-wrap[data-fs-theme=classic] .fs-bg { background: none; }
+        .ic-wrap[data-fs-theme=neon] .fs-bg .l1 { inset: auto -25% -8% -25%; height: 58%; transform: perspective(520px) rotateX(62deg); transform-origin: 50% 100%; background: repeating-linear-gradient(90deg, var(--fs-c) 0 2px, transparent 2px 96px), repeating-linear-gradient(0deg, var(--fs-c) 0 2px, transparent 2px 72px); opacity: .5; }
+        .ic-wrap[data-fs-theme=neon] .fs-bg .l2 { background: radial-gradient(ellipse at 50% 100%, var(--fs-c), transparent 62%); opacity: .35; }
+        .ic-wrap[data-fs-theme=gold] .fs-bg .l1 { background: repeating-linear-gradient(115deg, var(--fs-c) 0 1px, transparent 1px 40px); opacity: .14; }
+        .ic-wrap[data-fs-theme=gold] .fs-bg .l2 { background: radial-gradient(circle at 50% 45%, var(--fs-c), transparent 56%); opacity: .3; }
+        .ic-wrap[data-fs-theme=court] .fs-bg .l1 { background: linear-gradient(var(--fs-c), var(--fs-c)) 50% 0 / 6px 100% no-repeat, linear-gradient(var(--fs-c), var(--fs-c)) 0 24% / 100% 6px no-repeat, linear-gradient(var(--fs-c), var(--fs-c)) 0 76% / 100% 6px no-repeat; opacity: .22; }
+        .ic-wrap[data-fs-theme=court] .fs-bg .l2 { inset: 70px 150px; border: 6px solid var(--fs-c); opacity: .26; }
+        .ic-wrap[data-fs-theme=sunset] .fs-bg .l1 { background: radial-gradient(circle at 50% 92%, var(--fs-c) 0 20%, transparent 20.4%); opacity: .85; }
+        .ic-wrap[data-fs-theme=sunset] .fs-bg .l2 { top: 58%; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 7px, transparent 7px 28px); }
+        .ic-wrap[data-fs-theme=ice] .fs-bg .l1 { background: radial-gradient(circle at 18% 22%, #fff, transparent 36%), radial-gradient(circle at 82% 72%, #fff, transparent 42%); opacity: .85; }
+        .ic-wrap[data-fs-theme=ice] .fs-bg .l2 { background: repeating-linear-gradient(60deg, var(--fs-c) 0 1px, transparent 1px 64px); opacity: .08; }
+        .ic-wrap[data-fs-theme=carbon] .fs-bg .l1 { background: repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 4px, transparent 4px 8px), repeating-linear-gradient(-45deg, rgba(0,0,0,.3) 0 4px, transparent 4px 8px); }
+        .ic-wrap[data-fs-theme=carbon] .fs-bg .l2 { background: linear-gradient(115deg, transparent 58%, var(--fs-c) 58% 62%, transparent 62% 66%, var(--fs-c) 66% 67.2%, transparent 67.2%); opacity: .92; }
+        .ic-wrap[data-fs-theme=stadium] .fs-bg .l1 { inset: -30%; background: conic-gradient(from 165deg at 22% 0%, transparent 0 6deg, var(--fs-c) 17deg, transparent 28deg), conic-gradient(from 195deg at 78% 0%, transparent 0 6deg, var(--fs-c) 17deg, transparent 28deg); opacity: .2; }
+        .ic-wrap[data-fs-theme=stadium] .fs-bg .l2 { background: radial-gradient(ellipse at 50% 110%, var(--fs-c), transparent 55%); opacity: .22; }
+        .ic-wrap[data-fs-theme=aurora] .fs-bg .l1 { inset: -20%; background: radial-gradient(40% 50% at 25% 30%, var(--fs-c), transparent), radial-gradient(40% 50% at 75% 60%, var(--fs-b), transparent), radial-gradient(35% 45% at 55% 88%, var(--fs-c), transparent); filter: blur(50px); opacity: .6; }
+        .ic-fs .fs-bg i { position: absolute; bottom: -30px; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: var(--fs-c, #fff); opacity: .5; animation: fsBgUp calc(var(--d) / var(--fs-sp, 1)) linear var(--dl) infinite; }
+        @keyframes fsBgUp { from { transform: translateY(0); opacity: 0; } 10% { opacity: .55; } to { transform: translateY(-1180px); opacity: 0; } }
+        @keyframes fsBgDrift { from { translate: -34px 8px; scale: 1.1; } to { translate: 34px -22px; scale: 1.1; } }
+        @keyframes fsBgPulse { 0%, 100% { opacity: .12; } 50% { opacity: .55; } }
+        @keyframes fsBgSweep { from { left: -30%; } to { left: 130%; } }
+        @keyframes fsBgSpin { to { rotate: 360deg; } }
+        @keyframes fsBgZoom { from { scale: 1; } to { scale: 1.18; } }
+        .ic-wrap[data-fs-bg=drift] .fs-bg .l1 { animation: fsBgDrift calc(18s / var(--fs-sp, 1)) ease-in-out infinite alternate; }
+        .ic-wrap[data-fs-bg=pulse] .fs-bg .l2 { animation: fsBgPulse calc(4s / var(--fs-sp, 1)) ease-in-out infinite; }
+        .ic-wrap[data-fs-bg=sweep] .fs-bg::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 20%; left: -30%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); transform: skewX(-18deg); animation: fsBgSweep calc(5s / var(--fs-sp, 1)) linear infinite; }
+        .ic-wrap[data-fs-bg=rays] .fs-bg .l1 { animation: fsBgSpin calc(40s / var(--fs-sp, 1)) linear infinite; }
+        .ic-wrap[data-fs-bg=zoom] .fs-bg .l1 { animation: fsBgZoom calc(16s / var(--fs-sp, 1)) ease-in-out infinite alternate; }
+        .ic-fs .fs-ta, .ic-fs .fs-tb { font-weight: 800; text-transform: uppercase; text-align: center; line-height: 1.1; font-style: italic; }
+        .ic-wrap[data-lay=full].visible:not([data-fs-anim=letters]):not([data-fs-anim=none]) .fs-ta { animation: fsUp calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) .5s both; }
+        .ic-wrap[data-lay=full].visible:not([data-fs-anim=letters]):not([data-fs-anim=none]) .fs-tb { animation: fsUp calc(.8s / var(--fs-sp, 1)) cubic-bezier(.2,.8,.2,1) 1.2s both; }
+        .ic-fs .lp { display: inline-block; font-style: inherit; }
+        @keyframes fsLpWave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+        @keyframes fsLpPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.14); } }
+        @keyframes fsLpGlow { 0%, 100% { text-shadow: 0 0 4px transparent; } 50% { text-shadow: 0 0 10px var(--fs-c, #fff), 0 0 34px var(--fs-c, #fff); } }
+        @keyframes fsLpFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-9px) rotate(-2.5deg); } }
+        @keyframes fsLpFlick { 0%, 18%, 22%, 62%, 100% { opacity: 1; } 20%, 60%, 64% { opacity: .25; } }
+        @keyframes fsLpRb { 0% { color: #ff4d4d; } 17% { color: #ffb84d; } 34% { color: #f5ff4d; } 51% { color: #4dff88; } 68% { color: #4dc3ff; } 85% { color: #c04dff; } 100% { color: #ff4d4d; } }
+        @keyframes fsLpBounce { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-22px); } 50% { transform: translateY(0); } 62% { transform: translateY(-7px); } 74% { transform: translateY(0); } }
+        .ic-wrap[data-fs-loop=wave] .lp { animation: fsLpWave calc(2.2s / var(--fs-sp, 1)) ease-in-out calc(var(--n, 0) * .09s) infinite; }
+        .ic-wrap[data-fs-loop=pulse] .lp { animation: fsLpPulse calc(1.8s / var(--fs-sp, 1)) ease-in-out calc(var(--n, 0) * .07s) infinite; }
+        .ic-wrap[data-fs-loop=glow] .lp { animation: fsLpGlow calc(2.4s / var(--fs-sp, 1)) ease-in-out calc(var(--n, 0) * .1s) infinite; }
+        .ic-wrap[data-fs-loop=float] .lp { animation: fsLpFloat calc(3s / var(--fs-sp, 1)) ease-in-out calc(var(--n, 0) * .12s) infinite; }
+        .ic-wrap[data-fs-loop=flicker] .lp { animation: fsLpFlick calc(3.2s / var(--fs-sp, 1)) linear calc(var(--n, 0) * .23s) infinite; }
+        .ic-wrap[data-fs-loop=rainbow] .lp { animation: fsLpRb calc(4s / var(--fs-sp, 1)) linear calc(var(--n, 0) * -.2s) infinite; }
+        .ic-wrap[data-fs-loop=bounce] .lp { animation: fsLpBounce calc(2s / var(--fs-sp, 1)) ease-in-out calc(var(--n, 0) * .08s) infinite; }
         .ic-fs { position: absolute; inset: 0; z-index: 1; color: var(--ic-text, #fff); display: flex; flex-direction: column; align-items: center; }
         .ic-fs .fs-top { position: absolute; top: 56px; left: 0; right: 0; display: flex; justify-content: center; }
         .ic-fs .fs-top img { height: calc(170px * var(--fs-ls, 1)); max-width: 1100px; object-fit: contain; }
@@ -3194,25 +3244,30 @@
             s.setProperty('--ic-bg', g(cfg.bgColor, '#0c1a3d')); s.setProperty('--ic-bg2', g(cfg.bgColor2, '#14295a')); s.setProperty('--ic-top', g(cfg.topColor, '#7e93b8')); s.setProperty('--ic-bottom', g(cfg.bottomColor, '#f2f4f8'));
             s.setProperty('--ic-text', g(cfg.textColor, '#ffffff')); s.setProperty('--ic-toptext', g(cfg.topTextColor, '#ffffff')); s.setProperty('--ic-foottext', g(cfg.footTextColor, '#10213f'));
             s.setProperty('--ic-font', "'" + g(cfg.font, 'Montserrat') + "'"); s.setProperty('--ic-op', Math.max(0, Math.min(100, parseInt(g(cfg.bgOpacity, 100)))) / 100); s.setProperty('--ic-d', dur + 's');
-            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0'))); const FULL = g(cfg.layout, 'card') === 'full'; wrap.setAttribute('data-lay', FULL ? 'full' : 'card'); wrap.setAttribute('data-fs-anim', g(cfg.fsAnim, 'fadeUp')); wrap.setAttribute('data-fs-dir', g(cfg.fsShineDir, 'ltr')); s.setProperty('--fs-sp', Math.max(0.3, Math.min(3, (parseInt(g(cfg.fsSpeed, 100)) || 100) / 100))); s.setProperty('--fs-ls', (parseInt(g(cfg.fsLogoSize, 100)) || 100) / 100); s.setProperty('--fs-bs', (parseInt(g(cfg.fsBrandSize, 100)) || 100) / 100); s.setProperty('--fs-ts', (parseInt(g(cfg.fsTitleSize, 100)) || 100) / 100);
+            wrap.setAttribute('data-anim', g(cfg.anim, 'zoom')); wrap.setAttribute('data-out', g(cfg.animOut, 'same')); wrap.setAttribute('data-shine', String(g(cfg.shine, '1'))); s.setProperty('--ic-shine', g(cfg.shineColor, '#ffd84a')); wrap.setAttribute('data-f3d', String(g(cfg.float3d, '0'))); const FULL = g(cfg.layout, 'card') === 'full'; wrap.setAttribute('data-lay', FULL ? 'full' : 'card'); wrap.setAttribute('data-fs-anim', g(cfg.fsAnim, 'fadeUp')); const FT = g(cfg.fsTheme, 'classic'), FTH = { classic: ['#0c1a3d', '#14295a', '#ffd84a'], neon: ['#12062b', '#2a0a5e', '#00e5ff'], gold: ['#0a0a0a', '#2a2008', '#d4af37'], court: ['#0a3d8f', '#1262c9', '#ffffff'], sunset: ['#2b0a3d', '#ff5e62', '#ffd27a'], ice: ['#e9f6ff', '#7cc0ff', '#0b2a55'], carbon: ['#141414', '#262626', '#e10600'], stadium: ['#05070f', '#0e1a3a', '#ffe9a8'], aurora: ['#031a2b', '#0b3b4a', '#5cffb0'] }[g(cfg.fsTheme, 'classic')] || ['#0c1a3d', '#14295a', '#ffd84a']; wrap.setAttribute('data-fs-theme', FT); wrap.setAttribute('data-fs-bg', g(cfg.fsBgAnim, 'none')); wrap.setAttribute('data-fs-loop', g(cfg.fsLoop, 'none')); s.setProperty('--fs-a', g(cfg.fsColA, FTH[0])); s.setProperty('--fs-b', g(cfg.fsColB, FTH[1])); s.setProperty('--fs-c', g(cfg.fsColC, FTH[2])); wrap.setAttribute('data-fs-dir', g(cfg.fsShineDir, 'ltr')); s.setProperty('--fs-sp', Math.max(0.3, Math.min(3, (parseInt(g(cfg.fsSpeed, 100)) || 100) / 100))); s.setProperty('--fs-ls', (parseInt(g(cfg.fsLogoSize, 100)) || 100) / 100); s.setProperty('--fs-bs', (parseInt(g(cfg.fsBrandSize, 100)) || 100) / 100); s.setProperty('--fs-ts', (parseInt(g(cfg.fsTitleSize, 100)) || 100) / 100);
             const k = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * (parseInt(g(cfg.scale, 100)) / 100);
             s.transform = 'translate(-50%, -50%) scale(' + k + ')';
             icCd = { ts: parseInt(cfg.cdTs) || 0, label: g(cfg.cdLabel, ''), end: g(cfg.cdEnd, ''), show: !!cfg.cdShow };
             s.setProperty('--ic-cd', g(cfg.cdColor, '#ffffff')); s.setProperty('--ic-cd-s', (parseInt(g(cfg.cdSize, 34)) || 34) + 'px'); s.setProperty('--ic-sl', (parseInt(g(cfg.sideLogoSize, 90)) || 90) + 'px');
-            const key = JSON.stringify([FULL, cfg.fsTitleColor, cfg.fsDateColor, cfg.fsShineOn, cfg.fsAnim, cfg.fsLogo, cfg.fsBrand, cfg.fsTitle, cfg.fsDate, cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
+            const key = JSON.stringify([FULL, cfg.fsBgAnim, cfg.fsLoop, cfg.fsTxtA, cfg.fsTxtAColor, cfg.fsTxtASize, cfg.fsTxtASpace, cfg.fsTxtB, cfg.fsTxtBColor, cfg.fsTxtBSize, cfg.fsTxtBSpace, cfg.fsTitleColor, cfg.fsDateColor, cfg.fsShineOn, cfg.fsAnim, cfg.fsLogo, cfg.fsBrand, cfg.fsTitle, cfg.fsDate, cfg.topText, cfg.logo, cfg.city, cfg.line3, cfg.line4, cfg.line4Size, cfg.footText, cfg.logoSize, cfg.logoL, cfg.logoR, icCd.show && icCd.ts ? 1 : 0, icCd.label]);
             if (key !== icKeyCache || !panel.firstChild) {
                 icKeyCache = key;
                 const ls = Math.max(20, Math.min(200, parseInt(g(cfg.logoSize, 100)) || 100)) / 100;
                 const logo = String(cfg.logo || '').trim();
                 if (FULL) {
-                    let f = '<div class="ic-fs">';
+                    const BGA = g(cfg.fsBgAnim, 'none'); let f = '<div class="ic-fs"><div class="fs-bg"><s class="l1"></s><s class="l2"></s>';
+                    if (BGA === 'particles') for (let q = 0; q < 16; q++) f += '<i style="--x:' + Math.round((q * 6.3 + (q % 3) * 2.1) % 100) + '%;--s:' + (6 + (q * 7) % 14) + 'px;--d:' + (9 + (q * 5) % 9) + 's;--dl:-' + ((q * 3) % 11) + 's"></i>';
+                    f += '</div>';
                     if (cfg.fsLogo) f += '<div class="fs-top"><img src="' + esc(String(cfg.fsLogo).trim()) + '"></div>';
                     f += '<div class="fs-main">';
                     if (cfg.fsBrand) f += '<img class="fs-brand" src="' + esc(String(cfg.fsBrand).trim()) + '">';
                     const ft = String(g(cfg.fsTitle, '')).trim(), fd = String(g(cfg.fsDate, '')).trim();
-                    const so = g(cfg.fsShineOn, 'both'), LET = g(cfg.fsAnim, 'fadeUp') === 'letters'; let ci = 0;
-                    const chs = (t, sh) => LET ? Array.from(t).map(c => '<b class="ch' + (sh ? ' ic-shine' : '') + '" style="--n:' + (ci++) + '">' + (c === ' ' ? '&nbsp;' : esc(c)) + '</b>').join('') : esc(t);
-                    if (ft || fd) f += '<div class="fs-title">' + (ft ? '<span class="fs-t1' + (!LET && (so === 'both' || so === 'title') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsTitleColor, '#ffffff')) + '">' + chs(ft, so === 'both' || so === 'title') + '</span>' : '') + (ft && fd ? '<i></i>' : '') + (fd ? '<span class="fs-t2' + (!LET && (so === 'both' || so === 'date') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsDateColor, '#ffffff')) + '">' + chs(fd, so === 'both' || so === 'date') + '</span>' : '') + '</div>';
+                    const so = g(cfg.fsShineOn, 'both'), LET = g(cfg.fsAnim, 'fadeUp') === 'letters', LP = g(cfg.fsLoop, 'none') !== 'none', SPL = LET || LP; let ci = 0;
+                    const chs = (t, sh) => SPL ? Array.from(t).map(c => { const ch = (c === ' ' ? '&nbsp;' : esc(c)); return '<b class="ch' + (sh && LET && !LP ? ' ic-shine' : '') + '" style="--n:' + (ci++) + '">' + (LP ? '<em class="lp">' + ch + '</em>' : ch) + '</b>'; }).join('') : esc(t);
+                    const xt = (t, cls, col, sz, sp) => t ? '<div class="' + cls + '" style="color:' + esc(col) + ';font-size:' + (parseInt(sz) || 50) + 'px;letter-spacing:' + (parseInt(sp) || 0) + 'px">' + chs(t, false) + '</div>' : '';
+                    f += xt(String(g(cfg.fsTxtA, '')).trim(), 'fs-ta', g(cfg.fsTxtAColor, '#ffffff'), g(cfg.fsTxtASize, 50), g(cfg.fsTxtASpace, 8));
+                    if (ft || fd) f += '<div class="fs-title">' + (ft ? '<span class="fs-t1' + (!SPL && (so === 'both' || so === 'title') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsTitleColor, '#ffffff')) + '">' + chs(ft, so === 'both' || so === 'title') + '</span>' : '') + (ft && fd ? '<i></i>' : '') + (fd ? '<span class="fs-t2' + (!SPL && (so === 'both' || so === 'date') ? ' ic-shine' : '') + '" style="color:' + esc(g(cfg.fsDateColor, '#ffffff')) + '">' + chs(fd, so === 'both' || so === 'date') + '</span>' : '') + '</div>';
+                    f += xt(String(g(cfg.fsTxtB, '')).trim(), 'fs-tb', g(cfg.fsTxtBColor, '#ffffff'), g(cfg.fsTxtBSize, 50), g(cfg.fsTxtBSpace, 8));
                     if (icCd.show && icCd.ts) f += '<div class="ic-cd" id="ic-cd"><span class="ic-cd-l">' + esc(icCd.label) + '</span><span class="ic-cd-t" id="ic-cd-t"></span></div>';
                     panel.innerHTML = f + '</div></div>';
                 } else {
