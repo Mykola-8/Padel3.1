@@ -4237,12 +4237,13 @@
         }, 1000);
 
         // Спонсори — спільні для всіх кортів (padel/sponsors); масштаб і позиція беруться з корту
-        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalIc = null, __lastSnap = null;
+        let __globalSp = null, __globalBars = null, __globalQr = null, __globalRk = null, __globalGr = null, __globalPo = null, __globalRkW = null, __globalGrW = null, __globalPoW = null, __globalIc = null, __lastSnap = null;
         const __BARS_KEYS = ['tickerSlides', 'tickerSlideSec', 'tickerSlideAnim', 'tickerLogo', 'tickerLogoBg', 'tickerLogoW', 'tickerClockShow', 'tickerClockBg', 'tickerClockColor', 'tickerEnabled', 'tickerContentHTML', 'tickerBgColor', 'tickerTextColor', 'tickerBgAlpha', 'tickerHeight', 'tickerFontScale', 'tickerDirection', 'tickerSpeed', 'adBarEnabled', 'adBarSlides', 'adBarRemoveBg', 'adBarAnimation', 'adBarAnimateBg', 'adBarDuration', 'adBarHeight', 'adBarGap', 'adBarBgAlpha', 'adBarBgColor', 'adBarTextColor'];
         function __mergeSp(s) {
             if (!s) return s;
             if (__globalBars) { s = Object.assign({}, s); __BARS_KEYS.forEach(k => { if (__globalBars[k] !== undefined) s[k] = __globalBars[k]; }); const sl = __globalBars.adBarSlides; s.adBarSlides = Array.isArray(sl) ? sl : (sl && typeof sl === 'object' ? Object.values(sl) : []); }
-            if (__globalRk) { s = Object.assign({}, s); const t = __globalRk.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
+            const __rkG = (s.teamRanking && s.teamRanking.cat === 'women') ? (__globalRkW || { teams: [] }) : __globalRk;
+            if (__rkG) { s = Object.assign({}, s); const t = __rkG.teams; s.teamRanking = Object.assign({}, s.teamRanking || {}, { teams: (Array.isArray(t) ? t : (t && typeof t === 'object' ? Object.values(t) : [])).filter(x => x && typeof x === 'object') }); }
             if (__globalQr) { s = Object.assign({}, s); if (__globalQr.show !== undefined) s.showQrCode = !!__globalQr.show; if (__globalQr.url !== undefined) s.qrCodeUrl = __globalQr.url; if (__globalQr.desc !== undefined) s.qrCodeDescription = __globalQr.desc; }
             if (__globalIc && !/court_1$/.test(String(databasePath)) && !(s.introCard && s.introCard.own)) {
                 s = Object.assign({}, s); const ic = {};
@@ -4250,16 +4251,17 @@
                 ic.show = !!(s.introCard && s.introCard.show); s.introCard = ic;
             }
             const __arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []);
-            if (__globalGr) {
+            const __grG = (s.groups && s.groups.cat === 'women') ? (__globalGrW || { g: [] }) : __globalGr;
+            if (__grG) {
                 s = Object.assign({}, s); const g = Object.assign({}, s.groups || {});
-                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo', 'bgColor', 'cardColor', 'headColor', 'accent', 'textColor', 'numColor', 'titleColor', 'bgOpacity', 'font', 'fontHead', 'pattern', 'headStyle', 'cardStyle', 'line', 'sub', 'pc', 'pc2', 'theme', 'bgImgFit', 'bgDim', 'bgLogoSize', 'bgLogoOpacity', 'bgLogoPos'].forEach(k => { if (__globalGr[k] !== undefined) g[k] = __globalGr[k]; });
-                if (__globalGr.g !== undefined) g.g = __arr(__globalGr.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
+                ['count', 'teamsPer', 'tournament', 'title', 'subtitle', 'prefix', 'lblDiff', 'lblPts', 'winPts', 'lossPts', 'drawPts', 'bgImg', 'bgLogo', 'bgColor', 'cardColor', 'headColor', 'accent', 'textColor', 'numColor', 'titleColor', 'bgOpacity', 'font', 'fontHead', 'pattern', 'headStyle', 'cardStyle', 'line', 'sub', 'pc', 'pc2', 'theme', 'bgImgFit', 'bgDim', 'bgLogoSize', 'bgLogoOpacity', 'bgLogoPos'].forEach(k => { if (__grG[k] !== undefined) g[k] = __grG[k]; });
+                if (__grG.g !== undefined) g.g = __arr(__grG.g).map(x => Object.assign({}, x, { t: __arr(x && x.t), res: (x && x.res) || {} }));
                 s.groups = g;
             }
-            if (__globalPo) {
+            if (__globalPo || __globalPoW) {
                 s = Object.assign({}, s); const p = Object.assign({}, s.playoff || {});
                 ['upper', 'lower'].forEach(key => {
-                    const gp = __globalPo[key]; if (!gp || typeof gp !== 'object') return;
+                    const __w = p[key] && p[key].cat === 'women', __src = __w ? __globalPoW : __globalPo; let gp = __src && __src[key]; if (__w && !gp) gp = { m: {} }; if (!gp || typeof gp !== 'object') return;
                     const c = Object.assign({}, p[key] || {});
                     ['title', 'third', 'logo', 'logoSize', 'bg1', 'bg2', 'frame', 'score', 'line', 'text', 'head', 'titleColor', 'bgOpacity', 'shape', 'win', 'sc', 'bd', 'theme', 'twoLines', 'textSize', 'nameSize', 'nameAlign'].forEach(k => { if (gp[k] !== undefined) c[k] = gp[k]; });
                     if (gp.labels) c.labels = Object.assign({}, c.labels || {}, gp.labels);
@@ -5011,8 +5013,12 @@
                 else if (v && running) { const s2 = JSON.stringify(cfg); if (s2 !== sig) { sig = s2; build(); } }
             }
             PH.on(() => { if (running && cfg.photos) build(); });
-            onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(gcfg || mcfg); }, () => { gcfg = null; }); window.__pvReg('sc', () => apply(gcfg || mcfg));
-            window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(mcfg); };
+            let gcfgW = null;
+            const scPick = () => { const m = gcfg || mcfg; if (gcfgW && gcfgW.show && (!(m && m.show) || (gcfgW.ts || 0) >= (m.ts || 0))) return gcfgW; return m; };
+            onValue(ref(db, 'padel/scoretable'), s => { gcfg = s.val(); apply(scPick()); }, () => { gcfg = null; });
+            onValue(ref(db, 'padel/w/scoretable'), s => { gcfgW = s.val(); apply(scPick()); }, () => { gcfgW = null; });
+            window.__pvReg('sc', () => apply(scPick()));
+            window.__scMirror = (st) => { const v = st && st.scCfg; const j = v ? JSON.stringify(v) : ''; if (j === mj) return; mj = j; mcfg = v || null; if (!gcfg) apply(scPick()); };
             window.addEventListener('resize', look);
             return { apply };
         })();
@@ -6138,6 +6144,9 @@
             onValue(ref(db, 'padel/introCard'), (snap) => { __globalIc = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/groups'), (snap) => { __globalGr = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
             onValue(ref(db, 'padel/playoff'), (snap) => { __globalPo = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/w/ranking'), (snap) => { __globalRkW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/w/groups'), (snap) => { __globalGrW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
+            onValue(ref(db, 'padel/w/playoff'), (snap) => { __globalPoW = snap.val(); if (__lastSnap) cb(wrap(__lastSnap)); });
         }
         __courtOnValue((snapshot) => {
             const state = snapshot.val();
