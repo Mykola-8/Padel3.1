@@ -3150,7 +3150,7 @@ function __clearTournamentName() {
         // ===== ВСТУПНЕ ТАБЛО (титульна картка турніру) =====
         let IC_GLOBAL_KEYS = [];
         function icDefault() {
-            return { show: false, layout: 'card', fsLogo: '', fsBrand: '', fsTitle: 'FIP TOUR', fsDate: '2027', fsLogoSize: 100, fsBrandSize: 100, fsTitleSize: 100, fsTitleColor: '#ffffff', fsDateColor: '#ffffff', fsShineOn: 'both', fsShineDir: 'ltr', fsAnim: 'fadeUp', fsSpeed: 100, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
+            return { show: false, layout: 'card', fsLogo: '', fsBrand: '', fsTitle: 'FIP TOUR', fsDate: '2027', fsLogoSize: 100, fsBrandSize: 100, fsTitleSize: 100, fsTitleColor: '#ffffff', fsDateColor: '#ffffff', fsShineOn: 'both', fsShineDir: 'ltr', fsAnim: 'fadeUp', fsSpeed: 100, fsTheme: 'classic', fsColA: '#0c1a3d', fsColB: '#14295a', fsColC: '#ffd84a', fsBgAnim: 'none', fsLoop: 'none', fsTxtA: '', fsTxtAColor: '#ffffff', fsTxtASize: 50, fsTxtASpace: 8, fsTxtB: '', fsTxtBColor: '#ffffff', fsTxtBSize: 50, fsTxtBSpace: 8, topText: 'FIP GOLD', logo: '', city: 'Perugia', line3: 'MEDIOLANUM PADEL CUP', line4: '', line4Size: 40, footText: '', logoSize: 100, font: 'Montserrat', scale: 100,
                 logoL: '', logoR: '', cdTs: 0, cdLabel: 'ДО ПОЧАТКУ', cdEnd: 'ТУРНІР РОЗПОЧАВСЯ', cdShow: false, cdSize: 34, cdColor: '#ffffff', sideLogoSize: 90, bgOpacity: 100, topColor: '#7e93b8', bottomColor: '#f2f4f8', bgColor: '#0c1a3d', bgColor2: '#14295a', textColor: '#ffffff', topTextColor: '#ffffff', footTextColor: '#10213f', anim: 'zoom', animDur: 6 };
         }
         function icEnsure() {
@@ -3201,8 +3201,10 @@ function __clearTournamentName() {
             MS.forEach(i => set(ref(db, 'padel/courts/court_' + i + '/introCard/show'), !!v));
             if (MS.indexOf(parseInt(courtId)) >= 0) { icEnsure().show = !!v; icRefreshUI(); }
         };
+        const IC_THEMES = { classic: { a: '#0c1a3d', b: '#14295a', c: '#ffd84a', t: '#ffffff' }, neon: { a: '#12062b', b: '#2a0a5e', c: '#00e5ff', t: '#ffffff' }, gold: { a: '#0a0a0a', b: '#2a2008', c: '#d4af37', t: '#f5d77a' }, court: { a: '#0a3d8f', b: '#1262c9', c: '#ffffff', t: '#ffffff' }, sunset: { a: '#2b0a3d', b: '#ff5e62', c: '#ffd27a', t: '#ffffff' }, ice: { a: '#e9f6ff', b: '#7cc0ff', c: '#0b2a55', t: '#0b2a55' }, carbon: { a: '#141414', b: '#262626', c: '#e10600', t: '#ffffff' }, stadium: { a: '#05070f', b: '#0e1a3a', c: '#ffe9a8', t: '#ffffff' }, aurora: { a: '#031a2b', b: '#0b3b4a', c: '#5cffb0', t: '#ffffff' } };
         window.icInput = function(el) {
             const k = el.getAttribute('data-path'), c = icEnsure();
+            if (k === 'fsTheme') { c.fsTheme = el.value; const t = IC_THEMES[el.value]; if (t) { c.fsColA = t.a; c.fsColB = t.b; c.fsColC = t.c; c.fsTitleColor = t.t; c.fsDateColor = t.t; c.shineColor = t.c; c.fsTxtAColor = t.t; c.fsTxtBColor = t.t; } icRefreshUI(); icSave(true); return; }
             if (el.type === 'range') { c[k] = parseInt(el.value); const l = document.getElementById('ic-val-' + k); if (l) l.innerText = (k === 'animDur') ? (c[k] / 10).toFixed(1) + ' с' : c[k]; }
             else c[k] = el.value;
             icSave(false);
@@ -3269,6 +3271,18 @@ function __clearTournamentName() {
                     ${sel('fsShineDir', '↔ Напрямок блиску', [['ltr', 'Зліва направо'], ['rtl', 'Справа наліво']])}
                     ${sel('fsAnim', '🎞 Анімація появи (лого, назва, рік)', [['fadeUp', 'Знизу вгору (за черги)'], ['slide', 'Назва зліва, рік справа'], ['letters', 'По літерах'], ['zoom', 'Збільшення'], ['blur', 'Із розфокусу'], ['none', 'Без анімації']])}
                     ${slider('fsSpeed', '⚡ Швидкість анімацій і блиску (%)', 30, 300, 100)}
+                    <div style="border-top:1px dashed #c69f66; padding-top:6px; font-size:11px; font-weight:800; color:#e0b878;">🎨 Тема фону (стиль + графіка)</div>
+                    ${sel('fsTheme', '🖼 Тема', [['classic', 'Класика (як було, кольори «Фон» нижче)'], ['neon', '🌃 Неон — сітка й світіння'], ['gold', '🥇 Золото — чорний + золото'], ['court', '🎾 Корт — лінії падел-корту'], ['sunset', '🌅 Захід сонця'], ['ice', '❄️ Лід — світла'], ['carbon', '🏁 Карбон + червоні смуги'], ['stadium', '🏟 Стадіон — промені світла'], ['aurora', '🌌 Аврора']])}
+                    <div style="font-size:10px; color:#9a9;">Вибір теми одразу ставить її кольори (фон, текст, блиск). Нижче їх можна змінити.</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">${color('fsColA', '🎨 Фон 1', d.fsColA)}${color('fsColB', '🎨 Фон 2', d.fsColB)}${color('fsColC', '🎨 Акцент (графіка)', d.fsColC)}</div>
+                    ${sel('fsBgAnim', '🎬 Анімація фону', [['none', 'Без анімації'], ['drift', 'Плавний рух графіки'], ['pulse', 'Пульсація світіння'], ['sweep', 'Світлова смуга'], ['particles', 'Частинки вгору'], ['rays', 'Обертання променів/графіки'], ['zoom', 'Повільне наближення']])}
+                    ${sel('fsLoop', '🔤 Анімація літер (постійна)', [['none', 'Без анімації'], ['wave', 'Хвиля'], ['pulse', 'Пульс'], ['glow', 'Світіння'], ['float', 'Левітація'], ['flicker', 'Мерехтіння (неон)'], ['rainbow', 'Веселка'], ['bounce', 'Стрибки']])}
+                    <div style="font-size:10px; color:#9a9;">Анімація літер вимикає блиск на тексті (вони працюють замість нього).</div>
+                    <div style="border-top:1px dashed #c69f66; padding-top:6px; font-size:11px; font-weight:800; color:#e0b878;">🔤 Додаткові тексти</div>
+                    ${txt('fsTxtA', 'Текст НАД назвою (напр. OFFICIAL / FINALS)')}
+                    <div style="display:grid; grid-template-columns:1fr; gap:6px;">${color('fsTxtAColor', '🎨 Колір тексту над назвою', d.fsTxtAColor)}${slider('fsTxtASize', 'Розмір тексту над (px)', 16, 160, 50)}${slider('fsTxtASpace', 'Відстань між літерами над (px)', 0, 40, 8)}</div>
+                    ${txt('fsTxtB', 'Текст ПІД назвою (напр. PERUGIA · ITALY)')}
+                    <div style="display:grid; grid-template-columns:1fr; gap:6px;">${color('fsTxtBColor', '🎨 Колір тексту під назвою', d.fsTxtBColor)}${slider('fsTxtBSize', 'Розмір тексту під (px)', 16, 160, 50)}${slider('fsTxtBSpace', 'Відстань між літерами під (px)', 0, 40, 8)}</div>
                     <div style="font-size:10px; color:#9a9;">Кольори — «Фон (верх/низ)» і «Текст» нижче. Анімації появи/виходу, блиск, показ на кількох кортах — ті самі.</div>
                 </div>
                 ${txt('topText', 'Текст у верхній шапці (FIP GOLD)')}
